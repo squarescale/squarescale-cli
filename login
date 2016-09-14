@@ -1,0 +1,1 @@
+src/github.com/squarescale/squarescale-cli/login
