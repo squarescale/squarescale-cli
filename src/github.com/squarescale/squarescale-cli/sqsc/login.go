@@ -28,10 +28,11 @@ type AuthTokenResponse struct {
 
 // runLogin executes login command and return exit code.
 func runLogin(args []string) int {
+	res := 0
 
 	login, password, one_time_password, gh_token, gh_token_url, err := github.GeneratePersonalToken("Squarescale CLI")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v", err)
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		return 1
 	}
 
@@ -39,25 +40,27 @@ func runLogin(args []string) int {
 
 	sqsc_token, err := squarescale.ObtainTokenFromGitHub(SquarescaleEndpoint, gh_token)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v", err)
-		return 1
-	}
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		res = 1
+	} else {
 
-	fmt.Printf("Store Squarescale token: %s\n", sqsc_token)
+		fmt.Printf("Store Squarescale token: %s\n", sqsc_token)
 
-	err = tokenstore.SaveToken(SquarescaleEndpoint, sqsc_token)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v", err)
-		return 1
+		err = tokenstore.SaveToken(SquarescaleEndpoint, sqsc_token)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			res = 1
+		}
+
 	}
 
 	fmt.Println("Revoke temporary GitHub token...")
 
 	err = github.RevokePersonalToken(gh_token_url, login, password, one_time_password)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v", err)
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		return 1
 	}
 
-	return 0
+	return res
 }
