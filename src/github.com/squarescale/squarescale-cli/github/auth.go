@@ -51,8 +51,6 @@ func GeneratePersonalToken(note string) (login, password, otpass, token, token_u
 			params.Note = fmt.Sprintf("%s %d", params.Note, i)
 		}
 
-		fmt.Printf("Generating token %#s\n", params.Note)
-
 		encodedParams, err = json.Marshal(params)
 		if err != nil {
 			return
@@ -102,6 +100,8 @@ func GeneratePersonalToken(note string) (login, password, otpass, token, token_u
 			fmt.Printf("Token %#v already exists, this is probably a leftover from a previous login attempt. You should remove this token.\n", params.Note)
 			continue
 		}
+
+		fmt.Printf("Generating token %#s\n", params.Note)
 
 		if res.StatusCode == 201 {
 			token = response.Token

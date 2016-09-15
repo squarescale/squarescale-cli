@@ -16,22 +16,22 @@ func ObtainTokenFromGitHub(sqsc_url, token string) (string, error) {
 	var c http.Client
 	req, err := http.NewRequest("GET", sqsc_url+"/me/token?provider=github&token="+token, nil)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Could not make request: %v", err)
 	}
 	res, err := c.Do(req)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Could not send request: %v", err)
 	}
 
 	jsondata, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Could not read response: %v", err)
 	}
 
 	var response authTokenResponse
 	err = json.Unmarshal(jsondata, &response)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("Could not unmarshal %#s: %v", jsondata, err)
 	}
 
 	if res.StatusCode != 200 {
