@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 )
 
 type authTokenResponse struct {
@@ -14,7 +15,7 @@ type authTokenResponse struct {
 
 func ObtainTokenFromGitHub(sqsc_url, token string) (string, error) {
 	var c http.Client
-	req, err := http.NewRequest("GET", sqsc_url+"/me/token?provider=github&token="+token, nil)
+	req, err := http.NewRequest("GET", sqsc_url+"/me/token?provider=github&token="+url.QueryEscape(token), nil)
 	if err != nil {
 		return "", fmt.Errorf("Could not make request: %v", err)
 	}
