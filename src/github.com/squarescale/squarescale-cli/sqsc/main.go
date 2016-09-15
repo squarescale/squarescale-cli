@@ -91,13 +91,15 @@ var usageTemplate = `sqsc is a tool for Squarescale CLI
 
 Usage:
 
-	sqsc command [arguments]
+	sqsc [global arguments] command [arguments]
 
 The commands are:
 {{range .}}
 	{{.Name | printf "%-11s"}} {{.Short}}{{end}}
 
 Use "sqsc help [command]" for more information about a command.
+
+Global arguments:
 
 `
 
@@ -120,6 +122,9 @@ func printUsage(w io.Writer) {
 	bw := bufio.NewWriter(w)
 	tmpl(bw, usageTemplate, commands)
 	bw.Flush()
+	flag.CommandLine.SetOutput(w)
+	flag.PrintDefaults()
+	flag.CommandLine.SetOutput(os.Stderr)
 }
 
 func usage() {
