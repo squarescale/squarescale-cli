@@ -11,7 +11,7 @@ import (
 	"text/template"
 )
 
-const SquarescaleEndpoint = "http://localhost:3000"
+var SquarescaleEndpoint string = "http://sqsc.staging.sqsc.squarely.io"
 
 // A Command is an implementation of a sqsc command
 type Command struct {
@@ -57,6 +57,7 @@ var commands = []*Command{
 
 func main() {
 
+	flag.StringVar(&SquarescaleEndpoint, "endpoint", SquarescaleEndpoint, "Squarescale API endpoint")
 	flag.Usage = usage
 	flag.Parse()
 	log.SetFlags(0)
