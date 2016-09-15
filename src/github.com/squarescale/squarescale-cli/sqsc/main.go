@@ -11,7 +11,7 @@ import (
 	"text/template"
 )
 
-var SquarescaleEndpoint string = "http://sqsc.staging.sqsc.squarely.io"
+var SquarescaleEndpoint string = "http://www.staging.sqsc.squarely.io"
 
 // A Command is an implementation of a sqsc command
 type Command struct {
