@@ -1,6 +1,7 @@
 package tokenstore
 
 import (
+	"bytes"
 	"github.com/squarescale/go-netrc/netrc"
 	"io/ioutil"
 	"os"
@@ -28,6 +29,9 @@ func GetToken(host string) (string, error) {
 
 func SaveToken(host, token string) error {
 	n, err := netrc.ParseFile(NetrcFile())
+	if err != nil && os.IsNotExist(err) {
+		n, err = netrc.Parse(bytes.NewReader(nil))
+	}
 	if err != nil {
 		return err
 	}
