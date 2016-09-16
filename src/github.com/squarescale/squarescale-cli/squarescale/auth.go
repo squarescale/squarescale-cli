@@ -19,6 +19,7 @@ func ObtainTokenFromGitHub(sqsc_url, token string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("Could not make request: %v", err)
 	}
+	req.Header.Set("Accept", "application/json")
 	res, err := c.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("Could not send request: %v", err)

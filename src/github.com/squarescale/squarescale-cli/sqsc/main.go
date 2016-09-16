@@ -53,6 +53,7 @@ func (c *Command) Usage() {
 // The order here is the order in which they are printed by 'sqsc help'.
 var commands = []*Command{
 	cmdLogin,
+	cmdCreateProject,
 }
 
 func main() {
