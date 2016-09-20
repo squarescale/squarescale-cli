@@ -2,9 +2,10 @@ package tokenstore
 
 import (
 	"bytes"
-	"github.com/squarescale/go-netrc/netrc"
 	"io/ioutil"
 	"os"
+
+	"github.com/squarescale/go-netrc/netrc"
 )
 
 func NetrcFile() string {
