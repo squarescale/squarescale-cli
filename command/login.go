@@ -10,10 +10,12 @@ import (
 	"github.com/squarescale/squarescale-cli/tokenstore"
 )
 
+// LoginCommand is a cli.Command implementation for authenticating the user into the Squarescale platform.
 type LoginCommand struct {
 	Meta
 }
 
+// Run is part of cli.Command implementation.
 func (c *LoginCommand) Run(args []string) int {
 	// Parse flags
 	cmdFlags := flag.NewFlagSet("login", flag.ContinueOnError)
@@ -65,10 +67,12 @@ func (c *LoginCommand) Run(args []string) int {
 	return res
 }
 
+// Synopsis is part of cli.Command implementation.
 func (c *LoginCommand) Synopsis() string {
 	return "Login to Squarescale"
 }
 
+// Help is part of cli.Command implementation.
 func (c *LoginCommand) Help() string {
 	helpText := `
 Usage: sqsc login [options]

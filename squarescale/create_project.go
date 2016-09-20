@@ -12,6 +12,7 @@ type freeNameResponse struct {
 	Name string `json:"name"`
 }
 
+// FindProjectName asks the Squarescale service for a project name, using the provided token.
 func FindProjectName(sqscURL, token string) (string, error) {
 	var c http.Client
 	req, err := http.NewRequest("GET", sqscURL+"/free_name", nil)
@@ -52,6 +53,7 @@ type createProjectResponse struct {
 	Error string `json:"error"`
 }
 
+// CreateProject asks the Squarescale platform to create a new project, using the provided name and user token.
 func CreateProject(sqscURL, token, wantedName string) (projectName string, err error) {
 	var c http.Client
 	var reqdata createProjectRequest

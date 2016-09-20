@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// VersionCommand is a cli.Command implementation for displaying the cli version.
 type VersionCommand struct {
 	Meta
 
@@ -13,6 +14,7 @@ type VersionCommand struct {
 	Revision string
 }
 
+// Run is part of cli.Command implementation.
 func (c *VersionCommand) Run(args []string) int {
 	var versionString bytes.Buffer
 
@@ -25,10 +27,12 @@ func (c *VersionCommand) Run(args []string) int {
 	return 0
 }
 
+// Synopsis is part of cli.Command implementation.
 func (c *VersionCommand) Synopsis() string {
 	return fmt.Sprintf("Print %s version and quit", c.Name)
 }
 
+// Help is part of cli.Command implementation.
 func (c *VersionCommand) Help() string {
 	return ""
 }

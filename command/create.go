@@ -9,10 +9,12 @@ import (
 	"github.com/squarescale/squarescale-cli/tokenstore"
 )
 
+// CreateCommand is a cli.Command implementation for creating a Squarescale project.
 type CreateCommand struct {
 	Meta
 }
 
+// Run is part of cli.Command implementation.
 func (c *CreateCommand) Run(args []string) int {
 	// Parse flags
 	cmdFlags := flag.NewFlagSet("create", flag.ContinueOnError)
@@ -52,10 +54,12 @@ func (c *CreateCommand) Run(args []string) int {
 	return 0
 }
 
+// Synopsis is part of cli.Command implementation.
 func (c *CreateCommand) Synopsis() string {
 	return "Create Project in Squarescale"
 }
 
+// Help is part of cli.Command implementation.
 func (c *CreateCommand) Help() string {
 	helpText := `
 Usage: sqsc create [options] [project_name]

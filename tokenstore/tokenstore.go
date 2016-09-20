@@ -8,12 +8,13 @@ import (
 	"github.com/squarescale/go-netrc/netrc"
 )
 
-func NetrcFile() string {
+func netrcFile() string {
 	return os.Getenv("HOME") + "/.netrc"
 }
 
+// GetToken retrieves the Squarescale token in the token store.
 func GetToken(host string) (string, error) {
-	n, err := netrc.ParseFile(NetrcFile())
+	n, err := netrc.ParseFile(netrcFile())
 	if err != nil {
 		return "", err
 	}
@@ -28,8 +29,9 @@ func GetToken(host string) (string, error) {
 	return "", nil
 }
 
+// SaveToken persists the Squarescale token for the given host in the token store.
 func SaveToken(host, token string) error {
-	n, err := netrc.ParseFile(NetrcFile())
+	n, err := netrc.ParseFile(netrcFile())
 	if err != nil && os.IsNotExist(err) {
 		n, err = netrc.Parse(bytes.NewReader(nil))
 	}
@@ -55,5 +57,5 @@ func saveNetrc(n *netrc.Netrc) error {
 		return err
 	}
 
-	return ioutil.WriteFile(NetrcFile(), text, 0600)
+	return ioutil.WriteFile(netrcFile(), text, 0600)
 }
