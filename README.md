@@ -14,6 +14,14 @@ To install, use `go get`:
 $ go get -d github.com/squarescale/squarescale-cli/sqsc
 ```
 
+## Docker Build
+
+To build the Docker container:
+
+```bash
+$ make docker
+```
+
 ## Contribution
 
 1. Fork ([https://github.com/squarescale/squarescale-cli/sqsc/fork](https://github.com/squarescale/squarescale-cli/sqsc/fork))

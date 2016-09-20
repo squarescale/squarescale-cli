@@ -3,7 +3,10 @@ help: ## This help
 
 cli: deps ## Build CLI
 	GOPATH=$$PWD go install github.com/squarescale/squarescale-cli/sqsc
-
+linux:
+	GOPATH=$$PWD CGO_ENABLED=0 GOOS=linux go install github.com/squarescale/squarescale-cli/sqsc
+docker: cli	## Build Docker Container
+	docker build -t sqsc .
 deps:
 	GOPATH=$$PWD go get github.com/Bowery/prompt
 	GOPATH=$$PWD go get github.com/squarescale/go-netrc/netrc
