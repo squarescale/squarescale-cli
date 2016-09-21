@@ -5,6 +5,7 @@ import (
 	"github.com/squarescale/squarescale-cli/command"
 )
 
+// Commands returns a map of command factories.
 func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 	return map[string]cli.CommandFactory{
 		"login": func() (cli.Command, error) {
@@ -20,7 +21,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
-
+		"repository:add": func() (cli.Command, error) {
+			return &command.RepositoryAddCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"version": func() (cli.Command, error) {
 			return &command.VersionCommand{
 				Meta:     *meta,
