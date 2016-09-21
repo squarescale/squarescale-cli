@@ -32,7 +32,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	case 1:
 		projectName = args[0]
 	default:
-		c.Ui.Error("Too many command line arguments.\n")
+		c.Ui.Error("Too many command line arguments\n")
 		c.Ui.Output(c.Help())
 		return 1
 	}

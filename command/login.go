@@ -38,7 +38,7 @@ func (c *LoginCommand) Run(args []string) int {
 		return 1
 	}
 
-	c.Ui.Info("Forward GitHub authorization to Squarescale...")
+	c.Ui.Info("Forward GitHub authorization to Squarescale")
 
 	res := 0
 	sqscToken, err := squarescale.ObtainTokenFromGitHub(*endpoint, ghToken)
@@ -47,16 +47,17 @@ func (c *LoginCommand) Run(args []string) int {
 		res = 1
 
 	} else {
-		c.Ui.Info(fmt.Sprintf("Store Squarescale token: %s\n", sqscToken))
 		err = tokenstore.SaveToken(*endpoint, sqscToken)
 		if err != nil {
 			c.Error(err)
 			res = 1
-		}
 
+		} else {
+			c.Ui.Info(fmt.Sprintf("Successfully authenticated as user %s", login))
+		}
 	}
 
-	c.Ui.Info("Revoke temporary GitHub token...")
+	c.Ui.Info("Revoke temporary GitHub token")
 
 	err = github.RevokePersonalToken(ghTokenURL, login, pw, oneTimePW)
 	if err != nil {
@@ -92,7 +93,7 @@ func (c *LoginCommand) askForCredentials() (string, string, error) {
 		return "", "", err
 	}
 
-	pw, err := c.Ui.AskSecret("GitHub password: (typing will be hidden)")
+	pw, err := c.Ui.AskSecret("GitHub password (typing will be hidden):")
 	if err != nil {
 		return "", "", err
 	}

@@ -26,7 +26,7 @@ func (r *RepositoryAddCommand) Run(args []string) int {
 	}
 
 	if *project == "" {
-		r.Ui.Error("Project name must be specified.\n")
+		r.Ui.Error("Project name must be specified\n")
 		r.Ui.Output(r.Help())
 		return 1
 	}
