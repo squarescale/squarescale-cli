@@ -75,13 +75,13 @@ func (c *LoginCommand) Synopsis() string {
 // Help is part of cli.Command implementation.
 func (c *LoginCommand) Help() string {
 	helpText := `
-Usage: sqsc login [options]
+usage: sqsc login [options]
 
-	Logs the user in Squarescale services. Uses GitHub credentials to register.
+  Logs the user in Squarescale services. Uses GitHub credentials to register.
 
 Options:
 
-	-endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
+  -endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
 `
 	return strings.TrimSpace(helpText)
 }

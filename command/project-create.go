@@ -63,12 +63,12 @@ func (c *ProjectCreateCommand) Help() string {
 	helpText := `
 usage: sqsc project create [options] <project_name>
 
-	Creates a new project using the provided project name. If no project name is
-	provided, then a new name is automatically generated.
+  Creates a new project using the provided project name. If no project name is
+  provided, then a new name is automatically generated.
 
 Options:
 
-	-endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
+  -endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
 `
 	return strings.TrimSpace(helpText)
 }
