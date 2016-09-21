@@ -13,9 +13,10 @@ type authTokenResponse struct {
 	Error     string `json:"error"`
 }
 
-func ObtainTokenFromGitHub(sqsc_url, token string) (string, error) {
+// ObtainTokenFromGitHub gets a token from Squarescale using Github token.
+func ObtainTokenFromGitHub(sqscURL, token string) (string, error) {
 	var c http.Client
-	req, err := http.NewRequest("GET", sqsc_url+"/me/token?provider=github&token="+url.QueryEscape(token), nil)
+	req, err := http.NewRequest("GET", sqscURL+"/me/token?provider=github&token="+url.QueryEscape(token), nil)
 	if err != nil {
 		return "", fmt.Errorf("Could not make request: %v", err)
 	}
@@ -33,11 +34,12 @@ func ObtainTokenFromGitHub(sqsc_url, token string) (string, error) {
 	var response authTokenResponse
 	err = json.Unmarshal(jsondata, &response)
 	if err != nil {
-		return "", fmt.Errorf("Could not unmarshal %#s: %v", jsondata, err)
+		return "", fmt.Errorf("Could not unmarshal %s: %v", jsondata, err)
 	}
 
 	if res.StatusCode != 200 {
 		return "", fmt.Errorf("Could not login to squarescale: %s", response.Error)
 	}
+
 	return response.AuthToken, nil
 }

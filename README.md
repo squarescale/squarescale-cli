@@ -11,12 +11,12 @@ Squarescale CLI
 To install, use `go get`:
 
 ```bash
-$ go get -d github.com/squarescale/squarescale-cli/sqsc
+$ go get -d github.com/squarescale/squarescale-cli
 ```
 
 ## Contribution
 
-1. Fork ([https://github.com/squarescale/squarescale-cli/sqsc/fork](https://github.com/squarescale/squarescale-cli/sqsc/fork))
+1. Fork ([https://github.com/squarescale/squarescale-cli/fork](https://github.com/squarescale/squarescale-cli/fork))
 1. Create a feature branch
 1. Commit your changes
 1. Rebase your local changes against the master branch

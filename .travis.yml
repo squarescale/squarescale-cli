@@ -1,0 +1,7 @@
+language: go
+go:
+  - tip
+before_install:
+  - ./write_netrc.sh
+  - cp .netrc ~
+  - chmod 600 .netrc

@@ -12,9 +12,10 @@ type freeNameResponse struct {
 	Name string `json:"name"`
 }
 
-func FindProjectName(sqsc_url, token string) (string, error) {
+// FindProjectName asks the Squarescale service for a project name, using the provided token.
+func FindProjectName(sqscURL, token string) (string, error) {
 	var c http.Client
-	req, err := http.NewRequest("GET", sqsc_url+"/free_name", nil)
+	req, err := http.NewRequest("GET", sqscURL+"/free_name", nil)
 	if err != nil {
 		return "", err
 	}
@@ -37,7 +38,7 @@ func FindProjectName(sqsc_url, token string) (string, error) {
 	}
 
 	if res.StatusCode != 200 {
-		return "", fmt.Errorf("Could not generate a free name", jsondata)
+		return "", fmt.Errorf("Could not generate a free name %v", jsondata)
 	}
 	return response.Name, nil
 }
@@ -52,24 +53,25 @@ type createProjectResponse struct {
 	Error string `json:"error"`
 }
 
-func CreateProject(sqsc_url, token, wanted_name string) (project_name string, err error) {
+// CreateProject asks the Squarescale platform to create a new project, using the provided name and user token.
+func CreateProject(sqscURL, token, wantedName string) (projectName string, err error) {
 	var c http.Client
 	var reqdata createProjectRequest
 
-	if wanted_name == "" {
-		wanted_name, err = FindProjectName(sqsc_url, token)
+	if wantedName == "" {
+		wantedName, err = FindProjectName(sqscURL, token)
 		if err != nil {
 			return "", err
 		}
 	}
 
-	reqdata.Project.Name = wanted_name
+	reqdata.Project.Name = wantedName
 	reqbytes, err := json.Marshal(&reqdata)
 	if err != nil {
 		return "", err
 	}
 
-	req, err := http.NewRequest("POST", sqsc_url+"/projects", bytes.NewReader(reqbytes))
+	req, err := http.NewRequest("POST", sqscURL+"/projects", bytes.NewReader(reqbytes))
 	if err != nil {
 		return "", err
 	}
@@ -95,6 +97,6 @@ func CreateProject(sqsc_url, token, wanted_name string) (project_name string, er
 	if res.StatusCode != 201 {
 		return "", fmt.Errorf("Could not create project: %s", jsondata)
 	}
-	project_name = wanted_name
+	projectName = wantedName
 	return
 }
