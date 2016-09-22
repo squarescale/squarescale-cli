@@ -49,7 +49,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		return 1
 	}
 
-	c.Ui.Info(fmt.Sprintf("Created project %s\n", projectName))
+	c.Ui.Info(fmt.Sprintf("Created project %s", projectName))
 	return 0
 }
 
