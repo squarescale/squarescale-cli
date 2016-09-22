@@ -47,9 +47,9 @@ func (r *RepositoryAddCommand) Run(args []string) int {
 	}
 
 	// send to squarescale
-	err = squarescale.AddRepository(*endpoint, token, *project, gitRemote)
+	messages, err := squarescale.AddRepository(*endpoint, token, *project, gitRemote)
 	if err != nil {
-		r.Error(err)
+		r.ErrorWithMessages(err, messages)
 		return 1
 	}
 

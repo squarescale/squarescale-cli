@@ -14,19 +14,24 @@ type addRepositoryRequest struct {
 	} `json:"repository"`
 }
 
+type addRepositoryErrorResponse struct {
+	URL      []string `json:"url"`
+	ShortURL []string `json:"short_url"`
+}
+
 // AddRepository asks the Squarescale service to attach the provided repository to the project.
-func AddRepository(sqscURL, token, project, repoURL string) error {
+func AddRepository(sqscURL, token, project, repoURL string) ([]string, error) {
 	var payload addRepositoryRequest
 	payload.Repository.URL = repoURL
 	payloadBytes, err := json.Marshal(&payload)
 	if err != nil {
-		return fmt.Errorf("Cannot marshal payload %v: %v", payload, err)
+		return []string{}, fmt.Errorf("Cannot marshal payload %v: %v", payload, err)
 	}
 
 	endpoint := sqscURL + "/projects/" + project + "/repositories"
 	req, err := http.NewRequest("POST", endpoint, bytes.NewReader(payloadBytes))
 	if err != nil {
-		return fmt.Errorf("Cannot create request: %v", err)
+		return []string{}, fmt.Errorf("Cannot create request: %v", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -36,17 +41,24 @@ func AddRepository(sqscURL, token, project, repoURL string) error {
 	var c http.Client
 	res, err := c.Do(req)
 	if err != nil {
-		return fmt.Errorf("Cannot send request: %v", err)
+		return []string{}, fmt.Errorf("Cannot send request: %v", err)
 	}
 
 	if res.StatusCode != http.StatusCreated {
 		jsonBody, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			return fmt.Errorf("Could not read response: %v", err)
+			return []string{}, fmt.Errorf("Cannot read response: %v", err)
 		}
 
-		return fmt.Errorf("Cannot attach repository %s to project %s, errors: %v", repoURL, project, string(jsonBody))
+		var response addRepositoryErrorResponse
+		err = json.Unmarshal(jsonBody, &response)
+		if err != nil {
+			return []string{}, fmt.Errorf("Cannot read JSON: %v", err)
+		}
+
+		errors := append(response.URL, response.ShortURL...)
+		return errors, fmt.Errorf("Cannot attach repository '%s' to project '%s'", repoURL, project)
 	}
 
-	return nil
+	return []string{}, nil
 }
