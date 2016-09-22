@@ -18,7 +18,7 @@ type RepositoryAddCommand struct {
 // Run is part of cli.Command implementation.
 func (r *RepositoryAddCommand) Run(args []string) int {
 	// Parse flags
-	cmdFlags := flag.NewFlagSet("repository:add", flag.ContinueOnError)
+	cmdFlags := flag.NewFlagSet("repository add", flag.ContinueOnError)
 	cmdFlags.Usage = func() { r.Ui.Output(r.Help()) }
 	endpoint := EndpointFlag(cmdFlags)
 	project := ProjectFlag(cmdFlags)
@@ -65,7 +65,7 @@ func (r *RepositoryAddCommand) Synopsis() string {
 // Help is part of cli.Command implementation.
 func (r *RepositoryAddCommand) Help() string {
 	helpText := `
-usage: sqsc repository:add [options]
+usage: sqsc repository add [options]
 
   Adds current Git repository to the specified Squarescale project. The
   repository must contain a Dockerfile to be attached to a project.

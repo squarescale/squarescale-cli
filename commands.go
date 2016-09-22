@@ -21,7 +21,7 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
-		"repository:add": func() (cli.Command, error) {
+		"repository add": func() (cli.Command, error) {
 			return &command.RepositoryAddCommand{
 				Meta: *meta,
 			}, nil
