@@ -12,6 +12,9 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"project": func() (cli.Command, error) {
+			return &command.ProjectCommand{}, nil
+		},
 		"project create": func() (cli.Command, error) {
 			return &command.ProjectCreateCommand{
 				Meta: *meta,
