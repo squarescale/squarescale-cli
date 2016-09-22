@@ -61,7 +61,7 @@ func (c *ProjectCreateCommand) Synopsis() string {
 // Help is part of cli.Command implementation.
 func (c *ProjectCreateCommand) Help() string {
 	helpText := `
-Usage: sqsc create [options] [project_name]
+usage: sqsc project create [options] <project_name>
 
 	Creates a new project using the provided project name. If no project name is
 	provided, then a new name is automatically generated.
