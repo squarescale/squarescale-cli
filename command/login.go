@@ -28,13 +28,13 @@ func (c *LoginCommand) Run(args []string) int {
 	// Retrieve credentials from user input
 	login, pw, err := c.askForCredentials()
 	if err != nil {
-		c.Ui.Error(fmt.Sprintf("Error: %v\n", err))
+		c.Error(err)
 		return 1
 	}
 
 	oneTimePW, ghToken, ghTokenURL, err := github.GeneratePersonalToken(login, pw, c.Ui)
 	if err != nil {
-		c.Ui.Error(fmt.Sprintf("Error: %v\n", err))
+		c.Error(err)
 		return 1
 	}
 
@@ -43,14 +43,14 @@ func (c *LoginCommand) Run(args []string) int {
 	res := 0
 	sqscToken, err := squarescale.ObtainTokenFromGitHub(*endpoint, ghToken)
 	if err != nil {
-		c.Ui.Error(fmt.Sprintf("Error: %v\n", err))
+		c.Error(err)
 		res = 1
 
 	} else {
 		c.Ui.Info(fmt.Sprintf("Store Squarescale token: %s\n", sqscToken))
 		err = tokenstore.SaveToken(*endpoint, sqscToken)
 		if err != nil {
-			c.Ui.Error(fmt.Sprintf("Error: %v\n", err))
+			c.Error(err)
 			res = 1
 		}
 
@@ -60,7 +60,7 @@ func (c *LoginCommand) Run(args []string) int {
 
 	err = github.RevokePersonalToken(ghTokenURL, login, pw, oneTimePW)
 	if err != nil {
-		c.Ui.Error(fmt.Sprintf("Error: %v\n", err))
+		c.Error(err)
 		return 1
 	}
 
@@ -75,13 +75,13 @@ func (c *LoginCommand) Synopsis() string {
 // Help is part of cli.Command implementation.
 func (c *LoginCommand) Help() string {
 	helpText := `
-Usage: sqsc login [options]
+usage: sqsc login [options]
 
-	Logs the user in Squarescale services. Uses GitHub credentials to register.
+  Logs the user in Squarescale services. Uses GitHub credentials to register.
 
 Options:
 
-	-endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
+  -endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
 `
 	return strings.TrimSpace(helpText)
 }

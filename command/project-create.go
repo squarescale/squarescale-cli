@@ -24,7 +24,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		return 1
 	}
 
-	// Check for a payload
+	// Check for a project name
 	var projectName string
 	args = cmdFlags.Args()
 	switch len(args) {
@@ -39,13 +39,13 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 
 	token, err := tokenstore.GetToken(*endpoint)
 	if err != nil {
-		c.Ui.Error(fmt.Sprintf("Error: %v\n", err))
+		c.Error(err)
 		return 1
 	}
 
 	projectName, err = squarescale.CreateProject(*endpoint, token, projectName)
 	if err != nil {
-		c.Ui.Error(fmt.Sprintf("Error: %v\n", err))
+		c.Error(err)
 		return 1
 	}
 
@@ -63,12 +63,12 @@ func (c *ProjectCreateCommand) Help() string {
 	helpText := `
 usage: sqsc project create [options] <project_name>
 
-	Creates a new project using the provided project name. If no project name is
-	provided, then a new name is automatically generated.
+  Creates a new project using the provided project name. If no project name is
+  provided, then a new name is automatically generated.
 
 Options:
 
-	-endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
+  -endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
 `
 	return strings.TrimSpace(helpText)
 }
