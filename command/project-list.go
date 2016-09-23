@@ -28,15 +28,15 @@ func (c *ProjectListCommand) Run(args []string) int {
 		return 1
 	}
 
-	s := startSpinner(" list projects")
+	s := startSpinner("list projects")
 	projects, err := squarescale.ListProjects(*endpoint, token)
 	if err != nil {
-		stopSpinner(s)
+		s.Stop()
 		c.Error(err)
 		return 1
 	}
 
-	stopSpinner(s)
+	s.Stop()
 	c.Ui.Info(buildMessage(projects))
 	return 0
 }
