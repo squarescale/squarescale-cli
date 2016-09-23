@@ -43,3 +43,36 @@ func AddRepository(sqscURL, token, project, repoURL string) ([]string, error) {
 
 	return []string{}, nil
 }
+
+// ListRepositories asks the Squarescale service to lists all repositories for a given project.
+func ListRepositories(sqscURL, token, project string) ([]string, error) {
+	req := SqscRequest{
+		Method: "GET",
+		URL:    sqscURL + "/projects/" + project + "/repositories",
+		Token:  token,
+	}
+
+	res, err := doRequest(req)
+	if err != nil {
+		return []string{}, err
+	}
+
+	if res.Code != http.StatusOK {
+		return []string{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	}
+
+	var repositoryJSON []struct {
+		URL string `json:"url"`
+	}
+	err = json.Unmarshal(res.Body, &repositoryJSON)
+	if err != nil {
+		return []string{}, err
+	}
+
+	var repositories []string
+	for _, rJSON := range repositoryJSON {
+		repositories = append(repositories, rJSON.URL)
+	}
+
+	return repositories, nil
+}
