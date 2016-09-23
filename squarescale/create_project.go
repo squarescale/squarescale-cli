@@ -100,3 +100,48 @@ func CreateProject(sqscURL, token, wantedName string) (projectName string, err e
 	projectName = wantedName
 	return
 }
+
+// ListProjects asks the Squarescale service for available projects.
+func ListProjects(sqscURL, token string) ([]string, error) {
+	endpoint := sqscURL + "/projects"
+	req, err := http.NewRequest("GET", endpoint, nil)
+	if err != nil {
+		return []string{}, fmt.Errorf("Cannot create request: %v", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Authorization", "bearer "+token)
+
+	var c http.Client
+	res, err := c.Do(req)
+	if err != nil {
+		return []string{}, fmt.Errorf("Cannot send request: %v", err)
+	}
+
+	jsonBody, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return []string{}, fmt.Errorf("Cannot read response: %v", err)
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return []string{}, fmt.Errorf("Cannot read response, received status is %d", res.StatusCode)
+	}
+
+	type ProjectJSON struct {
+		Name string `json:"name"`
+	}
+
+	var projectsJSON []ProjectJSON
+	err = json.Unmarshal(jsonBody, &projectsJSON)
+	if err != nil {
+		return []string{}, fmt.Errorf("Cannot parse JSON %s: %v", string(jsonBody), err)
+	}
+
+	var projects []string
+	for _, pJSON := range projectsJSON {
+		projects = append(projects, pJSON.Name)
+	}
+
+	return projects, nil
+}
