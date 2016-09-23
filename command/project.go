@@ -23,7 +23,7 @@ func (c *ProjectCommand) Synopsis() string {
 // Help is part of cli.Command implementation.
 func (c *ProjectCommand) Help() string {
 	helpText := `
-Usage: sqsc project <subcommand>
+usage: sqsc project <subcommand>
 
   Run a Squarescale project related command. List of supported subcommands
   is available below.
