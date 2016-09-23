@@ -17,7 +17,6 @@ type RepositoryAddCommand struct {
 
 // Run is part of cli.Command implementation.
 func (r *RepositoryAddCommand) Run(args []string) int {
-	// Parse flags
 	cmdFlags := flag.NewFlagSet("repository add", flag.ContinueOnError)
 	cmdFlags.Usage = func() { r.Ui.Output(r.Help()) }
 	endpoint := EndpointFlag(cmdFlags)
@@ -26,7 +25,6 @@ func (r *RepositoryAddCommand) Run(args []string) int {
 		return 1
 	}
 
-	// Validate project name
 	if *project == "" {
 		r.Ui.Error("Project name must be specified.\n")
 		r.Ui.Output(r.Help())
@@ -39,21 +37,22 @@ func (r *RepositoryAddCommand) Run(args []string) int {
 		return 1
 	}
 
-	// Retrieve git remote url
 	gitRemote, err := findGitRemote()
 	if err != nil {
 		r.Error(err)
 		return 1
 	}
 
-	// send to squarescale
+	s := startSpinner(fmt.Sprintf(" add repository '%s' to project '%s'", gitRemote, *project))
 	messages, err := squarescale.AddRepository(*endpoint, token, *project, gitRemote)
 	if err != nil {
+		stopSpinner(s)
 		r.ErrorWithMessages(err, messages)
 		return 1
 	}
 
-	r.Ui.Info(fmt.Sprintf("Successfully attached repository '%s' to project '%s'", gitRemote, *project))
+	stopSpinner(s)
+	r.Ui.Info(fmt.Sprintf("Successfully added repository '%s' to project '%s'", gitRemote, *project))
 	return 0
 }
 
