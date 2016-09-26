@@ -44,9 +44,11 @@ func (r *RepositoryListCommand) Run(args []string) int {
 		return 1
 	}
 
-	msg := fmt.Sprintf("0 repository attached to project %s", *project)
+	var msg string
 	if len(repositories) > 0 {
 		msg = strings.Join(repositories, "\n")
+	} else {
+		msg = fmt.Sprintf("No repositories attached to project '%s'", *project)
 	}
 
 	s.Stop()
