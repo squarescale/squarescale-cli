@@ -44,10 +44,10 @@ func (r *RepositoryAddCommand) Run(args []string) int {
 	}
 
 	s := startSpinner(fmt.Sprintf("add repository '%s' to project '%s'", gitRemote, *project))
-	messages, err := squarescale.AddRepository(*endpoint, token, *project, gitRemote)
+	err = squarescale.AddRepository(*endpoint, token, *project, gitRemote)
 	if err != nil {
 		s.Stop()
-		r.ErrorWithMessages(err, messages)
+		r.Error(err)
 		return 1
 	}
 

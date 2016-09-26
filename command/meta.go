@@ -28,16 +28,3 @@ func ProjectFlag(f *flag.FlagSet) *string {
 func (m *Meta) Error(err error) {
 	m.Ui.Error(fmt.Sprintf("Error: %v", err))
 }
-
-// ErrorWithMessages is a shortcut to display errors with appropriate messages.
-func (m *Meta) ErrorWithMessages(err error, messages []string) {
-	m.Error(err)
-
-	if len(messages) > 0 {
-		m.Ui.Error("")
-		for _, message := range messages {
-			m.Ui.Error("  " + message)
-		}
-		m.Ui.Error("")
-	}
-}
