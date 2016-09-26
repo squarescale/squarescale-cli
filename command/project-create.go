@@ -43,13 +43,16 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		return 1
 	}
 
+	s := startSpinner("create project")
 	projectName, err = squarescale.CreateProject(*endpoint, token, projectName)
 	if err != nil {
+		s.Stop()
 		c.Error(err)
 		return 1
 	}
 
-	c.Ui.Info(fmt.Sprintf("Created project %s", projectName))
+	s.Stop()
+	c.Ui.Info(fmt.Sprintf("Created project '%s'", projectName))
 	return 0
 }
 
