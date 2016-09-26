@@ -25,9 +25,9 @@ func (r *RepositoryAddCommand) Run(args []string) int {
 		return 1
 	}
 
-	if *project == "" {
-		r.Ui.Error("Project name must be specified\n")
-		r.Ui.Output(r.Help())
+	err := validateArgs(*project)
+	if err != nil {
+		r.ErrorWithUsage(err, r.Help())
 		return 1
 	}
 
@@ -44,10 +44,10 @@ func (r *RepositoryAddCommand) Run(args []string) int {
 	}
 
 	s := startSpinner(fmt.Sprintf("add repository '%s' to project '%s'", gitRemote, *project))
-	messages, err := squarescale.AddRepository(*endpoint, token, *project, gitRemote)
+	err = squarescale.AddRepository(*endpoint, token, *project, gitRemote)
 	if err != nil {
 		s.Stop()
-		r.ErrorWithMessages(err, messages)
+		r.Error(err)
 		return 1
 	}
 
