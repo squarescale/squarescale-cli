@@ -9,27 +9,21 @@ import (
 // http.client is concurrently safe and should be reused across multiple connections
 var client http.Client
 
-// SquarescaleRequest stores the data required to contact Squarescale services over HTTP.
-type SquarescaleRequest struct {
+// SqscRequest stores the data required to contact Squarescale services over HTTP.
+type SqscRequest struct {
 	Method string
 	URL    string
 	Token  string // user token for authentication
 	Body   []byte // only relevant if Method != "GET"
 }
 
-// SquarescaleResponse stores the result of a SquarescaleRequest once performed by the client.
-type SquarescaleResponse struct {
+// SqscResponse stores the result of a SquarescaleRequest once performed by the client.
+type SqscResponse struct {
 	Code int
 	Body []byte
 }
 
-func setHeaders(req *http.Request, token string) {
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "bearer "+token)
-}
-
-func request(r SquarescaleRequest) (SquarescaleResponse, error) {
+func doRequest(r SqscRequest) (SqscResponse, error) {
 	var req *http.Request
 	var err error
 
@@ -40,20 +34,23 @@ func request(r SquarescaleRequest) (SquarescaleResponse, error) {
 	}
 
 	if err != nil {
-		return SquarescaleResponse{}, err
+		return SqscResponse{}, err
 	}
 
-	setHeaders(req, r.Token)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Authorization", "bearer "+r.Token)
+
 	res, err := client.Do(req)
 	if err != nil {
-		return SquarescaleResponse{}, err
+		return SqscResponse{}, err
 	}
 
 	defer res.Body.Close()
 	bytes, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return SquarescaleResponse{}, err
+		return SqscResponse{}, err
 	}
 
-	return SquarescaleResponse{Code: res.StatusCode, Body: bytes}, nil
+	return SqscResponse{Code: res.StatusCode, Body: bytes}, nil
 }

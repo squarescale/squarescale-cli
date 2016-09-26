@@ -8,13 +8,13 @@ import (
 
 // FindProjectName asks the Squarescale service for a project name, using the provided token.
 func FindProjectName(sqscURL, token string) (string, error) {
-	req := SquarescaleRequest{
+	req := SqscRequest{
 		Method: "GET",
 		URL:    sqscURL + "/free_name",
 		Token:  token,
 	}
 
-	res, err := request(req)
+	res, err := doRequest(req)
 	var response struct {
 		Name string `json:"name"`
 	}
@@ -52,14 +52,14 @@ func CreateProject(sqscURL, token, wantedName string) (string, error) {
 		return "", err
 	}
 
-	req := SquarescaleRequest{
+	req := SqscRequest{
 		Method: "POST",
 		URL:    sqscURL + "/projects",
 		Token:  token,
 		Body:   payloadBytes,
 	}
 
-	res, err := request(req)
+	res, err := doRequest(req)
 	if err != nil {
 		return "", err
 	}
@@ -81,13 +81,13 @@ func CreateProject(sqscURL, token, wantedName string) (string, error) {
 
 // ListProjects asks the Squarescale service for available projects.
 func ListProjects(sqscURL, token string) ([]string, error) {
-	req := SquarescaleRequest{
+	req := SqscRequest{
 		Method: "GET",
 		URL:    sqscURL + "/projects",
 		Token:  token,
 	}
 
-	res, err := request(req)
+	res, err := doRequest(req)
 	if err != nil {
 		return []string{}, err
 	}

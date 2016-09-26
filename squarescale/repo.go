@@ -20,14 +20,14 @@ func AddRepository(sqscURL, token, project, repoURL string) ([]string, error) {
 		return []string{}, err
 	}
 
-	req := SquarescaleRequest{
+	req := SqscRequest{
 		Method: "POST",
 		URL:    sqscURL + "/projects/" + project + "/repositories",
 		Token:  token,
 		Body:   payloadBytes,
 	}
 
-	res, err := request(req)
+	res, err := doRequest(req)
 	if err != nil {
 		return []string{}, err
 	}
