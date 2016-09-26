@@ -1,137 +1,107 @@
 package squarescale
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 )
 
-type freeNameResponse struct {
-	Name string `json:"name"`
-}
-
 // FindProjectName asks the Squarescale service for a project name, using the provided token.
 func FindProjectName(sqscURL, token string) (string, error) {
-	var c http.Client
-	req, err := http.NewRequest("GET", sqscURL+"/free_name", nil)
+	req := SquarescaleRequest{
+		Method: "GET",
+		URL:    sqscURL + "/free_name",
+		Token:  token,
+	}
+
+	res, err := request(req)
+	var response struct {
+		Name string `json:"name"`
+	}
+
+	err = json.Unmarshal(res.Body, &response)
 	if err != nil {
 		return "", err
 	}
 
-	setHeaders(req, token)
-	res, err := c.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("Could not send request: %v", err)
-	}
-
-	jsondata, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return "", fmt.Errorf("Could not read response: %v", err)
-	}
-
-	var response freeNameResponse
-	err = json.Unmarshal(jsondata, &response)
-	if err != nil {
-		return "", fmt.Errorf("Could not parse JSON result %s: %v", jsondata, err)
-	}
-
-	if res.StatusCode != 200 {
-		return "", fmt.Errorf("Could not generate a free name %v", jsondata)
+	if res.Code != http.StatusOK {
+		return "", fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
 	}
 	return response.Name, nil
 }
 
-type createProjectRequest struct {
-	Project struct {
-		Name string `json:"name"`
-	} `json:"project"`
-}
-
-type createProjectResponse struct {
-	Error string `json:"error"`
-}
-
 // CreateProject asks the Squarescale platform to create a new project, using the provided name and user token.
-func CreateProject(sqscURL, token, wantedName string) (projectName string, err error) {
-	var c http.Client
-	var reqdata createProjectRequest
-
+func CreateProject(sqscURL, token, wantedName string) (string, error) {
 	if wantedName == "" {
+		var err error
 		wantedName, err = FindProjectName(sqscURL, token)
 		if err != nil {
 			return "", err
 		}
 	}
 
-	reqdata.Project.Name = wantedName
-	reqbytes, err := json.Marshal(&reqdata)
+	var payload struct {
+		Project struct {
+			Name string `json:"name"`
+		} `json:"project"`
+	}
+
+	payload.Project.Name = wantedName
+	payloadBytes, err := json.Marshal(&payload)
 	if err != nil {
 		return "", err
 	}
 
-	req, err := http.NewRequest("POST", sqscURL+"/projects", bytes.NewReader(reqbytes))
+	req := SquarescaleRequest{
+		Method: "POST",
+		URL:    sqscURL + "/projects",
+		Token:  token,
+		Body:   payloadBytes,
+	}
+
+	res, err := request(req)
 	if err != nil {
 		return "", err
 	}
 
-	setHeaders(req, token)
-	res, err := c.Do(req)
+	var response struct {
+		Error string `json:"error"`
+	}
+	err = json.Unmarshal(res.Body, &response)
 	if err != nil {
-		return "", fmt.Errorf("Could not send request: %v", err)
+		return "", err
 	}
 
-	jsondata, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return "", fmt.Errorf("Could not read response: %v", err)
+	if res.Code != http.StatusCreated {
+		return "", fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
 	}
 
-	var response createProjectResponse
-	err = json.Unmarshal(jsondata, &response)
-	if err != nil {
-		return "", fmt.Errorf("Could not parse JSON result %s: %v", jsondata, err)
-	}
-
-	if res.StatusCode != 201 {
-		return "", fmt.Errorf("Could not create project: %s", jsondata)
-	}
-	projectName = wantedName
-	return
+	return wantedName, nil
 }
 
 // ListProjects asks the Squarescale service for available projects.
 func ListProjects(sqscURL, token string) ([]string, error) {
-	endpoint := sqscURL + "/projects"
-	req, err := http.NewRequest("GET", endpoint, nil)
+	req := SquarescaleRequest{
+		Method: "GET",
+		URL:    sqscURL + "/projects",
+		Token:  token,
+	}
+
+	res, err := request(req)
 	if err != nil {
-		return []string{}, fmt.Errorf("Cannot create request: %v", err)
+		return []string{}, err
 	}
 
-	setHeaders(req, token)
-	var c http.Client
-	res, err := c.Do(req)
-	if err != nil {
-		return []string{}, fmt.Errorf("Cannot send request: %v", err)
+	if res.Code != http.StatusOK {
+		return []string{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
 	}
 
-	jsonBody, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return []string{}, fmt.Errorf("Cannot read response: %v", err)
-	}
-
-	if res.StatusCode != http.StatusOK {
-		return []string{}, fmt.Errorf("Cannot read response, received status is %d", res.StatusCode)
-	}
-
-	type ProjectJSON struct {
+	var projectsJSON []struct {
 		Name string `json:"name"`
 	}
-
-	var projectsJSON []ProjectJSON
-	err = json.Unmarshal(jsonBody, &projectsJSON)
+	err = json.Unmarshal(res.Body, &projectsJSON)
 	if err != nil {
-		return []string{}, fmt.Errorf("Cannot parse JSON %s: %v", string(jsonBody), err)
+		return []string{}, err
 	}
 
 	var projects []string

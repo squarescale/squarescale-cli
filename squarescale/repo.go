@@ -1,56 +1,46 @@
 package squarescale
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 )
 
-type addRepositoryRequest struct {
-	Repository struct {
-		URL string `json:"url"`
-	} `json:"repository"`
-}
-
-type addRepositoryErrorResponse struct {
-	URL      []string `json:"url"`
-	ShortURL []string `json:"short_url"`
-}
-
 // AddRepository asks the Squarescale service to attach the provided repository to the project.
 func AddRepository(sqscURL, token, project, repoURL string) ([]string, error) {
-	var payload addRepositoryRequest
+	var payload struct {
+		Repository struct {
+			URL string `json:"url"`
+		} `json:"repository"`
+	}
+
 	payload.Repository.URL = repoURL
 	payloadBytes, err := json.Marshal(&payload)
 	if err != nil {
-		return []string{}, fmt.Errorf("Cannot marshal payload %v: %v", payload, err)
+		return []string{}, err
 	}
 
-	endpoint := sqscURL + "/projects/" + project + "/repositories"
-	req, err := http.NewRequest("POST", endpoint, bytes.NewReader(payloadBytes))
+	req := SquarescaleRequest{
+		Method: "POST",
+		URL:    sqscURL + "/projects/" + project + "/repositories",
+		Token:  token,
+		Body:   payloadBytes,
+	}
+
+	res, err := request(req)
 	if err != nil {
-		return []string{}, fmt.Errorf("Cannot create request: %v", err)
+		return []string{}, err
 	}
 
-	setHeaders(req, token)
-	var c http.Client
-	res, err := c.Do(req)
-	if err != nil {
-		return []string{}, fmt.Errorf("Cannot send request: %v", err)
-	}
-
-	if res.StatusCode != http.StatusCreated {
-		jsonBody, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			return []string{}, fmt.Errorf("Cannot read response: %v", err)
+	if res.Code != http.StatusCreated {
+		var response struct {
+			URL      []string `json:"url"`
+			ShortURL []string `json:"short_url"`
 		}
 
-		var response addRepositoryErrorResponse
-		err = json.Unmarshal(jsonBody, &response)
+		err = json.Unmarshal(res.Body, &response)
 		if err != nil {
-			return []string{}, fmt.Errorf("Cannot read JSON: %v", err)
+			return []string{}, err
 		}
 
 		errors := append(response.URL, response.ShortURL...)
