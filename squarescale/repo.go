@@ -33,18 +33,12 @@ func AddRepository(sqscURL, token, project, repoURL string) ([]string, error) {
 	}
 
 	if res.Code != http.StatusCreated {
-		var response struct {
-			URL      []string `json:"url"`
-			ShortURL []string `json:"short_url"`
-		}
-
-		err = json.Unmarshal(res.Body, &response)
+		errMsgs, err := readErrors(res.Body)
 		if err != nil {
 			return []string{}, err
 		}
 
-		errors := append(response.URL, response.ShortURL...)
-		return errors, fmt.Errorf("Cannot attach repository '%s' to project '%s'", repoURL, project)
+		return errMsgs, fmt.Errorf("Cannot attach repository '%s' to project '%s'", repoURL, project)
 	}
 
 	return []string{}, nil

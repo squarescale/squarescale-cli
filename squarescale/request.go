@@ -2,6 +2,7 @@ package squarescale
 
 import (
 	"bytes"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 )
@@ -53,4 +54,23 @@ func doRequest(r SqscRequest) (SqscResponse, error) {
 	}
 
 	return SqscResponse{Code: res.StatusCode, Body: bytes}, nil
+}
+
+func readErrors(body []byte) ([]string, error) {
+	var response struct {
+		URL      []string `json:"url"`
+		ShortURL []string `json:"short_url"`
+		Project  []string `json:"project"`
+	}
+
+	err := json.Unmarshal(body, &response)
+	if err != nil {
+		return []string{}, err
+	}
+
+	var messages []string
+	messages = append(messages, response.URL...)
+	messages = append(messages, response.ShortURL...)
+	messages = append(messages, response.Project...)
+	return messages, nil
 }
