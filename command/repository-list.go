@@ -24,9 +24,9 @@ func (r *RepositoryListCommand) Run(args []string) int {
 		return 1
 	}
 
-	if *project == "" {
-		r.Ui.Error("Project name must be specified.\n")
-		r.Ui.Output(r.Help())
+	err := validateArgs(*project)
+	if err != nil {
+		r.ErrorWithUsage(err, r.Help())
 		return 1
 	}
 
