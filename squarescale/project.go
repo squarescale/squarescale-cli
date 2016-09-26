@@ -19,8 +19,8 @@ func FindProjectName(sqscURL, token string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "bearer "+token)
+
+	setHeaders(req, token)
 	res, err := c.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("Could not send request: %v", err)
@@ -75,9 +75,8 @@ func CreateProject(sqscURL, token, wantedName string) (projectName string, err e
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "bearer "+token)
+
+	setHeaders(req, token)
 	res, err := c.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("Could not send request: %v", err)
@@ -109,10 +108,7 @@ func ListProjects(sqscURL, token string) ([]string, error) {
 		return []string{}, fmt.Errorf("Cannot create request: %v", err)
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "bearer "+token)
-
+	setHeaders(req, token)
 	var c http.Client
 	res, err := c.Do(req)
 	if err != nil {

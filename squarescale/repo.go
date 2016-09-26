@@ -34,10 +34,7 @@ func AddRepository(sqscURL, token, project, repoURL string) ([]string, error) {
 		return []string{}, fmt.Errorf("Cannot create request: %v", err)
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "bearer "+token)
-
+	setHeaders(req, token)
 	var c http.Client
 	res, err := c.Do(req)
 	if err != nil {
