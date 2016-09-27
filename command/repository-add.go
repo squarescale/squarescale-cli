@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os/exec"
@@ -78,10 +79,13 @@ Options:
 }
 
 func findGitRemote() (string, error) {
-	remote, err := exec.Command("git", "remote", "get-url", "origin").Output()
+	output, err := exec.Command("git", "remote", "get-url", "origin").CombinedOutput()
+	formattedOutput := strings.Replace(string(output), "\n", "", -1)
+
 	if err != nil {
-		return "", err
+		formattedOutput = strings.Replace(formattedOutput, "fatal: ", "", -1)
+		return "", errors.New(formattedOutput)
 	}
 
-	return strings.Replace(string(remote), "\n", "", -1), nil
+	return formattedOutput, nil
 }
