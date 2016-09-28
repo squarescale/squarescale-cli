@@ -2,11 +2,7 @@ package command
 
 import (
 	"flag"
-	"fmt"
 	"strings"
-
-	"github.com/squarescale/squarescale-cli/squarescale"
-	"github.com/squarescale/squarescale-cli/tokenstore"
 )
 
 // StatusCommand is a cli.Command implementation for knowing if user is authorized.
@@ -23,19 +19,14 @@ func (c *StatusCommand) Run(args []string) int {
 		return 1
 	}
 
-	token, err := tokenstore.GetToken(*endpoint)
+	err := runWithSpinner("check authorization", *endpoint, func(token string) error {
+		return nil // do nothing as we are already authenticated here.
+	})
+
 	if err != nil {
 		return c.error(err)
 	}
 
-	s := startSpinner("check authorization")
-	err = squarescale.ValidateToken(*endpoint, token)
-	if err != nil {
-		s.Stop()
-		return c.error(fmt.Errorf("Invalid token. Use the 'login' command first (%v).", err))
-	}
-
-	s.Stop()
 	return c.info("Current token is correctly authorized on Squarescale services.")
 }
 
