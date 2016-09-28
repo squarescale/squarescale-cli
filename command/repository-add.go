@@ -28,33 +28,28 @@ func (r *RepositoryAddCommand) Run(args []string) int {
 
 	err := validateArgs(*project)
 	if err != nil {
-		r.ErrorWithUsage(err, r.Help())
-		return 1
+		return r.errorWithUsage(err, r.Help())
 	}
 
 	token, err := tokenstore.GetToken(*endpoint)
 	if err != nil {
-		r.Error(err)
-		return 1
+		return r.error(err)
 	}
 
 	gitRemote, err := findGitRemote()
 	if err != nil {
-		r.Error(err)
-		return 1
+		return r.error(err)
 	}
 
 	s := startSpinner(fmt.Sprintf("add repository '%s' to project '%s'", gitRemote, *project))
 	err = squarescale.AddRepository(*endpoint, token, *project, gitRemote)
 	if err != nil {
 		s.Stop()
-		r.Error(err)
-		return 1
+		return r.error(err)
 	}
 
 	s.Stop()
-	r.Ui.Info(fmt.Sprintf("Successfully added repository '%s' to project '%s'", gitRemote, *project))
-	return 0
+	return r.info(fmt.Sprintf("Successfully added repository '%s' to project '%s'", gitRemote, *project))
 }
 
 // Synopsis is part of cli.Command implementation.

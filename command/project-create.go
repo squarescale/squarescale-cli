@@ -39,21 +39,18 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 
 	token, err := tokenstore.GetToken(*endpoint)
 	if err != nil {
-		c.Error(err)
-		return 1
+		return c.error(err)
 	}
 
 	s := startSpinner("create project")
 	projectName, err = squarescale.CreateProject(*endpoint, token, projectName)
 	if err != nil {
 		s.Stop()
-		c.Error(err)
-		return 1
+		return c.error(err)
 	}
 
 	s.Stop()
-	c.Ui.Info(fmt.Sprintf("Created project '%s'", projectName))
-	return 0
+	return c.info(fmt.Sprintf("Created project '%s'", projectName))
 }
 
 // Synopsis is part of cli.Command implementation.

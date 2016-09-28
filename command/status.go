@@ -25,21 +25,18 @@ func (c *StatusCommand) Run(args []string) int {
 
 	token, err := tokenstore.GetToken(*endpoint)
 	if err != nil {
-		c.Error(err)
-		return 1
+		return c.error(err)
 	}
 
 	s := startSpinner("check authorization")
 	err = squarescale.ValidateToken(*endpoint, token)
 	if err != nil {
 		s.Stop()
-		c.Error(fmt.Errorf("Invalid token. Use the 'login' command first (%v).", err))
-		return 1
+		return c.error(fmt.Errorf("Invalid token. Use the 'login' command first (%v).", err))
 	}
 
 	s.Stop()
-	c.Ui.Info("Current token is correctly authorized on Squarescale services.")
-	return 0
+	return c.info("Current token is correctly authorized on Squarescale services.")
 }
 
 // Synopsis is part of cli.Command implementation.

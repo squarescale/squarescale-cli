@@ -21,5 +21,5 @@ func ValidateToken(sqscURL, token string) error {
 		return nil
 	}
 
-	return fmt.Errorf("Token validation failed on Squarescale services")
+	return fmt.Errorf("token rejected")
 }

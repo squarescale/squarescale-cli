@@ -24,21 +24,24 @@ func (c *ProjectListCommand) Run(args []string) int {
 
 	token, err := tokenstore.GetToken(*endpoint)
 	if err != nil {
-		c.Error(err)
-		return 1
+		return c.error(err)
 	}
 
 	s := startSpinner("list projects")
 	projects, err := squarescale.ListProjects(*endpoint, token)
 	if err != nil {
 		s.Stop()
-		c.Error(err)
-		return 1
+		return c.error(err)
 	}
 
 	s.Stop()
-	c.Ui.Info(buildMessage(projects))
-	return 0
+
+	msg := strings.Join(projects, "\n")
+	if len(projects) == 0 {
+		msg = "No projects found"
+	}
+
+	return c.info(msg)
 }
 
 // Synopsis is part of cli.Command implementation.
@@ -58,12 +61,4 @@ Options:
   -endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
 `
 	return strings.TrimSpace(helpText)
-}
-
-func buildMessage(projects []string) string {
-	if len(projects) == 0 {
-		return "No project found"
-	}
-
-	return strings.Join(projects, "\n")
 }

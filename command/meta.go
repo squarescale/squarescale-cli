@@ -33,14 +33,19 @@ func validateArgs(project string) error {
 	return nil
 }
 
-// Error is a shortcut for Meta.Ui.Error with special formatting for errors.
-func (m *Meta) Error(err error) {
-	m.Ui.Error(fmt.Sprintf("Error: %v", err))
+func (m *Meta) info(message string) int {
+	m.Ui.Info(message)
+	return 0
 }
 
-// ErrorWithUsage is a shortcut for displaying an error and the usage.
-func (m *Meta) ErrorWithUsage(err error, usage string) {
-	m.Error(err)
+func (m *Meta) error(err error) int {
+	m.Ui.Error(fmt.Sprintf("Error: %v", err))
+	return 1
+}
+
+func (m *Meta) errorWithUsage(err error, usage string) int {
+	retCode := m.error(err)
 	m.Ui.Output("")
 	m.Ui.Output(usage)
+	return retCode
 }

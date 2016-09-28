@@ -26,34 +26,28 @@ func (r *RepositoryListCommand) Run(args []string) int {
 
 	err := validateArgs(*project)
 	if err != nil {
-		r.ErrorWithUsage(err, r.Help())
-		return 1
+		return r.errorWithUsage(err, r.Help())
 	}
 
 	token, err := tokenstore.GetToken(*endpoint)
 	if err != nil {
-		r.Error(err)
-		return 1
+		return r.error(err)
 	}
 
 	s := startSpinner("list repositories")
 	repositories, err := squarescale.ListRepositories(*endpoint, token, *project)
 	if err != nil {
 		s.Stop()
-		r.Error(err)
-		return 1
+		return r.error(err)
 	}
 
-	var msg string
-	if len(repositories) > 0 {
-		msg = strings.Join(repositories, "\n")
-	} else {
+	msg := strings.Join(repositories, "\n")
+	if len(repositories) == 0 {
 		msg = fmt.Sprintf("No repositories attached to project '%s'", *project)
 	}
 
 	s.Stop()
-	r.Ui.Info(msg)
-	return 0
+	return r.info(msg)
 }
 
 // Synopsis is part of cli.Command implementation.

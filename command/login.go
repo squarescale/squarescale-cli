@@ -28,14 +28,12 @@ func (c *LoginCommand) Run(args []string) int {
 	// Retrieve credentials from user input
 	login, pw, err := c.askForCredentials()
 	if err != nil {
-		c.Error(err)
-		return 1
+		return c.error(err)
 	}
 
 	oneTimePW, ghToken, ghTokenURL, err := github.GeneratePersonalToken(login, pw, c.Ui)
 	if err != nil {
-		c.Error(err)
-		return 1
+		return c.error(err)
 	}
 
 	c.Ui.Info("Forward GitHub authorization to Squarescale")
@@ -43,14 +41,12 @@ func (c *LoginCommand) Run(args []string) int {
 	res := 0
 	sqscToken, err := squarescale.ObtainTokenFromGitHub(*endpoint, ghToken)
 	if err != nil {
-		c.Error(err)
-		res = 1
+		res = c.error(err)
 
 	} else {
 		err = tokenstore.SaveToken(*endpoint, sqscToken)
 		if err != nil {
-			c.Error(err)
-			res = 1
+			res = c.error(err)
 
 		} else {
 			c.Ui.Info(fmt.Sprintf("Successfully authenticated as user %s", login))
@@ -61,8 +57,7 @@ func (c *LoginCommand) Run(args []string) int {
 
 	err = github.RevokePersonalToken(ghTokenURL, login, pw, oneTimePW)
 	if err != nil {
-		c.Error(err)
-		return 1
+		return c.error(err)
 	}
 
 	return res
