@@ -1,12 +1,12 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
-	"github.com/squarescale/squarescale-cli/tokenstore"
 )
 
 // ProjectCreateCommand is a cli.Command implementation for creating a Squarescale project.
@@ -32,28 +32,25 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	case 1:
 		projectName = args[0]
 	default:
-		c.Ui.Error("Too many command line arguments\n")
-		c.Ui.Output(c.Help())
-		return 1
+		return c.errorWithUsage(errors.New("Too many command line arguments"), c.Help())
 	}
 
-	token, err := tokenstore.GetToken(*endpoint)
+	var msg string
+	err := runWithSpinner("create project", *endpoint, func(token string) error {
+		pName, e := squarescale.CreateProject(*endpoint, token, projectName)
+		if e != nil {
+			return e
+		}
+
+		msg = fmt.Sprintf("Created project '%s'", pName)
+		return nil
+	})
+
 	if err != nil {
-		c.Error(err)
-		return 1
+		return c.error(err)
 	}
 
-	s := startSpinner("create project")
-	projectName, err = squarescale.CreateProject(*endpoint, token, projectName)
-	if err != nil {
-		s.Stop()
-		c.Error(err)
-		return 1
-	}
-
-	s.Stop()
-	c.Ui.Info(fmt.Sprintf("Created project '%s'", projectName))
-	return 0
+	return c.info(msg)
 }
 
 // Synopsis is part of cli.Command implementation.

@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
-	"github.com/squarescale/squarescale-cli/tokenstore"
 )
 
 // RepositoryListCommand is a cli.Command implementation for listing Squarescale project repositories.
@@ -26,34 +25,29 @@ func (r *RepositoryListCommand) Run(args []string) int {
 
 	err := validateArgs(*project)
 	if err != nil {
-		r.ErrorWithUsage(err, r.Help())
-		return 1
-	}
-
-	token, err := tokenstore.GetToken(*endpoint)
-	if err != nil {
-		r.Error(err)
-		return 1
-	}
-
-	s := startSpinner("list repositories")
-	repositories, err := squarescale.ListRepositories(*endpoint, token, *project)
-	if err != nil {
-		s.Stop()
-		r.Error(err)
-		return 1
+		return r.errorWithUsage(err, r.Help())
 	}
 
 	var msg string
-	if len(repositories) > 0 {
+	err = runWithSpinner("list repositories", *endpoint, func(token string) error {
+		repositories, e := squarescale.ListRepositories(*endpoint, token, *project)
+		if e != nil {
+			return e
+		}
+
 		msg = strings.Join(repositories, "\n")
-	} else {
-		msg = fmt.Sprintf("No repositories attached to project '%s'", *project)
+		if len(repositories) == 0 {
+			msg = fmt.Sprintf("No repositories attached to project '%s'", *project)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return r.error(err)
 	}
 
-	s.Stop()
-	r.Ui.Info(msg)
-	return 0
+	return r.info(msg)
 }
 
 // Synopsis is part of cli.Command implementation.

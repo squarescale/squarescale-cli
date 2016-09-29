@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
-	"github.com/squarescale/squarescale-cli/tokenstore"
 )
 
 // ProjectListCommand is a cli.Command implementation for listing all Squarescale projects.
@@ -22,23 +21,26 @@ func (c *ProjectListCommand) Run(args []string) int {
 		return 1
 	}
 
-	token, err := tokenstore.GetToken(*endpoint)
+	var msg string
+	err := runWithSpinner("list projects", *endpoint, func(token string) error {
+		projects, e := squarescale.ListProjects(*endpoint, token)
+		if e != nil {
+			return e
+		}
+
+		msg = strings.Join(projects, "\n")
+		if len(projects) == 0 {
+			msg = "No projects found"
+		}
+
+		return nil
+	})
+
 	if err != nil {
-		c.Error(err)
-		return 1
+		return c.error(err)
 	}
 
-	s := startSpinner("list projects")
-	projects, err := squarescale.ListProjects(*endpoint, token)
-	if err != nil {
-		s.Stop()
-		c.Error(err)
-		return 1
-	}
-
-	s.Stop()
-	c.Ui.Info(buildMessage(projects))
-	return 0
+	return c.info(msg)
 }
 
 // Synopsis is part of cli.Command implementation.
@@ -58,12 +60,4 @@ Options:
   -endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
 `
 	return strings.TrimSpace(helpText)
-}
-
-func buildMessage(projects []string) string {
-	if len(projects) == 0 {
-		return "No project found"
-	}
-
-	return strings.Join(projects, "\n")
 }

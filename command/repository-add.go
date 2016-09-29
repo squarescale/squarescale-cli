@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
-	"github.com/squarescale/squarescale-cli/tokenstore"
 )
 
 // RepositoryAddCommand is a cli.Command implementation for adding a repository to a Squarescale project.
@@ -28,33 +27,23 @@ func (r *RepositoryAddCommand) Run(args []string) int {
 
 	err := validateArgs(*project)
 	if err != nil {
-		r.ErrorWithUsage(err, r.Help())
-		return 1
-	}
-
-	token, err := tokenstore.GetToken(*endpoint)
-	if err != nil {
-		r.Error(err)
-		return 1
+		return r.errorWithUsage(err, r.Help())
 	}
 
 	gitRemote, err := findGitRemote()
 	if err != nil {
-		r.Error(err)
-		return 1
+		return r.error(err)
 	}
 
-	s := startSpinner(fmt.Sprintf("add repository '%s' to project '%s'", gitRemote, *project))
-	err = squarescale.AddRepository(*endpoint, token, *project, gitRemote)
+	err = runWithSpinner(fmt.Sprintf("add repository '%s' to project '%s'", gitRemote, *project), *endpoint, func(token string) error {
+		return squarescale.AddRepository(*endpoint, token, *project, gitRemote)
+	})
+
 	if err != nil {
-		s.Stop()
-		r.Error(err)
-		return 1
+		return r.error(err)
 	}
 
-	s.Stop()
-	r.Ui.Info(fmt.Sprintf("Successfully added repository '%s' to project '%s'", gitRemote, *project))
-	return 0
+	return r.info(fmt.Sprintf("Successfully added repository '%s' to project '%s'", gitRemote, *project))
 }
 
 // Synopsis is part of cli.Command implementation.
