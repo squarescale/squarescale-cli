@@ -27,7 +27,7 @@ func (c *StatusCommand) Run(args []string) int {
 		return c.error(err)
 	}
 
-	return c.info("Current token is correctly authorized on Squarescale services.")
+	return c.info("You're currently logged in")
 }
 
 // Synopsis is part of cli.Command implementation.

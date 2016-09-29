@@ -23,7 +23,7 @@ func runWithSpinner(text, endpoint string, action func(token string) error) erro
 
 	err = squarescale.ValidateToken(endpoint, token)
 	if err != nil {
-		return fmt.Errorf("Invalid token. Use the 'login' command first (%v).", err)
+		return fmt.Errorf("You're not authenticated, please login first (%v)", err)
 	}
 
 	return action(token)
