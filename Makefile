@@ -12,7 +12,7 @@ build: deps ## Build CLI (./sqsc binary)
 
 docker:
 	GOOS=linux CGO_ENABLED=0 go build -o sqsc-docker -ldflags "-X main.GitCommit=\"$(COMMIT)\""
-	docker build -t sqsc .
+	docker build -t sqsc-cli .
 
 clean: ## Clean repository
 	go clean
