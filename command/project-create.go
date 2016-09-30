@@ -25,32 +25,60 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	}
 
 	// Check for a project name
-	var projectName string
+	var wantedProjectName string
 	args = cmdFlags.Args()
 	switch len(args) {
 	case 0:
 	case 1:
-		projectName = args[0]
+		wantedProjectName = args[0]
 	default:
 		return c.errorWithUsage(errors.New("Too many command line arguments"), c.Help())
 	}
 
-	var msg string
-	err := runWithSpinner("create project", *endpoint, func(token string) error {
-		pName, e := squarescale.CreateProject(*endpoint, token, projectName)
-		if e != nil {
-			return e
+	var definitiveName string
+	err := c.runWithSpinner("create project", *endpoint, func(token string) error {
+		if wantedProjectName != "" {
+			valid, same, fmtName, err := squarescale.CheckProjectName(*endpoint, token, wantedProjectName)
+			if err != nil {
+				return fmt.Errorf("Cannot validate project name '%s'", wantedProjectName)
+			}
+
+			if !valid {
+				return fmt.Errorf(
+					"Project name '%s' is invalid (already taken or not well formed), please choose another one",
+					wantedProjectName)
+			}
+
+			if !same {
+				c.pauseSpinner()
+				c.Ui.Warn(fmt.Sprintf("Project will be created as '%s', is this ok?", fmtName))
+				_, err := c.Ui.Ask("Enter to accept, Ctrl-c to cancel:")
+				if err != nil {
+					return err
+				}
+
+				c.startSpinner()
+			}
+
+			definitiveName = fmtName
+
+		} else {
+			generatedName, err := squarescale.FindProjectName(*endpoint, token)
+			if err != nil {
+				return err
+			}
+
+			definitiveName = generatedName
 		}
 
-		msg = fmt.Sprintf("Created project '%s'", pName)
-		return nil
+		return squarescale.CreateProject(*endpoint, token, definitiveName)
 	})
 
 	if err != nil {
 		return c.error(err)
 	}
 
-	return c.info(msg)
+	return c.info(fmt.Sprintf("Created project '%s'", definitiveName))
 }
 
 // Synopsis is part of cli.Command implementation.

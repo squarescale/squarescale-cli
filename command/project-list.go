@@ -22,7 +22,7 @@ func (c *ProjectListCommand) Run(args []string) int {
 	}
 
 	var msg string
-	err := runWithSpinner("list projects", *endpoint, func(token string) error {
+	err := c.runWithSpinner("list projects", *endpoint, func(token string) error {
 		projects, e := squarescale.ListProjects(*endpoint, token)
 		if e != nil {
 			return e

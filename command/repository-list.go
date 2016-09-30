@@ -29,7 +29,7 @@ func (r *RepositoryListCommand) Run(args []string) int {
 	}
 
 	var msg string
-	err = runWithSpinner("list repositories", *endpoint, func(token string) error {
+	err = r.runWithSpinner("list repositories", *endpoint, func(token string) error {
 		repositories, e := squarescale.ListRepositories(*endpoint, token, *project)
 		if e != nil {
 			return e

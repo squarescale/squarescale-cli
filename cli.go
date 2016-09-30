@@ -12,16 +12,16 @@ import (
 func Run(args []string) int {
 	// Meta-option for executables.
 	// It defines output color and its stdout/stderr stream.
-	meta := &command.Meta{
-		Ui: &cli.ColoredUi{
-			InfoColor:  cli.UiColorCyan,
-			ErrorColor: cli.UiColorRed,
-			Ui: &cli.BasicUi{
-				Writer:      os.Stdout,
-				ErrorWriter: os.Stderr,
-				Reader:      os.Stdin,
-			},
-		}}
+	meta := command.DefaultMeta(&cli.ColoredUi{
+		InfoColor:  cli.UiColorCyan,
+		ErrorColor: cli.UiColorRed,
+		WarnColor:  cli.UiColorYellow,
+		Ui: &cli.BasicUi{
+			Writer:      os.Stdout,
+			ErrorWriter: os.Stderr,
+			Reader:      os.Stdin,
+		},
+	})
 
 	return RunCustom(args, Commands(meta))
 }
