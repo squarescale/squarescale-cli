@@ -20,12 +20,9 @@ type Meta struct {
 
 // DefaultMeta returns a default meta object with an initialized spinner.
 func DefaultMeta(ui cli.Ui) *Meta {
-	s := spinner.New(spinner.CharSets[24], 100*time.Millisecond)
-	s.FinalMSG = "... done\n"
-
 	return &Meta{
 		Ui:   ui,
-		spin: s,
+		spin: spinner.New(spinner.CharSets[24], 100*time.Millisecond),
 	}
 }
 
@@ -67,9 +64,9 @@ func (m *Meta) errorWithUsage(err error, usage string) int {
 }
 
 func (m *Meta) runWithSpinner(text, endpoint string, action func(token string) error) error {
-	m.spin.Start()
+	m.startSpinner()
 	m.spin.Suffix = " " + text
-	defer m.spin.Stop()
+	defer m.stopSpinner()
 
 	token, err := m.ensureLogin(endpoint)
 	if err != nil {
@@ -77,6 +74,21 @@ func (m *Meta) runWithSpinner(text, endpoint string, action func(token string) e
 	}
 
 	return action(token)
+}
+
+func (m *Meta) startSpinner() {
+	m.spin.Start()
+}
+
+func (m *Meta) pauseSpinner() {
+	m.spin.FinalMSG = "... paused\n"
+	m.spin.Stop()
+	time.Sleep(time.Millisecond) // leave time to the UI to refresh properly
+}
+
+func (m *Meta) stopSpinner() {
+	m.spin.FinalMSG = "... done\n"
+	m.spin.Stop()
 }
 
 func (m *Meta) ensureLogin(endpoint string) (string, error) {
