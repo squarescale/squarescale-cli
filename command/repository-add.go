@@ -35,7 +35,7 @@ func (r *RepositoryAddCommand) Run(args []string) int {
 		return r.error(err)
 	}
 
-	err = runWithSpinner(fmt.Sprintf("add repository '%s' to project '%s'", gitRemote, *project), *endpoint, func(token string) error {
+	err = r.runWithSpinner(fmt.Sprintf("add repository '%s' to project '%s'", gitRemote, *project), *endpoint, func(token string) error {
 		return squarescale.AddRepository(*endpoint, token, *project, gitRemote)
 	})
 

@@ -19,7 +19,7 @@ func (c *StatusCommand) Run(args []string) int {
 		return 1
 	}
 
-	err := runWithSpinner("check authorization", *endpoint, func(token string) error {
+	err := c.runWithSpinner("check authorization", *endpoint, func(token string) error {
 		return nil // do nothing as we are already authenticated here.
 	})
 

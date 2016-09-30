@@ -36,7 +36,8 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	}
 
 	var msg string
-	err := runWithSpinner("create project", *endpoint, func(token string) error {
+	err := c.runWithSpinner("create project", *endpoint, func(token string) error {
+
 		pName, e := squarescale.CreateProject(*endpoint, token, projectName)
 		if e != nil {
 			return e
