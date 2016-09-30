@@ -1,6 +1,91 @@
 {
 	"comment": "",
 	"ignore": "test",
-	"package": [],
+	"package": [
+		{
+			"checksumSHA1": "gNO0JNpLzYOdInGeq7HqMZUzx9M=",
+			"path": "github.com/armon/go-radix",
+			"revision": "4239b77079c7b5d1243b7b4736304ce8ddb6f0f2",
+			"revisionTime": "2016-01-15T23:47:25Z"
+		},
+		{
+			"checksumSHA1": "ta8SSP0z1c4mWWiJc9srvj2WirE=",
+			"path": "github.com/bgentry/speakeasy",
+			"revision": "a1ccbf2c40dfc8ce514b5c5c6e6d1429ea6880da",
+			"revisionTime": "2016-08-13T19:06:34Z"
+		},
+		{
+			"checksumSHA1": "SIt1nDmxTb831cdF+UKseuS4AK4=",
+			"path": "github.com/briandowns/spinner",
+			"revision": "a00ac22c746220ee70a0891a0ec4aa6c56c6bb6a",
+			"revisionTime": "2016-07-18T20:30:27Z"
+		},
+		{
+			"checksumSHA1": "G0Jclpec4uGGO1B/N+s9OjUjx5w=",
+			"path": "github.com/fatih/color",
+			"revision": "0016e2689083bc05a71fc0bdcd75f4947f6a5182",
+			"revisionTime": "2016-09-27T15:48:50Z"
+		},
+		{
+			"checksumSHA1": "ugnSryGF6VPBb5s87QgoRH6730g=",
+			"path": "github.com/mattn/go-colorable",
+			"revision": "c0ff2b41c8d72b025d838b42d5ec2d0d9d46bcc4",
+			"revisionTime": "2016-09-30T00:09:58Z"
+		},
+		{
+			"checksumSHA1": "xZuhljnmBysJPta/lMyYmJdujCg=",
+			"path": "github.com/mattn/go-isatty",
+			"revision": "66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8",
+			"revisionTime": "2016-08-06T12:27:52Z"
+		},
+		{
+			"checksumSHA1": "7niW29CvYceZ6zbia6b/LT+yD/M=",
+			"path": "github.com/mitchellh/cli",
+			"revision": "fcf521421aa29bde1d93b6920dfce826d7932208",
+			"revisionTime": "2016-08-15T18:46:15Z"
+		},
+		{
+			"checksumSHA1": "ZggOuRB07wssXbutFpIIyKL34Mc=",
+			"path": "github.com/squarescale/go-netrc/netrc",
+			"revision": "49f67159ae13a93c7408c1617f9076a872b8e103",
+			"revisionTime": "2016-09-21T10:03:41Z"
+		},
+		{
+			"checksumSHA1": "DJ5mRWeJUZ0mMb66laCzvEUw9a4=",
+			"path": "github.com/squarescale/squarescale-cli",
+			"revision": "545ed98edafcbe53867b2180197dafc575a5269b",
+			"revisionTime": "2016-09-30T07:27:47Z"
+		},
+		{
+			"checksumSHA1": "WT3maNlpxjUUH6iCkr2taQVgZoo=",
+			"path": "github.com/squarescale/squarescale-cli/command",
+			"revision": "545ed98edafcbe53867b2180197dafc575a5269b",
+			"revisionTime": "2016-09-30T07:27:47Z"
+		},
+		{
+			"checksumSHA1": "noySNMhNRCpIGaBPusVAJhlLv4w=",
+			"path": "github.com/squarescale/squarescale-cli/github",
+			"revision": "545ed98edafcbe53867b2180197dafc575a5269b",
+			"revisionTime": "2016-09-30T07:27:47Z"
+		},
+		{
+			"checksumSHA1": "YnKnoXC6lgzHMKw67r6sT7iJzDI=",
+			"path": "github.com/squarescale/squarescale-cli/squarescale",
+			"revision": "545ed98edafcbe53867b2180197dafc575a5269b",
+			"revisionTime": "2016-09-30T07:27:47Z"
+		},
+		{
+			"checksumSHA1": "IAnyb060Fb9RNCGQ+DsVOF6IL/w=",
+			"path": "github.com/squarescale/squarescale-cli/tokenstore",
+			"revision": "545ed98edafcbe53867b2180197dafc575a5269b",
+			"revisionTime": "2016-09-30T07:27:47Z"
+		},
+		{
+			"checksumSHA1": "vu7njn8O4vhFtmgGWntwjA2NAbk=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9",
+			"revisionTime": "2016-09-14T20:33:16Z"
+		}
+	],
 	"rootPath": "github.com/squarescale/squarescale-cli"
 }
