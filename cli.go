@@ -15,6 +15,7 @@ func Run(args []string) int {
 	meta := command.DefaultMeta(&cli.ColoredUi{
 		InfoColor:  cli.UiColorCyan,
 		ErrorColor: cli.UiColorRed,
+		WarnColor:  cli.UiColorYellow,
 		Ui: &cli.BasicUi{
 			Writer:      os.Stdout,
 			ErrorWriter: os.Stderr,

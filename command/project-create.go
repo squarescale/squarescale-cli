@@ -44,13 +44,15 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 			}
 
 			if !valid {
-				return fmt.Errorf("Project name '%s' is invalid, please choose another one", wantedProjectName)
+				return fmt.Errorf(
+					"Project name '%s' is invalid (already taken or not well formed), please choose another one",
+					wantedProjectName)
 			}
 
 			if !same {
 				c.pauseSpinner()
-				question := fmt.Sprintf("Project name would rather be '%s' than '%s', is this ok?", fmtName, wantedProjectName)
-				_, err := c.Ui.Ask(question + " (Enter to accept, Ctrl-c to cancel)")
+				c.Ui.Warn(fmt.Sprintf("Project will be created as '%s', is this ok?", fmtName))
+				_, err := c.Ui.Ask("Enter to accept, Ctrl-c to cancel:")
 				if err != nil {
 					return err
 				}
