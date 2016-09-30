@@ -10,10 +10,13 @@ help: ## This help
 build: deps ## Build CLI (./sqsc binary)
 	go build -o sqsc -ldflags "-X main.GitCommit=\"$(COMMIT)\""
 
+docker:
+	GOOS=linux CGO_ENABLED=0 go build -o sqsc-docker -ldflags "-X main.GitCommit=\"$(COMMIT)\""
+	docker build -t sqsc .
+
 clean: ## Clean repository
 	go clean
-	rm -f sqsc coverage.out
+	rm -f sqsc sqsc-docker
 
 deps: ## Install dependencies inside $GOPATH
 	go get ./...
-
