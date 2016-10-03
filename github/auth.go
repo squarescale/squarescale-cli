@@ -95,11 +95,11 @@ func GeneratePersonalToken(login, password string, prompt OneTimePasswordPrompt)
 		}
 
 		if res.StatusCode == http.StatusUnprocessableEntity && len(response.Errors) > 0 && response.Errors[0].Code == "already_exists" {
-			prompt.Info(fmt.Sprintf("Token %#v already exists, this is probably a leftover from a previous login attempt. You should remove this token.\n", params.Note))
+			prompt.Info(fmt.Sprintf("Token %v already exists, this is probably a leftover from a previous login attempt. You should remove this token.", params.Note))
 			continue
 		}
 
-		prompt.Info(fmt.Sprintf("Generating token <%s>\n", params.Note))
+		prompt.Info(fmt.Sprintf("Generating token '%s'", params.Note))
 
 		if res.StatusCode == http.StatusCreated {
 			token = response.Token
@@ -107,7 +107,7 @@ func GeneratePersonalToken(login, password string, prompt OneTimePasswordPrompt)
 			return
 		}
 
-		err = fmt.Errorf("%s error in <%s>: %s", res.Status, req.URL.String(), jsondata)
+		err = fmt.Errorf("%s error in '%s'", res.Status, req.URL.String())
 		return
 	}
 }

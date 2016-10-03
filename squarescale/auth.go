@@ -34,7 +34,7 @@ func ObtainTokenFromGitHub(sqscURL, token string) (string, error) {
 	var response authTokenResponse
 	err = json.Unmarshal(jsondata, &response)
 	if err != nil {
-		return "", fmt.Errorf("Could not unmarshal %s: %v", jsondata, err)
+		return "", fmt.Errorf("Could not unmarshal response: %v", err)
 	}
 
 	if res.StatusCode != 200 {
