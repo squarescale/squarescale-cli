@@ -148,3 +148,40 @@ func ListProjects(sqscURL, token string) ([]string, error) {
 
 	return projects, nil
 }
+
+// ProjectUrl asks the Squarescale service the url of the project if available, using the provided token.
+func ProjectUrl(sqscUrl, token, project string) (string, error) {
+	req := SqscRequest{
+		Method: "GET",
+		URL:    sqscUrl + "/projects/" + project + "/url",
+		Token:  token,
+	}
+
+	res, err := doRequest(req)
+	if err != nil {
+		return "", err
+	}
+
+	if res.Code == http.StatusPreconditionFailed {
+		return "", fmt.Errorf("Project '%s' not found", project)
+	}
+
+	if res.Code == http.StatusNotFound {
+		return "", fmt.Errorf("Project '%s' is not available on the web", project)
+	}
+
+	if res.Code != http.StatusOK {
+		return "", fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	}
+
+	var response struct {
+		Url string `json:"url"`
+	}
+
+	err = json.Unmarshal(res.Body, &response)
+	if err != nil {
+		return "", err
+	}
+
+	return response.Url, nil
+}
