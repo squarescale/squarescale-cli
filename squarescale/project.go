@@ -226,12 +226,13 @@ func ProjectLogs(sqscUrl, token, project, container string) ([]string, error) {
 	}
 
 	var messages []string
+	messages = append(messages, "\033[0m")
 	for _, log := range response {
 		var linePattern string
 		if log.LogType == "stderr" {
-			linePattern = "[%s][%s] ERR: %s"
+			linePattern = "\033[0;33m[%s][%s] E| %s\033[0m"
 		} else {
-			linePattern = "[%s][%s] %s"
+			linePattern = "[%s][%s] I| %s"
 		}
 		messages = append(messages, fmt.Sprintf(linePattern, log.Timestamp, log.ContainerName, log.Message))
 	}
