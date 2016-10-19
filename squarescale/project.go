@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 )
 
 type payloadWithName struct {
@@ -184,4 +185,57 @@ func ProjectUrl(sqscUrl, token, project string) (string, error) {
 	}
 
 	return response.Url, nil
+}
+
+func ProjectLogs(sqscUrl, token, project, container string) ([]string, error) {
+	req := SqscRequest{
+		Method: "GET",
+		URL:    sqscUrl + "/projects/" + project + "/logs/" + url.QueryEscape(container),
+		Token:  token,
+	}
+
+	res, err := doRequest(req)
+	if err != nil {
+		return []string{}, err
+	}
+
+	if res.Code == http.StatusBadRequest {
+		return []string{}, fmt.Errorf("Project '%s' not found", project)
+	}
+
+	if res.Code == http.StatusNotFound {
+		return []string{}, fmt.Errorf("Container '%s' is not found for project '%s'", container, project)
+	}
+
+	if res.Code != http.StatusOK {
+		return []string{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	}
+
+	var response []struct {
+		Timestamp     string `json:"timestamp"`
+		ProjectName   string `json:"project_name"`
+		ContainerName string `json:"container_name"`
+		Environment   string `json:"environment"`
+		LogType       string `json:"log_type"`
+		Message       string `json:"message"`
+	}
+	err = json.Unmarshal(res.Body, &response)
+
+	if err != nil {
+		return []string{}, err
+	}
+
+	var messages []string
+	for _, log := range response {
+		var linePattern string
+		if log.LogType == "stderr" {
+			linePattern = "[%s][%s] ERR: %s"
+		} else {
+			linePattern = "[%s][%s] %s"
+		}
+		messages = append(messages, fmt.Sprintf(linePattern, log.Timestamp, log.ContainerName, log.Message))
+	}
+
+	return messages, nil
+
 }
