@@ -187,28 +187,32 @@ func ProjectUrl(sqscUrl, token, project string) (string, error) {
 	return response.Url, nil
 }
 
-func ProjectLogs(sqscUrl, token, project, container string) ([]string, error) {
+func ProjectLogs(sqscUrl, token, project, container, after string) ([]string, string, error) {
+	query := ""
+	if after != "" {
+		query = "?after=" + url.QueryEscape(after)
+	}
 	req := SqscRequest{
 		Method: "GET",
-		URL:    sqscUrl + "/projects/" + project + "/logs/" + url.QueryEscape(container),
+		URL:    sqscUrl + "/projects/" + project + "/logs/" + url.QueryEscape(container) + query,
 		Token:  token,
 	}
 
 	res, err := doRequest(req)
 	if err != nil {
-		return []string{}, err
+		return []string{}, "", err
 	}
 
 	if res.Code == http.StatusBadRequest {
-		return []string{}, fmt.Errorf("Project '%s' not found", project)
+		return []string{}, "", fmt.Errorf("Project '%s' not found", project)
 	}
 
 	if res.Code == http.StatusNotFound {
-		return []string{}, fmt.Errorf("Container '%s' is not found for project '%s'", container, project)
+		return []string{}, "", fmt.Errorf("Container '%s' is not found for project '%s'", container, project)
 	}
 
 	if res.Code != http.StatusOK {
-		return []string{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+		return []string{}, "", fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
 	}
 
 	var response []struct {
@@ -222,11 +226,10 @@ func ProjectLogs(sqscUrl, token, project, container string) ([]string, error) {
 	err = json.Unmarshal(res.Body, &response)
 
 	if err != nil {
-		return []string{}, err
+		return []string{}, "", err
 	}
 
 	var messages []string
-	messages = append(messages, "\033[0m")
 	for _, log := range response {
 		var linePattern string
 		if log.Error == true {
@@ -236,7 +239,13 @@ func ProjectLogs(sqscUrl, token, project, container string) ([]string, error) {
 		}
 		messages = append(messages, fmt.Sprintf(linePattern, log.Timestamp, log.ContainerName, log.Message))
 	}
+	var lastTimestamp string
+	if len(response) == 0 {
+		lastTimestamp = ""
+	} else {
+		lastTimestamp = response[len(response)-1].Timestamp
+	}
 
-	return messages, nil
+	return messages, lastTimestamp, nil
 
 }
