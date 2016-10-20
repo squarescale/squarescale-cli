@@ -216,7 +216,7 @@ func ProjectLogs(sqscUrl, token, project, container string) ([]string, error) {
 		ProjectName   string `json:"project_name"`
 		ContainerName string `json:"container_name"`
 		Environment   string `json:"environment"`
-		LogType       string `json:"log_type"`
+		Error         bool   `json:"error"`
 		Message       string `json:"message"`
 	}
 	err = json.Unmarshal(res.Body, &response)
@@ -229,7 +229,7 @@ func ProjectLogs(sqscUrl, token, project, container string) ([]string, error) {
 	messages = append(messages, "\033[0m")
 	for _, log := range response {
 		var linePattern string
-		if log.LogType == "stderr" {
+		if log.Error == true {
 			linePattern = "\033[0;33m[%s][%s] E| %s\033[0m"
 		} else {
 			linePattern = "[%s][%s] I| %s"
