@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type payloadWithName struct {
@@ -221,6 +222,7 @@ func ProjectLogs(sqscUrl, token, project, container, after string) ([]string, st
 		ContainerName string `json:"container_name"`
 		Environment   string `json:"environment"`
 		Error         bool   `json:"error"`
+		LogType       string `json:"log_type"`
 		Message       string `json:"message"`
 	}
 	err = json.Unmarshal(res.Body, &response)
@@ -232,12 +234,22 @@ func ProjectLogs(sqscUrl, token, project, container, after string) ([]string, st
 	var messages []string
 	for _, log := range response {
 		var linePattern string
-		if log.Error == true {
-			linePattern = "\033[0;33m[%s][%s] E| %s\033[0m"
-		} else {
+		if log.LogType == "stderr" {
+			linePattern = "[%s][%s] E| %s"
+		} else if log.LogType == "stdout" {
 			linePattern = "[%s][%s] I| %s"
+		} else {
+			linePattern = "[%s][%s] S| %s"
 		}
-		messages = append(messages, fmt.Sprintf(linePattern, log.Timestamp, log.ContainerName, log.Message))
+		if log.Error {
+			linePattern = "\033[0;33m" + linePattern + "\033[0m"
+		}
+		t, err := time.Parse(time.RFC3339Nano, log.Timestamp)
+		if err == nil {
+			messages = append(messages, fmt.Sprintf(linePattern, t.Format("2006-01-02T15:04:05.999Z07:00"), log.ContainerName, log.Message))
+		} else {
+			messages = append(messages, fmt.Sprintf(linePattern, log.Timestamp, log.ContainerName, log.Message))
+		}
 	}
 	var lastTimestamp string
 	if len(response) == 0 {
