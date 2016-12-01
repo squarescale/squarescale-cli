@@ -8,11 +8,11 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-type ProjectUrlCommand struct {
+type UrlCommand struct {
 	Meta
 }
 
-func (c *ProjectUrlCommand) Run(args []string) int {
+func (c *UrlCommand) Run(args []string) int {
 	cmdFlags := flag.NewFlagSet("url", flag.ContinueOnError)
 	cmdFlags.Usage = func() { c.Ui.Output(c.Help()) }
 	endpoint := EndpointFlag(cmdFlags)
@@ -45,11 +45,11 @@ func (c *ProjectUrlCommand) Run(args []string) int {
 	return c.info(msg)
 }
 
-func (c *ProjectUrlCommand) Synopsis() string {
+func (c *UrlCommand) Synopsis() string {
 	return "Display project's public URL if available"
 }
 
-func (c *ProjectUrlCommand) Help() string {
+func (c *UrlCommand) Help() string {
 	helpText := `
 usage: sqsc project url [options]
 

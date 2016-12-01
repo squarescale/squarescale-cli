@@ -26,8 +26,8 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
-		"project url": func() (cli.Command, error) {
-			return &command.ProjectUrlCommand{
+		"url": func() (cli.Command, error) {
+			return &command.UrlCommand{
 				Meta: *meta,
 			}, nil
 		},
