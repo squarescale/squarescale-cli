@@ -31,8 +31,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
-		"scale-db": func() (cli.Command, error) {
-			return &command.ScaleDBCommand{
+		"db": func() (cli.Command, error) {
+			return &command.DBCommand{}, nil
+		},
+		"db scale": func() (cli.Command, error) {
+			return &command.DBScaleCommand{
 				Meta: *meta,
 			}, nil
 		},

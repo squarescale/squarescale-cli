@@ -9,13 +9,13 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ScaleDBCommand is a cli.Command implementation for scaling the db of a project.
-type ScaleDBCommand struct {
+// DBScaleCommand is a cli.Command implementation for scaling the db of a project.
+type DBScaleCommand struct {
 	Meta
 }
 
 // Run is part of cli.Command implementation.
-func (c *ScaleDBCommand) Run(args []string) int {
+func (c *DBScaleCommand) Run(args []string) int {
 	cmdFlags := flag.NewFlagSet("project scale-db", flag.ContinueOnError)
 	cmdFlags.Usage = func() { c.Ui.Output(c.Help()) }
 	endpoint := EndpointFlag(cmdFlags)
@@ -63,12 +63,12 @@ func (c *ScaleDBCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ScaleDBCommand) Synopsis() string {
+func (c *DBScaleCommand) Synopsis() string {
 	return "Scale up/down the database of a Squarescale project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ScaleDBCommand) Help() string {
+func (c *DBScaleCommand) Help() string {
 	helpText := `
 usage: sqsc scale-db [options] <micro|small|medium>
 
