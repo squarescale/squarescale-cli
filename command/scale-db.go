@@ -1,7 +1,9 @@
 package command
 
 import (
+	"errors"
 	"flag"
+	"fmt"
 	"strings"
 )
 
@@ -25,7 +27,24 @@ func (c *ScaleDBCommand) Run(args []string) int {
 		return c.errorWithUsage(err, c.Help())
 	}
 
-	return 0
+	// check for a database instance size
+	var dbInstance string
+	args = cmdFlags.Args()
+	switch len(args) {
+	case 0:
+	case 1:
+		dbInstance = args[0]
+	default:
+		return c.errorWithUsage(errors.New("Too many command line arguments"), c.Help())
+	}
+
+	err = validateDbInstance(dbInstance)
+	if err != nil {
+		return c.errorWithUsage(err, c.Help())
+	}
+
+
+	return c.info(fmt.Sprintf("Successfully scaled database to '%s' instance for project '%s'", dbInstance, *project))
 }
 
 // Synopsis is part of cli.Command implementation.
@@ -46,4 +65,13 @@ Options:
   -project=""                                     Squarescale project name
 `
 	return strings.TrimSpace(helpText)
+}
+
+func validateDbInstance(instance string) error {
+	switch instance {
+	case "micro", "small", "medium":
+		return nil
+	default:
+		return errors.New("Invalid value for database instance")
+	}
 }
