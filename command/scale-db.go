@@ -45,6 +45,12 @@ func (c *ScaleDBCommand) Run(args []string) int {
 		return c.errorWithUsage(err, c.Help())
 	}
 
+	c.Ui.Warn(fmt.Sprintf("Changing cluster settings for project '%s' will cause a downtime. Is this ok?", *project))
+	_, err = c.Ui.Ask("Enter to accept, Ctrl-c to cancel:")
+	if err != nil {
+		return c.error(err)
+	}
+
 	err = c.runWithSpinner("scale project database", *endpoint, func(token string) error {
 		return squarescale.ScaleDB(*endpoint, token, *project, dbInstance)
 	})
