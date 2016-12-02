@@ -16,7 +16,7 @@ type DBScaleCommand struct {
 
 // Run is part of cli.Command implementation.
 func (c *DBScaleCommand) Run(args []string) int {
-	cmdFlags := flag.NewFlagSet("project scale-db", flag.ContinueOnError)
+	cmdFlags := flag.NewFlagSet("db scale", flag.ContinueOnError)
 	cmdFlags.Usage = func() { c.Ui.Output(c.Help()) }
 	endpoint := EndpointFlag(cmdFlags)
 	project := ProjectFlag(cmdFlags)
