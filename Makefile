@@ -20,3 +20,7 @@ clean: ## Clean repository
 
 deps: ## Install dependencies inside $GOPATH
 	go get ./...
+
+lint: ## Lint Docker
+	docker run --rm -v $$PWD:/root/ projectatomic/dockerfile-lint dockerfile_lint
+	hadolint Dockerfile

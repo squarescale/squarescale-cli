@@ -5,3 +5,8 @@ before_install:
   - ./write_netrc.sh
   - cp .netrc ~
   - chmod 600 .netrc
+script:
+  - docker run --rm -i lukasmartinelli/hadolint < Dockerfile
+  - docker run --rm -v $PWD:/root/ projectatomic/dockerfile-lint dockerfile_lint
+services:
+  - docker
