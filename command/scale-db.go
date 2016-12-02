@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"strings"
+
+	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
 // ScaleDBCommand is a cli.Command implementation for scaling the db of a project.
@@ -16,7 +18,7 @@ type ScaleDBCommand struct {
 func (c *ScaleDBCommand) Run(args []string) int {
 	cmdFlags := flag.NewFlagSet("project scale-db", flag.ContinueOnError)
 	cmdFlags.Usage = func() { c.Ui.Output(c.Help()) }
-	//endpoint := EndpointFlag(cmdFlags)
+	endpoint := EndpointFlag(cmdFlags)
 	project := ProjectFlag(cmdFlags)
 	if err := cmdFlags.Parse(args); err != nil {
 		return 1
@@ -43,6 +45,13 @@ func (c *ScaleDBCommand) Run(args []string) int {
 		return c.errorWithUsage(err, c.Help())
 	}
 
+	err = c.runWithSpinner("scale project database", *endpoint, func(token string) error {
+		return squarescale.ScaleDB(*endpoint, token, *project, dbInstance)
+	})
+
+	if err != nil {
+		return c.error(err)
+	}
 
 	return c.info(fmt.Sprintf("Successfully scaled database to '%s' instance for project '%s'", dbInstance, *project))
 }
