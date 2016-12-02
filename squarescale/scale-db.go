@@ -10,10 +10,12 @@ import (
 func ScaleDB(sqscURL, token, project, instance string) error {
 	var payload struct {
 		Project struct {
+			Enabled       bool   `json:"db_enabled"`
 			InstanceClass string `json:"db_instance_class"`
 		} `json:"project"`
 	}
 
+	payload.Project.Enabled = true
 	payload.Project.InstanceClass = "db.t2." + instance
 	payloadBytes, err := json.Marshal(&payload)
 	if err != nil {
