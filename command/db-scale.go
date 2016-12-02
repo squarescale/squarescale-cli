@@ -70,7 +70,7 @@ func (c *DBScaleCommand) Synopsis() string {
 // Help is part of cli.Command implementation.
 func (c *DBScaleCommand) Help() string {
 	helpText := `
-usage: sqsc scale-db [options] <micro|small|medium>
+usage: sqsc db scale [options] <micro|small|medium>
 
   Scale the database of the specified Squarescale project.
 
