@@ -19,13 +19,13 @@ type RepositoryAddCommand struct {
 func (r *RepositoryAddCommand) Run(args []string) int {
 	cmdFlags := flag.NewFlagSet("repository add", flag.ContinueOnError)
 	cmdFlags.Usage = func() { r.Ui.Output(r.Help()) }
-	endpoint := EndpointFlag(cmdFlags)
-	project := ProjectFlag(cmdFlags)
+	endpoint := endpointFlag(cmdFlags)
+	project := projectFlag(cmdFlags)
 	if err := cmdFlags.Parse(args); err != nil {
 		return 1
 	}
 
-	err := validateArgs(*project)
+	err := validateProjectName(*project)
 	if err != nil {
 		return r.errorWithUsage(err, r.Help())
 	}

@@ -19,7 +19,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	// Parse flags
 	cmdFlags := flag.NewFlagSet("project create", flag.ContinueOnError)
 	cmdFlags.Usage = func() { c.Ui.Output(c.Help()) }
-	endpoint := EndpointFlag(cmdFlags)
+	endpoint := endpointFlag(cmdFlags)
 	if err := cmdFlags.Parse(args); err != nil {
 		return 1
 	}

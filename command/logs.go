@@ -24,8 +24,8 @@ func FollowFlag(f *flag.FlagSet) *string {
 func (c *LogsCommand) Run(args []string) int {
 	cmdFlags := flag.NewFlagSet("logs", flag.ContinueOnError)
 	cmdFlags.Usage = func() { c.Ui.Output(c.Help()) }
-	endpoint := EndpointFlag(cmdFlags)
-	project := ProjectFlag(cmdFlags)
+	endpoint := endpointFlag(cmdFlags)
+	project := projectFlag(cmdFlags)
 	container := ContainerFlag(cmdFlags)
 	var follow bool
 	cmdFlags.BoolVar(&follow, "f", false, "")
@@ -33,7 +33,7 @@ func (c *LogsCommand) Run(args []string) int {
 		return 1
 	}
 
-	err := validateArgs(*project)
+	err := validateProjectName(*project)
 	if err != nil {
 		return c.errorWithUsage(err, c.Help())
 	}

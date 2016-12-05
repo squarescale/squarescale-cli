@@ -16,7 +16,7 @@ type ProjectListCommand struct {
 func (c *ProjectListCommand) Run(args []string) int {
 	cmdFlags := flag.NewFlagSet("project list", flag.ContinueOnError)
 	cmdFlags.Usage = func() { c.Ui.Output(c.Help()) }
-	endpoint := EndpointFlag(cmdFlags)
+	endpoint := endpointFlag(cmdFlags)
 	if err := cmdFlags.Parse(args); err != nil {
 		return 1
 	}
