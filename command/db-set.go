@@ -54,7 +54,7 @@ func (c *DBSetCommand) Run(args []string) int {
 		}
 
 		if *dbInstanceArg != "" {
-			instance = "db.t2." + *dbInstanceArg
+			instance = *dbInstanceArg
 		}
 
 		msg = fmt.Sprintf("Successfully set database (engine = '%s', instance = '%s') for project '%s'", engine, instance, *projectNameArg)
@@ -79,27 +79,21 @@ func (c *DBSetCommand) Help() string {
 usage: sqsc db set [options]
 
   Set and scale up/down the database engine attached to a Squarescale project.
+  The list of database engines and instances available for use can be accessed
+  using the 'db list' command.
 
 Options:
 
   -endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
   -project=""                                     Squarescale project name
-  -engine=<mysql|postgres|aurora|mariadb>         Database engine
-  -instance=<micro|small|medium>                  Database instance size
+  -engine=""                                      Database engine
+  -instance=""                                    Database instance size
 `
 	return strings.TrimSpace(helpText)
 }
 
 func validateDBSetCommandArgs(project, dbEngine, dbInstance string) error {
 	if err := validateProjectName(project); err != nil {
-		return err
-	}
-
-	if err := validateDBEngine(dbEngine); err != nil {
-		return err
-	}
-
-	if err := validateDBInstance(dbInstance); err != nil {
 		return err
 	}
 

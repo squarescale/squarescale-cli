@@ -121,6 +121,10 @@ func ConfigDB(sqscURL, token, project, engine, instance string) error {
 		return err
 	}
 
+	if res.Code == http.StatusUnprocessableEntity {
+		return fmt.Errorf("Invalid value for either database engine ('%s') or instance ('%s')", engine, instance)
+	}
+
 	if res.Code != http.StatusNoContent {
 		return fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
 	}

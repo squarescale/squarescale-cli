@@ -28,21 +28,3 @@ func validateProjectName(project string) error {
 
 	return nil
 }
-
-func validateDBEngine(dbEngine string) error {
-	switch dbEngine {
-	case "", "mysql", "postgres", "aurora", "mariadb":
-		return nil
-	default:
-		return errors.New("Invalid value for database engine")
-	}
-}
-
-func validateDBInstance(dbInstance string) error {
-	switch dbInstance {
-	case "", "micro", "small", "medium":
-		return nil
-	default:
-		return errors.New("Invalid value for database instance")
-	}
-}
