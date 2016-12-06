@@ -16,7 +16,7 @@ type DBSetCommand struct {
 
 // Run is part of cli.Command implementation.
 func (c *DBSetCommand) Run(args []string) int {
-	cmdFlags := flag.NewFlagSet("db scale", flag.ContinueOnError)
+	cmdFlags := flag.NewFlagSet("db set", flag.ContinueOnError)
 	cmdFlags.Usage = func() { c.Ui.Output(c.Help()) }
 	endpoint := endpointFlag(cmdFlags)
 	projectNameArg := projectFlag(cmdFlags)
