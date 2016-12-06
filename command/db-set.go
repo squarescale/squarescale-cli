@@ -21,7 +21,7 @@ func (c *DBSetCommand) Run(args []string) int {
 	endpoint := endpointFlag(cmdFlags)
 	projectNameArg := projectFlag(cmdFlags)
 	dbEngineArg := dbEngineFlag(cmdFlags)
-	dbInstanceArg := dbEngineInstance(cmdFlags)
+	dbInstanceArg := dbEngineInstanceFlag(cmdFlags)
 	if err := cmdFlags.Parse(args); err != nil {
 		return 1
 	}

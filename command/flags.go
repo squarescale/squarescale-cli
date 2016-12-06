@@ -17,7 +17,7 @@ func dbEngineFlag(f *flag.FlagSet) *string {
 	return f.String("engine", "", "Database engine")
 }
 
-func dbEngineInstance(f *flag.FlagSet) *string {
+func dbEngineInstanceFlag(f *flag.FlagSet) *string {
 	return f.String("instance", "", "Database engine instance")
 }
 

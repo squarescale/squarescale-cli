@@ -8,7 +8,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// DBListCommand is a cli.Command implementation for top level `sqsc db` command.
+// DBListCommand is a cli.Command implementation to list the database engines and instances available for use.
 type DBListCommand struct {
 	Meta
 }
