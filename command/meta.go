@@ -1,8 +1,6 @@
 package command
 
 import (
-	"errors"
-	"flag"
 	"fmt"
 	"time"
 
@@ -24,26 +22,6 @@ func DefaultMeta(ui cli.Ui) *Meta {
 		Ui:   ui,
 		spin: spinner.New(spinner.CharSets[24], 100*time.Millisecond),
 	}
-}
-
-// EndpointFlag returns a pointer to a string that will be populated
-// when the given flagset is parsed with the Squarescale endpoint.
-func EndpointFlag(f *flag.FlagSet) *string {
-	return f.String("endpoint", "http://www.staging.sqsc.squarely.io", "Squarescale endpoint")
-}
-
-// ProjectFlag returns a pointer to a string that will be populated
-// when the given flagset is parsed with the Squarescale project.
-func ProjectFlag(f *flag.FlagSet) *string {
-	return f.String("project", "", "Squarescale project")
-}
-
-func validateArgs(project string) error {
-	if project == "" {
-		return errors.New("Project name must be specified")
-	}
-
-	return nil
 }
 
 func (m *Meta) info(message string) int {
