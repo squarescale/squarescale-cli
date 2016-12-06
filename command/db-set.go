@@ -22,11 +22,12 @@ func (c *DBSetCommand) Run(args []string) int {
 	projectNameArg := projectFlag(cmdFlags)
 	dbEngineArg := dbEngineFlag(cmdFlags)
 	dbInstanceArg := dbEngineInstanceFlag(cmdFlags)
+	dbDisabledArg := dbDisabledFlag(cmdFlags)
 	if err := cmdFlags.Parse(args); err != nil {
 		return 1
 	}
 
-	err := validateDBSetCommandArgs(*projectNameArg, *dbEngineArg, *dbInstanceArg)
+	err := validateDBSetCommandArgs(*projectNameArg, *dbEngineArg, *dbInstanceArg, *dbDisabledArg)
 	if err != nil {
 		return c.errorWithUsage(err, c.Help())
 	}
@@ -39,9 +40,14 @@ func (c *DBSetCommand) Run(args []string) int {
 
 	var msg string
 	err = c.runWithSpinner("scale project database", *endpoint, func(token string) error {
-		engine, instance, e := squarescale.GetDBConfig(*endpoint, token, *projectNameArg)
+		enabled, engine, instance, e := squarescale.GetDBConfig(*endpoint, token, *projectNameArg)
 		if e != nil {
 			return e
+		}
+
+		if *dbDisabledArg && !enabled {
+			msg = fmt.Sprintf("Database for project '%s' is already disabled", *projectNameArg)
+			return nil
 		}
 
 		if *dbEngineArg == engine && *dbInstanceArg == instance {
@@ -57,8 +63,16 @@ func (c *DBSetCommand) Run(args []string) int {
 			instance = *dbInstanceArg
 		}
 
-		msg = fmt.Sprintf("Successfully set database (engine = '%s', instance = '%s') for project '%s'", engine, instance, *projectNameArg)
-		return squarescale.ConfigDB(*endpoint, token, *projectNameArg, engine, instance)
+		if *dbDisabledArg {
+			msg = fmt.Sprintf("Successfully disabled database for project '%s'", *projectNameArg)
+		} else {
+			msg = fmt.Sprintf(
+				"Successfully set database (engine = '%s', instance = '%s') for project '%s'",
+				engine, instance, *projectNameArg)
+		}
+
+		enabled = !(*dbDisabledArg)
+		return squarescale.ConfigDB(*endpoint, token, *projectNameArg, enabled, engine, instance)
 	})
 
 	if err != nil {
@@ -88,16 +102,24 @@ Options:
   -project=""                                     Squarescale project name
   -engine=""                                      Database engine
   -instance=""                                    Database instance size
+  -disabled                                       Disable database
 `
 	return strings.TrimSpace(helpText)
 }
 
-func validateDBSetCommandArgs(project, dbEngine, dbInstance string) error {
+// validateDBSetCommandArgs ensures that the following predicate is satisfied:
+// - 'disabled' is true and (dbEngine and dbInstance are both empty)
+// - 'disabled' is false and (dbEngine or dbInstance is not empty)
+func validateDBSetCommandArgs(project, dbEngine, dbInstance string, disabled bool) error {
 	if err := validateProjectName(project); err != nil {
 		return err
 	}
 
-	if dbEngine == "" && dbInstance == "" {
+	if disabled && (dbEngine != "" || dbInstance != "") {
+		return errors.New("Cannot specify engine or instance when disabling database.")
+	}
+
+	if !disabled && (dbEngine == "" && dbInstance == "") {
 		return errors.New("Instance and engine cannot be both empty.")
 	}
 
