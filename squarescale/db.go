@@ -6,6 +6,58 @@ import (
 	"net/http"
 )
 
+// GetAvailableDBInstances returns all the database instances available for use in Squarescale.
+func GetAvailableDBInstances(sqscURL, token string) ([]string, error) {
+	req := SqscRequest{
+		Method: "GET",
+		URL:    sqscURL + "/db/instances",
+		Token:  token,
+	}
+
+	res, err := doRequest(req)
+	if err != nil {
+		return []string{}, err
+	}
+
+	var instancesList []string
+	err = json.Unmarshal(res.Body, &instancesList)
+	if err != nil {
+		return []string{}, err
+	}
+
+	if res.Code != http.StatusOK {
+		return []string{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	}
+
+	return instancesList, nil
+}
+
+// GetAvailableDBEngines returns all the database engines available for use in Squarescale.
+func GetAvailableDBEngines(sqscURL, token string) ([]string, error) {
+	req := SqscRequest{
+		Method: "GET",
+		URL:    sqscURL + "/db/engines",
+		Token:  token,
+	}
+
+	res, err := doRequest(req)
+	if err != nil {
+		return []string{}, err
+	}
+
+	var enginesList []string
+	err = json.Unmarshal(res.Body, &enginesList)
+	if err != nil {
+		return []string{}, err
+	}
+
+	if res.Code != http.StatusOK {
+		return []string{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	}
+
+	return enginesList, nil
+}
+
 // GetDBConfig asks the Squarescale API for the database config of a project.
 // Returns, in this order:
 // - the db engine in use (string)
