@@ -3,6 +3,7 @@ package command
 import (
 	"errors"
 	"flag"
+	"fmt"
 )
 
 func endpointFlag(f *flag.FlagSet) *string {
@@ -31,4 +32,26 @@ func validateProjectName(project string) error {
 	}
 
 	return nil
+}
+
+func optionsFromFlags(fs *flag.FlagSet) string {
+	res := "Options\n\n"
+	fs.VisitAll(func(f *flag.Flag) {
+		s := fmt.Sprintf("  -%s", f.Name)
+		name, usage := flag.UnquoteUsage(f)
+		if len(name) > 0 {
+			s += " " + name
+		}
+
+		s += fmt.Sprintf("\n        %s", usage)
+		if name == "string" {
+			s += fmt.Sprintf(" (default %q)\n", f.DefValue)
+		} else {
+			s += fmt.Sprintf(" (default %v)\n", f.DefValue)
+		}
+
+		res += s
+	})
+
+	return res
 }
