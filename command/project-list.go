@@ -10,14 +10,14 @@ import (
 // ProjectListCommand is a cli.Command implementation for listing all Squarescale projects.
 type ProjectListCommand struct {
 	Meta
+	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
 func (c *ProjectListCommand) Run(args []string) int {
-	cmdFlags := flag.NewFlagSet("project list", flag.ContinueOnError)
-	cmdFlags.Usage = func() { c.Ui.Output(c.Help()) }
-	endpoint := endpointFlag(cmdFlags)
-	if err := cmdFlags.Parse(args); err != nil {
+	c.flagSet = newFlagSet(c, c.Ui)
+	endpoint := endpointFlag(c.flagSet)
+	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
@@ -55,9 +55,6 @@ usage: sqsc project list [options]
 
   Lists all Squarescale projects attached to the authenticated account.
 
-Options:
-
-  -endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
 `
-	return strings.TrimSpace(helpText)
+	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

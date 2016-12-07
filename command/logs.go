@@ -11,6 +11,7 @@ import (
 
 type LogsCommand struct {
 	Meta
+	flagSet *flag.FlagSet
 }
 
 func ContainerFlag(f *flag.FlagSet) *string {
@@ -22,14 +23,13 @@ func FollowFlag(f *flag.FlagSet) *string {
 }
 
 func (c *LogsCommand) Run(args []string) int {
-	cmdFlags := flag.NewFlagSet("logs", flag.ContinueOnError)
-	cmdFlags.Usage = func() { c.Ui.Output(c.Help()) }
-	endpoint := endpointFlag(cmdFlags)
-	project := projectFlag(cmdFlags)
-	container := ContainerFlag(cmdFlags)
+	c.flagSet = newFlagSet(c, c.Ui)
+	endpoint := endpointFlag(c.flagSet)
+	project := projectFlag(c.flagSet)
+	container := ContainerFlag(c.flagSet)
 	var follow bool
-	cmdFlags.BoolVar(&follow, "f", false, "")
-	if err := cmdFlags.Parse(args); err != nil {
+	c.flagSet.BoolVar(&follow, "f", false, "Wait for next logs")
+	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
@@ -110,15 +110,6 @@ usage: sqsc project logs [options]
 
   Display last logs of the specified Squarescale project.
 
-Options:
-
-  -endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
-  -project=""                                     Squarescale project name
-  -container=""                                   Optional short url to filter
-                                                  logs for a specific container.
-                                                  Should be like:
-                                                  <github user>/<repo name>
-  -f                                              Wait for next logs
 `
-	return strings.TrimSpace(helpText)
+	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

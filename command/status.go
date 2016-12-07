@@ -8,14 +8,14 @@ import (
 // StatusCommand is a cli.Command implementation for knowing if user is authorized.
 type StatusCommand struct {
 	Meta
+	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
 func (c *StatusCommand) Run(args []string) int {
-	cmdFlags := flag.NewFlagSet("status", flag.ContinueOnError)
-	cmdFlags.Usage = func() { c.Ui.Output(c.Help()) }
-	endpoint := endpointFlag(cmdFlags)
-	if err := cmdFlags.Parse(args); err != nil {
+	c.flagSet = newFlagSet(c, c.Ui)
+	endpoint := endpointFlag(c.flagSet)
+	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
@@ -44,9 +44,6 @@ usage: sqsc status [options]
   authenticated. This command checks the validity of the credentials
   stored in the $HOME/.netrc file.
 
-Options:
-
-  -endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
 `
-	return strings.TrimSpace(helpText)
+	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

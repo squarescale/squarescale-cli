@@ -13,15 +13,15 @@ import (
 // LoginCommand is a cli.Command implementation for authenticating the user into the Squarescale platform.
 type LoginCommand struct {
 	Meta
+	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
 func (c *LoginCommand) Run(args []string) int {
 	// Parse flags
-	cmdFlags := flag.NewFlagSet("login", flag.ContinueOnError)
-	cmdFlags.Usage = func() { c.Ui.Output(c.Help()) }
-	endpoint := endpointFlag(cmdFlags)
-	if err := cmdFlags.Parse(args); err != nil {
+	c.flagSet = newFlagSet(c, c.Ui)
+	endpoint := endpointFlag(c.flagSet)
+	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
@@ -75,11 +75,8 @@ usage: sqsc login [options]
 
   Logs the user in Squarescale services. Uses GitHub credentials to register.
 
-Options:
-
-  -endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
 `
-	return strings.TrimSpace(helpText)
+	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
 
 func (c *LoginCommand) askForCredentials() (string, string, error) {

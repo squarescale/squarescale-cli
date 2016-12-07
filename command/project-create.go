@@ -12,21 +12,21 @@ import (
 // ProjectCreateCommand is a cli.Command implementation for creating a Squarescale project.
 type ProjectCreateCommand struct {
 	Meta
+	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
 func (c *ProjectCreateCommand) Run(args []string) int {
 	// Parse flags
-	cmdFlags := flag.NewFlagSet("project create", flag.ContinueOnError)
-	cmdFlags.Usage = func() { c.Ui.Output(c.Help()) }
-	endpoint := endpointFlag(cmdFlags)
-	if err := cmdFlags.Parse(args); err != nil {
+	c.flagSet = newFlagSet(c, c.Ui)
+	endpoint := endpointFlag(c.flagSet)
+	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	// Check for a project name
 	var wantedProjectName string
-	args = cmdFlags.Args()
+	args = c.flagSet.Args()
 	switch len(args) {
 	case 0:
 	case 1:
@@ -94,9 +94,6 @@ usage: sqsc project create [options] <project_name>
   Creates a new project using the provided project name. If no project name is
   provided, then a new name is automatically generated.
 
-Options:
-
-  -endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
 `
-	return strings.TrimSpace(helpText)
+	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

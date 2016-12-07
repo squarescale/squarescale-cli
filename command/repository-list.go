@@ -11,25 +11,25 @@ import (
 // RepositoryListCommand is a cli.Command implementation for listing Squarescale project repositories.
 type RepositoryListCommand struct {
 	Meta
+	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (r *RepositoryListCommand) Run(args []string) int {
-	cmdFlags := flag.NewFlagSet("repository list", flag.ContinueOnError)
-	cmdFlags.Usage = func() { r.Ui.Output(r.Help()) }
-	endpoint := endpointFlag(cmdFlags)
-	project := projectFlag(cmdFlags)
-	if err := cmdFlags.Parse(args); err != nil {
+func (c *RepositoryListCommand) Run(args []string) int {
+	c.flagSet = newFlagSet(c, c.Ui)
+	endpoint := endpointFlag(c.flagSet)
+	project := projectFlag(c.flagSet)
+	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	err := validateProjectName(*project)
 	if err != nil {
-		return r.errorWithUsage(err)
+		return c.errorWithUsage(err)
 	}
 
 	var msg string
-	err = r.runWithSpinner("list repositories", *endpoint, func(token string) error {
+	err = c.runWithSpinner("list repositories", *endpoint, func(token string) error {
 		repositories, e := squarescale.ListRepositories(*endpoint, token, *project)
 		if e != nil {
 			return e
@@ -44,28 +44,24 @@ func (r *RepositoryListCommand) Run(args []string) int {
 	})
 
 	if err != nil {
-		return r.error(err)
+		return c.error(err)
 	}
 
-	return r.info(msg)
+	return c.info(msg)
 }
 
 // Synopsis is part of cli.Command implementation.
-func (r *RepositoryListCommand) Synopsis() string {
+func (c *RepositoryListCommand) Synopsis() string {
 	return "Lists all Git repositories attached to a Squarescale project"
 }
 
 // Help is part of cli.Command implementation.
-func (r *RepositoryListCommand) Help() string {
+func (c *RepositoryListCommand) Help() string {
 	helpText := `
 usage: sqsc repository list [options]
 
   Lists all Git repositories attached to the specified Squarescale project.
 
-Options:
-
-  -endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
-  -project=""                                     Squarescale project name
 `
-	return strings.TrimSpace(helpText)
+	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

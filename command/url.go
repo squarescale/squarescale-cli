@@ -10,14 +10,14 @@ import (
 
 type UrlCommand struct {
 	Meta
+	flagSet *flag.FlagSet
 }
 
 func (c *UrlCommand) Run(args []string) int {
-	cmdFlags := flag.NewFlagSet("url", flag.ContinueOnError)
-	cmdFlags.Usage = func() { c.Ui.Output(c.Help()) }
-	endpoint := endpointFlag(cmdFlags)
-	project := projectFlag(cmdFlags)
-	if err := cmdFlags.Parse(args); err != nil {
+	c.flagSet = newFlagSet(c, c.Ui)
+	endpoint := endpointFlag(c.flagSet)
+	project := projectFlag(c.flagSet)
+	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
@@ -55,10 +55,6 @@ usage: sqsc project url [options]
 
   Display load balancer public URL if available in the specified Squarescale project.
 
-Options:
-
-  -endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
-  -project=""                                     Squarescale project name
 `
-	return strings.TrimSpace(helpText)
+	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

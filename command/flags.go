@@ -4,6 +4,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+
+	"github.com/mitchellh/cli"
 )
 
 func endpointFlag(f *flag.FlagSet) *string {
@@ -34,8 +36,19 @@ func validateProjectName(project string) error {
 	return nil
 }
 
+func newFlagSet(cmd cli.Command, ui cli.Ui) *flag.FlagSet {
+	return &flag.FlagSet{
+		// Bind the usage of the command to the usage of the flag set.
+		Usage: func() { ui.Output(cmd.Help()) },
+	}
+}
+
 func optionsFromFlags(fs *flag.FlagSet) string {
-	res := "Options\n\n"
+	if fs == nil {
+		return ""
+	}
+
+	res := "Options:\n\n"
 	fs.VisitAll(func(f *flag.Flag) {
 		s := fmt.Sprintf("  -%s", f.Name)
 		name, usage := flag.UnquoteUsage(f)

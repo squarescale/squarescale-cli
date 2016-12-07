@@ -12,18 +12,18 @@ import (
 // DBSetCommand is a cli.Command implementation for scaling the db of a project.
 type DBSetCommand struct {
 	Meta
+	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
 func (c *DBSetCommand) Run(args []string) int {
-	cmdFlags := flag.NewFlagSet("db set", flag.ContinueOnError)
-	cmdFlags.Usage = func() { c.Ui.Output(c.Help()) }
-	endpoint := endpointFlag(cmdFlags)
-	projectNameArg := projectFlag(cmdFlags)
-	dbEngineArg := dbEngineFlag(cmdFlags)
-	dbInstanceArg := dbEngineInstanceFlag(cmdFlags)
-	dbDisabledArg := dbDisabledFlag(cmdFlags)
-	if err := cmdFlags.Parse(args); err != nil {
+	c.flagSet = newFlagSet(c, c.Ui)
+	endpoint := endpointFlag(c.flagSet)
+	projectNameArg := projectFlag(c.flagSet)
+	dbEngineArg := dbEngineFlag(c.flagSet)
+	dbInstanceArg := dbEngineInstanceFlag(c.flagSet)
+	dbDisabledArg := dbDisabledFlag(c.flagSet)
+	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
@@ -96,15 +96,8 @@ usage: sqsc db set [options]
   The list of database engines and instances available for use can be accessed
   using the 'db list' command.
 
-Options:
-
-  -endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
-  -project=""                                     Squarescale project name
-  -engine=""                                      Database engine
-  -instance=""                                    Database instance size
-  -disabled                                       Disable database
 `
-	return strings.TrimSpace(helpText)
+	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
 
 // validateDBSetCommandArgs ensures that the following predicate is satisfied:

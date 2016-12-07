@@ -13,58 +13,54 @@ import (
 // RepositoryAddCommand is a cli.Command implementation for adding a repository to a Squarescale project.
 type RepositoryAddCommand struct {
 	Meta
+	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (r *RepositoryAddCommand) Run(args []string) int {
-	cmdFlags := flag.NewFlagSet("repository add", flag.ContinueOnError)
-	cmdFlags.Usage = func() { r.Ui.Output(r.Help()) }
-	endpoint := endpointFlag(cmdFlags)
-	project := projectFlag(cmdFlags)
-	if err := cmdFlags.Parse(args); err != nil {
+func (c *RepositoryAddCommand) Run(args []string) int {
+	c.flagSet = newFlagSet(c, c.Ui)
+	endpoint := endpointFlag(c.flagSet)
+	project := projectFlag(c.flagSet)
+	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	err := validateProjectName(*project)
 	if err != nil {
-		return r.errorWithUsage(err)
+		return c.errorWithUsage(err)
 	}
 
 	gitRemote, err := findGitRemote()
 	if err != nil {
-		return r.error(err)
+		return c.error(err)
 	}
 
-	err = r.runWithSpinner(fmt.Sprintf("add repository '%s' to project '%s'", gitRemote, *project), *endpoint, func(token string) error {
+	err = c.runWithSpinner(fmt.Sprintf("add repository '%s' to project '%s'", gitRemote, *project), *endpoint, func(token string) error {
 		return squarescale.AddRepository(*endpoint, token, *project, gitRemote)
 	})
 
 	if err != nil {
-		return r.error(err)
+		return c.error(err)
 	}
 
-	return r.info(fmt.Sprintf("Successfully added repository '%s' to project '%s'", gitRemote, *project))
+	return c.info(fmt.Sprintf("Successfully added repository '%s' to project '%s'", gitRemote, *project))
 }
 
 // Synopsis is part of cli.Command implementation.
-func (r *RepositoryAddCommand) Synopsis() string {
+func (c *RepositoryAddCommand) Synopsis() string {
 	return "Attach the current Git repository to a Squarescale project"
 }
 
 // Help is part of cli.Command implementation.
-func (r *RepositoryAddCommand) Help() string {
+func (c *RepositoryAddCommand) Help() string {
 	helpText := `
 usage: sqsc repository add [options]
 
   Adds current Git repository to the specified Squarescale project. The
   repository must contain a Dockerfile to be attached to a project.
 
-Options:
-
-  -endpoint="http://www.staging.sqsc.squarely.io" Squarescale endpoint
-  -project=""                                     Squarescale project name
 `
-	return strings.TrimSpace(helpText)
+	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
 
 func findGitRemote() (string, error) {
