@@ -32,7 +32,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	case 1:
 		wantedProjectName = args[0]
 	default:
-		return c.errorWithUsage(errors.New("Too many command line arguments"), c.Help())
+		return c.errorWithUsage(errors.New("Too many command line arguments"))
 	}
 
 	var definitiveName string

@@ -27,7 +27,7 @@ func (r *RepositoryAddCommand) Run(args []string) int {
 
 	err := validateProjectName(*project)
 	if err != nil {
-		return r.errorWithUsage(err, r.Help())
+		return r.errorWithUsage(err)
 	}
 
 	gitRemote, err := findGitRemote()

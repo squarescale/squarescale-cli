@@ -35,7 +35,7 @@ func (c *LogsCommand) Run(args []string) int {
 
 	err := validateProjectName(*project)
 	if err != nil {
-		return c.errorWithUsage(err, c.Help())
+		return c.errorWithUsage(err)
 	}
 
 	var msg string

@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -34,11 +35,9 @@ func (m *Meta) error(err error) int {
 	return 1
 }
 
-func (m *Meta) errorWithUsage(err error, usage string) int {
-	retCode := m.error(err)
-	m.Ui.Output("")
-	m.Ui.Output(usage)
-	return retCode
+func (m *Meta) errorWithUsage(err error) int {
+	m.error(errors.New(err.Error() + "\n"))
+	return cli.RunResultHelp
 }
 
 func (m *Meta) runWithSpinner(text, endpoint string, action func(token string) error) error {

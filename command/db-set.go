@@ -29,7 +29,7 @@ func (c *DBSetCommand) Run(args []string) int {
 
 	err := validateDBSetCommandArgs(*projectNameArg, *dbEngineArg, *dbInstanceArg, *dbDisabledArg)
 	if err != nil {
-		return c.errorWithUsage(err, c.Help())
+		return c.errorWithUsage(err)
 	}
 
 	c.Ui.Warn(fmt.Sprintf("Changing cluster settings for project '%s' will cause a downtime. Is this ok?", *projectNameArg))

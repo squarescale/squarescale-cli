@@ -25,7 +25,7 @@ func (r *RepositoryListCommand) Run(args []string) int {
 
 	err := validateProjectName(*project)
 	if err != nil {
-		return r.errorWithUsage(err, r.Help())
+		return r.errorWithUsage(err)
 	}
 
 	var msg string
