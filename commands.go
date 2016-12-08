@@ -13,6 +13,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"container set": func() (cli.Command, error) {
+			return &command.ContainerSetCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"project": func() (cli.Command, error) {
 			return &command.ProjectCommand{}, nil
 		},
