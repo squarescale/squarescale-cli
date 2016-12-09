@@ -34,11 +34,6 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
-		"url": func() (cli.Command, error) {
-			return &command.UrlCommand{
-				Meta: *meta,
-			}, nil
-		},
 		"db": func() (cli.Command, error) {
 			return &command.DBCommand{}, nil
 		},
@@ -54,6 +49,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 		},
 		"lb": func() (cli.Command, error) {
 			return &command.LBCommand{}, nil
+		},
+		"lb url": func() (cli.Command, error) {
+			return &command.LBURLCommand{
+				Meta: *meta,
+			}, nil
 		},
 		"status": func() (cli.Command, error) {
 			return &command.StatusCommand{
