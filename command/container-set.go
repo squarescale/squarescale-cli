@@ -35,9 +35,9 @@ func (c *ContainerSetCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Container short name cannot be empty."))
 	}
 
-	if *nInstancesArg < 0 {
+	if *nInstancesArg <= 0 {
 		if *nInstancesArg != -1 {
-			c.Ui.Warn("Number of instances cannot be negative. This value won't be set.")
+			c.Ui.Warn("Number of instances cannot be 0 or negative. This value won't be set.")
 		}
 
 		if *updateCmdArg == "" {
@@ -46,19 +46,24 @@ func (c *ContainerSetCommand) Run(args []string) int {
 		}
 	}
 
+	var msg string
 	err := c.runWithSpinner("configure container", *endpoint, func(token string) error {
 		id, size, command, err := squarescale.GetContainerInfo(*endpoint, token, *projectArg, *containerArg)
 		if err != nil {
 			return err
 		}
 
-		if *nInstancesArg >= 0 {
+		if *nInstancesArg > 0 {
 			size = *nInstancesArg
 		}
 
 		if *updateCmdArg != "" {
 			command = *updateCmdArg
 		}
+
+		msg = fmt.Sprintf(
+			"Successfully configured container (instances = '%d', command = '%s') '%s' for project '%s'",
+			size, command, *containerArg, *projectArg)
 
 		return squarescale.ConfigContainer(*endpoint, token, id, size, command)
 	})
@@ -67,7 +72,7 @@ func (c *ContainerSetCommand) Run(args []string) int {
 		return c.error(err)
 	}
 
-	return c.info(fmt.Sprintf("Successfully configured container '%s' for project '%s'", *containerArg, *projectArg))
+	return c.info(msg)
 }
 
 // Synopsis is part of cli.Command implementation.
