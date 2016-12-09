@@ -20,6 +20,10 @@ func containerFlag(f *flag.FlagSet) *string {
 	return f.String("container", "", "Container to configure")
 }
 
+func portFlag(f *flag.FlagSet) *int {
+	return f.Int("port", -1, "Port number")
+}
+
 func containerInstancesFlag(f *flag.FlagSet) *int {
 	return f.Int("instances", -1, "Number of container instances")
 }
@@ -36,8 +40,8 @@ func dbEngineInstanceFlag(f *flag.FlagSet) *string {
 	return f.String("instance", "", "Database engine instance")
 }
 
-func dbDisabledFlag(f *flag.FlagSet) *bool {
-	return f.Bool("disabled", false, "Deactivate database")
+func disabledFlag(f *flag.FlagSet, doc string) *bool {
+	return f.Bool("disabled", false, doc)
 }
 
 func validateProjectName(project string) error {
