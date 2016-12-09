@@ -17,7 +17,7 @@ func (c *DBCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *DBCommand) Synopsis() string {
-	return "Commands related to a Squarescale project"
+	return "Commands to interact with project database"
 }
 
 // Help is part of cli.Command implementation.

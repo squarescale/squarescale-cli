@@ -17,7 +17,7 @@ func (c *ProjectCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ProjectCommand) Synopsis() string {
-	return "Commands related to a Squarescale project"
+	return "Commands to interact with a project"
 }
 
 // Help is part of cli.Command implementation.
@@ -25,8 +25,8 @@ func (c *ProjectCommand) Help() string {
 	helpText := `
 usage: sqsc project <subcommand>
 
-  Run a Squarescale project related command. List of supported subcommands
-  is available below.
+  Run a Squarescale project related command.
+  List of supported subcommands is available below.
 `
 	return strings.TrimSpace(helpText)
 }
