@@ -16,6 +16,18 @@ func projectFlag(f *flag.FlagSet) *string {
 	return f.String("project", "", "Squarescale project")
 }
 
+func containerFlag(f *flag.FlagSet) *string {
+	return f.String("container", "", "Container to configure")
+}
+
+func containerInstancesFlag(f *flag.FlagSet) *int {
+	return f.Int("instances", -1, "Number of container instances")
+}
+
+func containerUpdateCmdFlag(f *flag.FlagSet) *string {
+	return f.String("update", "", "Update command to run for each build")
+}
+
 func dbEngineFlag(f *flag.FlagSet) *string {
 	return f.String("engine", "", "Database engine")
 }
