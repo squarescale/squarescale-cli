@@ -52,6 +52,9 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"lb": func() (cli.Command, error) {
+			return &command.LBCommand{}, nil
+		},
 		"status": func() (cli.Command, error) {
 			return &command.StatusCommand{
 				Meta: *meta,
