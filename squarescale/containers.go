@@ -8,8 +8,16 @@ import (
 	"strings"
 )
 
+// Container describes a project container as returned by the Squarescale API
+type Container struct {
+	ID      int
+	Command string
+	Size    int
+	WebPort int
+}
+
 // GetContainerInfo gets the id of a container based on its short name.
-func GetContainerInfo(sqscURL, token, project, shortName string) (int, int, string, error) {
+func GetContainerInfo(sqscURL, token, project, shortName string) (Container, error) {
 	req := SqscRequest{
 		Method: "GET",
 		URL:    fmt.Sprintf("%s/projects/%s/containers", sqscURL, project),
@@ -18,15 +26,15 @@ func GetContainerInfo(sqscURL, token, project, shortName string) (int, int, stri
 
 	res, err := doRequest(req)
 	if err != nil {
-		return 0, 0, "", err
+		return Container{}, err
 	}
 
 	if res.Code == http.StatusNotFound {
-		return 0, 0, "", fmt.Errorf("Project '%s' does not exist", project)
+		return Container{}, fmt.Errorf("Project '%s' does not exist", project)
 	}
 
 	if res.Code != http.StatusOK {
-		return 0, 0, "", fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+		return Container{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
 	}
 
 	var containersByID []struct {
@@ -34,22 +42,28 @@ func GetContainerInfo(sqscURL, token, project, shortName string) (int, int, stri
 		ShortURL string   `json:"short_url"`
 		Command  []string `json:"pre_command"`
 		Size     int      `json:"size"`
+		WebPort  int      `json:"web_port"`
 	}
 	if err := json.Unmarshal(res.Body, &containersByID); err != nil {
-		return 0, 0, "", err
+		return Container{}, err
 	}
 
 	for _, container := range containersByID {
 		if container.ShortURL == shortName {
-			return container.ID, container.Size, strings.Join(container.Command, " "), nil
+			return Container{
+				ID:      container.ID,
+				Size:    container.Size,
+				Command: strings.Join(container.Command, " "),
+				WebPort: container.WebPort,
+			}, nil
 		}
 	}
 
-	return 0, 0, "", fmt.Errorf("Container '%s' not found for project '%s'", shortName, project)
+	return Container{}, fmt.Errorf("Container '%s' not found for project '%s'", shortName, project)
 }
 
 // ConfigContainer calls the API to update the number of instances and update command.
-func ConfigContainer(sqscURL, token string, containerID, nInstances int, command string) error {
+func ConfigContainer(sqscURL, token string, container Container) error {
 	var payload struct {
 		Container struct {
 			Size    int    `json:"size"`
@@ -57,8 +71,8 @@ func ConfigContainer(sqscURL, token string, containerID, nInstances int, command
 		} `json:"container"`
 	}
 
-	payload.Container.Size = nInstances
-	payload.Container.Command = command
+	payload.Container.Size = container.Size
+	payload.Container.Command = container.Command
 	payloadBytes, err := json.Marshal(&payload)
 	if err != nil {
 		return err
@@ -66,7 +80,7 @@ func ConfigContainer(sqscURL, token string, containerID, nInstances int, command
 
 	req := SqscRequest{
 		Method: "PUT",
-		URL:    fmt.Sprintf("%s/containers/%d", sqscURL, containerID),
+		URL:    fmt.Sprintf("%s/containers/%d", sqscURL, container.ID),
 		Token:  token,
 		Body:   payloadBytes,
 	}
