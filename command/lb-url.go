@@ -53,7 +53,7 @@ func (c *LBURLCommand) Synopsis() string {
 // Help is part of cli.Command implementation.
 func (c *LBURLCommand) Help() string {
 	helpText := `
-usage: sqsc project url [options]
+usage: sqsc lb url [options]
 
   Display load balancer public URL if available in the specified Squarescale project.
 
