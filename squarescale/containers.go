@@ -10,14 +10,16 @@ import (
 
 // Container describes a project container as returned by the Squarescale API
 type Container struct {
-	ID      int
-	Command string
-	Size    int
-	WebPort int
+	ID        int
+	ShortName string
+	Command   string
+	Size      int
+	Web       bool
+	WebPort   int
 }
 
-// GetContainerInfo gets the id of a container based on its short name.
-func GetContainerInfo(sqscURL, token, project, shortName string) (Container, error) {
+// GetContainers gets all the containers attached to a Project
+func GetContainers(sqscURL, token, project string) ([]Container, error) {
 	req := SqscRequest{
 		Method: "GET",
 		URL:    fmt.Sprintf("%s/projects/%s/containers", sqscURL, project),
@@ -26,15 +28,15 @@ func GetContainerInfo(sqscURL, token, project, shortName string) (Container, err
 
 	res, err := doRequest(req)
 	if err != nil {
-		return Container{}, err
+		return []Container{}, err
 	}
 
 	if res.Code == http.StatusNotFound {
-		return Container{}, fmt.Errorf("Project '%s' does not exist", project)
+		return []Container{}, fmt.Errorf("Project '%s' does not exist", project)
 	}
 
 	if res.Code != http.StatusOK {
-		return Container{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+		return []Container{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
 	}
 
 	var containersByID []struct {
@@ -42,20 +44,39 @@ func GetContainerInfo(sqscURL, token, project, shortName string) (Container, err
 		ShortURL string   `json:"short_url"`
 		Command  []string `json:"pre_command"`
 		Size     int      `json:"size"`
+		Web      bool     `json:"web"`
 		WebPort  int      `json:"web_port"`
 	}
+
 	if err := json.Unmarshal(res.Body, &containersByID); err != nil {
+		return []Container{}, err
+	}
+
+	var containers []Container
+	for _, c := range containersByID {
+		containers = append(containers, Container{
+			ID:        c.ID,
+			ShortName: c.ShortURL,
+			Size:      c.Size,
+			Command:   strings.Join(c.Command, " "),
+			Web:       c.Web,
+			WebPort:   c.WebPort,
+		})
+	}
+
+	return containers, nil
+}
+
+// GetContainerInfo gets the container of a project based on its short name.
+func GetContainerInfo(sqscURL, token, project, shortName string) (Container, error) {
+	containers, err := GetContainers(sqscURL, token, project)
+	if err != nil {
 		return Container{}, err
 	}
 
-	for _, container := range containersByID {
-		if container.ShortURL == shortName {
-			return Container{
-				ID:      container.ID,
-				Size:    container.Size,
-				Command: strings.Join(container.Command, " "),
-				WebPort: container.WebPort,
-			}, nil
+	for _, container := range containers {
+		if container.ShortName == shortName {
+			return container, nil
 		}
 	}
 

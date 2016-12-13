@@ -63,3 +63,36 @@ func updateLBConfig(sqscURL, token, project string, payload jsonObject) error {
 
 	return nil
 }
+
+// LoadBalancerEnabled asks if the project load balancer is enabled.
+func LoadBalancerEnabled(sqscURL, token, project string) (bool, error) {
+	req := SqscRequest{
+		Method: "GET",
+		URL:    sqscURL + "/projects/" + project,
+		Token:  token,
+	}
+
+	res, err := doRequest(req)
+	if err != nil {
+		return false, err
+	}
+
+	if res.Code == http.StatusNotFound {
+		return false, fmt.Errorf("Project '%s' not found", project)
+	}
+
+	if res.Code != http.StatusOK {
+		return false, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	}
+
+	var response struct {
+		Enabled bool `json:"load_balancer"`
+	}
+
+	err = json.Unmarshal(res.Body, &response)
+	if err != nil {
+		return false, err
+	}
+
+	return response.Enabled, nil
+}
