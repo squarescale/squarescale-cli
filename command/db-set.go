@@ -22,7 +22,7 @@ func (c *DBSetCommand) Run(args []string) int {
 	projectNameArg := projectFlag(c.flagSet)
 	dbEngineArg := dbEngineFlag(c.flagSet)
 	dbInstanceArg := dbEngineInstanceFlag(c.flagSet)
-	dbDisabledArg := dbDisabledFlag(c.flagSet)
+	dbDisabledArg := disabledFlag(c.flagSet, "Disable database")
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}

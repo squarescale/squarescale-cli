@@ -50,6 +50,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 		"lb": func() (cli.Command, error) {
 			return &command.LBCommand{}, nil
 		},
+		"lb set": func() (cli.Command, error) {
+			return &command.LBSetCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"lb url": func() (cli.Command, error) {
 			return &command.LBURLCommand{
 				Meta: *meta,

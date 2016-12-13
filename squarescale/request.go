@@ -11,6 +11,8 @@ import (
 // http.client is concurrently safe and should be reused across multiple connections
 var client http.Client
 
+type jsonObject map[string]interface{}
+
 // SqscRequest stores the data required to contact Squarescale services over HTTP.
 type SqscRequest struct {
 	Method string
