@@ -6,34 +6,14 @@ import (
 	"net/http"
 )
 
+// CustomEnvironmentVariables gets all the custom environment variables specified for the project.
+func CustomEnvironmentVariables(sqscURL, token, project string) (map[string]string, error) {
+	return envVariables(sqscURL, token, project, "custom")
+}
+
 // EnvironmentVariables gets all the environment variables specified for the project.
 func EnvironmentVariables(sqscURL, token, project string) (map[string]string, error) {
-	req := SqscRequest{
-		Method: "GET",
-		URL:    fmt.Sprintf("%s/projects/%s/environment", sqscURL, project),
-		Token:  token,
-	}
-
-	res, err := doRequest(req)
-	if err != nil {
-		return map[string]string{}, err
-	}
-
-	if res.Code == http.StatusNotFound {
-		return map[string]string{}, fmt.Errorf("Project '%s' not found", project)
-	}
-
-	if res.Code != http.StatusOK {
-		return map[string]string{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
-	}
-
-	var variables map[string]string
-	err = json.Unmarshal(res.Body, &variables)
-	if err != nil {
-		return map[string]string{}, err
-	}
-
-	return variables, nil
+	return envVariables(sqscURL, token, project, "")
 }
 
 // SetEnvironmentVariables sets all the environment variables specified for the project.
@@ -60,9 +40,38 @@ func SetEnvironmentVariables(sqscURL, token, project string, vars map[string]str
 		return fmt.Errorf("Project '%s' not found", project)
 	}
 
-	if res.Code != http.StatusOK {
+	if res.Code != http.StatusNoContent {
 		return fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
 	}
 
 	return nil
+}
+
+func envVariables(sqscURL, token, project, category string) (map[string]string, error) {
+	req := SqscRequest{
+		Method: "GET",
+		URL:    fmt.Sprintf("%s/projects/%s/environment/%s", sqscURL, project, category),
+		Token:  token,
+	}
+
+	res, err := doRequest(req)
+	if err != nil {
+		return map[string]string{}, err
+	}
+
+	if res.Code == http.StatusNotFound {
+		return map[string]string{}, fmt.Errorf("Project '%s' not found", project)
+	}
+
+	if res.Code != http.StatusOK {
+		return map[string]string{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	}
+
+	var variables map[string]string
+	err = json.Unmarshal(res.Body, &variables)
+	if err != nil {
+		return map[string]string{}, err
+	}
+
+	return variables, nil
 }
