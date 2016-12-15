@@ -19,56 +19,40 @@ func EnvironmentVariables(sqscURL, token, project string) (map[string]string, er
 // SetEnvironmentVariables sets all the environment variables specified for the project.
 func SetEnvironmentVariables(sqscURL, token, project string, vars map[string]string) error {
 	payload := jsonObject{"environment": vars}
-	payloadBytes, err := json.Marshal(&payload)
+	url := fmt.Sprintf("%s/projects/%s/environment/custom", sqscURL, project)
+	code, _, err := put(url, token, &payload)
 	if err != nil {
 		return err
 	}
 
-	req := SqscRequest{
-		Method: "PUT",
-		URL:    fmt.Sprintf("%s/projects/%s/environment/custom", sqscURL, project),
-		Token:  token,
-		Body:   payloadBytes,
-	}
-
-	res, err := doRequest(req)
-	if err != nil {
-		return err
-	}
-
-	if res.Code == http.StatusNotFound {
+	if code == http.StatusNotFound {
 		return fmt.Errorf("Project '%s' not found", project)
 	}
 
-	if res.Code != http.StatusNoContent {
-		return fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	if code != http.StatusNoContent {
+		return unexpectedError(code)
 	}
 
 	return nil
 }
 
 func envVariables(sqscURL, token, project, category string) (map[string]string, error) {
-	req := SqscRequest{
-		Method: "GET",
-		URL:    fmt.Sprintf("%s/projects/%s/environment/%s", sqscURL, project, category),
-		Token:  token,
-	}
-
-	res, err := doRequest(req)
+	url := fmt.Sprintf("%s/projects/%s/environment/%s", sqscURL, project, category)
+	code, body, err := get(url, token)
 	if err != nil {
 		return map[string]string{}, err
 	}
 
-	if res.Code == http.StatusNotFound {
+	if code == http.StatusNotFound {
 		return map[string]string{}, fmt.Errorf("Project '%s' not found", project)
 	}
 
-	if res.Code != http.StatusOK {
-		return map[string]string{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	if code != http.StatusOK {
+		return map[string]string{}, unexpectedError(code)
 	}
 
 	var variables map[string]string
-	err = json.Unmarshal(res.Body, &variables)
+	err = json.Unmarshal(body, &variables)
 	if err != nil {
 		return map[string]string{}, err
 	}

@@ -17,25 +17,13 @@ type freeNameResponse struct {
 
 // CheckProjectName asks the Squarescale service to validate a given project name.
 func CheckProjectName(sqscURL, token, name string) (valid bool, same bool, fmtName string, err error) {
-	payload := struct {
-		Name string `json:"name"`
-	}{Name: name}
-
-	payloadBytes, err := json.Marshal(&payload)
+	code, body, err := post(sqscURL+"/free_name", token, &jsonObject{"name": name})
 	if err != nil {
 		return
 	}
 
-	req := SqscRequest{
-		Method: "POST",
-		URL:    sqscURL + "/free_name",
-		Token:  token,
-		Body:   payloadBytes,
-	}
-
-	res, err := doRequest(req)
-	if err != nil {
-		return
+	if code != http.StatusOK {
+		err = unexpectedError(code)
 	}
 
 	var resBody struct {
@@ -44,7 +32,7 @@ func CheckProjectName(sqscURL, token, name string) (valid bool, same bool, fmtNa
 		Name  string `json:"name"`
 	}
 
-	err = json.Unmarshal(res.Body, &resBody)
+	err = json.Unmarshal(body, &resBody)
 	if err != nil {
 		return
 	}
@@ -54,24 +42,18 @@ func CheckProjectName(sqscURL, token, name string) (valid bool, same bool, fmtNa
 
 // FindProjectName asks the Squarescale service for a project name, using the provided token.
 func FindProjectName(sqscURL, token string) (string, error) {
-	req := SqscRequest{
-		Method: "GET",
-		URL:    sqscURL + "/free_name",
-		Token:  token,
+	code, body, err := get(sqscURL+"/free_name", token)
+	if code != http.StatusOK {
+		return "", unexpectedError(code)
 	}
 
-	res, err := doRequest(req)
 	var response struct {
 		Name string `json:"name"`
 	}
 
-	err = json.Unmarshal(res.Body, &response)
+	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return "", err
-	}
-
-	if res.Code != http.StatusOK {
-		return "", fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
 	}
 
 	return response.Name, nil
@@ -79,40 +61,27 @@ func FindProjectName(sqscURL, token string) (string, error) {
 
 // CreateProject asks the Squarescale platform to create a new project, using the provided name and user token.
 func CreateProject(sqscURL, token, name string) error {
-	var payload struct {
-		Project struct {
-			Name string `json:"name"`
-		} `json:"project"`
+	payload := jsonObject{
+		"project": jsonObject{
+			"name": name,
+		},
 	}
 
-	payload.Project.Name = name
-	payloadBytes, err := json.Marshal(&payload)
+	code, body, err := post(sqscURL+"/projects", token, &payload)
 	if err != nil {
 		return err
 	}
 
-	req := SqscRequest{
-		Method: "POST",
-		URL:    sqscURL + "/projects",
-		Token:  token,
-		Body:   payloadBytes,
-	}
-
-	res, err := doRequest(req)
-	if err != nil {
-		return err
+	if code != http.StatusCreated {
+		return unexpectedError(code)
 	}
 
 	var response struct {
 		Error string `json:"error"`
 	}
-	err = json.Unmarshal(res.Body, &response)
+	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return err
-	}
-
-	if res.Code != http.StatusCreated {
-		return fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
 	}
 
 	return nil
@@ -120,25 +89,19 @@ func CreateProject(sqscURL, token, name string) error {
 
 // ListProjects asks the Squarescale service for available projects.
 func ListProjects(sqscURL, token string) ([]string, error) {
-	req := SqscRequest{
-		Method: "GET",
-		URL:    sqscURL + "/projects",
-		Token:  token,
-	}
-
-	res, err := doRequest(req)
+	code, body, err := get(sqscURL+"/projects", token)
 	if err != nil {
 		return []string{}, err
 	}
 
-	if res.Code != http.StatusOK {
-		return []string{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	if code != http.StatusOK {
+		return []string{}, unexpectedError(code)
 	}
 
 	var projectsJSON []struct {
 		Name string `json:"name"`
 	}
-	err = json.Unmarshal(res.Body, &projectsJSON)
+	err = json.Unmarshal(body, &projectsJSON)
 	if err != nil {
 		return []string{}, err
 	}
@@ -153,39 +116,32 @@ func ListProjects(sqscURL, token string) ([]string, error) {
 
 // ProjectUrl asks the Squarescale service the url of the project if available, using the provided token.
 func ProjectUrl(sqscUrl, token, project string) (string, error) {
-	req := SqscRequest{
-		Method: "GET",
-		URL:    sqscUrl + "/projects/" + project + "/url",
-		Token:  token,
-	}
-
-	res, err := doRequest(req)
+	code, body, err := get(sqscURL+"/projects/"+project+"/url", token)
 	if err != nil {
 		return "", err
 	}
 
-	if res.Code == http.StatusPreconditionFailed {
+	if code == http.StatusPreconditionFailed {
 		return "", fmt.Errorf("Project '%s' not found", project)
 	}
 
-	if res.Code == http.StatusNotFound {
+	if code == http.StatusNotFound {
 		return "", fmt.Errorf("Project '%s' is not available on the web", project)
 	}
 
-	if res.Code != http.StatusOK {
-		return "", fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	if code != http.StatusOK {
+		return "", unexpectedError(code)
 	}
 
 	var response struct {
-		Url string `json:"url"`
+		URL string `json:"url"`
 	}
-
-	err = json.Unmarshal(res.Body, &response)
+	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return "", err
 	}
 
-	return response.Url, nil
+	return response.URL, nil
 }
 
 func ProjectLogs(sqscUrl, token, project, container, after string) ([]string, string, error) {
@@ -193,27 +149,23 @@ func ProjectLogs(sqscUrl, token, project, container, after string) ([]string, st
 	if after != "" {
 		query = "?after=" + url.QueryEscape(after)
 	}
-	req := SqscRequest{
-		Method: "GET",
-		URL:    sqscUrl + "/projects/" + project + "/logs/" + url.QueryEscape(container) + query,
-		Token:  token,
-	}
 
-	res, err := doRequest(req)
+	url := sqscURL + "/projects/" + project + "/logs/" + url.QueryEscape(container) + query
+	code, body, err := get(url, token)
 	if err != nil {
 		return []string{}, "", err
 	}
 
-	if res.Code == http.StatusBadRequest {
+	if code == http.StatusBadRequest {
 		return []string{}, "", fmt.Errorf("Project '%s' not found", project)
 	}
 
-	if res.Code == http.StatusNotFound {
+	if code == http.StatusNotFound {
 		return []string{}, "", fmt.Errorf("Container '%s' is not found for project '%s'", container, project)
 	}
 
-	if res.Code != http.StatusOK {
-		return []string{}, "", fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	if code != http.StatusOK {
+		return []string{}, "", unexpectedError(code)
 	}
 
 	var response []struct {
@@ -225,7 +177,7 @@ func ProjectLogs(sqscUrl, token, project, container, after string) ([]string, st
 		LogType       string `json:"log_type"`
 		Message       string `json:"message"`
 	}
-	err = json.Unmarshal(res.Body, &response)
+	err = json.Unmarshal(body, &response)
 
 	if err != nil {
 		return []string{}, "", err

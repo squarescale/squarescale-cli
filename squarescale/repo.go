@@ -8,33 +8,21 @@ import (
 
 // AddRepository asks the Squarescale service to attach the provided repository to the project.
 func AddRepository(sqscURL, token, project, repoURL string) error {
-	var payload struct {
-		Repository struct {
-			URL string `json:"url"`
-		} `json:"repository"`
+	payload := jsonObject{
+		"repository": jsonObject{
+			"url": repoURL,
+		},
 	}
 
-	payload.Repository.URL = repoURL
-	payloadBytes, err := json.Marshal(&payload)
+	url := sqscURL + "/projects/" + project + "/repositories"
+	code, body, err := post(url, token, &payload)
 	if err != nil {
 		return err
 	}
 
-	req := SqscRequest{
-		Method: "POST",
-		URL:    sqscURL + "/projects/" + project + "/repositories",
-		Token:  token,
-		Body:   payloadBytes,
-	}
-
-	res, err := doRequest(req)
-	if err != nil {
-		return err
-	}
-
-	if res.Code != http.StatusCreated {
+	if code != http.StatusCreated {
 		errorsHeader := fmt.Sprintf("Cannot attach repository '%s' to project '%s'", repoURL, project)
-		return readErrors(res.Body, errorsHeader)
+		return readErrors(body, errorsHeader)
 	}
 
 	return nil
@@ -42,29 +30,24 @@ func AddRepository(sqscURL, token, project, repoURL string) error {
 
 // ListRepositories asks the Squarescale service to lists all repositories for a given project.
 func ListRepositories(sqscURL, token, project string) ([]string, error) {
-	req := SqscRequest{
-		Method: "GET",
-		URL:    sqscURL + "/projects/" + project + "/repositories",
-		Token:  token,
-	}
-
-	res, err := doRequest(req)
+	url := sqscURL + "/projects/" + project + "/repositories"
+	code, body, err := get(url, token)
 	if err != nil {
 		return []string{}, err
 	}
 
-	if res.Code == http.StatusNotFound {
-		return []string{}, readErrors(res.Body, fmt.Sprintf("Cannot list repositories for project '%s'", project))
+	if code == http.StatusNotFound {
+		return []string{}, readErrors(body, fmt.Sprintf("Cannot list repositories for project '%s'", project))
 	}
 
-	if res.Code != http.StatusOK {
-		return []string{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	if code != http.StatusOK {
+		return []string{}, unexpectedError(code)
 	}
 
 	var repositoryJSON []struct {
 		URL string `json:"url"`
 	}
-	err = json.Unmarshal(res.Body, &repositoryJSON)
+	err = json.Unmarshal(body, &repositoryJSON)
 	if err != nil {
 		return []string{}, err
 	}

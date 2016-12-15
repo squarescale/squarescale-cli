@@ -36,29 +36,18 @@ func ConfigLB(sqscURL, token, project string, container, port int) error {
 }
 
 func updateLBConfig(sqscURL, token, project string, payload jsonObject) error {
-	payloadBytes, err := json.Marshal(&payload)
+	url := sqscURL + "/projects/" + project + "/web-ports"
+	code, _, err := post(url, token, &payload)
 	if err != nil {
 		return err
 	}
 
-	req := SqscRequest{
-		Method: "POST",
-		URL:    sqscURL + "/projects/" + project + "/web-ports",
-		Token:  token,
-		Body:   payloadBytes,
-	}
-
-	res, err := doRequest(req)
-	if err != nil {
-		return err
-	}
-
-	if res.Code == http.StatusNotFound {
+	if code == http.StatusNotFound {
 		return fmt.Errorf("Project '%s' not found", project)
 	}
 
-	if res.Code != http.StatusOK {
-		return fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	if code != http.StatusOK {
+		return unexpectedError(code)
 	}
 
 	return nil
@@ -66,30 +55,25 @@ func updateLBConfig(sqscURL, token, project string, payload jsonObject) error {
 
 // LoadBalancerEnabled asks if the project load balancer is enabled.
 func LoadBalancerEnabled(sqscURL, token, project string) (bool, error) {
-	req := SqscRequest{
-		Method: "GET",
-		URL:    sqscURL + "/projects/" + project,
-		Token:  token,
-	}
-
-	res, err := doRequest(req)
+	url := sqscURL + "/projects/" + project
+	code, body, err := get(url, token)
 	if err != nil {
 		return false, err
 	}
 
-	if res.Code == http.StatusNotFound {
+	if code == http.StatusNotFound {
 		return false, fmt.Errorf("Project '%s' not found", project)
 	}
 
-	if res.Code != http.StatusOK {
-		return false, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	if code != http.StatusOK {
+		return false, unexpectedError(code)
 	}
 
 	var response struct {
 		Enabled bool `json:"load_balancer"`
 	}
 
-	err = json.Unmarshal(res.Body, &response)
+	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return false, err
 	}

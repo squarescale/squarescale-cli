@@ -7,17 +7,13 @@ import (
 
 // ValidateToken asks Squarescale service for token validity. Returns nil if user is authorized.
 func ValidateToken(sqscURL, token string) error {
-	res, err := doRequest(SqscRequest{
-		Method: "GET",
-		URL:    sqscURL + "/status",
-		Token:  token,
-	})
-
+	url := sqscURL + "/status"
+	code, _, err := get(url, token)
 	if err != nil {
 		return err
 	}
 
-	if res.Code == http.StatusOK {
+	if code == http.StatusOK {
 		return nil
 	}
 

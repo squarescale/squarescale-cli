@@ -8,25 +8,20 @@ import (
 
 // GetAvailableDBInstances returns all the database instances available for use in Squarescale.
 func GetAvailableDBInstances(sqscURL, token string) ([]string, error) {
-	req := SqscRequest{
-		Method: "GET",
-		URL:    sqscURL + "/db/instances",
-		Token:  token,
-	}
-
-	res, err := doRequest(req)
+	url := sqscURL + "/db/instances"
+	code, body, err := get(url, token)
 	if err != nil {
 		return []string{}, err
+	}
+
+	if code != http.StatusOK {
+		return []string{}, unexpectedError(code)
 	}
 
 	var instancesList []string
-	err = json.Unmarshal(res.Body, &instancesList)
+	err = json.Unmarshal(body, &instancesList)
 	if err != nil {
 		return []string{}, err
-	}
-
-	if res.Code != http.StatusOK {
-		return []string{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
 	}
 
 	return instancesList, nil

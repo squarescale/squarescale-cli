@@ -20,23 +20,18 @@ type Container struct {
 
 // GetContainers gets all the containers attached to a Project
 func GetContainers(sqscURL, token, project string) ([]Container, error) {
-	req := SqscRequest{
-		Method: "GET",
-		URL:    fmt.Sprintf("%s/projects/%s/containers", sqscURL, project),
-		Token:  token,
-	}
-
-	res, err := doRequest(req)
+	url := fmt.Sprintf("%s/projects/%s/containers", sqscURL, project)
+	code, body, err := get(url, token)
 	if err != nil {
 		return []Container{}, err
 	}
 
-	if res.Code == http.StatusNotFound {
+	if code == http.StatusNotFound {
 		return []Container{}, fmt.Errorf("Project '%s' does not exist", project)
 	}
 
-	if res.Code != http.StatusOK {
-		return []Container{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	if code != http.StatusOK {
+		return []Container{}, unexpectedError(code)
 	}
 
 	var containersByID []struct {
@@ -48,7 +43,7 @@ func GetContainers(sqscURL, token, project string) ([]Container, error) {
 		WebPort  int      `json:"web_port"`
 	}
 
-	if err := json.Unmarshal(res.Body, &containersByID); err != nil {
+	if err := json.Unmarshal(body, &containersByID); err != nil {
 		return []Container{}, err
 	}
 
@@ -85,38 +80,25 @@ func GetContainerInfo(sqscURL, token, project, shortName string) (Container, err
 
 // ConfigContainer calls the API to update the number of instances and update command.
 func ConfigContainer(sqscURL, token string, container Container) error {
-	var payload struct {
-		Container struct {
-			Size    int    `json:"size"`
-			Command string `json:"pre_command"`
-		} `json:"container"`
+	url := fmt.Sprintf("%s/containers/%d", sqscURL, container.ID)
+	payload := jsonObject{
+		"container": jsonObject{
+			"size":        container.Size,
+			"pre_command": container.Command,
+		},
 	}
 
-	payload.Container.Size = container.Size
-	payload.Container.Command = container.Command
-	payloadBytes, err := json.Marshal(&payload)
+	code, _, err := put(url, token, &payload)
 	if err != nil {
 		return err
 	}
 
-	req := SqscRequest{
-		Method: "PUT",
-		URL:    fmt.Sprintf("%s/containers/%d", sqscURL, container.ID),
-		Token:  token,
-		Body:   payloadBytes,
-	}
-
-	res, err := doRequest(req)
-	if err != nil {
-		return err
-	}
-
-	if res.Code == http.StatusNotFound {
+	if code == http.StatusNotFound {
 		return errors.New("Container does not exist")
 	}
 
-	if res.Code != http.StatusOK {
-		return fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	if code != http.StatusOK {
+		return unexpectedError(code)
 	}
 
 	return nil
