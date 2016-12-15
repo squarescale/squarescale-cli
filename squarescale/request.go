@@ -15,20 +15,6 @@ var client http.Client
 
 type jsonObject map[string]interface{}
 
-// SqscRequest stores the data required to contact Squarescale services over HTTP.
-type SqscRequest struct {
-	Method string
-	URL    string
-	Token  string // user token for authentication
-	Body   []byte // only relevant if Method != "GET"
-}
-
-// SqscResponse stores the result of a SquarescaleRequest once performed by the client.
-type SqscResponse struct {
-	Code int
-	Body []byte
-}
-
 func get(url, token string) (int, []byte, error) {
 	return request("GET", url, token, nil)
 }
@@ -73,38 +59,6 @@ func request(method, url, token string, payload *jsonObject) (int, []byte, error
 	}
 
 	return res.StatusCode, bytes, nil
-}
-
-func doRequest(r SqscRequest) (SqscResponse, error) {
-	var req *http.Request
-	var err error
-
-	if len(r.Body) > 0 {
-		req, err = http.NewRequest(r.Method, r.URL, bytes.NewReader(r.Body))
-	} else {
-		req, err = http.NewRequest(r.Method, r.URL, nil)
-	}
-
-	if err != nil {
-		return SqscResponse{}, err
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "bearer "+r.Token)
-
-	res, err := client.Do(req)
-	if err != nil {
-		return SqscResponse{}, err
-	}
-
-	defer res.Body.Close()
-	bytes, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return SqscResponse{}, err
-	}
-
-	return SqscResponse{Code: res.StatusCode, Body: bytes}, nil
 }
 
 func unexpectedError(code int) error {

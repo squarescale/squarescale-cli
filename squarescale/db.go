@@ -29,25 +29,19 @@ func GetAvailableDBInstances(sqscURL, token string) ([]string, error) {
 
 // GetAvailableDBEngines returns all the database engines available for use in Squarescale.
 func GetAvailableDBEngines(sqscURL, token string) ([]string, error) {
-	req := SqscRequest{
-		Method: "GET",
-		URL:    sqscURL + "/db/engines",
-		Token:  token,
-	}
-
-	res, err := doRequest(req)
+	code, body, err := get(sqscURL+"/db/engines", token)
 	if err != nil {
 		return []string{}, err
+	}
+
+	if code != http.StatusOK {
+		return []string{}, unexpectedError(code)
 	}
 
 	var enginesList []string
-	err = json.Unmarshal(res.Body, &enginesList)
+	err = json.Unmarshal(body, &enginesList)
 	if err != nil {
 		return []string{}, err
-	}
-
-	if res.Code != http.StatusOK {
-		return []string{}, fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
 	}
 
 	return enginesList, nil
@@ -59,71 +53,50 @@ func GetAvailableDBEngines(sqscURL, token string) ([]string, error) {
 // - the db engine in use (string)
 // - the db instance in use (string)
 func GetDBConfig(sqscURL, token, project string) (bool, string, string, error) {
-	req := SqscRequest{
-		Method: "GET",
-		URL:    sqscURL + "/projects/" + project,
-		Token:  token,
-	}
-
-	res, err := doRequest(req)
+	code, body, err := get(sqscURL+"/projects/"+project, token)
 	if err != nil {
 		return false, "", "", err
 	}
 
-	var body struct {
+	if code != http.StatusOK {
+		return false, "", "", unexpectedError(code)
+	}
+
+	var resp struct {
 		Enabled       bool   `json:"db_enabled"`
 		Engine        string `json:"db_engine"`
 		InstanceClass string `json:"db_instance_class"`
 	}
 
-	err = json.Unmarshal(res.Body, &body)
+	err = json.Unmarshal(body, &body)
 	if err != nil {
 		return false, "", "", err
 	}
 
-	if res.Code != http.StatusOK {
-		return false, "", "", fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
-	}
-
-	return body.Enabled, body.Engine, body.InstanceClass, nil
+	return resp.Enabled, resp.Engine, resp.InstanceClass, nil
 }
 
 // ConfigDB calls the Squarescale API to update database scale options for a given project.
 func ConfigDB(sqscURL, token, project string, enabled bool, engine, instance string) error {
-	var payload struct {
-		Project struct {
-			Enabled       bool   `json:"db_enabled"`
-			Engine        string `json:"db_engine"`
-			InstanceClass string `json:"db_instance_class"`
-		} `json:"project"`
+	payload := jsonObject{
+		"project": jsonObject{
+			"db_enabled":        enabled,
+			"db_engine":         engine,
+			"db_instance_class": instance,
+		},
 	}
 
-	payload.Project.Enabled = enabled
-	payload.Project.Engine = engine
-	payload.Project.InstanceClass = instance
-	payloadBytes, err := json.Marshal(&payload)
+	code, _, err := post(sqscURL+"/projects/"+project+"/cluster", token, &payload)
 	if err != nil {
 		return err
 	}
 
-	req := SqscRequest{
-		Method: "POST",
-		URL:    sqscURL + "/projects/" + project + "/cluster",
-		Token:  token,
-		Body:   payloadBytes,
-	}
-
-	res, err := doRequest(req)
-	if err != nil {
-		return err
-	}
-
-	if res.Code == http.StatusUnprocessableEntity {
+	if code == http.StatusUnprocessableEntity {
 		return fmt.Errorf("Invalid value for either database engine ('%s') or instance ('%s')", engine, instance)
 	}
 
-	if res.Code != http.StatusNoContent {
-		return fmt.Errorf("'%s %s' return code: %d", req.Method, req.URL, res.Code)
+	if code != http.StatusNoContent {
+		return unexpectedError(code)
 	}
 
 	return nil
