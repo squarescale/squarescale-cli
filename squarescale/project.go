@@ -8,13 +8,6 @@ import (
 	"time"
 )
 
-type payloadWithName struct {
-	Name string `json:"name"`
-}
-
-type freeNameResponse struct {
-}
-
 // CheckProjectName asks the Squarescale service to validate a given project name.
 func CheckProjectName(sqscURL, token, name string) (valid bool, same bool, fmtName string, err error) {
 	code, body, err := post(sqscURL+"/free_name", token, &jsonObject{"name": name})
@@ -24,6 +17,7 @@ func CheckProjectName(sqscURL, token, name string) (valid bool, same bool, fmtNa
 
 	if code != http.StatusOK {
 		err = unexpectedError(code)
+		return
 	}
 
 	var resBody struct {
