@@ -78,7 +78,7 @@ func GetDBConfig(sqscURL, token, project string) (bool, string, string, error) {
 
 // ConfigDB calls the Squarescale API to update database scale options for a given project.
 func ConfigDB(sqscURL, token, project string, enabled bool, engine, instance string) error {
-	payload := jsonObject{
+	payload := &jsonObject{
 		"project": jsonObject{
 			"db_enabled":        enabled,
 			"db_engine":         engine,
@@ -86,7 +86,7 @@ func ConfigDB(sqscURL, token, project string, enabled bool, engine, instance str
 		},
 	}
 
-	code, _, err := post(sqscURL+"/projects/"+project+"/cluster", token, &payload)
+	code, _, err := post(sqscURL+"/projects/"+project+"/cluster", token, payload)
 	if err != nil {
 		return err
 	}

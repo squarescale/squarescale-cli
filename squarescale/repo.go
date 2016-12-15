@@ -8,14 +8,14 @@ import (
 
 // AddRepository asks the Squarescale service to attach the provided repository to the project.
 func AddRepository(sqscURL, token, project, repoURL string) error {
-	payload := jsonObject{
+	payload := &jsonObject{
 		"repository": jsonObject{
 			"url": repoURL,
 		},
 	}
 
 	url := sqscURL + "/projects/" + project + "/repositories"
-	code, body, err := post(url, token, &payload)
+	code, body, err := post(url, token, payload)
 	if err != nil {
 		return err
 	}

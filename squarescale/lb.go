@@ -9,7 +9,7 @@ import (
 
 // DisableLB asks the Squarescale service to deactivate the load balancer.
 func DisableLB(sqscURL, token, project string) error {
-	payload := jsonObject{
+	payload := &jsonObject{
 		"project": jsonObject{
 			"load_balancer": false,
 		},
@@ -20,7 +20,7 @@ func DisableLB(sqscURL, token, project string) error {
 
 // ConfigLB sets the load balancer configuration for a given project.
 func ConfigLB(sqscURL, token, project string, container, port int) error {
-	payload := jsonObject{
+	payload := &jsonObject{
 		"project": jsonObject{
 			"load_balancer": true,
 		},
@@ -35,9 +35,9 @@ func ConfigLB(sqscURL, token, project string, container, port int) error {
 	return updateLBConfig(sqscURL, token, project, payload)
 }
 
-func updateLBConfig(sqscURL, token, project string, payload jsonObject) error {
+func updateLBConfig(sqscURL, token, project string, payload *jsonObject) error {
 	url := sqscURL + "/projects/" + project + "/web-ports"
-	code, _, err := post(url, token, &payload)
+	code, _, err := post(url, token, payload)
 	if err != nil {
 		return err
 	}

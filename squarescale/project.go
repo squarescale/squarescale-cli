@@ -55,13 +55,13 @@ func FindProjectName(sqscURL, token string) (string, error) {
 
 // CreateProject asks the Squarescale platform to create a new project, using the provided name and user token.
 func CreateProject(sqscURL, token, name string) error {
-	payload := jsonObject{
+	payload := &jsonObject{
 		"project": jsonObject{
 			"name": name,
 		},
 	}
 
-	code, body, err := post(sqscURL+"/projects", token, &payload)
+	code, body, err := post(sqscURL+"/projects", token, payload)
 	if err != nil {
 		return err
 	}
@@ -206,5 +206,4 @@ func ProjectLogs(sqscURL, token, project, container, after string) ([]string, st
 	}
 
 	return messages, lastTimestamp, nil
-
 }

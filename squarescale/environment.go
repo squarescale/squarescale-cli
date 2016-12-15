@@ -18,9 +18,8 @@ func EnvironmentVariables(sqscURL, token, project string) (map[string]string, er
 
 // SetEnvironmentVariables sets all the environment variables specified for the project.
 func SetEnvironmentVariables(sqscURL, token, project string, vars map[string]string) error {
-	payload := jsonObject{"environment": vars}
 	url := fmt.Sprintf("%s/projects/%s/environment/custom", sqscURL, project)
-	code, _, err := put(url, token, &payload)
+	code, _, err := put(url, token, &jsonObject{"environment": vars})
 	if err != nil {
 		return err
 	}

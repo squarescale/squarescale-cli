@@ -81,14 +81,14 @@ func GetContainerInfo(sqscURL, token, project, shortName string) (Container, err
 // ConfigContainer calls the API to update the number of instances and update command.
 func ConfigContainer(sqscURL, token string, container Container) error {
 	url := fmt.Sprintf("%s/containers/%d", sqscURL, container.ID)
-	payload := jsonObject{
+	payload := &jsonObject{
 		"container": jsonObject{
 			"size":        container.Size,
 			"pre_command": container.Command,
 		},
 	}
 
-	code, _, err := put(url, token, &payload)
+	code, _, err := put(url, token, payload)
 	if err != nil {
 		return err
 	}
