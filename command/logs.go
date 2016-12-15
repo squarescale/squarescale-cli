@@ -106,7 +106,7 @@ func (c *LogsCommand) Synopsis() string {
 
 func (c *LogsCommand) Help() string {
 	helpText := `
-usage: sqsc project logs [options]
+usage: sqsc logs [options]
 
   Display last logs of the specified Squarescale project.
 

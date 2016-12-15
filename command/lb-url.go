@@ -29,7 +29,7 @@ func (c *LBURLCommand) Run(args []string) int {
 
 	var msg string
 	err := c.runWithSpinner("project url", *endpoint, func(token string) error {
-		url, err := squarescale.ProjectUrl(*endpoint, token, *project)
+		url, err := squarescale.ProjectURL(*endpoint, token, *project)
 		if err != nil {
 			return err
 		}

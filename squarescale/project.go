@@ -114,8 +114,8 @@ func ListProjects(sqscURL, token string) ([]string, error) {
 	return projects, nil
 }
 
-// ProjectUrl asks the Squarescale service the url of the project if available, using the provided token.
-func ProjectUrl(sqscUrl, token, project string) (string, error) {
+// ProjectURL asks the Squarescale service the url of the project if available, using the provided token.
+func ProjectURL(sqscURL, token, project string) (string, error) {
 	code, body, err := get(sqscURL+"/projects/"+project+"/url", token)
 	if err != nil {
 		return "", err
@@ -144,7 +144,8 @@ func ProjectUrl(sqscUrl, token, project string) (string, error) {
 	return response.URL, nil
 }
 
-func ProjectLogs(sqscUrl, token, project, container, after string) ([]string, string, error) {
+// ProjectLogs gets the logs for a project container.
+func ProjectLogs(sqscURL, token, project, container, after string) ([]string, string, error) {
 	query := ""
 	if after != "" {
 		query = "?after=" + url.QueryEscape(after)
