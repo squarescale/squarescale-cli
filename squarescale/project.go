@@ -16,7 +16,7 @@ func (c *Client) CheckProjectName(name string) (valid bool, same bool, fmtName s
 	}
 
 	if code != http.StatusOK {
-		err = unexpectedError(code)
+		err = unexpectedHTTPError(code, body)
 		return
 	}
 
@@ -38,7 +38,7 @@ func (c *Client) CheckProjectName(name string) (valid bool, same bool, fmtName s
 func (c *Client) FindProjectName() (string, error) {
 	code, body, err := c.get("/free_name")
 	if code != http.StatusOK {
-		return "", unexpectedError(code)
+		return "", unexpectedHTTPError(code, body)
 	}
 
 	var response struct {
@@ -67,7 +67,7 @@ func (c *Client) CreateProject(name string) error {
 	}
 
 	if code != http.StatusCreated {
-		return unexpectedError(code)
+		return unexpectedHTTPError(code, body)
 	}
 
 	var response struct {
@@ -89,7 +89,7 @@ func (c *Client) ListProjects() ([]string, error) {
 	}
 
 	if code != http.StatusOK {
-		return []string{}, unexpectedError(code)
+		return []string{}, unexpectedHTTPError(code, body)
 	}
 
 	var projectsJSON []struct {
@@ -115,16 +115,14 @@ func (c *Client) ProjectURL(project string) (string, error) {
 		return "", err
 	}
 
-	if code == http.StatusPreconditionFailed {
+	switch code {
+	case http.StatusOK:
+	case http.StatusPreconditionFailed:
 		return "", fmt.Errorf("Project '%s' not found", project)
-	}
-
-	if code == http.StatusNotFound {
+	case http.StatusNotFound:
 		return "", fmt.Errorf("Project '%s' is not available on the web", project)
-	}
-
-	if code != http.StatusOK {
-		return "", unexpectedError(code)
+	default:
+		return "", unexpectedHTTPError(code, body)
 	}
 
 	var response struct {
@@ -150,16 +148,14 @@ func (c *Client) ProjectLogs(project, container, after string) ([]string, string
 		return []string{}, "", err
 	}
 
-	if code == http.StatusBadRequest {
+	switch code {
+	case http.StatusOK:
+	case http.StatusBadRequest:
 		return []string{}, "", fmt.Errorf("Project '%s' not found", project)
-	}
-
-	if code == http.StatusNotFound {
+	case http.StatusNotFound:
 		return []string{}, "", fmt.Errorf("Container '%s' is not found for project '%s'", container, project)
-	}
-
-	if code != http.StatusOK {
-		return []string{}, "", unexpectedError(code)
+	default:
+		return []string{}, "", unexpectedHTTPError(code, body)
 	}
 
 	var response []struct {

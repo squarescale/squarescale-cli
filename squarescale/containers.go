@@ -25,12 +25,12 @@ func (c *Client) GetContainers(project string) ([]Container, error) {
 		return []Container{}, err
 	}
 
-	if code == http.StatusNotFound {
+	switch code {
+	case http.StatusOK:
+	case http.StatusNotFound:
 		return []Container{}, fmt.Errorf("Project '%s' does not exist", project)
-	}
-
-	if code != http.StatusOK {
-		return []Container{}, unexpectedError(code)
+	default:
+		return []Container{}, unexpectedHTTPError(code, body)
 	}
 
 	var containersByID []struct {
@@ -86,18 +86,17 @@ func (c *Client) ConfigContainer(container Container) error {
 		},
 	}
 
-	code, _, err := c.put(fmt.Sprintf("/containers/%d", container.ID), payload)
+	code, body, err := c.put(fmt.Sprintf("/containers/%d", container.ID), payload)
 	if err != nil {
 		return err
 	}
 
-	if code == http.StatusNotFound {
+	switch code {
+	case http.StatusOK:
+		return nil
+	case http.StatusNotFound:
 		return errors.New("Container does not exist")
+	default:
+		return unexpectedHTTPError(code, body)
 	}
-
-	if code != http.StatusOK {
-		return unexpectedError(code)
-	}
-
-	return nil
 }

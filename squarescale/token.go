@@ -12,9 +12,10 @@ func (c *Client) ValidateToken() error {
 		return err
 	}
 
-	if code == http.StatusOK {
+	switch code {
+	case http.StatusOK:
 		return nil
+	default:
+		return fmt.Errorf("token rejected")
 	}
-
-	return fmt.Errorf("token rejected")
 }

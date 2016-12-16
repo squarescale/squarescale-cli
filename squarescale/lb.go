@@ -36,20 +36,19 @@ func (c *Client) ConfigLB(project string, container, port int) error {
 }
 
 func (c *Client) updateLBConfig(project string, payload *jsonObject) error {
-	code, _, err := c.post("/projects/"+project+"/web-ports", payload)
+	code, body, err := c.post("/projects/"+project+"/web-ports", payload)
 	if err != nil {
 		return err
 	}
 
-	if code == http.StatusNotFound {
+	switch code {
+	case http.StatusOK:
+		return nil
+	case http.StatusNotFound:
 		return fmt.Errorf("Project '%s' not found", project)
+	default:
+		return unexpectedHTTPError(code, body)
 	}
-
-	if code != http.StatusOK {
-		return unexpectedError(code)
-	}
-
-	return nil
 }
 
 // LoadBalancerEnabled asks if the project load balancer is enabled.
@@ -59,12 +58,12 @@ func (c *Client) LoadBalancerEnabled(project string) (bool, error) {
 		return false, err
 	}
 
-	if code == http.StatusNotFound {
+	switch code {
+	case http.StatusOK:
+	case http.StatusNotFound:
 		return false, fmt.Errorf("Project '%s' not found", project)
-	}
-
-	if code != http.StatusOK {
-		return false, unexpectedError(code)
+	default:
+		return false, unexpectedHTTPError(code, body)
 	}
 
 	var response struct {

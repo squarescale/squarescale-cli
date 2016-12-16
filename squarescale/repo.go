@@ -19,12 +19,12 @@ func (c *Client) AddRepository(project, repoURL string) error {
 		return err
 	}
 
-	if code != http.StatusCreated {
-		errorsHeader := fmt.Sprintf("Cannot attach repository '%s' to project '%s'", repoURL, project)
-		return readErrors(body, errorsHeader)
+	switch code {
+	case http.StatusCreated:
+		return nil
+	default:
+		return readErrors(body, fmt.Sprintf("Cannot attach repository '%s' to project '%s'", repoURL, project))
 	}
-
-	return nil
 }
 
 // ListRepositories asks the Squarescale service to lists all repositories for a given project.
@@ -34,12 +34,12 @@ func (c *Client) ListRepositories(project string) ([]string, error) {
 		return []string{}, err
 	}
 
-	if code == http.StatusNotFound {
+	switch code {
+	case http.StatusOK:
+	case http.StatusNotFound:
 		return []string{}, readErrors(body, fmt.Sprintf("Cannot list repositories for project '%s'", project))
-	}
-
-	if code != http.StatusOK {
-		return []string{}, unexpectedError(code)
+	default:
+		return []string{}, unexpectedHTTPError(code, body)
 	}
 
 	var repositoryJSON []struct {

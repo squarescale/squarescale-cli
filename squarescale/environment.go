@@ -18,20 +18,19 @@ func (c *Client) EnvironmentVariables(project string) (map[string]string, error)
 
 // SetEnvironmentVariables sets all the environment variables specified for the project.
 func (c *Client) SetEnvironmentVariables(project string, vars map[string]string) error {
-	code, _, err := c.put("/projects/"+project+"/environment/custom", &jsonObject{"environment": vars})
+	code, body, err := c.put("/projects/"+project+"/environment/custom", &jsonObject{"environment": vars})
 	if err != nil {
 		return err
 	}
 
-	if code == http.StatusNotFound {
+	switch code {
+	case http.StatusNoContent:
+		return nil
+	case http.StatusNotFound:
 		return fmt.Errorf("Project '%s' not found", project)
+	default:
+		return unexpectedHTTPError(code, body)
 	}
-
-	if code != http.StatusNoContent {
-		return unexpectedError(code)
-	}
-
-	return nil
 }
 
 func (c *Client) envVariables(project, category string) (map[string]string, error) {
@@ -40,12 +39,12 @@ func (c *Client) envVariables(project, category string) (map[string]string, erro
 		return map[string]string{}, err
 	}
 
-	if code == http.StatusNotFound {
+	switch code {
+	case http.StatusOK:
+	case http.StatusNotFound:
 		return map[string]string{}, fmt.Errorf("Project '%s' not found", project)
-	}
-
-	if code != http.StatusOK {
-		return map[string]string{}, unexpectedError(code)
+	default:
+		return map[string]string{}, unexpectedHTTPError(code, body)
 	}
 
 	var variables map[string]string

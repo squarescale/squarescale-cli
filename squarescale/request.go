@@ -73,7 +73,17 @@ func (c *Client) request(method, path string, payload *jsonObject) (int, []byte,
 	return res.StatusCode, bytes, nil
 }
 
-func unexpectedError(code int) error {
+func unexpectedHTTPError(code int, body []byte) error {
+	// try to decode the body with { "error": "<description>" }
+	var description struct {
+		Error string `json:"error"`
+	}
+
+	json.Unmarshal(body, description)
+	if description.Error != "" {
+		return errors.New("Error: " + description.Error)
+	}
+
 	return fmt.Errorf("An unexpected error occurred (code: %d)", code)
 }
 

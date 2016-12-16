@@ -14,7 +14,7 @@ func (c *Client) GetAvailableDBInstances() ([]string, error) {
 	}
 
 	if code != http.StatusOK {
-		return []string{}, unexpectedError(code)
+		return []string{}, unexpectedHTTPError(code, body)
 	}
 
 	var instancesList []string
@@ -34,7 +34,7 @@ func (c *Client) GetAvailableDBEngines() ([]string, error) {
 	}
 
 	if code != http.StatusOK {
-		return []string{}, unexpectedError(code)
+		return []string{}, unexpectedHTTPError(code, body)
 	}
 
 	var enginesList []string
@@ -58,7 +58,7 @@ func (c *Client) GetDBConfig(project string) (bool, string, string, error) {
 	}
 
 	if code != http.StatusOK {
-		return false, "", "", unexpectedError(code)
+		return false, "", "", unexpectedHTTPError(code, body)
 	}
 
 	var resp struct {
@@ -85,18 +85,17 @@ func (c *Client) ConfigDB(project string, enabled bool, engine, instance string)
 		},
 	}
 
-	code, _, err := c.post("/projects/"+project+"/cluster", payload)
+	code, body, err := c.post("/projects/"+project+"/cluster", payload)
 	if err != nil {
 		return err
 	}
 
-	if code == http.StatusUnprocessableEntity {
+	switch code {
+	case http.StatusNoContent:
+		return nil
+	case http.StatusUnprocessableEntity:
 		return fmt.Errorf("Invalid value for either database engine ('%s') or instance ('%s')", engine, instance)
+	default:
+		return unexpectedHTTPError(code, body)
 	}
-
-	if code != http.StatusNoContent {
-		return unexpectedError(code)
-	}
-
-	return nil
 }
