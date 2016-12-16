@@ -6,9 +6,8 @@ import (
 )
 
 // ValidateToken asks Squarescale service for token validity. Returns nil if user is authorized.
-func ValidateToken(sqscURL, token string) error {
-	url := sqscURL + "/status"
-	code, _, err := get(url, token)
+func (c *Client) ValidateToken() error {
+	code, _, err := c.get("/status")
 	if err != nil {
 		return err
 	}

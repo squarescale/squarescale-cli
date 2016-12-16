@@ -7,15 +7,14 @@ import (
 )
 
 // AddRepository asks the Squarescale service to attach the provided repository to the project.
-func AddRepository(sqscURL, token, project, repoURL string) error {
+func (c *Client) AddRepository(project, repoURL string) error {
 	payload := &jsonObject{
 		"repository": jsonObject{
 			"url": repoURL,
 		},
 	}
 
-	url := sqscURL + "/projects/" + project + "/repositories"
-	code, body, err := post(url, token, payload)
+	code, body, err := c.post("/projects/"+project+"/repositories", payload)
 	if err != nil {
 		return err
 	}
@@ -29,9 +28,8 @@ func AddRepository(sqscURL, token, project, repoURL string) error {
 }
 
 // ListRepositories asks the Squarescale service to lists all repositories for a given project.
-func ListRepositories(sqscURL, token, project string) ([]string, error) {
-	url := sqscURL + "/projects/" + project + "/repositories"
-	code, body, err := get(url, token)
+func (c *Client) ListRepositories(project string) ([]string, error) {
+	code, body, err := c.get("/projects/" + project + "/repositories")
 	if err != nil {
 		return []string{}, err
 	}

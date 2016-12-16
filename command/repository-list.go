@@ -29,8 +29,8 @@ func (c *RepositoryListCommand) Run(args []string) int {
 	}
 
 	var msg string
-	err = c.runWithSpinner("list repositories", *endpoint, func(token string) error {
-		repositories, e := squarescale.ListRepositories(*endpoint, token, *project)
+	err = c.runWithSpinner("list repositories", *endpoint, func(client *squarescale.Client) error {
+		repositories, e := client.ListRepositories(*project)
 		if e != nil {
 			return e
 		}

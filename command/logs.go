@@ -45,13 +45,13 @@ func (c *LogsCommand) Run(args []string) int {
 	} else {
 		waitText = fmt.Sprintf("last logs for container '%s'", *container)
 	}
-	var last string
-	var authtoken string
-	err = c.runWithSpinner(waitText, *endpoint, func(token string) error {
-		var e error
-		authtoken = token
-		msg, last, e = getLogs(*endpoint, token, *project, *container)
 
+	var sqscClient *squarescale.Client
+	var last string
+	err = c.runWithSpinner(waitText, *endpoint, func(client *squarescale.Client) error {
+		var e error
+		sqscClient = client
+		msg, last, e = getLogs(client, *project, *container)
 		return e
 	})
 
@@ -59,30 +59,29 @@ func (c *LogsCommand) Run(args []string) int {
 		return c.error(err)
 	}
 
+	c.info(msg)
 	if !follow {
-		return c.info(msg)
-	} else {
-		c.info(msg)
-		for {
-			time.Sleep(time.Second)
-			msg, last, err = getLogsAfter(*endpoint, authtoken, *project, *container, last)
-			if err != nil {
-				return c.error(err)
-			}
-			if msg != "" {
-				c.info(msg)
-			}
-		}
 		return 0
+	}
+
+	for {
+		time.Sleep(time.Second)
+		msg, last, err = getLogsAfter(sqscClient, *project, *container, last)
+		if err != nil {
+			return c.error(err)
+		}
+		if msg != "" {
+			c.info(msg)
+		}
 	}
 }
 
-func getLogs(endpoint, token, project, container string) (string, string, error) {
-	return getLogsAfter(endpoint, token, project, container, "")
+func getLogs(client *squarescale.Client, project, container string) (string, string, error) {
+	return getLogsAfter(client, project, container, "")
 }
 
-func getLogsAfter(endpoint, token, project, container, last string) (string, string, error) {
-	logs, lastTimestamp, e := squarescale.ProjectLogs(endpoint, token, project, container, last)
+func getLogsAfter(client *squarescale.Client, project, container, last string) (string, string, error) {
+	logs, lastTimestamp, e := client.ProjectLogs(project, container, last)
 	if e != nil {
 		return "", "", e
 	}

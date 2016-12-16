@@ -28,8 +28,8 @@ func (c *LBListCommand) Run(args []string) int {
 	}
 
 	var msg string
-	err := c.runWithSpinner("list load balancer config", *endpoint, func(token string) error {
-		enabled, err := squarescale.LoadBalancerEnabled(*endpoint, token, *project)
+	err := c.runWithSpinner("list load balancer config", *endpoint, func(client *squarescale.Client) error {
+		enabled, err := client.LoadBalancerEnabled(*project)
 		if err != nil {
 			return err
 		}
@@ -40,7 +40,7 @@ func (c *LBListCommand) Run(args []string) int {
 			return nil
 		}
 
-		containers, err := squarescale.GetContainers(*endpoint, token, *project)
+		containers, err := client.GetContainers(*project)
 		if err != nil {
 			return err
 		}

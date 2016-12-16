@@ -47,8 +47,8 @@ func (c *ContainerSetCommand) Run(args []string) int {
 	}
 
 	var msg string
-	err := c.runWithSpinner("configure container", *endpoint, func(token string) error {
-		container, err := squarescale.GetContainerInfo(*endpoint, token, *projectArg, *containerArg)
+	err := c.runWithSpinner("configure container", *endpoint, func(client *squarescale.Client) error {
+		container, err := client.GetContainerInfo(*projectArg, *containerArg)
 		if err != nil {
 			return err
 		}
@@ -65,7 +65,7 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			"Successfully configured container (instances = '%d', command = '%s') '%s' for project '%s'",
 			container.Size, container.Command, *containerArg, *projectArg)
 
-		return squarescale.ConfigContainer(*endpoint, token, container)
+		return client.ConfigContainer(container)
 	})
 
 	if err != nil {

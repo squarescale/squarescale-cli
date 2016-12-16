@@ -28,8 +28,8 @@ func (c *EnvGetCommand) Run(args []string) int {
 	}
 
 	var msg string
-	err := c.runWithSpinner("list environment variables", *endpoint, func(token string) error {
-		vars, err := squarescale.EnvironmentVariables(*endpoint, token, *project)
+	err := c.runWithSpinner("list environment variables", *endpoint, func(client *squarescale.Client) error {
+		vars, err := client.EnvironmentVariables(*project)
 		if err != nil {
 			return err
 		}

@@ -44,8 +44,8 @@ func (c *EnvSetCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	err := c.runWithSpinner("set environment variable", *endpoint, func(token string) error {
-		vars, err := squarescale.CustomEnvironmentVariables(*endpoint, token, *project)
+	err := c.runWithSpinner("set environment variable", *endpoint, func(client *squarescale.Client) error {
+		vars, err := client.CustomEnvironmentVariables(*project)
 		if err != nil {
 			return err
 		}
@@ -56,7 +56,7 @@ func (c *EnvSetCommand) Run(args []string) int {
 			vars[key] = value
 		}
 
-		return squarescale.SetEnvironmentVariables(*endpoint, token, *project, vars)
+		return client.SetEnvironmentVariables(*project, vars)
 	})
 
 	if err != nil {

@@ -39,8 +39,8 @@ func (c *DBSetCommand) Run(args []string) int {
 	}
 
 	var msg string
-	err = c.runWithSpinner("scale project database", *endpoint, func(token string) error {
-		enabled, engine, instance, e := squarescale.GetDBConfig(*endpoint, token, *projectNameArg)
+	err = c.runWithSpinner("scale project database", *endpoint, func(client *squarescale.Client) error {
+		enabled, engine, instance, e := client.GetDBConfig(*projectNameArg)
 		if e != nil {
 			return e
 		}
@@ -72,7 +72,7 @@ func (c *DBSetCommand) Run(args []string) int {
 		}
 
 		enabled = !(*dbDisabledArg)
-		return squarescale.ConfigDB(*endpoint, token, *projectNameArg, enabled, engine, instance)
+		return client.ConfigDB(*projectNameArg, enabled, engine, instance)
 	})
 
 	if err != nil {

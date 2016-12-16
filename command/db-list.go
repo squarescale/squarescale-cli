@@ -23,15 +23,15 @@ func (c *DBListCommand) Run(args []string) int {
 	}
 
 	var msg string
-	err := c.runWithSpinner("list available database engines and instances", *endpoint, func(token string) error {
-		engines, err := squarescale.GetAvailableDBEngines(*endpoint, token)
+	err := c.runWithSpinner("list available database engines and instances", *endpoint, func(client *squarescale.Client) error {
+		engines, err := client.GetAvailableDBEngines()
 		if err != nil {
 			return err
 		}
 
 		msg += fmtDBListOutput("Available engines", engines)
 
-		instances, err := squarescale.GetAvailableDBInstances(*endpoint, token)
+		instances, err := client.GetAvailableDBInstances()
 		if err != nil {
 			return err
 		}

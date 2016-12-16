@@ -36,9 +36,9 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	}
 
 	var definitiveName string
-	err := c.runWithSpinner("create project", *endpoint, func(token string) error {
+	err := c.runWithSpinner("create project", *endpoint, func(client *squarescale.Client) error {
 		if wantedProjectName != "" {
-			valid, same, fmtName, err := squarescale.CheckProjectName(*endpoint, token, wantedProjectName)
+			valid, same, fmtName, err := client.CheckProjectName(wantedProjectName)
 			if err != nil {
 				return fmt.Errorf("Cannot validate project name '%s'", wantedProjectName)
 			}
@@ -63,7 +63,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 			definitiveName = fmtName
 
 		} else {
-			generatedName, err := squarescale.FindProjectName(*endpoint, token)
+			generatedName, err := client.FindProjectName()
 			if err != nil {
 				return err
 			}
@@ -71,7 +71,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 			definitiveName = generatedName
 		}
 
-		return squarescale.CreateProject(*endpoint, token, definitiveName)
+		return client.CreateProject(definitiveName)
 	})
 
 	if err != nil {

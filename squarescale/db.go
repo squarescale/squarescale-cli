@@ -7,9 +7,8 @@ import (
 )
 
 // GetAvailableDBInstances returns all the database instances available for use in Squarescale.
-func GetAvailableDBInstances(sqscURL, token string) ([]string, error) {
-	url := sqscURL + "/db/instances"
-	code, body, err := get(url, token)
+func (c *Client) GetAvailableDBInstances() ([]string, error) {
+	code, body, err := c.get("/db/instances")
 	if err != nil {
 		return []string{}, err
 	}
@@ -28,8 +27,8 @@ func GetAvailableDBInstances(sqscURL, token string) ([]string, error) {
 }
 
 // GetAvailableDBEngines returns all the database engines available for use in Squarescale.
-func GetAvailableDBEngines(sqscURL, token string) ([]string, error) {
-	code, body, err := get(sqscURL+"/db/engines", token)
+func (c *Client) GetAvailableDBEngines() ([]string, error) {
+	code, body, err := c.get("/db/engines")
 	if err != nil {
 		return []string{}, err
 	}
@@ -52,8 +51,8 @@ func GetAvailableDBEngines(sqscURL, token string) ([]string, error) {
 // - if the db is enabled
 // - the db engine in use (string)
 // - the db instance in use (string)
-func GetDBConfig(sqscURL, token, project string) (bool, string, string, error) {
-	code, body, err := get(sqscURL+"/projects/"+project, token)
+func (c *Client) GetDBConfig(project string) (bool, string, string, error) {
+	code, body, err := c.get("/projects/" + project)
 	if err != nil {
 		return false, "", "", err
 	}
@@ -68,7 +67,7 @@ func GetDBConfig(sqscURL, token, project string) (bool, string, string, error) {
 		InstanceClass string `json:"db_instance_class"`
 	}
 
-	err = json.Unmarshal(body, &body)
+	err = json.Unmarshal(body, &resp)
 	if err != nil {
 		return false, "", "", err
 	}
@@ -77,7 +76,7 @@ func GetDBConfig(sqscURL, token, project string) (bool, string, string, error) {
 }
 
 // ConfigDB calls the Squarescale API to update database scale options for a given project.
-func ConfigDB(sqscURL, token, project string, enabled bool, engine, instance string) error {
+func (c *Client) ConfigDB(project string, enabled bool, engine, instance string) error {
 	payload := &jsonObject{
 		"project": jsonObject{
 			"db_enabled":        enabled,
@@ -86,7 +85,7 @@ func ConfigDB(sqscURL, token, project string, enabled bool, engine, instance str
 		},
 	}
 
-	code, _, err := post(sqscURL+"/projects/"+project+"/cluster", token, payload)
+	code, _, err := c.post("/projects/"+project+"/cluster", payload)
 	if err != nil {
 		return err
 	}

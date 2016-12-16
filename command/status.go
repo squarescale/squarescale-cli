@@ -3,6 +3,8 @@ package command
 import (
 	"flag"
 	"strings"
+
+	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
 // StatusCommand is a cli.Command implementation for knowing if user is authorized.
@@ -19,7 +21,7 @@ func (c *StatusCommand) Run(args []string) int {
 		return 1
 	}
 
-	err := c.runWithSpinner("check authorization", *endpoint, func(token string) error {
+	err := c.runWithSpinner("check authorization", *endpoint, func(client *squarescale.Client) error {
 		return nil // do nothing as we are already authenticated here.
 	})
 

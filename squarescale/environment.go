@@ -7,19 +7,18 @@ import (
 )
 
 // CustomEnvironmentVariables gets all the custom environment variables specified for the project.
-func CustomEnvironmentVariables(sqscURL, token, project string) (map[string]string, error) {
-	return envVariables(sqscURL, token, project, "custom")
+func (c *Client) CustomEnvironmentVariables(project string) (map[string]string, error) {
+	return c.envVariables(project, "custom")
 }
 
 // EnvironmentVariables gets all the environment variables specified for the project.
-func EnvironmentVariables(sqscURL, token, project string) (map[string]string, error) {
-	return envVariables(sqscURL, token, project, "")
+func (c *Client) EnvironmentVariables(project string) (map[string]string, error) {
+	return c.envVariables(project, "")
 }
 
 // SetEnvironmentVariables sets all the environment variables specified for the project.
-func SetEnvironmentVariables(sqscURL, token, project string, vars map[string]string) error {
-	url := fmt.Sprintf("%s/projects/%s/environment/custom", sqscURL, project)
-	code, _, err := put(url, token, &jsonObject{"environment": vars})
+func (c *Client) SetEnvironmentVariables(project string, vars map[string]string) error {
+	code, _, err := c.put("/projects/"+project+"/environment/custom", &jsonObject{"environment": vars})
 	if err != nil {
 		return err
 	}
@@ -35,9 +34,8 @@ func SetEnvironmentVariables(sqscURL, token, project string, vars map[string]str
 	return nil
 }
 
-func envVariables(sqscURL, token, project, category string) (map[string]string, error) {
-	url := fmt.Sprintf("%s/projects/%s/environment/%s", sqscURL, project, category)
-	code, body, err := get(url, token)
+func (c *Client) envVariables(project, category string) (map[string]string, error) {
+	code, body, err := c.get("/projects/" + project + "/environment/" + category)
 	if err != nil {
 		return map[string]string{}, err
 	}

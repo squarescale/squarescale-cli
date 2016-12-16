@@ -8,18 +8,18 @@ import (
 )
 
 // DisableLB asks the Squarescale service to deactivate the load balancer.
-func DisableLB(sqscURL, token, project string) error {
+func (c *Client) DisableLB(project string) error {
 	payload := &jsonObject{
 		"project": jsonObject{
 			"load_balancer": false,
 		},
 	}
 
-	return updateLBConfig(sqscURL, token, project, payload)
+	return c.updateLBConfig(project, payload)
 }
 
 // ConfigLB sets the load balancer configuration for a given project.
-func ConfigLB(sqscURL, token, project string, container, port int) error {
+func (c *Client) ConfigLB(project string, container, port int) error {
 	payload := &jsonObject{
 		"project": jsonObject{
 			"load_balancer": true,
@@ -32,12 +32,11 @@ func ConfigLB(sqscURL, token, project string, container, port int) error {
 		},
 	}
 
-	return updateLBConfig(sqscURL, token, project, payload)
+	return c.updateLBConfig(project, payload)
 }
 
-func updateLBConfig(sqscURL, token, project string, payload *jsonObject) error {
-	url := sqscURL + "/projects/" + project + "/web-ports"
-	code, _, err := post(url, token, payload)
+func (c *Client) updateLBConfig(project string, payload *jsonObject) error {
+	code, _, err := c.post("/projects/"+project+"/web-ports", payload)
 	if err != nil {
 		return err
 	}
@@ -54,9 +53,8 @@ func updateLBConfig(sqscURL, token, project string, payload *jsonObject) error {
 }
 
 // LoadBalancerEnabled asks if the project load balancer is enabled.
-func LoadBalancerEnabled(sqscURL, token, project string) (bool, error) {
-	url := sqscURL + "/projects/" + project
-	code, body, err := get(url, token)
+func (c *Client) LoadBalancerEnabled(project string) (bool, error) {
+	code, body, err := c.get("/projects/" + project)
 	if err != nil {
 		return false, err
 	}

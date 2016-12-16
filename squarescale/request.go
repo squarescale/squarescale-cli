@@ -10,24 +10,36 @@ import (
 	"net/http"
 )
 
-// http.client is concurrently safe and should be reused across multiple connections
-var client http.Client
-
 type jsonObject map[string]interface{}
 
-func get(url, token string) (int, []byte, error) {
-	return request("GET", url, token, nil)
+// Client is the basic structure to make API calls to Squarescale services
+type Client struct {
+	httpClient http.Client // http.client is concurrently safe and should be reused across multiple connections
+	endpoint   string
+	token      string
 }
 
-func post(url, token string, payload *jsonObject) (int, []byte, error) {
-	return request("POST", url, token, payload)
+// NewClient creates a new Squarescale client
+func NewClient(endpoint, token string) *Client {
+	return &Client{
+		endpoint: endpoint,
+		token:    token,
+	}
 }
 
-func put(url, token string, payload *jsonObject) (int, []byte, error) {
-	return request("PUT", url, token, payload)
+func (c *Client) get(path string) (int, []byte, error) {
+	return c.request("GET", path, nil)
 }
 
-func request(method, url, token string, payload *jsonObject) (int, []byte, error) {
+func (c *Client) post(path string, payload *jsonObject) (int, []byte, error) {
+	return c.request("POST", path, payload)
+}
+
+func (c *Client) put(path string, payload *jsonObject) (int, []byte, error) {
+	return c.request("PUT", path, payload)
+}
+
+func (c *Client) request(method, path string, payload *jsonObject) (int, []byte, error) {
 	var bodyReader io.Reader
 	if payload != nil {
 		payloadBytes, err := json.Marshal(payload)
@@ -38,16 +50,16 @@ func request(method, url, token string, payload *jsonObject) (int, []byte, error
 		bodyReader = bytes.NewReader(payloadBytes)
 	}
 
-	req, err := http.NewRequest(method, url, bodyReader)
+	req, err := http.NewRequest(method, c.endpoint+path, bodyReader)
 	if err != nil {
 		return 0, []byte{}, err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Authorization", "bearer "+token)
+	req.Header.Set("Authorization", "bearer "+c.token)
 
-	res, err := client.Do(req)
+	res, err := c.httpClient.Do(req)
 	if err != nil {
 		return 0, []byte{}, err
 	}

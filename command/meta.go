@@ -40,17 +40,17 @@ func (m *Meta) errorWithUsage(err error) int {
 	return cli.RunResultHelp
 }
 
-func (m *Meta) runWithSpinner(text, endpoint string, action func(token string) error) error {
+func (m *Meta) runWithSpinner(text, endpoint string, action func(*squarescale.Client) error) error {
 	m.startSpinner()
 	m.spin.Suffix = " " + text
 	defer m.stopSpinner()
 
-	token, err := m.ensureLogin(endpoint)
+	client, err := m.ensureLogin(endpoint)
 	if err != nil {
 		return err
 	}
 
-	return action(token)
+	return action(client)
 }
 
 func (m *Meta) startSpinner() {
@@ -68,16 +68,16 @@ func (m *Meta) stopSpinner() {
 	m.spin.Stop()
 }
 
-func (m *Meta) ensureLogin(endpoint string) (string, error) {
+func (m *Meta) ensureLogin(endpoint string) (*squarescale.Client, error) {
 	token, err := tokenstore.GetToken(endpoint)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	err = squarescale.ValidateToken(endpoint, token)
-	if err != nil {
-		return "", fmt.Errorf("You're not authenticated, please login first (%v)", err)
+	client := squarescale.NewClient(endpoint, token)
+	if err := client.ValidateToken(); err != nil {
+		return nil, fmt.Errorf("You're not authenticated, please login first (%v)", err)
 	}
 
-	return token, nil
+	return client, nil
 }

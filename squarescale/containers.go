@@ -19,9 +19,8 @@ type Container struct {
 }
 
 // GetContainers gets all the containers attached to a Project
-func GetContainers(sqscURL, token, project string) ([]Container, error) {
-	url := fmt.Sprintf("%s/projects/%s/containers", sqscURL, project)
-	code, body, err := get(url, token)
+func (c *Client) GetContainers(project string) ([]Container, error) {
+	code, body, err := c.get("/projects/" + project + "/containers")
 	if err != nil {
 		return []Container{}, err
 	}
@@ -63,8 +62,8 @@ func GetContainers(sqscURL, token, project string) ([]Container, error) {
 }
 
 // GetContainerInfo gets the container of a project based on its short name.
-func GetContainerInfo(sqscURL, token, project, shortName string) (Container, error) {
-	containers, err := GetContainers(sqscURL, token, project)
+func (c *Client) GetContainerInfo(project, shortName string) (Container, error) {
+	containers, err := c.GetContainers(project)
 	if err != nil {
 		return Container{}, err
 	}
@@ -79,8 +78,7 @@ func GetContainerInfo(sqscURL, token, project, shortName string) (Container, err
 }
 
 // ConfigContainer calls the API to update the number of instances and update command.
-func ConfigContainer(sqscURL, token string, container Container) error {
-	url := fmt.Sprintf("%s/containers/%d", sqscURL, container.ID)
+func (c *Client) ConfigContainer(container Container) error {
 	payload := &jsonObject{
 		"container": jsonObject{
 			"size":        container.Size,
@@ -88,7 +86,7 @@ func ConfigContainer(sqscURL, token string, container Container) error {
 		},
 	}
 
-	code, _, err := put(url, token, payload)
+	code, _, err := c.put(fmt.Sprintf("/containers/%d", container.ID), payload)
 	if err != nil {
 		return err
 	}

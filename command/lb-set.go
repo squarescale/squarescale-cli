@@ -32,13 +32,13 @@ func (c *LBSetCommand) Run(args []string) int {
 	}
 
 	var msg string
-	err := c.runWithSpinner("configure load balancer", *endpoint, func(token string) error {
+	err := c.runWithSpinner("configure load balancer", *endpoint, func(client *squarescale.Client) error {
 		if *disabledArg {
 			msg = fmt.Sprintf("Successfully disabled load balancer for project '%s'", *project)
-			return squarescale.DisableLB(*endpoint, token, *project)
+			return client.DisableLB(*project)
 		}
 
-		container, err := squarescale.GetContainerInfo(*endpoint, token, *project, *containerArg)
+		container, err := client.GetContainerInfo(*project, *containerArg)
 		if err != nil {
 			return err
 		}
@@ -51,7 +51,7 @@ func (c *LBSetCommand) Run(args []string) int {
 			"Successfully configured load balancer (enabled = '%v', container = '%s', port = '%d') for project '%s'",
 			true, *containerArg, container.WebPort, *project)
 
-		return squarescale.ConfigLB(*endpoint, token, *project, container.ID, container.WebPort)
+		return client.ConfigLB(*project, container.ID, container.WebPort)
 	})
 
 	if err != nil {

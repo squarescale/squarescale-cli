@@ -9,8 +9,8 @@ import (
 )
 
 // CheckProjectName asks the Squarescale service to validate a given project name.
-func CheckProjectName(sqscURL, token, name string) (valid bool, same bool, fmtName string, err error) {
-	code, body, err := post(sqscURL+"/free_name", token, &jsonObject{"name": name})
+func (c *Client) CheckProjectName(name string) (valid bool, same bool, fmtName string, err error) {
+	code, body, err := c.post("/free_name", &jsonObject{"name": name})
 	if err != nil {
 		return
 	}
@@ -35,8 +35,8 @@ func CheckProjectName(sqscURL, token, name string) (valid bool, same bool, fmtNa
 }
 
 // FindProjectName asks the Squarescale service for a project name, using the provided token.
-func FindProjectName(sqscURL, token string) (string, error) {
-	code, body, err := get(sqscURL+"/free_name", token)
+func (c *Client) FindProjectName() (string, error) {
+	code, body, err := c.get("/free_name")
 	if code != http.StatusOK {
 		return "", unexpectedError(code)
 	}
@@ -54,14 +54,14 @@ func FindProjectName(sqscURL, token string) (string, error) {
 }
 
 // CreateProject asks the Squarescale platform to create a new project, using the provided name and user token.
-func CreateProject(sqscURL, token, name string) error {
+func (c *Client) CreateProject(name string) error {
 	payload := &jsonObject{
 		"project": jsonObject{
 			"name": name,
 		},
 	}
 
-	code, body, err := post(sqscURL+"/projects", token, payload)
+	code, body, err := c.post("/projects", payload)
 	if err != nil {
 		return err
 	}
@@ -82,8 +82,8 @@ func CreateProject(sqscURL, token, name string) error {
 }
 
 // ListProjects asks the Squarescale service for available projects.
-func ListProjects(sqscURL, token string) ([]string, error) {
-	code, body, err := get(sqscURL+"/projects", token)
+func (c *Client) ListProjects() ([]string, error) {
+	code, body, err := c.get("/projects")
 	if err != nil {
 		return []string{}, err
 	}
@@ -109,8 +109,8 @@ func ListProjects(sqscURL, token string) ([]string, error) {
 }
 
 // ProjectURL asks the Squarescale service the url of the project if available, using the provided token.
-func ProjectURL(sqscURL, token, project string) (string, error) {
-	code, body, err := get(sqscURL+"/projects/"+project+"/url", token)
+func (c *Client) ProjectURL(project string) (string, error) {
+	code, body, err := c.get("/projects/" + project + "/url")
 	if err != nil {
 		return "", err
 	}
@@ -139,14 +139,13 @@ func ProjectURL(sqscURL, token, project string) (string, error) {
 }
 
 // ProjectLogs gets the logs for a project container.
-func ProjectLogs(sqscURL, token, project, container, after string) ([]string, string, error) {
+func (c *Client) ProjectLogs(project, container, after string) ([]string, string, error) {
 	query := ""
 	if after != "" {
 		query = "?after=" + url.QueryEscape(after)
 	}
 
-	url := sqscURL + "/projects/" + project + "/logs/" + url.QueryEscape(container) + query
-	code, body, err := get(url, token)
+	code, body, err := c.get("/projects/" + project + "/logs/" + url.QueryEscape(container) + query)
 	if err != nil {
 		return []string{}, "", err
 	}
