@@ -9,24 +9,18 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
+// LogsCommand outputs the logs of a container for a given project.
 type LogsCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
-func ContainerFlag(f *flag.FlagSet) *string {
-	return f.String("container", "", "Optional container short url to filter logs, ex: <githubuser>/<repository>")
-}
-
-func FollowFlag(f *flag.FlagSet) *string {
-	return f.String("f", "", "Follow logs")
-}
-
+// Run is part of cli.Command implementation.
 func (c *LogsCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	project := projectFlag(c.flagSet)
-	container := ContainerFlag(c.flagSet)
+	container := containerFlag(c.flagSet)
 	var follow bool
 	c.flagSet.BoolVar(&follow, "f", false, "Wait for next logs")
 	if err := c.flagSet.Parse(args); err != nil {
@@ -99,15 +93,18 @@ func getLogsAfter(client *squarescale.Client, project, container, last string) (
 	return msg, lastTimestamp, nil
 }
 
+// Synopsis is part of cli.Command implementation.
 func (c *LogsCommand) Synopsis() string {
 	return "Display last logs of a Squarescale project or one specific container"
 }
 
+// Help is part of cli.Command implementation.
 func (c *LogsCommand) Help() string {
 	helpText := `
 usage: sqsc logs [options]
 
   Display last logs of the specified Squarescale project.
+  Container short url to filter logs follows the pattern: <user>/<repository>
 
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
