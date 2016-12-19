@@ -10,16 +10,16 @@ help: ## This help
 build: deps ## Build CLI (./sqsc binary)
 	go build -o sqsc -ldflags "-X main.GitCommit=\"$(COMMIT)\""
 
+deps: ## Install dependencies inside $GOPATH
+	go get ./...
+
 docker:
 	GOOS=linux CGO_ENABLED=0 go build -o sqsc-docker -ldflags "-X main.GitCommit=\"$(COMMIT)\""
 	docker build -t sqsc-cli .
 
-clean: ## Clean repository
-	go clean
-	rm -f sqsc sqsc-docker
 
-deps: ## Install dependencies inside $GOPATH
-	go get ./...
+clean: ## Clean repository
+	go clean && rm -f sqsc sqsc-*
 
 lint: ## Lint Docker
 	docker run --rm -v $$PWD:/root/ projectatomic/dockerfile-lint dockerfile_lint
