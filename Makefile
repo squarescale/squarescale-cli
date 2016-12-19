@@ -1,4 +1,9 @@
-COMMIT = $$(git describe --always)
+COMMIT      = $$(git describe --always)
+GO_LD_FLAGS = -ldflags "-X main.GitCommit=\"$(COMMIT)\""
+GO_CMD      = go build -v $(GO_LD_FLAGS)
+DOCKER_CMD  = docker run --rm
+MOUNT_POINT = /go/src/github.com/squarescale/squarescale-cli
+MOUNT_FLAGS = -v "$(PWD)":"$(MOUNT_POINT)" -w "$(MOUNT_POINT)"
 
 .PHONY: all
 
@@ -17,6 +22,13 @@ docker:
 	GOOS=linux CGO_ENABLED=0 go build -o sqsc-docker -ldflags "-X main.GitCommit=\"$(COMMIT)\""
 	docker build -t sqsc-cli .
 
+docker-linux-amd64: ## Compile for linux-amd64 in a container
+	$(DOCKER_CMD) $(MOUNT_FLAGS) -e GOOS=linux -e GOARCH=amd64 golang:1.7 $(GO_CMD) -o sqsc-linux-amd64
+
+docker-darwin-amd64: ## Compile for darwin-amd64 in a container
+	$(DOCKER_CMD) $(MOUNT_FLAGS) -e GOOS=darwin -e GOARCH=amd64 golang:1.7 $(GO_CMD) -o sqsc-darwin-amd64
+
+generate: docker-linux-amd64 docker-darwin-amd64
 
 clean: ## Clean repository
 	go clean && rm -f sqsc sqsc-*
