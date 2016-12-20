@@ -18,6 +18,10 @@ build: deps ## Build CLI (./sqsc binary)
 deps: ## Install dependencies inside $GOPATH
 	go get ./...
 
+build-docker: build
+	CGO_ENABLED=0 $(GO_CMD) -o sqsc-docker
+	docker build -t sqsc-cli .
+
 docker-linux-amd64: ## Compile for linux-amd64 in a container
 	$(DOCKER_CMD) $(MOUNT_FLAGS) -e GOOS=linux -e GOARCH=amd64 golang:1.7 $(GO_CMD) -o sqsc-linux-amd64
 
@@ -30,4 +34,8 @@ publish: generate
 	bash publish.sh
 
 clean: ## Clean repository
-	go clean && rm -f sqsc sqsc-*-*
+	go clean && rm -f sqsc sqsc-*
+
+lint: ## Lint Docker
+	docker run --rm -v $$PWD:/root/ projectatomic/dockerfile-lint dockerfile_lint
+	hadolint Dockerfile
