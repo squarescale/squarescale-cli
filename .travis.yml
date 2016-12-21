@@ -7,11 +7,13 @@ before_install:
   - ./write_netrc.sh
   - cp .netrc ~
   - chmod 600 .netrc
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq python3
+  - pip3 install requests
 
 script:
   - make publish
 
 services:
   - docker
+
+notifications:
+  email: false
