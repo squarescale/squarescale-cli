@@ -1,12 +1,17 @@
 language: go
+
 go:
-  - tip
+  - 1.7.1
+
 before_install:
   - ./write_netrc.sh
   - cp .netrc ~
   - chmod 600 .netrc
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq python3
+
 script:
-  - docker run --rm -i sjourdan/hadolint < Dockerfile
-  - docker run --rm -v $PWD:/root/ projectatomic/dockerfile-lint dockerfile_lint
+  - make publish
+
 services:
   - docker
