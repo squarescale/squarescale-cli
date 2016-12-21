@@ -11,6 +11,7 @@ user  = user_token.split(":")[0]
 token = user_token.split(":")[1]
 
 # Get all releases
+print("Retrieve all releases...")
 url = "https://api.github.com/repos/squarescale/squarescale-cli/releases"
 releases = requests.get(url, auth=(user, token))
 if releases.status_code != 200:
@@ -18,6 +19,7 @@ if releases.status_code != 200:
     sys.exit(1)
 
 # Clear all previous drafts
+print("Remove old release drafts...")
 for release in releases.json():
     if release["draft"]:
         delete_url = url + "/" + str(release["id"])
@@ -37,6 +39,7 @@ if git_sha_1_process.returncode != 0:
 git_sha_1 = git_sha_1_process.stdout.replace("\n", "")
 
 # Create new release
+print("Create new release draft...")
 headers = { "Content-Type": "application/json" }
 data = {
     "tag_name": git_sha_1,
@@ -53,6 +56,7 @@ release_id = str(created.json()["id"])
 
 # Push executable contents
 for executable in ["sqsc-linux-amd64", "sqsc-darwin-amd64"]:
+    print("Push executable " + executable + " to release draft...")
     params = { "name": executable }
     headers = { "Content-Type": "application/octet-stream" }
     upload_url = "https://uploads.github.com/repos/squarescale/squarescale-cli/releases/" + release_id + "/assets"
@@ -67,3 +71,5 @@ for executable in ["sqsc-linux-amd64", "sqsc-darwin-amd64"]:
         if uploaded.status_code != 201:
             print("Error: Upload " + executable + " " + str(uploaded.status_code))
             sys.exit(1)
+
+print("Done.")
