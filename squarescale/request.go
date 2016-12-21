@@ -10,6 +10,8 @@ import (
 	"net/http"
 )
 
+const supportedAPI string = "v1"
+
 type jsonObject map[string]interface{}
 
 // Client is the basic structure to make API calls to Squarescale services
@@ -58,6 +60,7 @@ func (c *Client) request(method, path string, payload *jsonObject) (int, []byte,
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Authorization", "bearer "+c.token)
+	req.Header.Set("API-Version", supportedAPI)
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {
