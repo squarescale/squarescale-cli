@@ -31,7 +31,7 @@ docker-darwin-amd64: ## Compile for darwin-amd64 in a container
 generate: docker-linux-amd64 docker-darwin-amd64
 
 publish: generate
-	bash publish.sh
+	python3 publish.py
 
 clean: ## Clean repository
 	go clean && rm -f sqsc sqsc-*
