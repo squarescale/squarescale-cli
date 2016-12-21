@@ -1,23 +1,19 @@
 language: go
-
 go:
-  - 1.7.1
-
+- 1.7.1
 before_install:
-  - ./write_netrc.sh
-  - cp .netrc ~
-  - chmod 600 .netrc
-  - pip3 install requests
-
+- "./write_netrc.sh"
+- cp .netrc ~
+- chmod 600 .netrc
+- pip3 install requests
 script:
-  - make publish
-
+- make publish
 services:
-  - docker
-
+- docker
 notifications:
   email: false
-
+  slack:
+    secure: FjdpcgpybUeV+CxNCcAbbN4GbOR5hgV5L7e/3j0Wu9h8l45d0t7XvR6p9IPRoQP5dazoS8RqJ9blmAXazB+k0akNy9daX2DZfyZEopxP3UUJTL7F8qx1uqs4ykjTqrfjYIuhAbYE3vGlA4JmrY/00kla+hEP6Coc2EArhjzYI6K8JW6y9fvl7nd9POV//xdDCVkpWaPt/RzVMG6kDrbxnDXqgGxcOjaCSiwjddTpdZhzD7X77Wqf5l1FUreGIE6kAaUCDzVPcpwq3QFFUV2n7eBr18RMzF73F6w9iEBtLe1Yq9CXhDIGsnYIilwxVzDv65ZHuwH+6HIkyH6DTf0kzLM7F2ZQmkdFIpEWoKWwEslzKEXs4XpeRJ2gilErvl0t96vbjOdhOXKjHY+2t4i+x9kHV/a9mm9+o7JKmboqz0PLA3KCuhyX/xpQSAwz0r8YJHQLwZqc01bzuvC/OAlYd2jyjYgWnWzwbvtqbnKIRzDT5Gln+Q9ASUTK6u11CUitTEMJQGzopQtJRli8K/9zQdsm91BJkR2TnNYB8jiTPvtN0z5kk1VFDP4wLYfBde7HlZ264RnFF13H3d3dcCcMzHGHWrrttMG8/Oze4U9HdQe/2F1b0/4CkgVVixrG6vuWv2BvHy4sHLmlcirydm2fkNy1XvbBx+5+B2a/Tt+QLlg=
 branches:
   only:
   - master
