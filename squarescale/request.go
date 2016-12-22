@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-const supportedAPI string = "v1"
+const supportedAPI string = "1"
 
 type jsonObject map[string]interface{}
 
