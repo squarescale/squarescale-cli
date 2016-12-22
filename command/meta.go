@@ -76,7 +76,7 @@ func (m *Meta) ensureLogin(endpoint string) (*squarescale.Client, error) {
 
 	client := squarescale.NewClient(endpoint, token)
 	if err := client.ValidateToken(); err != nil {
-		return nil, fmt.Errorf("You're not authenticated, please login first (%v)", err)
+		return nil, err
 	}
 
 	return client, nil
