@@ -50,14 +50,9 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 			}
 
 			if !same {
-				c.pauseSpinner()
-				c.Ui.Warn(fmt.Sprintf("Project will be created as '%s', is this ok?", fmtName))
-				_, err := c.Ui.Ask("Enter to accept, Ctrl-c to cancel:")
-				if err != nil {
+				if err := c.askConfirmName(fmtName); err != nil {
 					return err
 				}
-
-				c.startSpinner()
 			}
 
 			definitiveName = fmtName
@@ -65,6 +60,10 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		} else {
 			generatedName, err := client.FindProjectName()
 			if err != nil {
+				return err
+			}
+
+			if err := c.askConfirmName(generatedName); err != nil {
 				return err
 			}
 
@@ -96,4 +95,16 @@ usage: sqsc project create [options] <project_name>
 
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+}
+
+func (c *ProjectCreateCommand) askConfirmName(name string) error {
+	c.pauseSpinner()
+	c.Ui.Warn(fmt.Sprintf("Project will be created as '%s', is this ok?", name))
+	_, err := c.Ui.Ask("Enter to accept, Ctrl-c to cancel:")
+	if err != nil {
+		return err
+	}
+
+	c.startSpinner()
+	return nil
 }
