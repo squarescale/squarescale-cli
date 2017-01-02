@@ -38,21 +38,18 @@ func (c *DBSetCommand) Run(args []string) int {
 		return c.error(err)
 	}
 
-	var msg string
-	err = c.runWithSpinner("scale project database", *endpoint, func(client *squarescale.Client) error {
+	return c.runWithSpinner("scale project database", *endpoint, func(client *squarescale.Client) (string, error) {
 		enabled, engine, instance, e := client.GetDBConfig(*projectNameArg)
 		if e != nil {
-			return e
+			return "", e
 		}
 
 		if *dbDisabledArg && !enabled {
-			msg = fmt.Sprintf("Database for project '%s' is already disabled", *projectNameArg)
-			return nil
+			return fmt.Sprintf("Database for project '%s' is already disabled", *projectNameArg), nil
 		}
 
 		if *dbEngineArg == engine && *dbInstanceArg == instance {
-			msg = fmt.Sprintf("Database for project '%s' is already configured with these parameters", *projectNameArg)
-			return nil
+			return fmt.Sprintf("Database for project '%s' is already configured with these parameters", *projectNameArg), nil
 		}
 
 		if *dbEngineArg != "" {
@@ -63,6 +60,7 @@ func (c *DBSetCommand) Run(args []string) int {
 			instance = *dbInstanceArg
 		}
 
+		var msg string
 		if *dbDisabledArg {
 			msg = fmt.Sprintf("Successfully disabled database for project '%s'", *projectNameArg)
 		} else {
@@ -72,14 +70,8 @@ func (c *DBSetCommand) Run(args []string) int {
 		}
 
 		enabled = !(*dbDisabledArg)
-		return client.ConfigDB(*projectNameArg, enabled, engine, instance)
+		return msg, client.ConfigDB(*projectNameArg, enabled, engine, instance)
 	})
-
-	if err != nil {
-		return c.error(err)
-	}
-
-	return c.info(msg)
 }
 
 // Synopsis is part of cli.Command implementation.

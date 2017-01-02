@@ -40,17 +40,24 @@ func (m *Meta) errorWithUsage(err error) int {
 	return cli.RunResultHelp
 }
 
-func (m *Meta) runWithSpinner(text, endpoint string, action func(*squarescale.Client) error) error {
+func (m *Meta) runWithSpinner(text, endpoint string, action func(*squarescale.Client) (string, error)) int {
 	m.startSpinner()
 	m.spin.Suffix = " " + text
-	defer m.stopSpinner()
 
 	client, err := m.ensureLogin(endpoint)
 	if err != nil {
-		return err
+		m.stopSpinner()
+		return m.error(err)
 	}
 
-	return action(client)
+	finalMsg, err := action(client)
+	if err != nil {
+		m.stopSpinner()
+		return m.error(err)
+	}
+
+	m.stopSpinner()
+	return m.info(finalMsg)
 }
 
 func (m *Meta) startSpinner() {

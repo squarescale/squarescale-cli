@@ -21,26 +21,19 @@ func (c *ProjectListCommand) Run(args []string) int {
 		return 1
 	}
 
-	var msg string
-	err := c.runWithSpinner("list projects", *endpoint, func(client *squarescale.Client) error {
-		projects, e := client.ListProjects()
-		if e != nil {
-			return e
+	return c.runWithSpinner("list projects", *endpoint, func(client *squarescale.Client) (string, error) {
+		projects, err := client.ListProjects()
+		if err != nil {
+			return "", err
 		}
 
-		msg = strings.Join(projects, "\n")
+		msg := strings.Join(projects, "\n")
 		if len(projects) == 0 {
 			msg = "No projects found"
 		}
 
-		return nil
+		return msg, nil
 	})
-
-	if err != nil {
-		return c.error(err)
-	}
-
-	return c.info(msg)
 }
 
 // Synopsis is part of cli.Command implementation.

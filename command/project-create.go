@@ -24,23 +24,24 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		return 1
 	}
 
-	var definitiveName string
-	err := c.runWithSpinner("create project", *endpoint, func(client *squarescale.Client) error {
+	return c.runWithSpinner("create project", *endpoint, func(client *squarescale.Client) (string, error) {
+		var definitiveName string
+
 		if *wantedProjectName != "" {
 			valid, same, fmtName, err := client.CheckProjectName(*wantedProjectName)
 			if err != nil {
-				return fmt.Errorf("Cannot validate project name '%s'", *wantedProjectName)
+				return "", fmt.Errorf("Cannot validate project name '%s'", *wantedProjectName)
 			}
 
 			if !valid {
-				return fmt.Errorf(
+				return "", fmt.Errorf(
 					"Project name '%s' is invalid (already taken or not well formed), please choose another one",
 					*wantedProjectName)
 			}
 
 			if !same {
 				if err := c.askConfirmName(fmtName); err != nil {
-					return err
+					return "", err
 				}
 			}
 
@@ -49,24 +50,18 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		} else {
 			generatedName, err := client.FindProjectName()
 			if err != nil {
-				return err
+				return "", err
 			}
 
 			if err := c.askConfirmName(generatedName); err != nil {
-				return err
+				return "", err
 			}
 
 			definitiveName = generatedName
 		}
 
-		return client.CreateProject(definitiveName)
+		return fmt.Sprintf("Created project '%s'", definitiveName), client.CreateProject(definitiveName)
 	})
-
-	if err != nil {
-		return c.error(err)
-	}
-
-	return c.info(fmt.Sprintf("Created project '%s'", definitiveName))
 }
 
 // Synopsis is part of cli.Command implementation.

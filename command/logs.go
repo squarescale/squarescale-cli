@@ -32,7 +32,6 @@ func (c *LogsCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	var msg string
 	var waitText string
 	if *container == "" {
 		waitText = fmt.Sprintf("last logs for project '%s'", *project)
@@ -41,19 +40,18 @@ func (c *LogsCommand) Run(args []string) int {
 	}
 
 	var sqscClient *squarescale.Client
+	var msg string
 	var last string
-	err = c.runWithSpinner(waitText, *endpoint, func(client *squarescale.Client) error {
-		var e error
+	retCode := c.runWithSpinner(waitText, *endpoint, func(client *squarescale.Client) (string, error) {
 		sqscClient = client
-		msg, last, e = getLogs(client, *project, *container)
-		return e
+		msg, last, err = getLogs(client, *project, *container)
+		return msg, err
 	})
 
-	if err != nil {
-		return c.error(err)
+	if retCode != 0 {
+		return retCode
 	}
 
-	c.info(msg)
 	if !follow {
 		return 0
 	}
@@ -64,6 +62,7 @@ func (c *LogsCommand) Run(args []string) int {
 		if err != nil {
 			return c.error(err)
 		}
+
 		if msg != "" {
 			c.info(msg)
 		}

@@ -31,34 +31,27 @@ func (c *LBSetCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	var msg string
-	err := c.runWithSpinner("configure load balancer", *endpoint, func(client *squarescale.Client) error {
+	return c.runWithSpinner("configure load balancer", *endpoint, func(client *squarescale.Client) (string, error) {
 		if *disabledArg {
-			msg = fmt.Sprintf("Successfully disabled load balancer for project '%s'", *project)
-			return client.DisableLB(*project)
+			return fmt.Sprintf("Successfully disabled load balancer for project '%s'", *project), client.DisableLB(*project)
 		}
 
 		container, err := client.GetContainerInfo(*project, *containerArg)
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		if *portArg > 0 {
 			container.WebPort = *portArg
 		}
 
-		msg = fmt.Sprintf(
+		msg := fmt.Sprintf(
 			"Successfully configured load balancer (enabled = '%v', container = '%s', port = '%d') for project '%s'",
 			true, *containerArg, container.WebPort, *project)
 
-		return client.ConfigLB(*project, container.ID, container.WebPort)
+		err = client.ConfigLB(*project, container.ID, container.WebPort)
+		return msg, err
 	})
-
-	if err != nil {
-		return c.error(err)
-	}
-
-	return c.info(msg)
 }
 
 // Synopsis is part of cli.Command implementation.
