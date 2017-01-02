@@ -27,22 +27,14 @@ func (c *LBURLCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	var msg string
-	err := c.runWithSpinner("project url", *endpoint, func(client *squarescale.Client) error {
+	return c.runWithSpinner("project url", *endpoint, func(client *squarescale.Client) (string, error) {
 		url, err := client.ProjectURL(*project)
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		msg = fmt.Sprintf("Project '%s' is available at %s", *project, url)
-		return nil
+		return fmt.Sprintf("Project '%s' is available at %s", *project, url), nil
 	})
-
-	if err != nil {
-		return c.error(err)
-	}
-
-	return c.info(msg)
 }
 
 // Synopsis is part of cli.Command implementation.

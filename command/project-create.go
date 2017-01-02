@@ -1,7 +1,6 @@
 package command
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -20,44 +19,30 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	// Parse flags
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
+	wantedProjectName := projectNameFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	// Check for a project name
-	var wantedProjectName string
-	args = c.flagSet.Args()
-	switch len(args) {
-	case 0:
-	case 1:
-		wantedProjectName = args[0]
-	default:
-		return c.errorWithUsage(errors.New("Too many command line arguments"))
-	}
+	return c.runWithSpinner("create project", *endpoint, func(client *squarescale.Client) (string, error) {
+		var definitiveName string
 
-	var definitiveName string
-	err := c.runWithSpinner("create project", *endpoint, func(client *squarescale.Client) error {
-		if wantedProjectName != "" {
-			valid, same, fmtName, err := client.CheckProjectName(wantedProjectName)
+		if *wantedProjectName != "" {
+			valid, same, fmtName, err := client.CheckProjectName(*wantedProjectName)
 			if err != nil {
-				return fmt.Errorf("Cannot validate project name '%s'", wantedProjectName)
+				return "", fmt.Errorf("Cannot validate project name '%s'", *wantedProjectName)
 			}
 
 			if !valid {
-				return fmt.Errorf(
+				return "", fmt.Errorf(
 					"Project name '%s' is invalid (already taken or not well formed), please choose another one",
-					wantedProjectName)
+					*wantedProjectName)
 			}
 
 			if !same {
-				c.pauseSpinner()
-				c.Ui.Warn(fmt.Sprintf("Project will be created as '%s', is this ok?", fmtName))
-				_, err := c.Ui.Ask("Enter to accept, Ctrl-c to cancel:")
-				if err != nil {
-					return err
+				if err := c.askConfirmName(fmtName); err != nil {
+					return "", err
 				}
-
-				c.startSpinner()
 			}
 
 			definitiveName = fmtName
@@ -65,20 +50,18 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		} else {
 			generatedName, err := client.FindProjectName()
 			if err != nil {
-				return err
+				return "", err
+			}
+
+			if err := c.askConfirmName(generatedName); err != nil {
+				return "", err
 			}
 
 			definitiveName = generatedName
 		}
 
-		return client.CreateProject(definitiveName)
+		return fmt.Sprintf("Created project '%s'", definitiveName), client.CreateProject(definitiveName)
 	})
-
-	if err != nil {
-		return c.error(err)
-	}
-
-	return c.info(fmt.Sprintf("Created project '%s'", definitiveName))
 }
 
 // Synopsis is part of cli.Command implementation.
@@ -96,4 +79,16 @@ usage: sqsc project create [options] <project_name>
 
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+}
+
+func (c *ProjectCreateCommand) askConfirmName(name string) error {
+	c.pauseSpinner()
+	c.Ui.Warn(fmt.Sprintf("Project will be created as '%s', is this ok?", name))
+	_, err := c.Ui.Ask("Enter to accept, Ctrl-c to cancel:")
+	if err != nil {
+		return err
+	}
+
+	c.startSpinner()
+	return nil
 }

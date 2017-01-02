@@ -36,15 +36,10 @@ func (c *RepositoryAddCommand) Run(args []string) int {
 	}
 
 	label := fmt.Sprintf("add repository '%s' to project '%s'", gitRemote, *project)
-	err = c.runWithSpinner(label, *endpoint, func(client *squarescale.Client) error {
-		return client.AddRepository(*project, gitRemote)
+	return c.runWithSpinner(label, *endpoint, func(client *squarescale.Client) (string, error) {
+		msg := fmt.Sprintf("Successfully added repository '%s' to project '%s'", gitRemote, *project)
+		return msg, client.AddRepository(*project, gitRemote)
 	})
-
-	if err != nil {
-		return c.error(err)
-	}
-
-	return c.info(fmt.Sprintf("Successfully added repository '%s' to project '%s'", gitRemote, *project))
 }
 
 // Synopsis is part of cli.Command implementation.

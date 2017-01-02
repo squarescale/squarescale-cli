@@ -22,30 +22,23 @@ func (c *DBListCommand) Run(args []string) int {
 		return 1
 	}
 
-	var msg string
-	err := c.runWithSpinner("list available database engines and instances", *endpoint, func(client *squarescale.Client) error {
+	return c.runWithSpinner("list available database engines and instances", *endpoint, func(client *squarescale.Client) (string, error) {
 		engines, err := client.GetAvailableDBEngines()
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		msg += fmtDBListOutput("Available engines", engines)
+		msg := fmtDBListOutput("Available engines", engines)
 
 		instances, err := client.GetAvailableDBInstances()
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		msg += "\n\n"
 		msg += fmtDBListOutput("Available instances", instances)
-		return nil
+		return msg, nil
 	})
-
-	if err != nil {
-		return c.error(err)
-	}
-
-	return c.info(msg)
 }
 
 // Synopsis is part of cli.Command implementation.

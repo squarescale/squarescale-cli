@@ -44,33 +44,23 @@ func (c *EnvSetCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	err := c.runWithSpinner("set environment variable", *endpoint, func(client *squarescale.Client) error {
+	return c.runWithSpinner("set environment variable", *endpoint, func(client *squarescale.Client) (string, error) {
 		vars, err := client.CustomEnvironmentVariables(*project)
 		if err != nil {
-			return err
+			return "", err
 		}
 
+		var msg string
 		if *remove {
+			msg = fmt.Sprintf("Successfully removed variable '%s'", key)
 			delete(vars, key)
 		} else {
+			msg = fmt.Sprintf("Successfully set variable '%s' to value '%s'", key, value)
 			vars[key] = value
 		}
 
-		return client.SetEnvironmentVariables(*project, vars)
+		return msg, client.SetEnvironmentVariables(*project, vars)
 	})
-
-	if err != nil {
-		return c.error(err)
-	}
-
-	var msg string
-	if *remove {
-		msg = fmt.Sprintf("Successfully removed variable '%s'", key)
-	} else {
-		msg = fmt.Sprintf("Successfully set variable '%s' to value '%s'", key, value)
-	}
-
-	return c.info(msg)
 }
 
 // Synopsis is part of cli.Command implementation.

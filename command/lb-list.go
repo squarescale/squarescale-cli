@@ -27,27 +27,26 @@ func (c *LBListCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	var msg string
-	err := c.runWithSpinner("list load balancer config", *endpoint, func(client *squarescale.Client) error {
+	return c.runWithSpinner("list load balancer config", *endpoint, func(client *squarescale.Client) (string, error) {
 		enabled, err := client.LoadBalancerEnabled(*project)
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		msg = "state: enabled"
+		msg := "state: enabled"
 		if !enabled {
 			msg = "state: disabled"
-			return nil
+			return msg, nil
 		}
 
 		containers, err := client.GetContainers(*project)
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		if len(containers) == 0 {
 			msg += "\n"
-			return nil
+			return msg, nil
 		}
 
 		checkedChars := map[bool]string{false: " ", true: "✓"}
@@ -59,14 +58,8 @@ func (c *LBListCommand) Run(args []string) int {
 
 		msg += " ([✓] -> maps to <container>:<port>, no mapping otherwise)\n\n"
 		msg += strings.Join(msgBody, "\n")
-		return nil
+		return msg, nil
 	})
-
-	if err != nil {
-		return c.error(err)
-	}
-
-	return c.info(msg)
 }
 
 // Synopsis is part of cli.Command implementation.

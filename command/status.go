@@ -21,15 +21,9 @@ func (c *StatusCommand) Run(args []string) int {
 		return 1
 	}
 
-	err := c.runWithSpinner("check authorization", *endpoint, func(client *squarescale.Client) error {
-		return nil // do nothing as we are already authenticated here.
+	return c.runWithSpinner("check authorization", *endpoint, func(client *squarescale.Client) (string, error) {
+		return "You're currently logged in", nil // do nothing as we are already authenticated here.
 	})
-
-	if err != nil {
-		return c.error(err)
-	}
-
-	return c.info("You're currently logged in")
 }
 
 // Synopsis is part of cli.Command implementation.

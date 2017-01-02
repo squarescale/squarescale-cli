@@ -46,11 +46,10 @@ func (c *ContainerSetCommand) Run(args []string) int {
 		}
 	}
 
-	var msg string
-	err := c.runWithSpinner("configure container", *endpoint, func(client *squarescale.Client) error {
+	return c.runWithSpinner("configure container", *endpoint, func(client *squarescale.Client) (string, error) {
 		container, err := client.GetContainerInfo(*projectArg, *containerArg)
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		if *nInstancesArg > 0 {
@@ -61,18 +60,12 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			container.Command = *updateCmdArg
 		}
 
-		msg = fmt.Sprintf(
+		msg := fmt.Sprintf(
 			"Successfully configured container (instances = '%d', command = '%s') '%s' for project '%s'",
 			container.Size, container.Command, *containerArg, *projectArg)
 
-		return client.ConfigContainer(container)
+		return msg, client.ConfigContainer(container)
 	})
-
-	if err != nil {
-		return c.error(err)
-	}
-
-	return c.info(msg)
 }
 
 // Synopsis is part of cli.Command implementation.
