@@ -1,7 +1,6 @@
 package command
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -20,33 +19,23 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	// Parse flags
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
+	wantedProjectName := projectNameFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	// Check for a project name
-	var wantedProjectName string
-	args = c.flagSet.Args()
-	switch len(args) {
-	case 0:
-	case 1:
-		wantedProjectName = args[0]
-	default:
-		return c.errorWithUsage(errors.New("Too many command line arguments"))
-	}
-
 	var definitiveName string
 	err := c.runWithSpinner("create project", *endpoint, func(client *squarescale.Client) error {
-		if wantedProjectName != "" {
-			valid, same, fmtName, err := client.CheckProjectName(wantedProjectName)
+		if *wantedProjectName != "" {
+			valid, same, fmtName, err := client.CheckProjectName(*wantedProjectName)
 			if err != nil {
-				return fmt.Errorf("Cannot validate project name '%s'", wantedProjectName)
+				return fmt.Errorf("Cannot validate project name '%s'", *wantedProjectName)
 			}
 
 			if !valid {
 				return fmt.Errorf(
 					"Project name '%s' is invalid (already taken or not well formed), please choose another one",
-					wantedProjectName)
+					*wantedProjectName)
 			}
 
 			if !same {

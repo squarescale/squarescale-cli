@@ -16,6 +16,10 @@ func projectFlag(f *flag.FlagSet) *string {
 	return f.String("project", "", "Squarescale project")
 }
 
+func projectNameFlag(f *flag.FlagSet) *string {
+	return f.String("name", "", "Project name")
+}
+
 func containerFlag(f *flag.FlagSet) *string {
 	return f.String("container", "", "Container to configure")
 }
