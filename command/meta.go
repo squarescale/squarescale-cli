@@ -2,7 +2,6 @@ package command
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/briandowns/spinner"
@@ -31,7 +30,7 @@ func (m *Meta) info(message string) int {
 }
 
 func (m *Meta) error(err error) int {
-	m.Ui.Error(fmt.Sprintf("Error: %v", err))
+	m.Ui.Error(err.Error())
 	return 1
 }
 
@@ -46,13 +45,13 @@ func (m *Meta) runWithSpinner(text, endpoint string, action func(*squarescale.Cl
 
 	client, err := m.ensureLogin(endpoint)
 	if err != nil {
-		m.stopSpinner()
+		m.errorSpinner()
 		return m.error(err)
 	}
 
 	finalMsg, err := action(client)
 	if err != nil {
-		m.stopSpinner()
+		m.errorSpinner()
 		return m.error(err)
 	}
 
@@ -72,6 +71,11 @@ func (m *Meta) pauseSpinner() {
 
 func (m *Meta) stopSpinner() {
 	m.spin.FinalMSG = "... done\n"
+	m.spin.Stop()
+}
+
+func (m *Meta) errorSpinner() {
+	m.spin.FinalMSG = "... error\n"
 	m.spin.Stop()
 }
 
