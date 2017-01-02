@@ -15,7 +15,7 @@ func (c *Client) CheckProjectName(name string) (valid bool, same bool, fmtName s
 		return
 	}
 
-	if code != http.StatusOK {
+	if code != http.StatusAccepted {
 		err = unexpectedHTTPError(code, body)
 		return
 	}
