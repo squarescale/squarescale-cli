@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -137,25 +138,25 @@ func (c *Client) ProjectURL(project string) (string, error) {
 }
 
 // ProjectLogs gets the logs for a project container.
-func (c *Client) ProjectLogs(project, container, after string) ([]string, string, error) {
+func (c *Client) ProjectLogs(project string, container string, after int) ([]string, int, error) {
 	query := ""
-	if after != "" {
-		query = "?after=" + url.QueryEscape(after)
+	if after > 0 {
+		query = "?after=" + url.QueryEscape(strconv.Itoa(after))
 	}
 
 	code, body, err := c.get("/projects/" + project + "/logs/" + url.QueryEscape(container) + query)
 	if err != nil {
-		return []string{}, "", err
+		return []string{}, -1, err
 	}
 
 	switch code {
 	case http.StatusOK:
 	case http.StatusBadRequest:
-		return []string{}, "", fmt.Errorf("Project '%s' not found", project)
+		return []string{}, -1, fmt.Errorf("Project '%s' not found", project)
 	case http.StatusNotFound:
-		return []string{}, "", fmt.Errorf("Container '%s' is not found for project '%s'", container, project)
+		return []string{}, -1, fmt.Errorf("Container '%s' is not found for project '%s'", container, project)
 	default:
-		return []string{}, "", unexpectedHTTPError(code, body)
+		return []string{}, -1, unexpectedHTTPError(code, body)
 	}
 
 	var response []struct {
@@ -166,11 +167,12 @@ func (c *Client) ProjectLogs(project, container, after string) ([]string, string
 		Error         bool   `json:"error"`
 		LogType       string `json:"log_type"`
 		Message       string `json:"message"`
+		Offset        int    `json:"offset"`
 	}
 	err = json.Unmarshal(body, &response)
 
 	if err != nil {
-		return []string{}, "", err
+		return []string{}, -1, err
 	}
 
 	var messages []string
@@ -193,12 +195,12 @@ func (c *Client) ProjectLogs(project, container, after string) ([]string, string
 			messages = append(messages, fmt.Sprintf(linePattern, log.Timestamp, log.ContainerName, log.Message))
 		}
 	}
-	var lastTimestamp string
+	var lastOffset int
 	if len(response) == 0 {
-		lastTimestamp = ""
+		lastOffset = -1
 	} else {
-		lastTimestamp = response[len(response)-1].Timestamp
+		lastOffset = response[len(response)-1].Offset
 	}
 
-	return messages, lastTimestamp, nil
+	return messages, lastOffset, nil
 }
