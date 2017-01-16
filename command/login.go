@@ -53,11 +53,9 @@ func (c *LoginCommand) Run(args []string) int {
 		}
 	}
 
-	c.Ui.Info("Revoke temporary GitHub token")
-
 	err = github.RevokePersonalToken(ghTokenURL, login, pw, oneTimePW)
-	if err != nil {
-		return c.error(err)
+	if err == nil {
+		c.Ui.Info("Revoke temporary GitHub token")
 	}
 
 	return res
