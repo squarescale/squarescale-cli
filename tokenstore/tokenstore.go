@@ -12,8 +12,17 @@ func netrcFile() string {
 	return os.Getenv("HOME") + "/.netrc"
 }
 
+func initNetrcFileIfNotExist() {
+	var _, err = os.Stat(netrcFile())
+	if os.IsNotExist(err) {
+		var file, _ = os.Create(netrcFile())
+		defer file.Close()
+	}
+}
+
 // GetToken retrieves the Squarescale token in the token store.
 func GetToken(host string) (string, error) {
+	initNetrcFileIfNotExist()
 	n, err := netrc.ParseFile(netrcFile())
 	if err != nil {
 		return "", err
