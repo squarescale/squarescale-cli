@@ -19,6 +19,6 @@ func (c *Client) ValidateToken() error {
 	case http.StatusBadRequest:
 		return errors.New("update needed, api versions mismatch")
 	default:
-		return fmt.Errorf("app token rejected, login required")
+		return fmt.Errorf("You're not logged in, please run login command")
 	}
 }
