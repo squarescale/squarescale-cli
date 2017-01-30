@@ -9,7 +9,7 @@ import (
 )
 
 func endpointFlag(f *flag.FlagSet) *string {
-	return f.String("endpoint", "http://www.staging.sqsc.squarely.io", "Squarescale endpoint")
+	return f.String("endpoint", "http://www.production.sqsc.squarely.io", "Squarescale endpoint")
 }
 
 func projectFlag(f *flag.FlagSet) *string {

@@ -57,6 +57,6 @@ func RunCustom(args []string, commands map[string]cli.CommandFactory) int {
 
 func ParseGlobalFlags(args []string) {
 	var endpoint string
-	flag.StringVar(&endpoint, "endpoint", "http://www.staging.sqsc.squarely.io", "Squarescale API endpoint")
+	flag.StringVar(&endpoint, "endpoint", "http://www.production.sqsc.squarely.io", "Squarescale API endpoint")
 
 }
