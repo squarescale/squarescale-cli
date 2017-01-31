@@ -21,6 +21,7 @@ func (c *RepositoryAddCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	project := projectFlag(c.flagSet)
+	url := repoUrlFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -30,9 +31,12 @@ func (c *RepositoryAddCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	gitRemote, err := findGitRemote()
-	if err != nil {
-		return c.error(err)
+	gitRemote := *url
+	if gitRemote == "" {
+		gitRemote, err = findGitRemote()
+		if err != nil {
+			return c.error(err)
+		}
 	}
 
 	label := fmt.Sprintf("add repository '%s' to project '%s'", gitRemote, *project)
