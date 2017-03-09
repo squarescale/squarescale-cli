@@ -37,6 +37,10 @@ func (c *Client) post(path string, payload *jsonObject) (int, []byte, error) {
 	return c.request("POST", path, payload)
 }
 
+func (c *Client) delete(path string) (int, []byte, error) {
+	return c.request("DELETE", path, nil)
+}
+
 func (c *Client) put(path string, payload *jsonObject) (int, []byte, error) {
 	return c.request("PUT", path, payload)
 }

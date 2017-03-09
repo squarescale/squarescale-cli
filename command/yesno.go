@@ -7,13 +7,13 @@ import (
 
 func AskYesNo(ui cli.Ui, alwaysYes *bool, question string, defVal bool) (bool, error) {
 	if defVal {
-		question = question + " [Y/n] "
+		question = question + " [Y/n]"
 	} else {
-		question = question + " [y/N] "
+		question = question + " [y/N]"
 	}
 
 	if *alwaysYes {
-		ui.Info(question + "y")
+		ui.Info(question + " y")
 		return true, nil
 	}
 

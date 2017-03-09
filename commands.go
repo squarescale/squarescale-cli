@@ -55,6 +55,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"project remove": func() (cli.Command, error) {
+			return &command.ProjectRemoveCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"db": func() (cli.Command, error) {
 			return &command.DBCommand{}, nil
 		},

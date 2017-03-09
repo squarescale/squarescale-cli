@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+type ProjectStatus struct {
+	InfraStatus string `json:"infra_status"`
+}
+
 // CheckProjectName asks the Squarescale service to validate a given project name.
 func (c *Client) CheckProjectName(name string) (valid bool, same bool, fmtName string, err error) {
 	code, body, err := c.post("/free_name", &jsonObject{"name": name})
@@ -135,6 +139,69 @@ func (c *Client) ProjectURL(project string) (string, error) {
 	}
 
 	return response.URL, nil
+}
+
+// ProjectStatus return the status of the project
+func (c *Client) ProjectStatus(project string) (*ProjectStatus, error) {
+	code, body, err := c.get("/projects/" + project)
+	if err != nil {
+		return nil, err
+	}
+
+	switch code {
+	case http.StatusOK:
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("Project '%s' not found", project)
+	default:
+		return nil, unexpectedHTTPError(code, body)
+	}
+
+	var status ProjectStatus
+	err = json.Unmarshal(body, &status)
+	if err != nil {
+		return nil, err
+	}
+
+	return &status, nil
+}
+
+// ProjectUnprovision unprovisions a project
+func (c *Client) ProjectUnprovision(project string) error {
+	code, body, err := c.post("/projects/"+project+"/unprovision", nil)
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusOK:
+	case http.StatusAccepted:
+	case http.StatusNoContent:
+	case http.StatusNotFound:
+		return fmt.Errorf("Project '%s' not found", project)
+	default:
+		return unexpectedHTTPError(code, body)
+	}
+
+	return nil
+}
+
+// ProjectDelete deletes an unprovisionned project
+func (c *Client) ProjectDelete(project string) error {
+	code, body, err := c.delete("/projects/" + project)
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusOK:
+	case http.StatusNoContent:
+	case http.StatusNotFound:
+		return fmt.Errorf("Project '%s' not found", project)
+	default:
+		return unexpectedHTTPError(code, body)
+	}
+
+	return nil
 }
 
 // ProjectLogs gets the logs for a project container.
