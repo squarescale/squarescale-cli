@@ -4,12 +4,21 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
 
 	"github.com/mitchellh/cli"
 )
 
 func endpointFlag(f *flag.FlagSet) *string {
-	return f.String("endpoint", "http://www.production.sqsc.squarely.io", "Squarescale endpoint")
+	env := os.Getenv("SQSC_ENV")
+	if env == "" {
+		env = "production"
+	}
+	endpoint := os.Getenv("SQSC_ENDPOINT")
+	if endpoint == "" {
+		endpoint = "http://www." + env + ".sqsc.squarely.io"
+	}
+	return f.String("endpoint", endpoint, "Squarescale endpoint")
 }
 
 func projectFlag(f *flag.FlagSet) *string {
