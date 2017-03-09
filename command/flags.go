@@ -45,6 +45,10 @@ func containerUpdateCmdFlag(f *flag.FlagSet) *string {
 	return f.String("update", "", "Update command to run for each build")
 }
 
+func clusterSizeFlag(f *flag.FlagSet) *uint {
+	return f.Uint("cluster-size", 0, "Cluster Size")
+}
+
 func dbEngineFlag(f *flag.FlagSet) *string {
 	return f.String("engine", "", "Database engine")
 }

@@ -13,6 +13,14 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"cluster": func() (cli.Command, error) {
+			return &command.ClusterCommand{}, nil
+		},
+		"cluster set": func() (cli.Command, error) {
+			return &command.ClusterSetCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"container": func() (cli.Command, error) {
 			return &command.ContainerCommand{}, nil
 		},
