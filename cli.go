@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
@@ -53,10 +52,4 @@ func RunCustom(args []string, commands map[string]cli.CommandFactory) int {
 	}
 
 	return exitCode
-}
-
-func ParseGlobalFlags(args []string) {
-	var endpoint string
-	flag.StringVar(&endpoint, "endpoint", "http://www.production.sqsc.squarely.io", "Squarescale API endpoint")
-
 }
