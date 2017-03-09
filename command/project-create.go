@@ -18,6 +18,7 @@ type ProjectCreateCommand struct {
 func (c *ProjectCreateCommand) Run(args []string) int {
 	// Parse flags
 	c.flagSet = newFlagSet(c, c.Ui)
+	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
 	wantedProjectName := projectNameFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
@@ -40,7 +41,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 			}
 
 			if !same {
-				if err := c.askConfirmName(fmtName); err != nil {
+				if err := c.askConfirmName(alwaysYes, fmtName); err != nil {
 					return "", err
 				}
 			}
@@ -53,7 +54,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 				return "", err
 			}
 
-			if err := c.askConfirmName(generatedName); err != nil {
+			if err := c.askConfirmName(alwaysYes, generatedName); err != nil {
 				return "", err
 			}
 
@@ -81,12 +82,14 @@ usage: sqsc project create [options] <project_name>
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
 
-func (c *ProjectCreateCommand) askConfirmName(name string) error {
+func (c *ProjectCreateCommand) askConfirmName(alwaysYes *bool, name string) error {
 	c.pauseSpinner()
 	c.Ui.Warn(fmt.Sprintf("Project will be created as '%s', is this ok?", name))
-	_, err := c.Ui.Ask("Enter to accept, Ctrl-c to cancel:")
+	ok, err := AskYesNo(c.Ui, alwaysYes, "Is this ok?", true)
 	if err != nil {
 		return err
+	} else if !ok {
+		return CancelledError
 	}
 
 	c.startSpinner()

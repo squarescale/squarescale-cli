@@ -10,6 +10,8 @@ import (
 	"github.com/squarescale/squarescale-cli/tokenstore"
 )
 
+var CancelledError error = errors.New("Cancelled")
+
 // Meta contain the meta-option that nearly all subcommand inherited.
 type Meta struct {
 	Ui   cli.Ui
@@ -30,8 +32,16 @@ func (m *Meta) info(message string) int {
 }
 
 func (m *Meta) error(err error) int {
-	m.Ui.Error(err.Error())
-	return 1
+	if err == CancelledError {
+		return m.cancelled()
+	} else {
+		m.Ui.Error(err.Error())
+		return 1
+	}
+}
+
+func (m *Meta) cancelled() int {
+	return 2
 }
 
 func (m *Meta) errorWithUsage(err error) int {
@@ -45,13 +55,13 @@ func (m *Meta) runWithSpinner(text, endpoint string, action func(*squarescale.Cl
 
 	client, err := m.ensureLogin(endpoint)
 	if err != nil {
-		m.errorSpinner()
+		m.errorSpinner(err)
 		return m.error(err)
 	}
 
 	finalMsg, err := action(client)
 	if err != nil {
-		m.errorSpinner()
+		m.errorSpinner(err)
 		return m.error(err)
 	}
 
@@ -74,8 +84,12 @@ func (m *Meta) stopSpinner() {
 	m.spin.Stop()
 }
 
-func (m *Meta) errorSpinner() {
-	m.spin.FinalMSG = "... error\n"
+func (m *Meta) errorSpinner(err error) {
+	if err == CancelledError {
+		m.spin.FinalMSG = "... cancelled\n"
+	} else {
+		m.spin.FinalMSG = "... error\n"
+	}
 	m.spin.Stop()
 }
 

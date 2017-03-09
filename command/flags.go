@@ -61,6 +61,10 @@ func repoUrlFlag(f *flag.FlagSet) *string {
 	return f.String("url", "", "Git remote url")
 }
 
+func yesFlag(f *flag.FlagSet) *bool {
+	return f.Bool("yes", false, "Assume yes")
+}
+
 func validateProjectName(project string) error {
 	if project == "" {
 		return errors.New("Project name must be specified")

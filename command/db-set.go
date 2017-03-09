@@ -22,6 +22,7 @@ func (c *DBSetCommand) Run(args []string) int {
 	projectNameArg := projectFlag(c.flagSet)
 	dbEngineArg := dbEngineFlag(c.flagSet)
 	dbInstanceArg := dbEngineInstanceFlag(c.flagSet)
+	alwaysYes := yesFlag(c.flagSet)
 	dbDisabledArg := disabledFlag(c.flagSet, "Disable database")
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -32,10 +33,12 @@ func (c *DBSetCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	c.Ui.Warn(fmt.Sprintf("Changing cluster settings for project '%s' will cause a downtime. Is this ok?", *projectNameArg))
-	_, err = c.Ui.Ask("Enter to accept, Ctrl-c to cancel:")
+	c.Ui.Warn(fmt.Sprintf("Changing cluster settings for project '%s' will cause a downtime.", *projectNameArg))
+	ok, err := AskYesNo(c.Ui, alwaysYes, "Is this ok?", false)
 	if err != nil {
 		return c.error(err)
+	} else if !ok {
+		return c.cancelled()
 	}
 
 	return c.runWithSpinner("scale project database", *endpoint, func(client *squarescale.Client) (string, error) {
