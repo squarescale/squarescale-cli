@@ -13,7 +13,7 @@ func Run(args []string) int {
 	var f flag.FlagSet
 
 	color := f.Bool("color", command.IsTTY, "Colored output")
-	format := f.Bool("format", command.IsTTY, "Enable nice output")
+	format := f.Bool("format", true, "Enable nice output")
 	spin := f.Bool("progress", command.IsTTY, "Enable progress spinner")
 
 	err := f.Parse(args)
