@@ -26,6 +26,6 @@ func AskYesNo(ui cli.Ui, alwaysYes *bool, question string, defVal bool) (bool, e
 	if defVal {
 		return ans != "n", nil
 	} else {
-		return ans != "y", nil
+		return ans == "y", nil
 	}
 }
