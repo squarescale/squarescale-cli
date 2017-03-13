@@ -86,6 +86,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"db show": func() (cli.Command, error) {
+			return &command.DBShowCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"lb": func() (cli.Command, error) {
 			return &command.LBCommand{}, nil
 		},
