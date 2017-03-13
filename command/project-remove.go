@@ -21,25 +21,29 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	c.Ui.Info("Destroy infrastructure and configuration for project " + *projectName + "?")
+	projectName, err := projectNameArg(c.flagSet, 0)
+	if err != nil {
+		return c.errorWithUsage(err)
+	}
+
+	c.Ui.Info("Destroy infrastructure and configuration for project " + projectName + "?")
 	if *alwaysYes {
 		c.Ui.Info("(approved from command line)")
 	} else {
 		res, err := c.Ui.Ask("Enter the project name to destroy:")
 		if err != nil {
 			return c.error(err)
-		} else if res != *projectName {
+		} else if res != projectName {
 			return c.cancelled()
 		}
 	}
 
 	res := c.runWithSpinner("unprovision project", *endpoint, func(client *squarescale.Client) (string, error) {
-		err := client.ProjectUnprovision(*projectName)
+		err := client.ProjectUnprovision(projectName)
 		if err != nil {
 			return "", err
 		}
@@ -48,7 +52,7 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 
 	loop:
 		for {
-			status, err := client.ProjectStatus(*projectName)
+			status, err := client.ProjectStatus(projectName)
 			if err != nil {
 				return "", err
 			}
@@ -71,7 +75,7 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 	}
 
 	return c.runWithSpinner("delete project", *endpoint, func(client *squarescale.Client) (string, error) {
-		err := client.ProjectDelete(*projectName)
+		err := client.ProjectDelete(projectName)
 		if err != nil {
 			return "", err
 		}

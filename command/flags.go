@@ -69,6 +69,15 @@ func yesFlag(f *flag.FlagSet) *bool {
 	return f.Bool("yes", false, "Assume yes")
 }
 
+func projectNameArg(f *flag.FlagSet, arg int) (string, error) {
+	value := f.Arg(arg)
+	if value == "" {
+		return "", errors.New("Project name must be specified")
+	} else {
+		return value, nil
+	}
+}
+
 func validateProjectName(project string) error {
 	if project == "" {
 		return errors.New("Project name must be specified")
