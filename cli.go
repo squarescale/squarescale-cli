@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
@@ -9,20 +10,29 @@ import (
 )
 
 func Run(args []string) int {
+	var f flag.FlagSet
+
+	color := f.Bool("color", command.IsTTY, "Colored output")
+	format := f.Bool("format", command.IsTTY, "Enable nice output")
+	spin := f.Bool("progress", command.IsTTY, "Enable progress spinner")
+
+	err := f.Parse(args)
+	if err == flag.ErrHelp {
+		return 0
+	} else if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		return 1
+	}
+
 	// Meta-option for executables.
 	// It defines output color and its stdout/stderr stream.
-	meta := command.DefaultMeta(&cli.ColoredUi{
-		InfoColor:  cli.UiColorCyan,
-		ErrorColor: cli.UiColorRed,
-		WarnColor:  cli.UiColorYellow,
-		Ui: &cli.BasicUi{
-			Writer:      os.Stdout,
-			ErrorWriter: os.Stderr,
-			Reader:      os.Stdin,
-		},
-	})
+	meta := command.DefaultMeta(&cli.BasicUi{
+		Writer:      os.Stdout,
+		ErrorWriter: os.Stderr,
+		Reader:      os.Stdin,
+	}, *color, *format, *spin)
 
-	return RunCustom(args, Commands(meta))
+	return RunCustom(f.Args(), Commands(meta))
 }
 
 func RunCustom(args []string, commands map[string]cli.CommandFactory) int {

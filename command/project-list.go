@@ -37,7 +37,7 @@ func (c *ProjectListCommand) Run(args []string) int {
 			msg = "No projects found"
 		}
 
-		return FormatTable(msg, true), nil
+		return c.FormatTable(msg, true), nil
 	})
 }
 

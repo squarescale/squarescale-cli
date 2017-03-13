@@ -2,28 +2,47 @@ package command
 
 import (
 	"errors"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/briandowns/spinner"
+	"github.com/mattn/go-isatty"
 	"github.com/mitchellh/cli"
 	"github.com/squarescale/squarescale-cli/squarescale"
 	"github.com/squarescale/squarescale-cli/tokenstore"
 )
 
 var CancelledError error = errors.New("Cancelled")
+var IsTTY bool
+
+func init() {
+	IsTTY = isatty.IsTerminal(os.Stdout.Fd())
+}
 
 // Meta contain the meta-option that nearly all subcommand inherited.
 type Meta struct {
-	Ui   cli.Ui
-	spin *spinner.Spinner
+	Ui         cli.Ui
+	spin       *spinner.Spinner
+	spinEnable bool
+	niceFormat bool
 }
 
 // DefaultMeta returns a default meta object with an initialized spinner.
-func DefaultMeta(ui cli.Ui) *Meta {
+func DefaultMeta(ui cli.Ui, color, niceFormat, spinnerEnable bool) *Meta {
+	if color {
+		ui = &cli.ColoredUi{
+			InfoColor:  cli.UiColorCyan,
+			ErrorColor: cli.UiColorRed,
+			WarnColor:  cli.UiColorYellow,
+			Ui:         ui,
+		}
+	}
 	return &Meta{
-		Ui:   ui,
-		spin: spinner.New(spinner.CharSets[24], 100*time.Millisecond),
+		Ui:         ui,
+		spin:       spinner.New(spinner.CharSets[24], 100*time.Millisecond),
+		spinEnable: spinnerEnable,
+		niceFormat: niceFormat,
 	}
 }
 
@@ -75,21 +94,37 @@ func (m *Meta) runWithSpinner(text, endpoint string, action func(*squarescale.Cl
 }
 
 func (m *Meta) startSpinner() {
+	if !m.spinEnable {
+		return
+	}
+
 	m.spin.Start()
 }
 
 func (m *Meta) pauseSpinner() {
+	if !m.spinEnable {
+		return
+	}
+
 	m.spin.FinalMSG = "... paused\n"
 	m.spin.Stop()
 	time.Sleep(time.Millisecond) // leave time to the UI to refresh properly
 }
 
 func (m *Meta) stopSpinner() {
+	if !m.spinEnable {
+		return
+	}
+
 	m.spin.FinalMSG = "... done\n"
 	m.spin.Stop()
 }
 
 func (m *Meta) errorSpinner(err error) {
+	if !m.spinEnable {
+		return
+	}
+
 	if err == CancelledError {
 		m.spin.FinalMSG = "... cancelled\n"
 	} else {
@@ -112,9 +147,18 @@ func (m *Meta) ensureLogin(endpoint string) (*squarescale.Client, error) {
 	return client, nil
 }
 
-func FormatTable(table string, header bool) string {
-	var res string
+func (m *Meta) FormatTable(table string, header bool) string {
 	table = strings.Trim(table, "\n")
+	if !m.niceFormat {
+		return table
+	}
+
+	return FormatTable(table)
+}
+
+func FormatTable(table string) string {
+	table = strings.Trim(table, "\n")
+	var res string
 	lines := strings.Split(table, "\n")
 	var csize []int
 	for _, line := range lines {
