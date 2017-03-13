@@ -86,31 +86,31 @@ func (c *Client) CreateProject(name string) error {
 	return nil
 }
 
+type Project struct {
+	Name            string `json:"name"`
+	InfraStatus     string `json:"infra_status"`
+	ClusterSize     int    `json:"cluster_size"`
+	NomadNodesReady int    `json:"nomad_nodes_ready"`
+}
+
 // ListProjects asks the Squarescale service for available projects.
-func (c *Client) ListProjects() ([]string, error) {
+func (c *Client) ListProjects() ([]Project, error) {
 	code, body, err := c.get("/projects")
 	if err != nil {
-		return []string{}, err
+		return nil, err
 	}
 
 	if code != http.StatusOK {
-		return []string{}, unexpectedHTTPError(code, body)
+		return nil, unexpectedHTTPError(code, body)
 	}
 
-	var projectsJSON []struct {
-		Name string `json:"name"`
-	}
+	var projectsJSON []Project
 	err = json.Unmarshal(body, &projectsJSON)
 	if err != nil {
-		return []string{}, err
+		return nil, err
 	}
 
-	var projects []string
-	for _, pJSON := range projectsJSON {
-		projects = append(projects, pJSON.Name)
-	}
-
-	return projects, nil
+	return projectsJSON, nil
 }
 
 // ProjectURL asks the Squarescale service the url of the project if available, using the provided token.

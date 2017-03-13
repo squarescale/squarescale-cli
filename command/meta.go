@@ -2,6 +2,7 @@ package command
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/briandowns/spinner"
@@ -66,7 +67,11 @@ func (m *Meta) runWithSpinner(text, endpoint string, action func(*squarescale.Cl
 	}
 
 	m.stopSpinner()
-	return m.info(finalMsg)
+	if finalMsg != "" {
+		return m.info(finalMsg)
+	} else {
+		return 0
+	}
 }
 
 func (m *Meta) startSpinner() {
@@ -105,4 +110,38 @@ func (m *Meta) ensureLogin(endpoint string) (*squarescale.Client, error) {
 	}
 
 	return client, nil
+}
+
+func FormatTable(table string, header bool) string {
+	var res string
+	table = strings.Trim(table, "\n")
+	lines := strings.Split(table, "\n")
+	var csize []int
+	for _, line := range lines {
+		cols := strings.Split(line, "\t")
+		for c, col := range cols {
+			if len(csize) <= c {
+				csize = append(csize, len(col))
+			} else if len(col) > csize[c] {
+				csize[c] = len(col)
+			}
+		}
+	}
+	for _, line := range lines {
+		if res != "" {
+			res += "\n"
+		}
+		cols := strings.Split(line, "\t")
+		var l string
+		for c, col := range cols {
+			sz := csize[c]
+			l += col
+			if c < len(cols)-1 {
+				l += strings.Repeat(" ", sz-len(col))
+				l += "\t"
+			}
+		}
+		res += l
+	}
+	return res
 }

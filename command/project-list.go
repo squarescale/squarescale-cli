@@ -2,6 +2,7 @@ package command
 
 import (
 	"flag"
+	"fmt"
 	"strings"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
@@ -27,12 +28,16 @@ func (c *ProjectListCommand) Run(args []string) int {
 			return "", err
 		}
 
-		msg := strings.Join(projects, "\n")
+		var msg string = "Name\tStatus\tSize\n"
+		for _, p := range projects {
+			msg += fmt.Sprintf("%s\t%s\t%d/%d\n", p.Name, p.InfraStatus, p.NomadNodesReady, p.ClusterSize)
+		}
+
 		if len(projects) == 0 {
 			msg = "No projects found"
 		}
 
-		return msg, nil
+		return FormatTable(msg, true), nil
 	})
 }
 
