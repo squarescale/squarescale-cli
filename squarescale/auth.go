@@ -34,11 +34,15 @@ func ObtainTokenFromGitHub(sqscURL, token string) (string, error) {
 	var response authTokenResponse
 	err = json.Unmarshal(jsondata, &response)
 	if err != nil {
-		return "", fmt.Errorf("Could not unmarshal response: %v", err)
+		if res.StatusCode != 200 {
+			return "", fmt.Errorf("Could not login to Squarescale: %s", res.Status)
+		} else {
+			return "", fmt.Errorf("Could not unmarshal response: %v", err)
+		}
 	}
 
 	if res.StatusCode != 200 {
-		return "", fmt.Errorf("Could not login to squarescale: %s", response.Error)
+		return "", fmt.Errorf("Could not login to SquareScale: %s", response.Error)
 	}
 
 	return response.AuthToken, nil
