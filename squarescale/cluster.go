@@ -25,7 +25,7 @@ func (c *Client) GetClusterSize(project string) (uint, error) {
 		return 0, err
 	}
 
-	return 0, nil
+	return resp.ClusterSize, nil
 }
 
 // ConfigDB calls the Squarescale API to update database scale options for a given project.
