@@ -68,6 +68,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"project slackbot": func() (cli.Command, error) {
+			return &command.ProjectSlackbotCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"db": func() (cli.Command, error) {
 			return &command.DBCommand{}, nil
 		},

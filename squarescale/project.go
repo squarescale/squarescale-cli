@@ -114,6 +114,63 @@ func (c *Client) ListProjects() ([]Project, error) {
 }
 
 // ProjectURL asks the Squarescale service the url of the project if available, using the provided token.
+func (c *Client) ProjectSlackURL(project string) (string, error) {
+	code, body, err := c.get("/projects/" + project + "/slack")
+	if err != nil {
+		return "", err
+	}
+
+	switch code {
+	case http.StatusOK:
+	case http.StatusPreconditionFailed:
+		return "", fmt.Errorf("Project '%s' not found", project)
+	case http.StatusNotFound:
+		return "", fmt.Errorf("Project '%s' is not available on the web", project)
+	default:
+		return "", unexpectedHTTPError(code, body)
+	}
+
+	var response struct {
+		URL string `json:"slack_webhook"`
+	}
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return "", err
+	}
+
+	return response.URL, nil
+}
+
+// ProjectURL asks the Squarescale service the url of the project if available, using the provided token.
+func (c *Client) SetProjectSlackURL(project, url string) error {
+	code, body, err := c.post("/projects/"+project+"/slack", &jsonObject{"project": &jsonObject{"slack_webhook": url}})
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusCreated:
+		break
+	default:
+		err = unexpectedHTTPError(code, body)
+		return err
+	}
+
+	var resBody struct {
+		Valid bool   `json:"valid"`
+		Same  bool   `json:"same"`
+		Name  string `json:"name"`
+	}
+
+	err = json.Unmarshal(body, &resBody)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// ProjectURL asks the Squarescale service the url of the project if available, using the provided token.
 func (c *Client) ProjectURL(project string) (string, error) {
 	code, body, err := c.get("/projects/" + project + "/url")
 	if err != nil {
