@@ -2,6 +2,7 @@ package squarescale
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -59,7 +60,7 @@ func (c *Client) FindProjectName() (string, error) {
 }
 
 // CreateProject asks the Squarescale platform to create a new project, using the provided name and user token.
-func (c *Client) CreateProject(name string) error {
+func (c *Client) CreateProject(name string) (taskId int, err error) {
 	payload := &jsonObject{
 		"project": jsonObject{
 			"name": name,
@@ -68,22 +69,27 @@ func (c *Client) CreateProject(name string) error {
 
 	code, body, err := c.post("/projects", payload)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	if code != http.StatusCreated {
-		return unexpectedHTTPError(code, body)
+		return 0, unexpectedHTTPError(code, body)
 	}
 
 	var response struct {
 		Error string `json:"error"`
+		Task  int    `json:"task"`
 	}
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	if response.Error != "" {
+		err = errors.New(response.Error)
+	}
+
+	return response.Task, err
 }
 
 type Project struct {

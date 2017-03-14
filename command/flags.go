@@ -69,6 +69,10 @@ func yesFlag(f *flag.FlagSet) *bool {
 	return f.Bool("yes", false, "Assume yes")
 }
 
+func nowaitFlag(f *flag.FlagSet) *bool {
+	return f.Bool("nowait", false, "Don't wait for operation to complete")
+}
+
 func projectNameArg(f *flag.FlagSet, arg int) (string, error) {
 	value := f.Arg(arg)
 	if value == "" {

@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
@@ -19,14 +20,18 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	// Parse flags
 	c.flagSet = newFlagSet(c, c.Ui)
 	alwaysYes := yesFlag(c.flagSet)
+	nowait := nowaitFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
 	wantedProjectName := projectNameFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	return c.runWithSpinner("create project", *endpoint, func(client *squarescale.Client) (string, error) {
+	var taskId int
+
+	res := c.runWithSpinner("create project", *endpoint, func(client *squarescale.Client) (string, error) {
 		var definitiveName string
+		var err error
 
 		if *wantedProjectName != "" {
 			valid, same, fmtName, err := client.CheckProjectName(*wantedProjectName)
@@ -61,8 +66,21 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 			definitiveName = generatedName
 		}
 
-		return fmt.Sprintf("Created project '%s'", definitiveName), client.CreateProject(definitiveName)
+		taskId, err = client.CreateProject(definitiveName)
+
+		return fmt.Sprintf("Created project '%s'", definitiveName), err
 	})
+	if res != 0 {
+		return res
+	}
+
+	if !*nowait {
+		res = c.runWithSpinner("wait for project creation", *endpoint, func(client *squarescale.Client) (string, error) {
+			return client.WaitTask(taskId, time.Second)
+		})
+	}
+
+	return res
 }
 
 // Synopsis is part of cli.Command implementation.
