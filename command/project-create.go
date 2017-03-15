@@ -68,7 +68,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 
 		taskId, err = client.CreateProject(definitiveName)
 
-		return fmt.Sprintf("Created project '%s'", definitiveName), err
+		return fmt.Sprintf("[#%d] Created project '%s'", taskId, definitiveName), err
 	})
 	if res != 0 {
 		return res

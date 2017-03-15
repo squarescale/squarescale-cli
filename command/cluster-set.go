@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
@@ -19,6 +20,7 @@ type ClusterSetCommand struct {
 func (c *ClusterSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
+	nowait := nowaitFlag(c.flagSet)
 	projectNameArg := projectFlag(c.flagSet)
 	clusterSizeArg := clusterSizeFlag(c.flagSet)
 	alwaysYes := yesFlag(c.flagSet)
@@ -38,7 +40,10 @@ func (c *ClusterSetCommand) Run(args []string) int {
 		return c.cancelled()
 	}
 
-	return c.runWithSpinner("change cluster size", *endpoint, func(client *squarescale.Client) (string, error) {
+	var taskId int
+
+	res := c.runWithSpinner("change cluster size", *endpoint, func(client *squarescale.Client) (string, error) {
+		var err error
 		currentSize, e := client.GetClusterSize(*projectNameArg)
 		if e != nil {
 			return "", e
@@ -48,9 +53,20 @@ func (c *ClusterSetCommand) Run(args []string) int {
 			return fmt.Sprintf("cluster is already size %d", currentSize), nil
 		}
 
-		err = client.SetClusterSize(*projectNameArg, *clusterSizeArg)
-		return fmt.Sprintf("changed cluster size from %d to %d", currentSize, *clusterSizeArg), err
+		taskId, err = client.SetClusterSize(*projectNameArg, *clusterSizeArg)
+		return fmt.Sprintf("[#%d] changed cluster size from %d to %d", taskId, currentSize, *clusterSizeArg), err
 	})
+	if res != 0 {
+		return res
+	}
+
+	if !*nowait {
+		res = c.runWithSpinner("wait for cluster change", *endpoint, func(client *squarescale.Client) (string, error) {
+			return client.WaitTask(taskId, time.Second)
+		})
+	}
+
+	return res
 }
 
 // Synopsis is part of cli.Command implementation.

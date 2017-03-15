@@ -40,7 +40,7 @@ func DefaultMeta(ui cli.Ui, color, niceFormat, spinnerEnable bool) *Meta {
 	}
 	return &Meta{
 		Ui:         ui,
-		spin:       spinner.New(spinner.CharSets[24], 100*time.Millisecond),
+		spin:       spinner.New(spinner.CharSets[7], 100*time.Millisecond),
 		spinEnable: spinnerEnable,
 		niceFormat: niceFormat,
 	}

@@ -76,7 +76,7 @@ func (c *Client) GetDBConfig(project string) (bool, string, string, error) {
 }
 
 // ConfigDB calls the Squarescale API to update database scale options for a given project.
-func (c *Client) ConfigDB(project string, enabled bool, engine, instance string) error {
+func (c *Client) ConfigDB(project string, enabled bool, engine, instance string) (taskId int, err error) {
 	payload := &jsonObject{
 		"project": jsonObject{
 			"db_enabled":        enabled,
@@ -87,15 +87,30 @@ func (c *Client) ConfigDB(project string, enabled bool, engine, instance string)
 
 	code, body, err := c.post("/projects/"+project+"/cluster", payload)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	switch code {
+	case http.StatusAccepted:
+		fallthrough
+	case http.StatusOK:
+		break
 	case http.StatusNoContent:
-		return nil
+		return 0, nil
 	case http.StatusUnprocessableEntity:
-		return fmt.Errorf("Invalid value for either database engine ('%s') or instance ('%s')", engine, instance)
+		return 0, fmt.Errorf("Invalid value for either database engine ('%s') or instance ('%s')", engine, instance)
 	default:
-		return unexpectedHTTPError(code, body)
+		return 0, unexpectedHTTPError(code, body)
 	}
+
+	var resp struct {
+		DBTask int `json:"db_task"`
+	}
+
+	err = json.Unmarshal(body, &resp)
+	if err != nil {
+		return 0, err
+	}
+
+	return resp.DBTask, nil
 }

@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
@@ -19,6 +20,7 @@ type DBSetCommand struct {
 func (c *DBSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
+	nowait := nowaitFlag(c.flagSet)
 	projectNameArg := projectFlag(c.flagSet)
 	dbEngineArg := dbEngineFlag(c.flagSet)
 	dbInstanceArg := dbEngineInstanceFlag(c.flagSet)
@@ -41,7 +43,10 @@ func (c *DBSetCommand) Run(args []string) int {
 		return c.cancelled()
 	}
 
-	return c.runWithSpinner("scale project database", *endpoint, func(client *squarescale.Client) (string, error) {
+	var taskId int
+
+	res := c.runWithSpinner("scale project database", *endpoint, func(client *squarescale.Client) (string, error) {
+		var err error
 		enabled, engine, instance, e := client.GetDBConfig(*projectNameArg)
 		if e != nil {
 			return "", e
@@ -63,18 +68,31 @@ func (c *DBSetCommand) Run(args []string) int {
 			instance = *dbInstanceArg
 		}
 
+		enabled = !(*dbDisabledArg)
+		taskId, err = client.ConfigDB(*projectNameArg, enabled, engine, instance)
+
 		var msg string
 		if *dbDisabledArg {
-			msg = fmt.Sprintf("Successfully disabled database for project '%s'", *projectNameArg)
+			msg = fmt.Sprintf("[#%d] Successfully disabled database for project '%s'", taskId, *projectNameArg)
 		} else {
 			msg = fmt.Sprintf(
-				"Successfully set database (engine = '%s', instance = '%s') for project '%s'",
-				engine, instance, *projectNameArg)
+				"[#%d] Successfully set database (engine = '%s', instance = '%s') for project '%s'",
+				taskId, engine, instance, *projectNameArg)
 		}
 
-		enabled = !(*dbDisabledArg)
-		return msg, client.ConfigDB(*projectNameArg, enabled, engine, instance)
+		return msg, err
 	})
+	if res != 0 {
+		return res
+	}
+
+	if !*nowait {
+		res = c.runWithSpinner("wait for database change", *endpoint, func(client *squarescale.Client) (string, error) {
+			return client.WaitTask(taskId, time.Second)
+		})
+	}
+
+	return res
 }
 
 // Synopsis is part of cli.Command implementation.
