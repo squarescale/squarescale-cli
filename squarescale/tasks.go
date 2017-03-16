@@ -2,6 +2,7 @@ package squarescale
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -13,6 +14,8 @@ const (
 	StatusCancelled = "cancelled"
 	StatusDone      = "done"
 )
+
+var ErrInProgress error = errors.New("Task still in progress")
 
 type Task struct {
 	Status string `json:"status"`
@@ -34,6 +37,10 @@ func (c *Client) GetTask(id int) (task Task, err error) {
 }
 
 func (c *Client) WaitTask(id int, interval time.Duration) (status string, err error) {
+	if id == 0 {
+		return "", ErrInProgress
+	}
+
 	for status != StatusDone && status != StatusCancelled {
 		task, err := c.GetTask(id)
 		if err != nil {

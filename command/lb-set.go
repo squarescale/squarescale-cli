@@ -39,7 +39,7 @@ func (c *LBSetCommand) Run(args []string) int {
 		var err error
 		if *disabledArg {
 			taskId, err = client.DisableLB(*project)
-			return fmt.Sprintf("Successfully disabled load balancer for project '%s'", *project), err
+			return fmt.Sprintf("[#%d] Successfully disabled load balancer for project '%s'", taskId, *project), err
 		}
 
 		container, err := client.GetContainerInfo(*project, *containerArg)
@@ -51,11 +51,11 @@ func (c *LBSetCommand) Run(args []string) int {
 			container.WebPort = *portArg
 		}
 
-		msg := fmt.Sprintf(
-			"Successfully configured load balancer (enabled = '%v', container = '%s', port = '%d') for project '%s'",
-			true, *containerArg, container.WebPort, *project)
-
 		taskId, err = client.ConfigLB(*project, container.ID, container.WebPort)
+		msg := fmt.Sprintf(
+			"[#%d] Successfully configured load balancer (enabled = '%v', container = '%s', port = '%d') for project '%s'",
+			taskId, true, *containerArg, container.WebPort, *project)
+
 		return msg, err
 	})
 	if res != 0 {
