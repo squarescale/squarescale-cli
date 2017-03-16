@@ -9,7 +9,11 @@ import (
 )
 
 func netrcFile() string {
-	return os.Getenv("HOME") + "/.netrc"
+	netrc := os.Getenv("SQSC_NETRC")
+	if netrc == "" {
+		netrc = os.Getenv("HOME") + "/.netrc"
+	}
+	return netrc
 }
 
 func initNetrcFileIfNotExist() {
