@@ -27,6 +27,11 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		return 1
 	}
 
+	if *wantedProjectName == "" && c.flagSet.Arg(0) != "" {
+		name := c.flagSet.Arg(0)
+		wantedProjectName = &name
+	}
+
 	var taskId int
 
 	res := c.runWithSpinner("create project", *endpoint, func(client *squarescale.Client) (string, error) {
