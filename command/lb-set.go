@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
@@ -19,6 +20,7 @@ type LBSetCommand struct {
 func (c *LBSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
+	nowait := nowaitFlag(c.flagSet)
 	project := projectFlag(c.flagSet)
 	containerArg := containerFlag(c.flagSet)
 	portArg := portFlag(c.flagSet)
@@ -31,9 +33,13 @@ func (c *LBSetCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	return c.runWithSpinner("configure load balancer", *endpoint, func(client *squarescale.Client) (string, error) {
+	var taskId int
+
+	res := c.runWithSpinner("configure load balancer", *endpoint, func(client *squarescale.Client) (string, error) {
+		var err error
 		if *disabledArg {
-			return fmt.Sprintf("Successfully disabled load balancer for project '%s'", *project), client.DisableLB(*project)
+			taskId, err = client.DisableLB(*project)
+			return fmt.Sprintf("Successfully disabled load balancer for project '%s'", *project), err
 		}
 
 		container, err := client.GetContainerInfo(*project, *containerArg)
@@ -49,9 +55,20 @@ func (c *LBSetCommand) Run(args []string) int {
 			"Successfully configured load balancer (enabled = '%v', container = '%s', port = '%d') for project '%s'",
 			true, *containerArg, container.WebPort, *project)
 
-		err = client.ConfigLB(*project, container.ID, container.WebPort)
+		taskId, err = client.ConfigLB(*project, container.ID, container.WebPort)
 		return msg, err
 	})
+	if res != 0 {
+		return res
+	}
+
+	if !*nowait {
+		res = c.runWithSpinner("wait for load balancer change", *endpoint, func(client *squarescale.Client) (string, error) {
+			return client.WaitTask(taskId, time.Second)
+		})
+	}
+
+	return res
 }
 
 // Synopsis is part of cli.Command implementation.

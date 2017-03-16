@@ -8,7 +8,7 @@ import (
 )
 
 // DisableLB asks the Squarescale service to deactivate the load balancer.
-func (c *Client) DisableLB(project string) error {
+func (c *Client) DisableLB(project string) (int, error) {
 	payload := &jsonObject{
 		"project": jsonObject{
 			"load_balancer": false,
@@ -19,7 +19,7 @@ func (c *Client) DisableLB(project string) error {
 }
 
 // ConfigLB sets the load balancer configuration for a given project.
-func (c *Client) ConfigLB(project string, container, port int) error {
+func (c *Client) ConfigLB(project string, container, port int) (int, error) {
 	payload := &jsonObject{
 		"project": jsonObject{
 			"load_balancer": true,
@@ -35,20 +35,31 @@ func (c *Client) ConfigLB(project string, container, port int) error {
 	return c.updateLBConfig(project, payload)
 }
 
-func (c *Client) updateLBConfig(project string, payload *jsonObject) error {
+func (c *Client) updateLBConfig(project string, payload *jsonObject) (int, error) {
 	code, body, err := c.post("/projects/"+project+"/web-ports", payload)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	switch code {
 	case http.StatusOK:
-		return nil
+		return 0, nil
 	case http.StatusNotFound:
-		return fmt.Errorf("Project '%s' not found", project)
+		return 0, fmt.Errorf("Project '%s' not found", project)
 	default:
-		return unexpectedHTTPError(code, body)
+		return 0, unexpectedHTTPError(code, body)
 	}
+
+	var response struct {
+		Task int `json:"task"`
+	}
+
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return 0, err
+	}
+
+	return response.Task, nil
 }
 
 // LoadBalancerEnabled asks if the project load balancer is enabled.
