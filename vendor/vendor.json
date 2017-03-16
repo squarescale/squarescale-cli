@@ -9,6 +9,12 @@
 			"revisionTime": "2016-01-15T23:47:25Z"
 		},
 		{
+			"checksumSHA1": "yjEPjEdNO9h+1Y12MGKl4jp2d+0=",
+			"path": "github.com/bgentry/actioncable-go",
+			"revision": "1f2dbd93dbaee9be19217d5a0f5b42179254752a",
+			"revisionTime": "2017-03-09T20:10:21Z"
+		},
+		{
 			"checksumSHA1": "ta8SSP0z1c4mWWiJc9srvj2WirE=",
 			"path": "github.com/bgentry/speakeasy",
 			"revision": "a1ccbf2c40dfc8ce514b5c5c6e6d1429ea6880da",
