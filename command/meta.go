@@ -29,7 +29,7 @@ type Meta struct {
 }
 
 // DefaultMeta returns a default meta object with an initialized spinner.
-func DefaultMeta(ui cli.Ui, color, niceFormat, spinnerEnable bool) *Meta {
+func DefaultMeta(ui cli.Ui, color, niceFormat, spinnerEnable bool, spinTime time.Duration) *Meta {
 	if color {
 		ui = &cli.ColoredUi{
 			InfoColor:  cli.UiColorCyan,
@@ -38,9 +38,14 @@ func DefaultMeta(ui cli.Ui, color, niceFormat, spinnerEnable bool) *Meta {
 			Ui:         ui,
 		}
 	}
+
+	if spinTime == 0 {
+		spinTime = 100 * time.Millisecond
+	}
+
 	return &Meta{
 		Ui:         ui,
-		spin:       spinner.New(spinner.CharSets[7], 100*time.Millisecond),
+		spin:       spinner.New(spinner.CharSets[7], spinTime),
 		spinEnable: spinnerEnable,
 		niceFormat: niceFormat,
 	}

@@ -4,17 +4,38 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/mitchellh/cli"
 	"github.com/squarescale/squarescale-cli/command"
 )
 
+func defValueFromEnv(envname string, def bool) bool {
+	env := strings.ToLower(os.Getenv(envname))
+	if env == "0" || env == "false" || env == "off" || env == "no" {
+		def = false
+	} else if env != "" {
+		def = true
+	}
+	return def
+}
+
+func defDurationFromEnv(envname string, def time.Duration) time.Duration {
+	env, err := time.ParseDuration(os.Getenv(envname))
+	if err == nil {
+		return env
+	} else {
+		return def
+	}
+}
+
 func Run(args []string) int {
 	var f flag.FlagSet
 
-	color := f.Bool("color", command.IsTTY, "Colored output")
-	format := f.Bool("format", true, "Enable nice output")
-	spin := f.Bool("progress", command.IsTTY, "Enable progress spinner")
+	color := f.Bool("color", defValueFromEnv("SQSC_COLOR", command.IsTTY), "Colored output")
+	format := f.Bool("format", defValueFromEnv("SQSC_FORMAT", true), "Enable nice output")
+	spin := f.Bool("progress", defValueFromEnv("SQSC_PROGRESS", command.IsTTY), "Enable progress spinner")
 
 	err := f.Parse(args)
 	if err == flag.ErrHelp {
@@ -30,7 +51,7 @@ func Run(args []string) int {
 		Writer:      os.Stdout,
 		ErrorWriter: os.Stderr,
 		Reader:      os.Stdin,
-	}, *color, *format, *spin)
+	}, *color, *format, *spin, defDurationFromEnv("SQSC_SPIN_TIME", 0))
 
 	return RunCustom(f.Args(), Commands(meta))
 }
