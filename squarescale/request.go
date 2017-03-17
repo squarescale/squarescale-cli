@@ -8,6 +8,9 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
+
+	actioncable "github.com/bgentry/actioncable-go"
 )
 
 const supportedAPI string = "1"
@@ -16,17 +19,34 @@ type jsonObject map[string]interface{}
 
 // Client is the basic structure to make API calls to Squarescale services
 type Client struct {
-	httpClient http.Client // http.client is concurrently safe and should be reused across multiple connections
-	endpoint   string
-	token      string
+	httpClient        http.Client // http.client is concurrently safe and should be reused across multiple connections
+	cachedCableClient *actioncable.Client
+	endpoint          string
+	token             string
 }
 
 // NewClient creates a new Squarescale client
 func NewClient(endpoint, token string) *Client {
-	return &Client{
+	c := &Client{
 		endpoint: endpoint,
 		token:    token,
 	}
+	return c
+}
+
+func (c *Client) cableClient() *actioncable.Client {
+	if c.cachedCableClient == nil {
+		c.cachedCableClient = actioncable.NewClient(strings.Replace(c.endpoint, "http", "ws", 1)+"/cable", c.cableHeaders)
+	}
+	return c.cachedCableClient
+}
+
+func (c *Client) cableHeaders() (*http.Header, error) {
+	h := make(http.Header, 2)
+	h.Set("Authorization", "bearer "+c.token)
+	h.Set("API-Version", supportedAPI)
+	h.Set("Origin", c.endpoint)
+	return &h, nil
 }
 
 func (c *Client) get(path string) (int, []byte, error) {

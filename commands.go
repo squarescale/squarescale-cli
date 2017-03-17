@@ -73,6 +73,16 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"task show": func() (cli.Command, error) {
+			return &command.TaskShowCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"task wait": func() (cli.Command, error) {
+			return &command.TaskWaitCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"db": func() (cli.Command, error) {
 			return &command.DBCommand{}, nil
 		},

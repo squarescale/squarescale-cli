@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
@@ -62,7 +61,12 @@ func (c *ClusterSetCommand) Run(args []string) int {
 
 	if !*nowait {
 		res = c.runWithSpinner("wait for cluster change", *endpoint, func(client *squarescale.Client) (string, error) {
-			return client.WaitTask(taskId, time.Second)
+			task, err := client.WaitTask(taskId)
+			if err != nil {
+				return "", err
+			} else {
+				return task.Status, nil
+			}
 		})
 	}
 
