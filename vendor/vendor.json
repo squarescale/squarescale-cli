@@ -33,6 +33,18 @@
 			"revisionTime": "2016-09-27T15:48:50Z"
 		},
 		{
+			"checksumSHA1": "G778A9feKkdW7ZjeDdj5qoU0Ku4=",
+			"path": "github.com/gorilla/websocket",
+			"revision": "b258b4fadb573ac412f187b9f31974ea99d32f50",
+			"revisionTime": "2017-03-02T22:46:13Z"
+		},
+		{
+			"checksumSHA1": "oIkoHb8+rM5Etur5HhZVY/sDQKQ=",
+			"path": "github.com/jpillora/backoff",
+			"revision": "06c7a16c845dc8e0bf575fafeeca0f5462f5eb4d",
+			"revisionTime": "2017-02-22T00:19:28Z"
+		},
+		{
 			"checksumSHA1": "ugnSryGF6VPBb5s87QgoRH6730g=",
 			"path": "github.com/mattn/go-colorable",
 			"revision": "c0ff2b41c8d72b025d838b42d5ec2d0d9d46bcc4",
