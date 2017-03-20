@@ -81,7 +81,11 @@ func (c *Client) WaitTask(id int) (*Task, error) {
 		if ev.Err != nil {
 			return nil, err
 		} else if len(ev.Event.Message) > 0 {
-			err := json.Unmarshal(ev.Event.Message, &task)
+			var msg struct {
+				Task Task `json:"task"`
+			}
+			err := json.Unmarshal(ev.Event.Message, &msg)
+			task = msg.Task
 			if err != nil {
 				return nil, fmt.Errorf("Could not unmarshal JSON %s: %v", string(ev.Event.Message))
 			}
