@@ -37,7 +37,7 @@ func (c *EnvSetCommand) Run(args []string) int {
 	case 2:
 		key, value = args[0], args[1]
 	default:
-		return c.errorWithUsage(errors.New("Invalid arguments"))
+		return c.errorWithUsage(fmt.Errorf("Extra arguments on the command line: %v", args[2:]))
 	}
 
 	if err := validateEnvVariable(key, value, *remove); err != nil {

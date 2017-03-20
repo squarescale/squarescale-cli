@@ -30,6 +30,10 @@ func (c *TaskShowCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("No task id provided"))
 	}
 
+	if c.flagSet.NArg() > 1 {
+		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
+	}
+
 	return c.runWithSpinner("fetch task", *endpoint, func(client *squarescale.Client) (string, error) {
 		t, err := client.GetTask(taskId)
 		if err != nil {

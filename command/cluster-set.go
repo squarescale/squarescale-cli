@@ -31,6 +31,10 @@ func (c *ClusterSetCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("You must specify a cluster size"))
 	}
 
+	if c.flagSet.NArg() > 0 {
+		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	}
+
 	c.Ui.Warn(fmt.Sprintf("Changing cluster settings for project '%s' may cause a downtime.", *projectNameArg))
 	ok, err := AskYesNo(c.Ui, alwaysYes, "Is this ok?", false)
 	if err != nil {

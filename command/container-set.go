@@ -27,6 +27,10 @@ func (c *ContainerSetCommand) Run(args []string) int {
 		return 1
 	}
 
+	if c.flagSet.NArg() > 0 {
+		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	}
+
 	if err := validateProjectName(*projectArg); err != nil {
 		return c.errorWithUsage(err)
 	}

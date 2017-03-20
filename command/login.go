@@ -25,6 +25,10 @@ func (c *LoginCommand) Run(args []string) int {
 		return 1
 	}
 
+	if c.flagSet.NArg() > 0 {
+		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	}
+
 	// Retrieve credentials from user input
 	login, pw, err := c.askForCredentials()
 	if err != nil {

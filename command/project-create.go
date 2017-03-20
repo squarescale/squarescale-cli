@@ -31,6 +31,10 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		wantedProjectName = &name
 	}
 
+	if c.flagSet.NArg() > 1 {
+		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
+	}
+
 	var taskId int
 
 	res := c.runWithSpinner("create project", *endpoint, func(client *squarescale.Client) (string, error) {

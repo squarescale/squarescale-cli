@@ -2,6 +2,7 @@ package command
 
 import (
 	"flag"
+	"fmt"
 	"strings"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
@@ -26,6 +27,10 @@ func (c *ProjectSlackbotCommand) Run(args []string) int {
 	projectName, err := projectNameArg(c.flagSet, 0)
 	if err != nil {
 		return c.errorWithUsage(err)
+	}
+
+	if c.flagSet.NArg() > 1 {
+		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
 	}
 
 	url := c.flagSet.Arg(1)

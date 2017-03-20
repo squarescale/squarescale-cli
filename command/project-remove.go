@@ -30,6 +30,10 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
+	if c.flagSet.NArg() > 1 {
+		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
+	}
+
 	c.Ui.Info("Destroy infrastructure and configuration for project " + projectName + "?")
 	if *alwaysYes {
 		c.Ui.Info("(approved from command line)")

@@ -2,6 +2,7 @@ package command
 
 import (
 	"flag"
+	"fmt"
 	"strings"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
@@ -19,6 +20,10 @@ func (c *StatusCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
+	}
+
+	if c.flagSet.NArg() > 0 {
+		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
 	return c.runWithSpinner("check authorization", *endpoint, func(client *squarescale.Client) (string, error) {

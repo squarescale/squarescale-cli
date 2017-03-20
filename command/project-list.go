@@ -22,6 +22,10 @@ func (c *ProjectListCommand) Run(args []string) int {
 		return 1
 	}
 
+	if c.flagSet.NArg() > 0 {
+		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	}
+
 	return c.runWithSpinner("list projects", *endpoint, func(client *squarescale.Client) (string, error) {
 		projects, err := client.ListProjects()
 		if err != nil {

@@ -29,6 +29,10 @@ func (c *DBSetCommand) Run(args []string) int {
 		return 1
 	}
 
+	if c.flagSet.NArg() > 0 {
+		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	}
+
 	err := validateDBSetCommandArgs(*projectNameArg, *dbEngineArg, *dbInstanceArg, *dbDisabledArg)
 	if err != nil {
 		return c.errorWithUsage(err)
