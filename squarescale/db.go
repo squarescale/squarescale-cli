@@ -105,6 +105,7 @@ func (c *Client) ConfigDB(project string, enabled bool, engine, instance string)
 
 	var resp struct {
 		DBTask int `json:"db_task"`
+		Task   int `json:"task"`
 	}
 
 	err = json.Unmarshal(body, &resp)
@@ -112,5 +113,9 @@ func (c *Client) ConfigDB(project string, enabled bool, engine, instance string)
 		return 0, err
 	}
 
-	return resp.DBTask, nil
+	if resp.Task != 0 {
+		return resp.Task, nil
+	} else {
+		return resp.DBTask, nil
+	}
 }
