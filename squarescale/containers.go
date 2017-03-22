@@ -12,10 +12,10 @@ import (
 type Container struct {
 	ID        int
 	ShortName string
-	Command   string
 	Size      int
 	Web       bool
 	WebPort   int
+	Command              []string
 }
 
 // GetContainers gets all the containers attached to a Project
@@ -52,9 +52,9 @@ func (c *Client) GetContainers(project string) ([]Container, error) {
 			ID:        c.ID,
 			ShortName: c.ShortURL,
 			Size:      c.Size,
-			Command:   strings.Join(c.Command, " "),
 			Web:       c.Web,
 			WebPort:   c.WebPort,
+			Command:              c.Command,
 		})
 	}
 

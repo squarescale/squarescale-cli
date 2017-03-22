@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/kballard/go-shellquote"
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
@@ -61,7 +62,10 @@ func (c *ContainerSetCommand) Run(args []string) int {
 		}
 
 		if *updateCmdArg != "" {
-			container.Command = *updateCmdArg
+			container.Command, err = shellquote.Split(*updateCmdArg)
+			if err != nil {
+				return "", err
+			}
 		}
 
 		msg := fmt.Sprintf(
