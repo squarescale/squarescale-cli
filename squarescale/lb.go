@@ -43,7 +43,7 @@ func (c *Client) updateLBConfig(project string, payload *jsonObject) (int, error
 
 	switch code {
 	case http.StatusOK:
-		return 0, nil
+		break
 	case http.StatusNotFound:
 		return 0, fmt.Errorf("Project '%s' not found", project)
 	default:
