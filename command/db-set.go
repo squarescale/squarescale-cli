@@ -56,10 +56,12 @@ func (c *DBSetCommand) Run(args []string) int {
 		}
 
 		if *dbDisabledArg && !enabled {
+			*nowait = true
 			return fmt.Sprintf("Database for project '%s' is already disabled", *projectNameArg), nil
 		}
 
 		if *dbEngineArg == engine && *dbInstanceArg == instance {
+			*nowait = true
 			return fmt.Sprintf("Database for project '%s' is already configured with these parameters", *projectNameArg), nil
 		}
 
