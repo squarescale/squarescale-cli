@@ -53,6 +53,7 @@ func (c *ClusterSetCommand) Run(args []string) int {
 		}
 
 		if currentSize == *clusterSizeArg {
+			*nowait = true
 			return fmt.Sprintf("cluster is already size %d", currentSize), nil
 		}
 
