@@ -1,9 +1,11 @@
 package command
 
 import (
+	"encoding/pem"
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"strings"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
@@ -24,6 +26,10 @@ func (c *LBSetCommand) Run(args []string) int {
 	containerArg := containerFlag(c.flagSet)
 	portArg := portFlag(c.flagSet)
 	disabledArg := disabledFlag(c.flagSet, "Disable load balancer")
+	httpsArg := httpsFlag(c.flagSet)
+	certArg := certFlag(c.flagSet)
+	certChainArg := certChainFlag(c.flagSet)
+	secretKeyArg := secretKeyFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -32,11 +38,61 @@ func (c *LBSetCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if err := validateLBSetCommandArgs(*project, *containerArg, *portArg, *disabledArg); err != nil {
+	if err := validateLBSetCommandArgs(*project, *containerArg, *portArg, *disabledArg, *certArg, *certChainArg, *secretKeyArg); err != nil {
 		return c.errorWithUsage(err)
 	}
 
 	var taskId int
+	var cert, secretKey string
+	var certChain []string
+
+	// Read certificate files and re-encode them for backend
+
+	if *certArg != "" {
+		data, err := ioutil.ReadFile(*certArg)
+		if err != nil {
+			return c.error(err)
+		}
+		block, data := pem.Decode(data)
+		if block == nil {
+			return c.error(fmt.Errorf("%s: Could not decode PEM", *secretKeyArg))
+		} else if block.Type != "CERTIFICATE" {
+			return c.error(fmt.Errorf("%s: Does not contain a certificate, it contains %s", *secretKeyArg, block.Type))
+		} else {
+			cert = string(pem.EncodeToMemory(block))
+		}
+	}
+
+	if *certChainArg != "" {
+		data, err := ioutil.ReadFile(*certChainArg)
+		if err != nil {
+			return c.error(err)
+		}
+		block, data := pem.Decode(data)
+		for block != nil {
+			if block.Type != "CERTIFICATE" {
+				return c.error(fmt.Errorf("%s: Does not contain a certificate, it contains %s", *secretKeyArg, block.Type))
+			} else {
+				certChain = append(certChain, string(pem.EncodeToMemory(block)))
+			}
+			block, data = pem.Decode(data)
+		}
+	}
+
+	if *secretKeyArg != "" {
+		data, err := ioutil.ReadFile(*secretKeyArg)
+		if err != nil {
+			return c.error(err)
+		}
+		block, data := pem.Decode(data)
+		if block == nil {
+			return c.error(fmt.Errorf("%s: Could not decode PEM", *secretKeyArg))
+		} else if !strings.Contains(block.Type, "PRIVATE KEY") {
+			return c.error(fmt.Errorf("%s: Does not contain a private key, it contains %s", *secretKeyArg, block.Type))
+		} else {
+			secretKey = string(pem.EncodeToMemory(block))
+		}
+	}
 
 	res := c.runWithSpinner("configure load balancer", *endpoint, func(client *squarescale.Client) (string, error) {
 		var err error
@@ -54,7 +110,7 @@ func (c *LBSetCommand) Run(args []string) int {
 			container.WebPort = *portArg
 		}
 
-		taskId, err = client.ConfigLB(*project, container.ID, container.WebPort)
+		taskId, err = client.ConfigLB(*project, container.ID, container.WebPort, *httpsArg, cert, certChain, secretKey)
 		msg := fmt.Sprintf(
 			"[#%d] Successfully configured load balancer (enabled = '%v', container = '%s', port = '%d') for project '%s'",
 			taskId, true, *containerArg, container.WebPort, *project)
@@ -99,17 +155,13 @@ usage: sqsc lb set [options]
 // validateLBSetCommandArgs ensures that the following predicate is satisfied:
 // - 'disabled' is true and (container and port are not both specified)
 // - 'disabled' is false and (container or port are specified)
-func validateLBSetCommandArgs(project, container string, port int, disabled bool) error {
+func validateLBSetCommandArgs(project, container string, port int, disabled bool, cert, certChain, secretKey string) error {
 	if err := validateProjectName(project); err != nil {
 		return err
 	}
 
 	if disabled && (container != "" || port > 0) {
 		return errors.New("Cannot specify container or port when disabling load balancer.")
-	}
-
-	if !disabled && (container == "" && port <= 0) {
-		return errors.New("Instance and engine cannot be both empty.")
 	}
 
 	return nil

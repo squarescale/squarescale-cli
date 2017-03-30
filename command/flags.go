@@ -61,6 +61,22 @@ func disabledFlag(f *flag.FlagSet, doc string) *bool {
 	return f.Bool("disabled", false, doc)
 }
 
+func httpsFlag(f *flag.FlagSet) *bool {
+	return f.Bool("https", false, "Enable https")
+}
+
+func certFlag(f *flag.FlagSet) *string {
+	return f.String("cert", "", "Path to a PEM-encoded certificate")
+}
+
+func certChainFlag(f *flag.FlagSet) *string {
+	return f.String("cert-chain", "", "Path to a PEM-encoded certificate chain")
+}
+
+func secretKeyFlag(f *flag.FlagSet) *string {
+	return f.String("secret-key", "", "Path to the secret key used for the certificate")
+}
+
 func repoUrlFlag(f *flag.FlagSet) *string {
 	return f.String("url", "", "Git remote url")
 }
