@@ -33,6 +33,14 @@ func containerFlag(f *flag.FlagSet) *string {
 	return f.String("container", "", "Container to configure")
 }
 
+func filterNameFlag(f *flag.FlagSet) *string {
+	return f.String("name", "", "Filter on name")
+}
+
+func filterTypeFlag(f *flag.FlagSet) *string {
+	return f.String("container", "", "Filter on type")
+}
+
 func portFlag(f *flag.FlagSet) *int {
 	return f.Int("port", -1, "Port number")
 }

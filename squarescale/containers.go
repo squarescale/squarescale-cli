@@ -22,6 +22,7 @@ type Container struct {
 	Scheduled            bool   `json:"scheduled"`
 	RepositoryConfigured bool   `json:"repository_configured"`
 	PreCommandStatus     string `json:"pre_command_status"`
+	RefreshCallbacks     []string
 }
 
 func (c *Container) Status() (string, string) {
@@ -75,6 +76,7 @@ func (c *Client) GetContainers(project string) ([]Container, error) {
 		Scheduled            bool     `json:"scheduled"`
 		RepositoryConfigured bool     `json:"repository_configured"`
 		PreCommandStatus     string   `json:"pre_command_status"`
+		RefreshCallbacks     []string `json:"refresh_callbacks"`
 	}
 
 	if err := json.Unmarshal(body, &containersByID); err != nil {
@@ -97,6 +99,7 @@ func (c *Client) GetContainers(project string) ([]Container, error) {
 			Scheduled:            c.Scheduled,
 			RepositoryConfigured: c.RepositoryConfigured,
 			PreCommandStatus:     c.PreCommandStatus,
+			RefreshCallbacks:     c.RefreshCallbacks,
 		})
 	}
 
