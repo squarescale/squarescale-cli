@@ -19,6 +19,7 @@ func (c *EnvGetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	project := projectFlag(c.flagSet)
+
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -32,15 +33,30 @@ func (c *EnvGetCommand) Run(args []string) int {
 	}
 
 	return c.runWithSpinner("list environment variables", *endpoint, func(client *squarescale.Client) (string, error) {
-		vars, err := client.EnvironmentVariables(*project)
+		env, err := client.EnvironmentVariables(*project)
 		if err != nil {
 			return "", err
 		}
 
 		var lines []string
-		for k, v := range vars {
-			lines = append(lines, fmt.Sprintf("%s=\"%s\"", k, v))
+        lines = append(lines, "DEFAULT VARIABLES")
+		for k, v := range env.Preset  {
+			lines = append(lines, fmt.Sprintf("|-- %s=\"%s\"", k, v))
 		}
+
+        lines = append(lines, "")
+        lines = append(lines, "CUSTOM VARIABLES")
+        lines = append(lines, "|- GLOBAL")
+		for k, v := range env.Custom.Global {
+			lines = append(lines, fmt.Sprintf("|-- %s=\"%s\"", k, v))
+		}
+
+        for serviceName, vars := range env.Custom.PerService {
+            lines = append(lines, fmt.Sprintf("|- %s", serviceName))
+            for k, v := range vars {
+                lines = append(lines, fmt.Sprintf("|-- %s=\"%s\"", k, v))
+            }
+        }
 
 		var msg string
 		if len(lines) > 0 {
