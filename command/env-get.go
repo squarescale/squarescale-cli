@@ -22,6 +22,7 @@ func (c *EnvGetCommand) Run(args []string) int {
 	container := containerFlag(c.flagSet)
 	preSet := c.flagSet.Bool("preset", false, "Print pre-set variables")
 	global := c.flagSet.Bool("global", false, "Print global variables")
+	noPP := c.flagSet.Bool("no-pretty-print", false, "Format to allow easier parsing")
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -48,19 +49,19 @@ func (c *EnvGetCommand) Run(args []string) int {
 		var lines []string
 
 		if printPreset {
-			printPresets(&lines, env)
+			printPresets(&lines, env, *noPP)
 		}
 
-		if printGlobal || *container != "" || noFlag {
+		if printGlobal || *container != "" || noFlag && !*noPP {
 			lines = append(lines, "CUSTOM VARIABLES")
 		}
 
 		if printGlobal {
-			printGlobals(&lines, env)
+			printGlobals(&lines, env, *noPP)
 		}
 
 		if noFlag || *container != "" {
-			printPerService(&lines, env, container)
+			printPerService(&lines, env, container, *noPP)
 		}
 
 		var msg string
@@ -74,29 +75,43 @@ func (c *EnvGetCommand) Run(args []string) int {
 	})
 }
 
-func printPresets(lines *[]string, env *squarescale.Environment) {
-	*lines = append(*lines, "PRESET VARIABLES")
-	printVars(lines, &env.Preset)
-	*lines = append(*lines, "")
+func printPresets(lines *[]string, env *squarescale.Environment, noPP bool) {
+	if !noPP {
+		*lines = append(*lines, "PRESET VARIABLES")
+	}
+	printVars(lines, &env.Preset, noPP)
+	if !noPP {
+		*lines = append(*lines, "")
+	}
 }
 
-func printGlobals(lines *[]string, env *squarescale.Environment) {
-	*lines = append(*lines, "|- GLOBAL")
-	printVars(lines, &env.Custom.Global)
+func printGlobals(lines *[]string, env *squarescale.Environment, noPP bool) {
+	if !noPP {
+		*lines = append(*lines, "|- GLOBAL")
+	}
+	printVars(lines, &env.Custom.Global, noPP)
 }
 
-func printPerService(lines *[]string, env *squarescale.Environment, container *string) {
+func printPerService(lines *[]string, env *squarescale.Environment, container *string, noPP bool) {
 	for serviceName, vars := range env.Custom.PerService {
 		if serviceName == *container || *container == "" {
-			*lines = append(*lines, fmt.Sprintf("|- %s", serviceName))
-			printVars(lines, &vars)
+			if !noPP {
+				*lines = append(*lines, fmt.Sprintf("|- %s", serviceName))
+			}
+			printVars(lines, &vars, noPP)
 		}
 	}
 }
 
-func printVars(lines *[]string, vars *map[string]string) {
+func printVars(lines *[]string, vars *map[string]string, noPP bool) {
+	format := ""
+	if noPP {
+		format = "%s=%s"
+	} else {
+		format = "|-- %s=\"%s\""
+	}
 	for k, v := range *vars {
-		*lines = append(*lines, fmt.Sprintf("|-- %s=\"%s\"", k, v))
+		*lines = append(*lines, fmt.Sprintf(format, k, v))
 	}
 }
 
