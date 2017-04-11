@@ -7,16 +7,16 @@ import (
 )
 
 type Environment struct {
-    Preset map[string]string `json:"default"`
-    Custom struct {
-        Global map[string]string `json:"global"`
-        PerService map[string]map[string]string `json:"per_service"`
-    } `json:"custom"`
+	Preset map[string]string `json:"default"`
+	Custom struct {
+		Global     map[string]string            `json:"global"`
+		PerService map[string]map[string]string `json:"per_service"`
+	} `json:"custom"`
 }
 
 // EnvironmentVariables gets all the environment variables specified for the project.
 func (c *Client) EnvironmentVariables(project string) (*Environment, error) {
-    return c.envVariables(project)
+	return c.envVariables(project)
 }
 
 // SetEnvironmentVariables sets all the environment variables specified for the project.
@@ -31,7 +31,7 @@ func (c *Client) SetEnvironmentVariables(project string, env *Environment) error
 		return nil
 	case http.StatusNotFound:
 		return fmt.Errorf("Project '%s' not found", project)
-    case http.StatusUnprocessableEntity:
+	case http.StatusUnprocessableEntity:
 		return fmt.Errorf("%s", body)
 	default:
 		return unexpectedHTTPError(code, body)

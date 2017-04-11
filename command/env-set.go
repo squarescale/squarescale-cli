@@ -32,13 +32,13 @@ func (c *EnvSetCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-    if ! *global && *container == "" {
+	if !*global && *container == "" {
 		return c.errorWithUsage(errors.New("Must either provide a container name or set as global."))
-    }
+	}
 
-    if *global && *container != "" {
+	if *global && *container != "" {
 		return c.errorWithUsage(errors.New("Cannot set as global and provide a container name."))
-    }
+	}
 
 	var key, value string
 	args = c.flagSet.Args()
@@ -61,27 +61,27 @@ func (c *EnvSetCommand) Run(args []string) int {
 			return "", err
 		}
 
-        var msg string
-        if *global {
-            if *remove {
-                delete(env.Custom.Global, key)
-                msg = fmt.Sprintf("Successfully removed global variable '%s'", key)
-            } else {
-                env.Custom.Global[key] = value
-                msg = fmt.Sprintf("Successfully set global variable '%s' to value '%s'", key, value)
-            }
-        } else {
-            if *remove {
-                delete(env.Custom.PerService[*container], key)
-                msg = fmt.Sprintf("Successfully removed variable '%s' for container '%s'", key, *container)
-            } else {
-                if _, present := env.Custom.PerService[*container]; ! present {
-                    env.Custom.PerService[*container] = make(map[string]string)
-                }
-                env.Custom.PerService[*container][key] = value
-                msg = fmt.Sprintf("Successfully set variable '%s' to value '%s' for container '%s'", key, value, *container)
-            }
-        }
+		var msg string
+		if *global {
+			if *remove {
+				delete(env.Custom.Global, key)
+				msg = fmt.Sprintf("Successfully removed global variable '%s'", key)
+			} else {
+				env.Custom.Global[key] = value
+				msg = fmt.Sprintf("Successfully set global variable '%s' to value '%s'", key, value)
+			}
+		} else {
+			if *remove {
+				delete(env.Custom.PerService[*container], key)
+				msg = fmt.Sprintf("Successfully removed variable '%s' for container '%s'", key, *container)
+			} else {
+				if _, present := env.Custom.PerService[*container]; !present {
+					env.Custom.PerService[*container] = make(map[string]string)
+				}
+				env.Custom.PerService[*container][key] = value
+				msg = fmt.Sprintf("Successfully set variable '%s' to value '%s' for container '%s'", key, value, *container)
+			}
+		}
 
 		return msg, client.SetEnvironmentVariables(*project, env)
 	})

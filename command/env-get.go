@@ -39,24 +39,24 @@ func (c *EnvGetCommand) Run(args []string) int {
 		}
 
 		var lines []string
-        lines = append(lines, "DEFAULT VARIABLES")
-		for k, v := range env.Preset  {
+		lines = append(lines, "DEFAULT VARIABLES")
+		for k, v := range env.Preset {
 			lines = append(lines, fmt.Sprintf("|-- %s=\"%s\"", k, v))
 		}
 
-        lines = append(lines, "")
-        lines = append(lines, "CUSTOM VARIABLES")
-        lines = append(lines, "|- GLOBAL")
+		lines = append(lines, "")
+		lines = append(lines, "CUSTOM VARIABLES")
+		lines = append(lines, "|- GLOBAL")
 		for k, v := range env.Custom.Global {
 			lines = append(lines, fmt.Sprintf("|-- %s=\"%s\"", k, v))
 		}
 
-        for serviceName, vars := range env.Custom.PerService {
-            lines = append(lines, fmt.Sprintf("|- %s", serviceName))
-            for k, v := range vars {
-                lines = append(lines, fmt.Sprintf("|-- %s=\"%s\"", k, v))
-            }
-        }
+		for serviceName, vars := range env.Custom.PerService {
+			lines = append(lines, fmt.Sprintf("|- %s", serviceName))
+			for k, v := range vars {
+				lines = append(lines, fmt.Sprintf("|-- %s=\"%s\"", k, v))
+			}
+		}
 
 		var msg string
 		if len(lines) > 0 {
