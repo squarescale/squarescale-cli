@@ -49,6 +49,10 @@ func containerInstancesFlag(f *flag.FlagSet) *int {
 	return f.Int("instances", -1, "Number of container instances")
 }
 
+func containerBuildServiceFlag(f *flag.FlagSet) *string {
+	return f.String("build-service", "", "Build service to use (internal|travis)")
+}
+
 func containerUpdateCmdFlag(f *flag.FlagSet) *string {
 	return f.String("update", "", "Update command to run for each build")
 }

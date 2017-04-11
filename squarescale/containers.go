@@ -22,6 +22,7 @@ type Container struct {
 	Scheduled            bool   `json:"scheduled"`
 	RepositoryConfigured bool   `json:"repository_configured"`
 	PreCommandStatus     string `json:"pre_command_status"`
+	BuildService         string `json:"build_service"`
 	RefreshCallbacks     []string
 }
 
@@ -77,6 +78,7 @@ func (c *Client) GetContainers(project string) ([]Container, error) {
 		RepositoryConfigured bool     `json:"repository_configured"`
 		PreCommandStatus     string   `json:"pre_command_status"`
 		RefreshCallbacks     []string `json:"refresh_callbacks"`
+		BuildService         string   `json:"build_service"`
 	}
 
 	if err := json.Unmarshal(body, &containersByID); err != nil {
@@ -100,6 +102,7 @@ func (c *Client) GetContainers(project string) ([]Container, error) {
 			RepositoryConfigured: c.RepositoryConfigured,
 			PreCommandStatus:     c.PreCommandStatus,
 			RefreshCallbacks:     c.RefreshCallbacks,
+			BuildService:         c.BuildService,
 		})
 	}
 
@@ -124,13 +127,17 @@ func (c *Client) GetContainerInfo(project, shortName string) (Container, error) 
 
 // ConfigContainer calls the API to update the number of instances and update command.
 func (c *Client) ConfigContainer(container Container) error {
-	payload := &jsonObject{
-		"container": jsonObject{
-			"size":        container.Size,
-			"pre_command": container.Command,
-		},
+	cont := jsonObject{
+		"pre_command": container.Command,
+	}
+	if container.Size > 0 {
+		cont["size"] = container.Size
+	}
+	if container.BuildService != "" {
+		cont["build_service"] = container.BuildService
 	}
 
+	payload := &jsonObject{"container": cont}
 	code, body, err := c.put(fmt.Sprintf("/containers/%d", container.ID), payload)
 	if err != nil {
 		return err

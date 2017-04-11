@@ -23,6 +23,7 @@ func (c *ContainerSetCommand) Run(args []string) int {
 	projectArg := projectFlag(c.flagSet)
 	containerArg := containerFlag(c.flagSet)
 	nInstancesArg := containerInstancesFlag(c.flagSet)
+	buildServiceArg := containerBuildServiceFlag(c.flagSet)
 	updateCmdArg := containerUpdateCmdFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -45,7 +46,7 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			c.Ui.Warn("Number of instances cannot be 0 or negative. This value won't be set.")
 		}
 
-		if *updateCmdArg == "" {
+		if *updateCmdArg == "" && *buildServiceArg == "" {
 			err := errors.New("Invalid values provided for instance number and update command.")
 			return c.errorWithUsage(err)
 		}
@@ -68,9 +69,13 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			}
 		}
 
+		if *buildServiceArg != "" {
+			container.BuildService = *buildServiceArg
+		}
+
 		msg := fmt.Sprintf(
-			"Successfully configured container (instances = '%d', command = '%s') '%s' for project '%s'",
-			container.Size, container.Command, *containerArg, *projectArg)
+			"Successfully configured container (instances = '%d', command = '%s', build_service = %s) '%s' for project '%s'",
+			container.Size, container.Command, container.BuildService, *containerArg, *projectArg)
 
 		return msg, client.ConfigContainer(container)
 	})
