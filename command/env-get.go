@@ -19,10 +19,17 @@ func (c *EnvGetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	project := projectFlag(c.flagSet)
+	container := containerFlag(c.flagSet)
+	preSet := c.flagSet.Bool("preset", false, "Print pre-set variables")
+	global := c.flagSet.Bool("global", false, "Print global variables")
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
+
+	noFlag := !*global && *container == "" && !*preSet
+	printGlobal := *global || noFlag
+	printPreset := *preSet || noFlag
 
 	if c.flagSet.NArg() > 0 {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
@@ -39,19 +46,21 @@ func (c *EnvGetCommand) Run(args []string) int {
 		}
 
 		var lines []string
-		lines = append(lines, "DEFAULT VARIABLES")
-		for k, v := range env.Preset {
-			lines = append(lines, fmt.Sprintf("|-- %s=\"%s\"", k, v))
+
+		if printPreset {
+			printPresets(&lines, env)
 		}
 
-		lines = append(lines, "")
-		lines = append(lines, "CUSTOM VARIABLES")
-		lines = append(lines, "|- GLOBAL")
-		displayVars(&lines, &env.Custom.Global)
+		if printGlobal || *container != "" || noFlag {
+			lines = append(lines, "CUSTOM VARIABLES")
+		}
 
-		for serviceName, vars := range env.Custom.PerService {
-			lines = append(lines, fmt.Sprintf("|- %s", serviceName))
-			displayVars(&lines, &vars)
+		if printGlobal {
+			printGlobals(&lines, env)
+		}
+
+		if noFlag || *container != "" {
+			printPerService(&lines, env, container)
 		}
 
 		var msg string
@@ -65,7 +74,27 @@ func (c *EnvGetCommand) Run(args []string) int {
 	})
 }
 
-func displayVars(lines *[]string, vars *map[string]string) {
+func printPresets(lines *[]string, env *squarescale.Environment) {
+	*lines = append(*lines, "PRESET VARIABLES")
+	printVars(lines, &env.Preset)
+	*lines = append(*lines, "")
+}
+
+func printGlobals(lines *[]string, env *squarescale.Environment) {
+	*lines = append(*lines, "|- GLOBAL")
+	printVars(lines, &env.Custom.Global)
+}
+
+func printPerService(lines *[]string, env *squarescale.Environment, container *string) {
+	for serviceName, vars := range env.Custom.PerService {
+		if serviceName == *container || *container == "" {
+			*lines = append(*lines, fmt.Sprintf("|- %s", serviceName))
+			printVars(lines, &vars)
+		}
+	}
+}
+
+func printVars(lines *[]string, vars *map[string]string) {
 	for k, v := range *vars {
 		*lines = append(*lines, fmt.Sprintf("|-- %s=\"%s\"", k, v))
 	}
