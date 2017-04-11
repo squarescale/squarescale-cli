@@ -75,6 +75,9 @@ func (c *EnvSetCommand) Run(args []string) int {
                 delete(env.Custom.PerService[*container], key)
                 msg = fmt.Sprintf("Successfully removed variable '%s' for container '%s'", key, *container)
             } else {
+                if _, present := env.Custom.PerService[*container]; ! present {
+                    env.Custom.PerService[*container] = make(map[string]string)
+                }
                 env.Custom.PerService[*container][key] = value
                 msg = fmt.Sprintf("Successfully set variable '%s' to value '%s' for container '%s'", key, value, *container)
             }
