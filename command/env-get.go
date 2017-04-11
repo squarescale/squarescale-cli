@@ -47,15 +47,11 @@ func (c *EnvGetCommand) Run(args []string) int {
 		lines = append(lines, "")
 		lines = append(lines, "CUSTOM VARIABLES")
 		lines = append(lines, "|- GLOBAL")
-		for k, v := range env.Custom.Global {
-			lines = append(lines, fmt.Sprintf("|-- %s=\"%s\"", k, v))
-		}
+		displayVars(&lines, &env.Custom.Global)
 
 		for serviceName, vars := range env.Custom.PerService {
 			lines = append(lines, fmt.Sprintf("|- %s", serviceName))
-			for k, v := range vars {
-				lines = append(lines, fmt.Sprintf("|-- %s=\"%s\"", k, v))
-			}
+			displayVars(&lines, &vars)
 		}
 
 		var msg string
@@ -67,6 +63,12 @@ func (c *EnvGetCommand) Run(args []string) int {
 
 		return msg, nil
 	})
+}
+
+func displayVars(lines *[]string, vars *map[string]string) {
+	for k, v := range *vars {
+		*lines = append(*lines, fmt.Sprintf("|-- %s=\"%s\"", k, v))
+	}
 }
 
 // Synopsis is part of cli.Command implementation.
