@@ -31,6 +31,8 @@ func (c *Client) SetEnvironmentVariables(project string, env *Environment) error
 		return nil
 	case http.StatusNotFound:
 		return fmt.Errorf("Project '%s' not found", project)
+    case http.StatusUnprocessableEntity:
+		return fmt.Errorf("%s", body)
 	default:
 		return unexpectedHTTPError(code, body)
 	}
