@@ -24,7 +24,6 @@ func (c *EnvGetCommand) Run(args []string) int {
 	container := containerFlag(c.flagSet)
 	preSet := c.flagSet.Bool("preset", false, "Print pre-set variables")
 	global := c.flagSet.Bool("global", false, "Print global variables")
-	noPP := c.flagSet.Bool("no-pretty-print", false, "Format to allow easier parsing")
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -35,10 +34,10 @@ func (c *EnvGetCommand) Run(args []string) int {
 	printPreset := *preSet || noFlag
 
 	var printFunction func(string, *map[string]string, *bytes.Buffer)
-	if *noPP {
-		printFunction = printVars
-	} else {
+	if c.niceFormat {
 		printFunction = prettyPrintVars
+	} else {
+		printFunction = printVars
 	}
 
 	if c.flagSet.NArg() > 0 {
