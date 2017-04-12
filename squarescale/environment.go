@@ -7,11 +7,9 @@ import (
 )
 
 type Environment struct {
-	Preset map[string]string `json:"default"`
-	Custom struct {
-		Global     map[string]string            `json:"global"`
-		PerService map[string]map[string]string `json:"per_service"`
-	} `json:"custom"`
+	Preset     map[string]string            `json:"default"`
+	Global     map[string]string            `json:"global"`
+	PerService map[string]map[string]string `json:"per_service"`
 }
 
 // EnvironmentVariables gets all the environment variables specified for the project.
@@ -21,7 +19,7 @@ func (c *Client) EnvironmentVariables(project string) (*Environment, error) {
 
 // SetEnvironmentVariables sets all the environment variables specified for the project.
 func (c *Client) SetEnvironmentVariables(project string, env *Environment) error {
-	code, body, err := c.put("/projects/"+project+"/environment/custom", &jsonObject{"environment": env.Custom, "format": "json"})
+	code, body, err := c.put("/projects/"+project+"/environment/custom", &jsonObject{"environment": env, "format": "json"})
 	if err != nil {
 		return err
 	}

@@ -63,19 +63,19 @@ func (c *EnvSetCommand) Run(args []string) int {
 
 		var msg string
 		if *global && *remove {
-			delete(env.Custom.Global, key)
+			delete(env.Global, key)
 			msg = fmt.Sprintf("Successfully removed global variable '%s'", key)
 		} else if *global {
-			env.Custom.Global[key] = value
+			env.Global[key] = value
 			msg = fmt.Sprintf("Successfully set global variable '%s' to value '%s'", key, value)
 		} else if *remove {
-			delete(env.Custom.PerService[*container], key)
+			delete(env.PerService[*container], key)
 			msg = fmt.Sprintf("Successfully removed variable '%s' for container '%s'", key, *container)
 		} else {
-			if _, present := env.Custom.PerService[*container]; !present {
-				env.Custom.PerService[*container] = make(map[string]string)
+			if _, present := env.PerService[*container]; !present {
+				env.PerService[*container] = make(map[string]string)
 			}
-			env.Custom.PerService[*container][key] = value
+			env.PerService[*container][key] = value
 			msg = fmt.Sprintf("Successfully set variable '%s' to value '%s' for container '%s'", key, value, *container)
 		}
 

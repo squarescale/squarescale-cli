@@ -61,11 +61,11 @@ func (c *EnvGetCommand) Run(args []string) int {
 		}
 
 		if printGlobal {
-			printFunction("Global", &env.Custom.Global, &linesBuffer)
+			printFunction("Global", &env.Global, &linesBuffer)
 		}
 
 		if noFlag || *container != "" {
-			for containerName, vars := range env.Custom.PerService {
+			for containerName, vars := range env.PerService {
 				if containerName == *container || *container == "" {
 					printFunction(containerName, &vars, &linesBuffer)
 				}
