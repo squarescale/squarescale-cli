@@ -76,12 +76,17 @@ func (c *EnvGetCommand) Run(args []string) int {
 }
 
 func prettyPrintVars(title string, variables *map[string]string, lines *bytes.Buffer) {
+	lines.WriteString(fmt.Sprintf("%s\n", title))
+
+	if len(*variables) == 0 {
+		lines.WriteString("  none\n")
+	}
+
 	data := make([][]string, 0, len(*variables))
 	for k, v := range *variables {
 		data = append(data, []string{k, v})
 	}
 
-	lines.WriteString(fmt.Sprintf("%s\n", title))
 	table := tablewriter.NewWriter(lines)
 	table.AppendBulk(data)
 	table.SetBorder(false)
