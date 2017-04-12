@@ -1,10 +1,12 @@
 package command
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"strings"
 
+	"github.com/olekukonko/tablewriter"
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
@@ -32,6 +34,13 @@ func (c *EnvGetCommand) Run(args []string) int {
 	printGlobal := *global || noFlag
 	printPreset := *preSet || noFlag
 
+	var printFunction func(string, *map[string]string, *bytes.Buffer)
+	if *noPP {
+		printFunction = printVars
+	} else {
+		printFunction = prettyPrintVars
+	}
+
 	if c.flagSet.NArg() > 0 {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
@@ -46,72 +55,45 @@ func (c *EnvGetCommand) Run(args []string) int {
 			return "", err
 		}
 
-		var lines []string
+		var linesBuffer bytes.Buffer
 
 		if printPreset {
-			printPresets(&lines, env, *noPP)
-		}
-
-		if printGlobal || *container != "" || noFlag && !*noPP {
-			lines = append(lines, "CUSTOM VARIABLES")
+			printFunction("Presets", &env.Preset, &linesBuffer)
 		}
 
 		if printGlobal {
-			printGlobals(&lines, env, *noPP)
+			printFunction("Global", &env.Custom.Global, &linesBuffer)
 		}
 
 		if noFlag || *container != "" {
-			printPerService(&lines, env, container, *noPP)
+			for containerName, vars := range env.Custom.PerService {
+				if containerName == *container || *container == "" {
+					printFunction(containerName, &vars, &linesBuffer)
+				}
+			}
 		}
-
-		var msg string
-		if len(lines) > 0 {
-			msg = strings.Join(lines, "\n")
-		} else {
-			msg = fmt.Sprintf("No environment variables found for project '%s'", *project)
-		}
-
-		return msg, nil
+		return linesBuffer.String(), nil
 	})
 }
 
-func printPresets(lines *[]string, env *squarescale.Environment, noPP bool) {
-	if !noPP {
-		*lines = append(*lines, "PRESET VARIABLES")
+func prettyPrintVars(title string, variables *map[string]string, lines *bytes.Buffer) {
+	data := make([][]string, 0, len(*variables))
+	for k, v := range *variables {
+		data = append(data, []string{k, v})
 	}
-	printVars(lines, &env.Preset, noPP)
-	if !noPP {
-		*lines = append(*lines, "")
-	}
+
+	lines.WriteString(fmt.Sprintf("%s\n", title))
+	table := tablewriter.NewWriter(lines)
+	table.AppendBulk(data)
+	table.SetBorder(false)
+	table.SetColumnSeparator("=")
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.Render()
 }
 
-func printGlobals(lines *[]string, env *squarescale.Environment, noPP bool) {
-	if !noPP {
-		*lines = append(*lines, "|- GLOBAL")
-	}
-	printVars(lines, &env.Custom.Global, noPP)
-}
-
-func printPerService(lines *[]string, env *squarescale.Environment, container *string, noPP bool) {
-	for serviceName, vars := range env.Custom.PerService {
-		if serviceName == *container || *container == "" {
-			if !noPP {
-				*lines = append(*lines, fmt.Sprintf("|- %s", serviceName))
-			}
-			printVars(lines, &vars, noPP)
-		}
-	}
-}
-
-func printVars(lines *[]string, vars *map[string]string, noPP bool) {
-	format := ""
-	if noPP {
-		format = "%s=%s"
-	} else {
-		format = "|-- %s=\"%s\""
-	}
-	for k, v := range *vars {
-		*lines = append(*lines, fmt.Sprintf(format, k, v))
+func printVars(title string, variables *map[string]string, lines *bytes.Buffer) {
+	for k, v := range *variables {
+		lines.WriteString(fmt.Sprintf("%s=%s\n", k, v))
 	}
 }
 
