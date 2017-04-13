@@ -1,10 +1,12 @@
 package command
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"strings"
 
+	"github.com/olekukonko/tablewriter"
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
@@ -19,8 +21,23 @@ func (c *EnvGetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	project := projectFlag(c.flagSet)
+	container := containerFlag(c.flagSet)
+	preSet := c.flagSet.Bool("preset", false, "Print pre-set variables")
+	global := c.flagSet.Bool("global", false, "Print global variables")
+
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
+	}
+
+	noFlag := !*global && *container == "" && !*preSet
+	printGlobal := *global || noFlag
+	printPreset := *preSet || noFlag
+
+	var printFunction func(string, *map[string]string, *bytes.Buffer)
+	if c.niceFormat {
+		printFunction = prettyPrintVars
+	} else {
+		printFunction = printVars
 	}
 
 	if c.flagSet.NArg() > 0 {
@@ -32,25 +49,56 @@ func (c *EnvGetCommand) Run(args []string) int {
 	}
 
 	return c.runWithSpinner("list environment variables", *endpoint, func(client *squarescale.Client) (string, error) {
-		vars, err := client.EnvironmentVariables(*project)
+		env, err := client.EnvironmentVariables(*project)
 		if err != nil {
 			return "", err
 		}
 
-		var lines []string
-		for k, v := range vars {
-			lines = append(lines, fmt.Sprintf("%s=\"%s\"", k, v))
+		var linesBuffer bytes.Buffer
+
+		if printPreset {
+			printFunction("Presets", &env.Preset, &linesBuffer)
 		}
 
-		var msg string
-		if len(lines) > 0 {
-			msg = strings.Join(lines, "\n")
-		} else {
-			msg = fmt.Sprintf("No environment variables found for project '%s'", *project)
+		if printGlobal {
+			printFunction("Global", &env.Global, &linesBuffer)
 		}
 
-		return msg, nil
+		if noFlag || *container != "" {
+			for containerName, vars := range env.PerService {
+				if containerName == *container || *container == "" {
+					printFunction(containerName, &vars, &linesBuffer)
+				}
+			}
+		}
+		return linesBuffer.String(), nil
 	})
+}
+
+func prettyPrintVars(title string, variables *map[string]string, lines *bytes.Buffer) {
+	lines.WriteString(fmt.Sprintf("%s\n", title))
+
+	if len(*variables) == 0 {
+		lines.WriteString("  none\n")
+	}
+
+	data := make([][]string, 0, len(*variables))
+	for k, v := range *variables {
+		data = append(data, []string{k, v})
+	}
+
+	table := tablewriter.NewWriter(lines)
+	table.AppendBulk(data)
+	table.SetBorder(false)
+	table.SetColumnSeparator("=")
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.Render()
+}
+
+func printVars(title string, variables *map[string]string, lines *bytes.Buffer) {
+	for k, v := range *variables {
+		lines.WriteString(fmt.Sprintf("%s=%s\n", k, v))
+	}
 }
 
 // Synopsis is part of cli.Command implementation.
