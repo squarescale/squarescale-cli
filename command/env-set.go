@@ -43,6 +43,8 @@ func (c *EnvSetCommand) Run(args []string) int {
 	var key, value string
 	args = c.flagSet.Args()
 	switch len(args) {
+	case 0:
+		return c.errorWithUsage(fmt.Errorf("No argument provided"))
 	case 1:
 		key = args[0]
 	case 2:
