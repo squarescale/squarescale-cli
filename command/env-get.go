@@ -40,7 +40,9 @@ func (c *EnvGetCommand) Run(args []string) int {
 		printFunction = printVars
 	}
 
-	if c.flagSet.NArg() > 0 {
+	queryvar := c.flagSet.Arg(0)
+	queryval := ""
+	if c.flagSet.NArg() > 1 {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
@@ -56,22 +58,37 @@ func (c *EnvGetCommand) Run(args []string) int {
 
 		var linesBuffer bytes.Buffer
 
-		if printPreset {
+		if queryvar != "" {
+			queryval = env.Preset[queryvar]
+		} else if printPreset {
 			printFunction("Presets", &env.Preset, &linesBuffer)
 		}
 
-		if printGlobal {
+		if queryvar != "" {
+			if val, ok := env.Global[queryvar]; ok && !*preSet {
+				queryval = val
+			}
+		} else if printGlobal {
 			printFunction("Global", &env.Global, &linesBuffer)
 		}
 
 		if noFlag || *container != "" {
 			for containerName, vars := range env.PerService {
-				if containerName == *container || *container == "" {
+				if queryvar != "" {
+					if val, ok := vars[queryvar]; ok && containerName == *container {
+						queryval = val
+					}
+				} else if containerName == *container || *container == "" {
 					printFunction(containerName, &vars, &linesBuffer)
 				}
 			}
 		}
-		return linesBuffer.String(), nil
+
+		if queryvar != "" {
+			return queryval, nil
+		} else {
+			return linesBuffer.String(), nil
+		}
 	})
 }
 
@@ -109,7 +126,7 @@ func (c *EnvGetCommand) Synopsis() string {
 // Help is part of cli.Command implementation.
 func (c *EnvGetCommand) Help() string {
 	helpText := `
-usage: sqsc env get [options]
+usage: sqsc env get [options] [VARNAME]
 
   Display project environment variables.
 
