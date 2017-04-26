@@ -54,9 +54,17 @@ func (c *ContainerShowCommand) Run(args []string) int {
 			msg += fmt.Sprintf("Size:     %d/%d\n", c.Running, c.Size)
 			msg += fmt.Sprintf("Web:      %v\n", c.Web)
 			msg += fmt.Sprintf("Web Port: %d\n", c.WebPort)
-			msg += fmt.Sprintf("Refresh callbacks:\n")
-			for _, url := range c.RefreshCallbacks {
-				msg += fmt.Sprintf("  - %s\n", url)
+			if len(c.RefreshCallbacks) > 0 {
+				msg += fmt.Sprintf("Refresh callbacks:\n")
+				for _, url := range c.RefreshCallbacks {
+					msg += fmt.Sprintf("  - %s\n", url)
+				}
+			}
+			if len(c.BuildCallbacks) > 0 {
+				msg += fmt.Sprintf("Rebuild callbacks:\n")
+				for _, url := range c.BuildCallbacks {
+					msg += fmt.Sprintf("  - %s\n", url)
+				}
 			}
 		}
 

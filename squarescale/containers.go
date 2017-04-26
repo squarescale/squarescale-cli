@@ -24,6 +24,7 @@ type Container struct {
 	PreCommandStatus     string `json:"pre_command_status"`
 	BuildService         string `json:"build_service"`
 	RefreshCallbacks     []string
+	BuildCallbacks       []string
 }
 
 func (c *Container) Status() (string, string) {
@@ -78,6 +79,7 @@ func (c *Client) GetContainers(project string) ([]Container, error) {
 		RepositoryConfigured bool     `json:"repository_configured"`
 		PreCommandStatus     string   `json:"pre_command_status"`
 		RefreshCallbacks     []string `json:"refresh_callbacks"`
+		BuildCallbacks       []string `json:"build_callbacks"`
 		BuildService         string   `json:"build_service"`
 	}
 
@@ -102,6 +104,7 @@ func (c *Client) GetContainers(project string) ([]Container, error) {
 			RepositoryConfigured: c.RepositoryConfigured,
 			PreCommandStatus:     c.PreCommandStatus,
 			RefreshCallbacks:     c.RefreshCallbacks,
+			BuildCallbacks:       c.BuildCallbacks,
 			BuildService:         c.BuildService,
 		})
 	}
