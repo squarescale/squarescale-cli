@@ -45,7 +45,7 @@ func (c *LogsCommand) Run(args []string) int {
 
 	var sqscClient *squarescale.Client
 	var msg string
-	var last int
+	var last string
 	retCode := c.runWithSpinner(waitText, *endpoint, func(client *squarescale.Client) (string, error) {
 		sqscClient = client
 		msg, last, err = getLogs(client, *project, *container)
@@ -73,27 +73,27 @@ func (c *LogsCommand) Run(args []string) int {
 	}
 }
 
-func getLogs(client *squarescale.Client, project, container string) (string, int, error) {
-	return getLogsAfter(client, project, container, -1)
+func getLogs(client *squarescale.Client, project, container string) (string, string, error) {
+	return getLogsAfter(client, project, container, "")
 }
 
-func getLogsAfter(client *squarescale.Client, project string, container string, last int) (string, int, error) {
-	logs, lastOffset, e := client.ProjectLogs(project, container, last)
+func getLogsAfter(client *squarescale.Client, project string, container string, last string) (string, string, error) {
+	logs, lastTimestamp, e := client.ProjectLogs(project, container, last)
 	if e != nil {
-		return "", -1, e
+		return "", "", e
 	}
 
 	msg := "\033[0m" + strings.Join(logs, "\n")
 	if len(logs) == 0 {
-		if last < 0 {
+		if last == "" {
 			msg = fmt.Sprintf("No available logs")
 		} else {
-			lastOffset = last
+			lastTimestamp = last
 			msg = ""
 		}
 	}
 
-	return msg, lastOffset, nil
+	return msg, lastTimestamp, nil
 }
 
 // Synopsis is part of cli.Command implementation.

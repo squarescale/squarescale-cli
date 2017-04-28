@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
 	"time"
 )
 
@@ -268,69 +267,78 @@ func (c *Client) ProjectDelete(project string) error {
 }
 
 // ProjectLogs gets the logs for a project container.
-func (c *Client) ProjectLogs(project string, container string, after int) ([]string, int, error) {
+func (c *Client) ProjectLogs(project string, container string, after string) ([]string, string, error) {
 	query := ""
-	if after > 0 {
-		query = "?after=" + url.QueryEscape(strconv.Itoa(after))
+	if after != "" {
+		query = "?after=" + url.QueryEscape(after)
 	}
 
 	code, body, err := c.get("/projects/" + project + "/logs/" + url.QueryEscape(container) + query)
 	if err != nil {
-		return []string{}, -1, err
+		return []string{}, "", err
 	}
 
 	switch code {
 	case http.StatusOK:
 	case http.StatusBadRequest:
-		return []string{}, -1, fmt.Errorf("Project '%s' not found", project)
+		return []string{}, "", fmt.Errorf("Project '%s' not found", project)
 	case http.StatusNotFound:
-		return []string{}, -1, fmt.Errorf("Container '%s' is not found for project '%s'", container, project)
+		return []string{}, "", fmt.Errorf("Container '%s' is not found for project '%s'", container, project)
 	default:
-		return []string{}, -1, unexpectedHTTPError(code, body)
+		return []string{}, "", unexpectedHTTPError(code, body)
 	}
 
 	var response []struct {
 		Timestamp     string `json:"timestamp"`
 		ProjectName   string `json:"project_name"`
 		ContainerName string `json:"container_name"`
-		Environment   string `json:"environment"`
 		Error         bool   `json:"error"`
-		LogType       string `json:"log_type"`
+		Type          string `json:"type"`
 		Message       string `json:"message"`
-		Offset        int    `json:"offset"`
+		Level         int    `json:"level"`
 	}
 	err = json.Unmarshal(body, &response)
 
 	if err != nil {
-		return []string{}, -1, err
+		return []string{}, "", err
 	}
 
 	var messages []string
 	for _, log := range response {
 		var linePattern string
-		if log.LogType == "stderr" {
-			linePattern = "[%s][%s] E| %s"
-		} else if log.LogType == "stdout" {
-			linePattern = "[%s][%s] I| %s"
+		var lt string
+		if log.Type == "docker" {
+			lt = "D"
+		} else if log.Type == "nomad" {
+			lt = "N"
+		} else if log.Type == "event" {
+			lt = "E"
 		} else {
-			linePattern = "[%s][%s] S| %s"
+			lt = "-"
+		}
+		if log.Level >= 5 {
+			linePattern = "[%s][%s][%s] I| %s"
+		} else if log.Level >= 4 {
+			linePattern = "[%s][%s][%s] W| %s"
+		} else {
+			linePattern = "[%s][%s][%s] E| %s"
 		}
 		if log.Error {
 			linePattern = "\033[0;33m" + linePattern + "\033[0m"
 		}
 		t, err := time.Parse(time.RFC3339Nano, log.Timestamp)
 		if err == nil {
-			messages = append(messages, fmt.Sprintf(linePattern, t.Format("2006-01-02T15:04:05.999Z07:00"), log.ContainerName, log.Message))
+			messages = append(messages, fmt.Sprintf(linePattern, t.Format("2006-01-02T15:04:05.999Z07:00"), log.ContainerName, lt, log.Message))
 		} else {
-			messages = append(messages, fmt.Sprintf(linePattern, log.Timestamp, log.ContainerName, log.Message))
+			messages = append(messages, fmt.Sprintf(linePattern, log.Timestamp, log.ContainerName, lt, log.Message))
 		}
 	}
-	var lastOffset int
+	var lastTimestamp string
 	if len(response) == 0 {
-		lastOffset = -1
+		lastTimestamp = ""
 	} else {
-		lastOffset = response[len(response)-1].Offset
+		lastTimestamp = response[len(response)-1].Timestamp
 	}
 
-	return messages, lastOffset, nil
+	return messages, lastTimestamp, nil
 }
