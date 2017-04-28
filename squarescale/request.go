@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	actioncable "github.com/bgentry/actioncable-go"
+	multierr "github.com/hashicorp/go-multierror"
 )
 
 const supportedAPI string = "1"
@@ -115,7 +116,40 @@ func unexpectedHTTPError(code int, body []byte) error {
 		return errors.New("Error: " + description.Error)
 	}
 
-	return fmt.Errorf("An unexpected error occurred (code: %d)", code)
+	var data map[string]interface{}
+	json.Unmarshal(body, &data)
+	err := decodeAnyError(data, "error", "")
+
+	if err == nil {
+		err = fmt.Errorf("An unexpected error occurred (code: %d)", code)
+	}
+
+	return err
+}
+
+func decodeAnyError(errs map[string]interface{}, exclude, prefix string) error {
+	var err *multierr.Error
+	for k, v := range errs {
+		var pre string
+		if prefix == "" {
+			pre = k
+		} else {
+			pre = prefix + " " + k
+		}
+		switch val := v.(type) {
+		case string:
+			err = multierr.Append(err, fmt.Errorf("%s: %s", pre, val))
+		case []interface{}:
+			for _, value := range val {
+				if s, ok := value.(string); ok {
+					err = multierr.Append(err, fmt.Errorf("%s: %s", pre, s))
+				}
+			}
+		case map[string]interface{}:
+			err = multierr.Append(err, decodeAnyError(val, "", pre))
+		}
+	}
+	return err.ErrorOrNil()
 }
 
 func readErrors(body []byte, header string) error {
