@@ -31,8 +31,8 @@ func (c *Client) GetClusterSize(project string) (uint, error) {
 // ConfigDB calls the Squarescale API to update database scale options for a given project.
 func (c *Client) SetClusterSize(project string, clusterSize uint) (int, error) {
 	payload := &jsonObject{
-		"project": jsonObject{
-			"cluster_size": clusterSize,
+		"cluster": jsonObject{
+			"desired_size": clusterSize,
 		},
 	}
 
