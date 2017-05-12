@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/squarescale/go-netrc/netrc"
 )
@@ -26,6 +27,7 @@ func initNetrcFileIfNotExist() {
 
 // GetToken retrieves the Squarescale token in the token store.
 func GetToken(host string) (string, error) {
+	host = normalizeHost(host)
 	initNetrcFileIfNotExist()
 	n, err := netrc.ParseFile(netrcFile())
 	if err != nil {
@@ -44,6 +46,7 @@ func GetToken(host string) (string, error) {
 
 // SaveToken persists the Squarescale token for the given host in the token store.
 func SaveToken(host, token string) error {
+	host = normalizeHost(host)
 	n, err := netrc.ParseFile(netrcFile())
 	if err != nil && os.IsNotExist(err) {
 		n, err = netrc.Parse(bytes.NewReader(nil))
@@ -71,4 +74,8 @@ func saveNetrc(n *netrc.Netrc) error {
 	}
 
 	return ioutil.WriteFile(netrcFile(), text, 0600)
+}
+
+func normalizeHost(host string) string {
+	return strings.TrimSuffix(host, "/")
 }
