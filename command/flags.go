@@ -16,7 +16,7 @@ func endpointFlag(f *flag.FlagSet) *string {
 	}
 	endpoint := os.Getenv("SQSC_ENDPOINT")
 	if endpoint == "" {
-		endpoint = "http://www." + env + ".sqsc.squarely.io"
+		endpoint = "https://www." + env + ".sqsc.squarely.io"
 	}
 	return f.String("endpoint", endpoint, "Squarescale endpoint")
 }
