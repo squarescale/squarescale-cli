@@ -31,7 +31,7 @@ func (c *RepositoryListCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	return c.runWithSpinner("list repositories", *endpoint, func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("list repositories", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		repositories, err := client.ListRepositories(*project)
 		if err != nil {
 			return "", err

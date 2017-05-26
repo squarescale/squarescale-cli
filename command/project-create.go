@@ -37,7 +37,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 
 	var taskId int
 
-	res := c.runWithSpinner("create project", *endpoint, func(client *squarescale.Client) (string, error) {
+	res := c.runWithSpinner("create project", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var definitiveName string
 		var err error
 
@@ -83,7 +83,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	}
 
 	if !*nowait {
-		res = c.runWithSpinner("wait for project creation", *endpoint, func(client *squarescale.Client) (string, error) {
+		res = c.runWithSpinner("wait for project creation", endpoint.String(), func(client *squarescale.Client) (string, error) {
 			task, err := client.WaitTask(taskId)
 			if err != nil {
 				return "", err

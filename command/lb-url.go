@@ -31,7 +31,7 @@ func (c *LBURLCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	return c.runWithSpinner("project url", *endpoint, func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("project url", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		url, err := client.ProjectURL(*project)
 		if err != nil {
 			return "", err

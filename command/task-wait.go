@@ -34,7 +34,7 @@ func (c *TaskWaitCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
 	}
 
-	return c.runWithSpinner("fetch task", *endpoint, func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("fetch task", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		t, err := client.WaitTask(taskId)
 		if err != nil {
 			return "", err

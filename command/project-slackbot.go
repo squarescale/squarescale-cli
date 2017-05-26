@@ -35,11 +35,11 @@ func (c *ProjectSlackbotCommand) Run(args []string) int {
 
 	url := c.flagSet.Arg(1)
 	if url == "" {
-		return c.runWithSpinner("retrieve slack settings", *endpoint, func(client *squarescale.Client) (string, error) {
+		return c.runWithSpinner("retrieve slack settings", endpoint.String(), func(client *squarescale.Client) (string, error) {
 			return client.ProjectSlackURL(projectName)
 		})
 	} else {
-		return c.runWithSpinner(fmt.Sprintf("change slack integration URL to %s", url), *endpoint, func(client *squarescale.Client) (string, error) {
+		return c.runWithSpinner(fmt.Sprintf("change slack integration URL to %s", url), endpoint.String(), func(client *squarescale.Client) (string, error) {
 			return url, client.SetProjectSlackURL(projectName, url)
 		})
 	}

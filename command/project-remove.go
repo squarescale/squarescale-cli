@@ -46,7 +46,7 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 		}
 	}
 
-	res := c.runWithSpinner("unprovision project", *endpoint, func(client *squarescale.Client) (string, error) {
+	res := c.runWithSpinner("unprovision project", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		err := client.ProjectUnprovision(projectName)
 		if err != nil {
 			return "", err
@@ -78,7 +78,7 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 		return res
 	}
 
-	return c.runWithSpinner("delete project", *endpoint, func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("delete project", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		err := client.ProjectDelete(projectName)
 		if err != nil {
 			return "", err

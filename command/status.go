@@ -26,7 +26,7 @@ func (c *StatusCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	return c.runWithSpinner("check authorization", *endpoint, func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("check authorization", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		return "You're currently logged in", nil // do nothing as we are already authenticated here.
 	})
 }

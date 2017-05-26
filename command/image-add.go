@@ -33,7 +33,7 @@ func (c *ImageAddCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	return c.runWithSpinner("add docker image", *endpoint, func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("add docker image", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		msg := fmt.Sprintf("Successfully added docker image '%s' to project '%s'", *image, *project)
 		return msg, client.AddImage(*project, *image)
 	})

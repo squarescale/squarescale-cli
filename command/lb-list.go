@@ -31,7 +31,7 @@ func (c *LBListCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	return c.runWithSpinner("list load balancer config", *endpoint, func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("list load balancer config", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		enabled, err := client.LoadBalancerEnabled(*project)
 		if err != nil {
 			return "", err

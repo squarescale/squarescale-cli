@@ -45,7 +45,7 @@ func (c *ClusterSetCommand) Run(args []string) int {
 
 	var taskId int
 
-	res := c.runWithSpinner("change cluster size", *endpoint, func(client *squarescale.Client) (string, error) {
+	res := c.runWithSpinner("change cluster size", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
 		currentSize, e := client.GetClusterSize(*projectNameArg)
 		if e != nil {
@@ -65,7 +65,7 @@ func (c *ClusterSetCommand) Run(args []string) int {
 	}
 
 	if !*nowait {
-		res = c.runWithSpinner("wait for cluster change", *endpoint, func(client *squarescale.Client) (string, error) {
+		res = c.runWithSpinner("wait for cluster change", endpoint.String(), func(client *squarescale.Client) (string, error) {
 			task, err := client.WaitTask(taskId)
 			if err != nil {
 				return "", err

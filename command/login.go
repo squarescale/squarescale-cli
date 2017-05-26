@@ -43,12 +43,12 @@ func (c *LoginCommand) Run(args []string) int {
 	c.Ui.Info("Forward GitHub authorization to Squarescale")
 
 	res := 0
-	sqscToken, err := squarescale.ObtainTokenFromGitHub(*endpoint, ghToken)
+	sqscToken, err := squarescale.ObtainTokenFromGitHub(endpoint.String(), ghToken)
 	if err != nil {
 		res = c.error(err)
 
 	} else {
-		err = tokenstore.SaveToken(*endpoint, sqscToken)
+		err = tokenstore.SaveToken(endpoint.String(), sqscToken)
 		if err != nil {
 			res = c.error(err)
 

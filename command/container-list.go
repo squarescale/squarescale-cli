@@ -32,7 +32,7 @@ func (c *ContainerListCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	return c.runWithSpinner("list containers", *endpoint, func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("list containers", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		containers, err := client.GetContainers(*projectArg)
 		if err != nil {
 			return "", err

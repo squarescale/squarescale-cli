@@ -8,21 +8,40 @@ import (
 	"strings"
 
 	"github.com/mitchellh/cli"
+	log "github.com/sirupsen/logrus"
 )
 
-func endpointFlag(f *flag.FlagSet) *string {
-	env := os.Getenv("SQSC_ENV")
-	if env == "" {
-		env = "production"
-	}
-	defaultValue := os.Getenv("SQSC_ENDPOINT")
-	if defaultValue == "" {
-		defaultValue = "https://www." + env + ".sqsc.squarely.io"
-	}
+type endpoint string
 
-	endpoint := f.String("endpoint", defaultValue, "Squarescale endpoint")
-	normalizedEndpoint := strings.TrimSuffix(*endpoint, "/")
-	return &normalizedEndpoint
+func (e *endpoint) String() string {
+	if *e == "" {
+		env := os.Getenv("SQSC_ENV")
+		if env == "" {
+			env = "production"
+		}
+		defaultValue := os.Getenv("SQSC_ENDPOINT")
+		if defaultValue == "" {
+			defaultValue = "https://www." + env + ".sqsc.squarely.io"
+		}
+
+		log.WithField("endpoint", defaultValue).Debug()
+		return defaultValue
+	}
+	log.WithField("endpoint", *e).Debug()
+	return string(*e)
+}
+
+func (e *endpoint) Set(value string) error {
+	normalizedEndpoint := strings.TrimSuffix(value, "/")
+	*e = endpoint(normalizedEndpoint)
+	return nil
+}
+
+var endPointFlag endpoint
+
+func endpointFlag(f *flag.FlagSet) *endpoint {
+	f.Var(&endPointFlag, "endpoint", "SquareScale endpoint")
+	return &endPointFlag
 }
 
 func projectFlag(f *flag.FlagSet) *string {

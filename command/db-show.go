@@ -32,7 +32,7 @@ func (c *DBShowCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	return c.runWithSpinner("fetch database configuration", *endpoint, func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("fetch database configuration", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		enabled, engine, instance, e := client.GetDBConfig(*projectNameArg)
 		if e != nil {
 			return "", e

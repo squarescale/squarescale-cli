@@ -52,7 +52,7 @@ func (c *ContainerSetCommand) Run(args []string) int {
 		}
 	}
 
-	return c.runWithSpinner("configure container", *endpoint, func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("configure container", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		container, err := client.GetContainerInfo(*projectArg, *containerArg)
 		if err != nil {
 			return "", err

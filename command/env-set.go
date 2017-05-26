@@ -57,7 +57,7 @@ func (c *EnvSetCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	return c.runWithSpinner("set environment variable", *endpoint, func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("set environment variable", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		env, err := client.EnvironmentVariables(*project)
 		if err != nil {
 			return "", err

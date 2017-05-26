@@ -46,7 +46,7 @@ func (c *LogsCommand) Run(args []string) int {
 	var sqscClient *squarescale.Client
 	var msg string
 	var last string
-	retCode := c.runWithSpinner(waitText, *endpoint, func(client *squarescale.Client) (string, error) {
+	retCode := c.runWithSpinner(waitText, endpoint.String(), func(client *squarescale.Client) (string, error) {
 		sqscClient = client
 		msg, last, err = getLogs(client, *project, *container)
 		return msg, err

@@ -94,7 +94,7 @@ func (c *LBSetCommand) Run(args []string) int {
 		}
 	}
 
-	res := c.runWithSpinner("configure load balancer", *endpoint, func(client *squarescale.Client) (string, error) {
+	res := c.runWithSpinner("configure load balancer", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
 		if *disabledArg {
 			taskId, err = client.DisableLB(*project)
@@ -122,7 +122,7 @@ func (c *LBSetCommand) Run(args []string) int {
 	}
 
 	if !*nowait {
-		res = c.runWithSpinner("wait for load balancer change", *endpoint, func(client *squarescale.Client) (string, error) {
+		res = c.runWithSpinner("wait for load balancer change", endpoint.String(), func(client *squarescale.Client) (string, error) {
 			task, err := client.WaitTask(taskId)
 			if err != nil {
 				return "", err

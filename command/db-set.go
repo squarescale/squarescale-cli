@@ -48,7 +48,7 @@ func (c *DBSetCommand) Run(args []string) int {
 
 	var taskId int
 
-	res := c.runWithSpinner("scale project database", *endpoint, func(client *squarescale.Client) (string, error) {
+	res := c.runWithSpinner("scale project database", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
 		enabled, engine, instance, e := client.GetDBConfig(*projectNameArg)
 		if e != nil {
@@ -92,7 +92,7 @@ func (c *DBSetCommand) Run(args []string) int {
 	}
 
 	if !*nowait {
-		res = c.runWithSpinner("wait for database change", *endpoint, func(client *squarescale.Client) (string, error) {
+		res = c.runWithSpinner("wait for database change", endpoint.String(), func(client *squarescale.Client) (string, error) {
 			task, err := client.WaitTask(taskId)
 			if err != nil {
 				return "", err
