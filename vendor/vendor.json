@@ -93,6 +93,12 @@
 			"revisionTime": "2017-01-28T05:05:32Z"
 		},
 		{
+			"checksumSHA1": "x/C9sWJ33glBGKgGvb8VvUQvR8s=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "5e5dc898656f695e2a086b8e12559febbfc01562",
+			"revisionTime": "2017-05-15T10:45:16Z"
+		},
+		{
 			"checksumSHA1": "ZggOuRB07wssXbutFpIIyKL34Mc=",
 			"path": "github.com/squarescale/go-netrc/netrc",
 			"revision": "49f67159ae13a93c7408c1617f9076a872b8e103",
