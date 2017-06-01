@@ -20,7 +20,9 @@ func (e *endpoint) String() string {
 			env = "production"
 		}
 		defaultValue := os.Getenv("SQSC_ENDPOINT")
-		if defaultValue == "" {
+		if defaultValue == "" && env == "dev" {
+			defaultValue = "http://web.service.consul:3000"
+		} else if defaultValue == "" {
 			defaultValue = "https://www." + env + ".sqsc.squarely.io"
 		}
 

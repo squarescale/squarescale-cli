@@ -1,5 +1,5 @@
-COMMIT      = $$(git describe --always)
-GO_LD_FLAGS = -ldflags "-X main.GitCommit=\"$(COMMIT)\""
+VERSION     = $(shell git describe --always --dirty)
+GO_LD_FLAGS = -ldflags '-X main.GitCommit="$(VERSION)"'
 GO_CMD      = go build -v $(GO_LD_FLAGS)
 DOCKER_CMD  = docker run --rm
 MOUNT_POINT = /go/src/github.com/squarescale/squarescale-cli
