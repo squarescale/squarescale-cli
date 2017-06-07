@@ -11,7 +11,8 @@ import (
 type Container struct {
 	ID                   int
 	ShortName            string
-	Command              []string
+	PreCommand           []string
+	RunCommand           []string
 	Running              int
 	Size                 int
 	Web                  bool
@@ -67,7 +68,8 @@ func (c *Client) GetContainers(project string) ([]Container, error) {
 	var containersByID []struct {
 		ID                   int      `json:"id"`
 		ShortURL             string   `json:"short_url"`
-		Command              []string `json:"pre_command"`
+		PreCommand           []string `json:"pre_command"`
+		RunCommand           []string `json:"run_command"`
 		Running              int      `json:"running"`
 		Size                 int      `json:"size"`
 		Web                  bool     `json:"web"`
@@ -93,7 +95,8 @@ func (c *Client) GetContainers(project string) ([]Container, error) {
 			ID:                   c.ID,
 			ShortName:            c.ShortURL,
 			Size:                 c.Size,
-			Command:              c.Command,
+			PreCommand:           c.PreCommand,
+			RunCommand:           c.RunCommand,
 			Web:                  c.Web,
 			WebPort:              c.WebPort,
 			Type:                 c.Type,
@@ -130,8 +133,12 @@ func (c *Client) GetContainerInfo(project, shortName string) (Container, error) 
 
 // ConfigContainer calls the API to update the number of instances and update command.
 func (c *Client) ConfigContainer(container Container) error {
-	cont := jsonObject{
-		"pre_command": container.Command,
+	cont := jsonObject{}
+	if container.PreCommand != nil {
+		cont["pre_command"] = container.PreCommand
+	}
+	if container.RunCommand != nil {
+		cont["run_command"] = container.RunCommand
 	}
 	if container.Size > 0 {
 		cont["size"] = container.Size
