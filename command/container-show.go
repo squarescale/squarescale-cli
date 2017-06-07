@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/kballard/go-shellquote"
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
@@ -39,30 +40,35 @@ func (c *ContainerShowCommand) Run(args []string) int {
 			return "", err
 		}
 
-		var msg string = "Type\tName\tStatus\tSize\tWeb\tPort\n"
-		for _, c := range containers {
-			if *containerArg != "" && *containerArg != c.ShortName {
+		var msg string
+		for _, co := range containers {
+			if *containerArg != "" && *containerArg != co.ShortName {
 				continue
 			}
-			if *typeArg != "" && *typeArg != c.Type {
+			if *typeArg != "" && *typeArg != co.Type {
 				continue
 			}
-			st, _ := c.Status()
-			msg += fmt.Sprintf("Type:     %s\n", c.Type)
-			msg += fmt.Sprintf("Name:     %s\n", c.ShortName)
-			msg += fmt.Sprintf("Status:   %s\n", st)
-			msg += fmt.Sprintf("Size:     %d/%d\n", c.Running, c.Size)
-			msg += fmt.Sprintf("Web:      %v\n", c.Web)
-			msg += fmt.Sprintf("Web Port: %d\n", c.WebPort)
-			if len(c.RefreshCallbacks) > 0 {
+			st, _ := co.Status()
+			msg += fmt.Sprintf("Type:\t%s\n", co.Type)
+			msg += fmt.Sprintf("Name:\t%s\n", co.ShortName)
+			msg += fmt.Sprintf("Status:\t%s\n", st)
+			msg += fmt.Sprintf("Size:\t%d/%d\n", co.Running, co.Size)
+			msg += fmt.Sprintf("Pre Command:\t%s\n", shellquote.Join(co.PreCommand...))
+			msg += fmt.Sprintf("Run Command:\t%s\n", shellquote.Join(co.RunCommand...))
+			msg += fmt.Sprintf("Web:\t%v\n", co.Web)
+			msg += fmt.Sprintf("Web Port:\t%d\n", co.WebPort)
+			msg = c.FormatTable(msg, false)
+			msg += "\n\n"
+
+			if len(co.RefreshCallbacks) > 0 {
 				msg += fmt.Sprintf("Refresh callbacks:\n")
-				for _, url := range c.RefreshCallbacks {
+				for _, url := range co.RefreshCallbacks {
 					msg += fmt.Sprintf("  - %s\n", url)
 				}
 			}
-			if len(c.BuildCallbacks) > 0 {
+			if len(co.BuildCallbacks) > 0 {
 				msg += fmt.Sprintf("Rebuild callbacks:\n")
-				for _, url := range c.BuildCallbacks {
+				for _, url := range co.BuildCallbacks {
 					msg += fmt.Sprintf("  - %s\n", url)
 				}
 			}
@@ -72,7 +78,7 @@ func (c *ContainerShowCommand) Run(args []string) int {
 			msg = "No containers found"
 		}
 
-		return c.FormatTable(msg, false), nil
+		return msg, nil
 	})
 }
 
