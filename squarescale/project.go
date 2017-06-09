@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -59,10 +60,11 @@ func (c *Client) FindProjectName() (string, error) {
 }
 
 // CreateProject asks the Squarescale platform to create a new project, using the provided name and user token.
-func (c *Client) CreateProject(name string) (taskId int, err error) {
+func (c *Client) CreateProject(name, infraType string) (taskId int, err error) {
 	payload := &jsonObject{
 		"project": jsonObject{
-			"name": name,
+			"name":       name,
+			"infra_type": getInfraTypeEnumValue(infraType),
 		},
 	}
 
@@ -89,6 +91,10 @@ func (c *Client) CreateProject(name string) (taskId int, err error) {
 	}
 
 	return response.Task, err
+}
+
+func getInfraTypeEnumValue(infraType string) string {
+	return strings.Replace(infraType, "-", "_", 1)
 }
 
 type Project struct {

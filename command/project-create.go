@@ -22,6 +22,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	nowait := nowaitFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
 	wantedProjectName := projectNameFlag(c.flagSet)
+	infraType := infraTypeFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -33,6 +34,10 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 
 	if c.flagSet.NArg() > 1 {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
+	}
+
+	if *infraType != "high-availability" && *infraType != "single-node" {
+		return c.errorWithUsage(fmt.Errorf("Unknown infrastructure type: %v. Correct values are high-availability or single-node", *infraType))
 	}
 
 	var taskId int
@@ -74,7 +79,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 			definitiveName = generatedName
 		}
 
-		taskId, err = client.CreateProject(definitiveName)
+		taskId, err = client.CreateProject(definitiveName, *infraType)
 
 		return fmt.Sprintf("[#%d] Created project '%s'", taskId, definitiveName), err
 	})
@@ -125,4 +130,8 @@ func (c *ProjectCreateCommand) askConfirmName(alwaysYes *bool, name string) erro
 
 	c.startSpinner()
 	return nil
+}
+
+func infraTypeFlag(f *flag.FlagSet) *string {
+	return f.String("infra-type", "high-availability", "Set the infrastructure configuration.")
 }
