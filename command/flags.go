@@ -63,7 +63,7 @@ func filterNameFlag(f *flag.FlagSet) *string {
 }
 
 func filterTypeFlag(f *flag.FlagSet) *string {
-	return f.String("container", "", "Filter on type")
+	return f.String("type", "", "Filter on type")
 }
 
 func portFlag(f *flag.FlagSet) *int {
