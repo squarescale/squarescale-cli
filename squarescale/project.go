@@ -313,30 +313,40 @@ func (c *Client) ProjectLogs(project string, container string, after string) ([]
 	for _, log := range response {
 		var linePattern string
 		var lt string
+		var containerWithBrackets string
+		var level string
 		if log.Type == "docker" {
-			lt = "D"
+			lt = "docker"
 		} else if log.Type == "nomad" {
-			lt = "N"
+			lt = "nomad "
 		} else if log.Type == "event" {
-			lt = "E"
+			lt = "sqsc  "
 		} else {
-			lt = "-"
+			lt = ""
+		}
+		if log.ContainerName == "" {
+			containerWithBrackets = ""
+		} else {
+			containerWithBrackets = "[" + log.ContainerName + "] "
 		}
 		if log.Level >= 5 {
-			linePattern = "[%s][%s][%s] I| %s"
+			level = "INFO "
 		} else if log.Level >= 4 {
-			linePattern = "[%s][%s][%s] W| %s"
+			level = "WARN "
 		} else {
-			linePattern = "[%s][%s][%s] E| %s"
+			level = "ERROR"
 		}
+		linePattern = "%s %s %s-- [%s] %s"
 		if log.Error {
 			linePattern = "\033[0;33m" + linePattern + "\033[0m"
 		}
 		t, err := time.Parse(time.RFC3339Nano, log.Timestamp)
 		if err == nil {
-			messages = append(messages, fmt.Sprintf(linePattern, t.Format("2006-01-02T15:04:05.999Z07:00"), log.ContainerName, lt, log.Message))
+			formatedTime := t.Format("2006-01-02 15:04:05.999")
+			padTime := fmt.Sprintf("%-23s", formatedTime)
+			messages = append(messages, fmt.Sprintf(linePattern, padTime, lt, containerWithBrackets, level, log.Message))
 		} else {
-			messages = append(messages, fmt.Sprintf(linePattern, log.Timestamp, log.ContainerName, lt, log.Message))
+			messages = append(messages, fmt.Sprintf(linePattern, log.Timestamp, lt, containerWithBrackets, level, log.Message))
 		}
 	}
 	var lastTimestamp string
