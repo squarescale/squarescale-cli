@@ -27,6 +27,10 @@ func (c *ContainerSetCommand) Run(args []string) int {
 	updateCmdArg := containerUpdateCmdFlag(c.flagSet)
 	noUpdateCmdArg := containerNoUpdateCmdFlag(c.flagSet)
 	runCmdArg := containerRunCmdFlag(c.flagSet)
+	limitMemoryArg := containerLimitMemoryFlag(c.flagSet)
+	limitCPUArg := containerLimitCPUFlag(c.flagSet)
+	limitIOPSArg := containerLimitIOPSFlag(c.flagSet)
+	limitNetArg := containerLimitNetFlag(c.flagSet)
 	noRunCmdArg := containerNoRunCmdFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -57,7 +61,7 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			c.Ui.Warn("Number of instances cannot be 0 or negative. This value won't be set.")
 		}
 
-		if *updateCmdArg == "" && *buildServiceArg == "" && *runCmdArg == "" && !*noRunCmdArg && !*noUpdateCmdArg {
+		if *updateCmdArg == "" && *buildServiceArg == "" && *runCmdArg == "" && !*noRunCmdArg && !*noUpdateCmdArg && *limitCPUArg < 0 && *limitMemoryArg < 0 && *limitIOPSArg < 0 && *limitNetArg < 0 {
 			err := errors.New("Invalid values provided for instance number and update command.")
 			return c.errorWithUsage(err)
 		}
@@ -100,6 +104,19 @@ func (c *ContainerSetCommand) Run(args []string) int {
 
 		if *buildServiceArg != "" {
 			container.BuildService = *buildServiceArg
+		}
+
+		if *limitMemoryArg >= 0 {
+			container.Limits.Memory = *limitMemoryArg
+		}
+		if *limitCPUArg >= 0 {
+			container.Limits.CPU = *limitCPUArg
+		}
+		if *limitIOPSArg >= 0 {
+			container.Limits.IOPS = *limitIOPSArg
+		}
+		if *limitNetArg >= 0 {
+			container.Limits.Net = *limitNetArg
 		}
 
 		msg := fmt.Sprintf(

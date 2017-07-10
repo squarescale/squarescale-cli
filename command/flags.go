@@ -94,6 +94,22 @@ func containerRunCmdFlag(f *flag.FlagSet) *string {
 	return f.String("command", "", "Command to run when starting container (override)")
 }
 
+func containerLimitMemoryFlag(f *flag.FlagSet) *int {
+	return f.Int("memory", -1, "This is the maximum amount of memory your service will be able to use until it is killed and restarted automatically.")
+}
+
+func containerLimitCPUFlag(f *flag.FlagSet) *int {
+	return f.Int("cpu", -1, "This is an indicative limit of how much CPU your service requires.")
+}
+
+func containerLimitIOPSFlag(f *flag.FlagSet) *int {
+	return f.Int("iops", -1, "This is an indicative limit of how many I/O operation per second your service requires.")
+}
+
+func containerLimitNetFlag(f *flag.FlagSet) *int {
+	return f.Int("net", -1, "This is an indicative limit of how much network bandwidth your service requires.")
+}
+
 func clusterSizeFlag(f *flag.FlagSet) *uint {
 	return f.Uint("cluster-size", 0, "Cluster Size")
 }
