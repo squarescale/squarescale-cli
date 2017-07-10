@@ -26,6 +26,14 @@ type Container struct {
 	BuildService         string `json:"build_service"`
 	RefreshCallbacks     []string
 	BuildCallbacks       []string
+	Limits               ContainerLimits `json:"limits"`
+}
+
+type ContainerLimits struct {
+	Memory int `json:"mem"`
+	CPU    int `json:"cpu"`
+	IOPS   int `json:"iops"`
+	Net    int `json:"net"`
 }
 
 func (c *Container) Status() (string, string) {
@@ -66,23 +74,24 @@ func (c *Client) GetContainers(project string) ([]Container, error) {
 	}
 
 	var containersByID []struct {
-		ID                   int      `json:"id"`
-		ShortURL             string   `json:"short_url"`
-		PreCommand           []string `json:"pre_command"`
-		RunCommand           []string `json:"run_command"`
-		Running              int      `json:"running"`
-		Size                 int      `json:"size"`
-		Web                  bool     `json:"web"`
-		WebPort              int      `json:"web_port"`
-		Type                 string   `json:"type"`
-		BuildStatus          string   `json:"build_status"`
-		BuildOutOfDate       bool     `json:"build_out_of_date"`
-		Scheduled            bool     `json:"scheduled"`
-		RepositoryConfigured bool     `json:"repository_configured"`
-		PreCommandStatus     string   `json:"pre_command_status"`
-		RefreshCallbacks     []string `json:"refresh_callbacks"`
-		BuildCallbacks       []string `json:"build_callbacks"`
-		BuildService         string   `json:"build_service"`
+		ID                   int             `json:"id"`
+		ShortURL             string          `json:"short_url"`
+		PreCommand           []string        `json:"pre_command"`
+		RunCommand           []string        `json:"run_command"`
+		Running              int             `json:"running"`
+		Size                 int             `json:"size"`
+		Web                  bool            `json:"web"`
+		WebPort              int             `json:"web_port"`
+		Type                 string          `json:"type"`
+		BuildStatus          string          `json:"build_status"`
+		BuildOutOfDate       bool            `json:"build_out_of_date"`
+		Scheduled            bool            `json:"scheduled"`
+		RepositoryConfigured bool            `json:"repository_configured"`
+		PreCommandStatus     string          `json:"pre_command_status"`
+		RefreshCallbacks     []string        `json:"refresh_callbacks"`
+		BuildCallbacks       []string        `json:"build_callbacks"`
+		BuildService         string          `json:"build_service"`
+		Limits               ContainerLimits `json:"limits"`
 	}
 
 	if err := json.Unmarshal(body, &containersByID); err != nil {
@@ -109,6 +118,7 @@ func (c *Client) GetContainers(project string) ([]Container, error) {
 			RefreshCallbacks:     c.RefreshCallbacks,
 			BuildCallbacks:       c.BuildCallbacks,
 			BuildService:         c.BuildService,
+			Limits:               c.Limits,
 		})
 	}
 
@@ -146,6 +156,20 @@ func (c *Client) ConfigContainer(container Container) error {
 	if container.BuildService != "" {
 		cont["build_service"] = container.BuildService
 	}
+	limits := jsonObject{}
+	if container.Limits.Memory >= 0 {
+		limits["mem"] = container.Limits.Memory
+	}
+	if container.Limits.CPU >= 0 {
+		limits["cpu"] = container.Limits.CPU
+	}
+	if container.Limits.IOPS >= 0 {
+		limits["iops"] = container.Limits.IOPS
+	}
+	if container.Limits.Net >= 0 {
+		limits["net"] = container.Limits.Net
+	}
+	cont["limits"] = limits
 
 	payload := &jsonObject{"container": cont}
 	code, body, err := c.put(fmt.Sprintf("/containers/%d", container.ID), payload)

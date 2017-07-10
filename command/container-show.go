@@ -57,6 +57,10 @@ func (c *ContainerShowCommand) Run(args []string) int {
 			msg += fmt.Sprintf("Run Command:\t%s\n", shellquote.Join(co.RunCommand...))
 			msg += fmt.Sprintf("Web:\t%v\n", co.Web)
 			msg += fmt.Sprintf("Web Port:\t%d\n", co.WebPort)
+			msg += fmt.Sprintf("Memory limit:\t%d MB\n", co.Limits.Memory)
+			msg += fmt.Sprintf("CPU limit:\t%d MHz\n", co.Limits.CPU)
+			msg += fmt.Sprintf("IOPS limit:\t%d\n", co.Limits.IOPS)
+			msg += fmt.Sprintf("Network limit:\t%d Mbps\n", co.Limits.Net)
 			msg = c.FormatTable(msg, false)
 			msg += "\n\n"
 
