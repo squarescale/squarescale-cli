@@ -9,24 +9,74 @@ import (
 
 // Container describes a project container as returned by the Squarescale API
 type Container struct {
-	ID                   int
-	ShortName            string
-	PreCommand           []string
-	RunCommand           []string
-	Running              int
-	Size                 int
-	Web                  bool
-	WebPort              int
-	Type                 string
-	BuildStatus          string `json:"build_status"`
-	BuildOutOfDate       bool   `json:"build_out_of_date"`
-	Scheduled            bool   `json:"scheduled"`
-	RepositoryConfigured bool   `json:"repository_configured"`
-	PreCommandStatus     string `json:"pre_command_status"`
-	BuildService         string `json:"build_service"`
-	RefreshCallbacks     []string
-	BuildCallbacks       []string
-	Limits               ContainerLimits `json:"limits"`
+	ID                   int                  `json:"id"`
+	ShortName            string               `json:"short_url"`
+	PreCommand           []string             `json:"pre_command"`
+	RunCommand           []string             `json:"run_command"`
+	Running              int                  `json:"running"`
+	Size                 int                  `json:"size"`
+	Web                  bool                 `json:"web"`
+	WebPort              int                  `json:"web_port"`
+	Type                 string               `json:"type"`
+	BuildStatus          string               `json:"build_status"`
+	BuildOutOfDate       bool                 `json:"build_out_of_date"`
+	Scheduled            bool                 `json:"scheduled"`
+	RepositoryConfigured bool                 `json:"repository_configured"`
+	PreCommandStatus     string               `json:"pre_command_status"`
+	RefreshCallbacks     []string             `json:"refresh_callbacks"`
+	BuildCallbacks       []string             `json:"build_callbacks"`
+	BuildService         string               `json:"build_service"`
+	Limits               ContainerLimits      `json:"limits"`
+	NomadStatus          ContainerNomadStatus `json:"nomad_status"`
+}
+
+type ContainerNomadStatus struct {
+	Service    JobNomadStatus `json:"service"`
+	PreCommand JobNomadStatus `json:"pre_command"`
+}
+
+type JobNomadStatus struct {
+	Name             string
+	PlacementFailure bool
+	Placements       []JobNomadPlacement
+}
+
+func (placements *JobNomadStatus) Errors(kind string) []string {
+	var errors []string
+	for _, placement := range placements.Placements {
+		msg := "Missing resources to schedule " + kind
+		n := 0
+		for dimension, num := range placement.DimensionExhausted {
+			if n == 0 {
+				msg += ": "
+			} else {
+				msg += ", "
+			}
+			msg += fmt.Sprintf("%s on %d node(s)", dimension, num)
+			n++
+		}
+		if n == 0 {
+			msg += fmt.Sprintf(": %d exhausted node out of %d", placement.NodesExhausted, placement.NodesEvaluated)
+		} else if n > 1 {
+			msg += fmt.Sprintf(" (total of %d exhausted node out of %d)", placement.NodesExhausted, placement.NodesEvaluated)
+		}
+		errors = append(errors, msg)
+	}
+	return errors
+}
+
+type JobNomadPlacement struct {
+	Errors             []JobNomadPlacementError
+	NodesEvaluated     int
+	NodesExhausted     int
+	ClassFiltered      map[string]int
+	ConstraintFiltered map[string]int
+	ClassExhausted     map[string]int
+	DimensionExhausted map[string]int
+}
+
+type JobNomadPlacementError struct {
+	Message string
 }
 
 type ContainerLimits struct {
@@ -73,56 +123,13 @@ func (c *Client) GetContainers(project string) ([]Container, error) {
 		return []Container{}, unexpectedHTTPError(code, body)
 	}
 
-	var containersByID []struct {
-		ID                   int             `json:"id"`
-		ShortURL             string          `json:"short_url"`
-		PreCommand           []string        `json:"pre_command"`
-		RunCommand           []string        `json:"run_command"`
-		Running              int             `json:"running"`
-		Size                 int             `json:"size"`
-		Web                  bool            `json:"web"`
-		WebPort              int             `json:"web_port"`
-		Type                 string          `json:"type"`
-		BuildStatus          string          `json:"build_status"`
-		BuildOutOfDate       bool            `json:"build_out_of_date"`
-		Scheduled            bool            `json:"scheduled"`
-		RepositoryConfigured bool            `json:"repository_configured"`
-		PreCommandStatus     string          `json:"pre_command_status"`
-		RefreshCallbacks     []string        `json:"refresh_callbacks"`
-		BuildCallbacks       []string        `json:"build_callbacks"`
-		BuildService         string          `json:"build_service"`
-		Limits               ContainerLimits `json:"limits"`
-	}
+	var containersByID []Container
 
 	if err := json.Unmarshal(body, &containersByID); err != nil {
 		return []Container{}, err
 	}
 
-	var containers []Container
-	for _, c := range containersByID {
-		containers = append(containers, Container{
-			ID:                   c.ID,
-			ShortName:            c.ShortURL,
-			Size:                 c.Size,
-			PreCommand:           c.PreCommand,
-			RunCommand:           c.RunCommand,
-			Web:                  c.Web,
-			WebPort:              c.WebPort,
-			Type:                 c.Type,
-			Running:              c.Running,
-			BuildStatus:          c.BuildStatus,
-			BuildOutOfDate:       c.BuildOutOfDate,
-			Scheduled:            c.Scheduled,
-			RepositoryConfigured: c.RepositoryConfigured,
-			PreCommandStatus:     c.PreCommandStatus,
-			RefreshCallbacks:     c.RefreshCallbacks,
-			BuildCallbacks:       c.BuildCallbacks,
-			BuildService:         c.BuildService,
-			Limits:               c.Limits,
-		})
-	}
-
-	return containers, nil
+	return containersByID, nil
 }
 
 // GetContainerInfo gets the container of a project based on its short name.
