@@ -44,6 +44,9 @@ func (c *ContainerListCommand) Run(args []string) int {
 				continue
 			}
 			st, _ := c.Status()
+			if c.NomadStatus.PreCommand.PlacementFailure || c.NomadStatus.Service.PlacementFailure {
+				st += " (error)"
+			}
 			msg += fmt.Sprintf("%s\t%s\t%s\t%d/%d\t%v\t%d\n", c.Type, c.ShortName, st, c.Running, c.Size, c.Web, c.WebPort)
 		}
 
