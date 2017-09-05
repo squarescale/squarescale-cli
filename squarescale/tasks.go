@@ -25,23 +25,41 @@ type Task struct {
 	Params        json.RawMessage `json:"params"`
 	Status        string          `json:"status"`
 	CompletedBy   string          `json:"completed_by"`
-	CompletedAt   time.Time       `json:"completed_at"`
-	CreatedAt     time.Time       `json:"created_at"`
-	UpdatedAt     time.Time       `json:"updated_at"`
+	CompletedAt   string          `json:"completed_at"`
+	CreatedAt     string          `json:"created_at"`
+	UpdatedAt     string          `json:"updated_at"`
 	Hold          bool            `json:"hold"`
 	CableToken    string          `json:"table_token"`
 }
 
+func (t *Task) CreatedTime() (time.Time, error) {
+	return time.Parse(time.RFC3339, t.CreatedAt)
+}
+
+func (t *Task) UpdatedTime() (time.Time, error) {
+	return time.Parse(time.RFC3339, t.UpdatedAt)
+}
+
+func (t *Task) CompletedTime() (time.Time, error) {
+	return time.Parse(time.RFC3339, t.CompletedAt)
+}
+
 func (t *Task) LatestTime(format string) string {
 	kind := "created"
-	time := t.CreatedAt
-	if t.CompletedAt.After(time) {
-		kind = "completed"
-		time = t.CompletedAt
+	createdTime, errCreated := t.CreatedTime()
+	if errCreated != nil {
+		return "-"
 	}
-	if t.UpdatedAt.After(time) {
+	updatedTime, errUpdated := t.UpdatedTime()
+	completedTime, errCompleted := t.CompletedTime()
+	time := createdTime
+	if errCompleted == nil && completedTime.After(time) {
+		kind = "completed"
+		time = completedTime
+	}
+	if errUpdated == nil && updatedTime.After(time) {
 		kind = "updated"
-		time = t.UpdatedAt
+		time = updatedTime
 	}
 	return kind + " " + time.Format(format)
 }
