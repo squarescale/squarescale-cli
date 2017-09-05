@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
@@ -46,9 +47,9 @@ func (c *TaskWaitCommand) Run(args []string) int {
 			[]string{"Status", t.Status},
 			[]string{"Params", string(t.Params)},
 			[]string{"Completed By", t.CompletedBy},
-			[]string{"Created At", t.CreatedAt},
-			[]string{"Updated At", t.UpdatedAt},
-			[]string{"Completed At", t.CompletedAt},
+			[]string{"Created At", t.CreatedAt.Format(time.RFC3339)},
+			[]string{"Updated At", t.UpdatedAt.Format(time.RFC3339)},
+			[]string{"Completed At", t.CompletedAt.Format(time.RFC3339)},
 			[]string{"Waiting Events", strconv.Itoa(len(t.WaitingEvents))},
 		}
 		for _, ev := range t.WaitingEvents {

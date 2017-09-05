@@ -88,6 +88,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"task list": func() (cli.Command, error) {
+			return &command.TaskListCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"task wait": func() (cli.Command, error) {
 			return &command.TaskWaitCommand{
 				Meta: *meta,
