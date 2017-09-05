@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 const (
@@ -18,15 +19,54 @@ var ErrInProgress error = errors.New("Task still in progress")
 
 type Task struct {
 	Id            int             `json:"id"`
+	TaskType      string          `json:"type"`
 	ProjectId     int             `json:"project_id"`
 	WaitingEvents []string        `json:"waiting_events"`
 	Params        json.RawMessage `json:"params"`
 	Status        string          `json:"status"`
 	CompletedBy   string          `json:"completed_by"`
-	CompletedAt   string          `json:"completed_at"`
-	CreatedAt     string          `json:"created_at"`
-	UpdatedAt     string          `json:"updated_at"`
+	CompletedAt   time.Time       `json:"completed_at"`
+	CreatedAt     time.Time       `json:"created_at"`
+	UpdatedAt     time.Time       `json:"updated_at"`
 	Hold          bool            `json:"hold"`
+	CableToken    string          `json:"table_token"`
+}
+
+func (t *Task) LatestTime(format string) string {
+	kind := "created"
+	time := t.CreatedAt
+	if t.CompletedAt.After(time) {
+		kind = "completed"
+		time = t.CompletedAt
+	}
+	if t.UpdatedAt.After(time) {
+		kind = "updated"
+		time = t.UpdatedAt
+	}
+	return kind + " " + time.Format(format)
+}
+
+func (t *Task) StatusWithHold() string {
+	res := t.Status
+	if t.Hold {
+		res += " (hold)"
+	}
+	return res
+}
+
+func (c *Client) GetTasks(projectName string) (tasks []Task, err error) {
+	code, body, err := c.get(fmt.Sprintf("/projects/%s/tasks", projectName))
+	if err != nil {
+		return
+	}
+
+	if code != http.StatusOK {
+		err = unexpectedHTTPError(code, body)
+		return
+	}
+
+	err = json.Unmarshal(body, &tasks)
+	return
 }
 
 func (c *Client) GetTask(id int) (task Task, err error) {
