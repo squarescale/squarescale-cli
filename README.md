@@ -13,6 +13,10 @@ To install, use `go get`:
 ```bash
 $> go get -d github.com/squarescale/squarescale-cli
 ```
+### Troubleshooting
+
+When installing squarescale-cli, if you have an error `Unable to read Username for 'https://github.com'` but you are all set to connect to Github using ssh, just run the following command and try again:
+`git config --global url.ssh://git@github.com/.insteadOf https://github.com/`
 
 ## Publish a release on Github
 
