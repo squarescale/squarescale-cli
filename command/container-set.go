@@ -72,11 +72,16 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			return "", err
 		}
 
+		c.Meta.spin.Stop()
+		c.Meta.info("")
+
 		if *nInstancesArg > 0 {
 			container.Size = *nInstancesArg
+			c.info("Configure service with %d instances", *nInstancesArg)
 		}
 
 		if *updateCmdArg != "" {
+			c.info("Configure service with update command: %s", *updateCmdArg)
 			container.PreCommand, err = shellquote.Split(*updateCmdArg)
 			if err != nil {
 				return "", err
@@ -86,9 +91,11 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			}
 		}
 		if *noUpdateCmdArg {
+			c.info("Configure service without update command")
 			container.PreCommand = []string{}
 		}
 		if *runCmdArg != "" {
+			c.info("Configure service with run command: %s", *runCmdArg)
 			container.RunCommand, err = shellquote.Split(*runCmdArg)
 			if err != nil {
 				return "", err
@@ -98,27 +105,33 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			}
 		}
 		if *noRunCmdArg {
+			c.info("Configure service without run command")
 			container.RunCommand = []string{}
 		}
 
 		if *buildServiceArg != "" {
+			c.info("Configure service with %s build service", *buildServiceArg)
 			container.BuildService = *buildServiceArg
 		}
 
 		if *limitMemoryArg >= 0 {
+			c.info("Configure service with memory limit of %d MB", *limitMemoryArg)
 			container.Limits.Memory = *limitMemoryArg
 		}
 		if *limitCPUArg >= 0 {
+			c.info("Configure service with CPU limit of %d Mhz", *limitCPUArg)
 			container.Limits.CPU = *limitCPUArg
 		}
 		if *limitNetArg >= 0 {
+			c.info("Configure service with network bandwidth limit of %d Mbps", *limitNetArg)
 			container.Limits.Net = *limitNetArg
 		}
 
 		msg := fmt.Sprintf(
-			"Successfully configured container (instances = '%d', pre_command = %v, run_command = %v, build_service = %s) '%s' for project '%s'",
-			container.Size, container.PreCommand, container.RunCommand, container.BuildService, *containerArg, *projectArg)
+			"Successfully configured container '%s' for project '%s'",
+			*containerArg, *projectArg)
 
+		c.Meta.spin.Start()
 		return msg, client.ConfigContainer(container)
 	})
 }
