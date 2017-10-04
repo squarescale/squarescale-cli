@@ -2,6 +2,7 @@ package command
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -51,8 +52,8 @@ func DefaultMeta(ui cli.Ui, color, niceFormat, spinnerEnable bool, spinTime time
 	}
 }
 
-func (m *Meta) info(message string) int {
-	m.Ui.Info(message)
+func (m *Meta) info(message string, args ...interface{}) int {
+	m.Ui.Info(fmt.Sprintf(message, args...))
 	return 0
 }
 
