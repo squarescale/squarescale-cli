@@ -11,7 +11,10 @@ import (
 // ProjectCreateCommand is a cli.Command implementation for creating a Squarescale project.
 type ProjectCreateCommand struct {
 	Meta
-	flagSet *flag.FlagSet
+	flagSet         *flag.FlagSet
+	DatabaseEngine  string
+	DatabaseClass   string
+	DatabaseDisable bool
 }
 
 // Run is part of cli.Command implementation.
@@ -23,6 +26,9 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	wantedProjectName := projectNameFlag(c.flagSet)
 	infraType := infraTypeFlag(c.flagSet)
+	c.flagSet.BoolVar(&c.DatabaseDisable, "no-db", false, "Disable database creation")
+	c.flagSet.StringVar(&c.DatabaseEngine, "db-engine", "", "Select database engine")
+	c.flagSet.StringVar(&c.DatabaseClass, "db-class", "", "Select database instance class")
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -45,6 +51,40 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	res := c.runWithSpinner("create project", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var definitiveName string
 		var err error
+
+		if c.DatabaseEngine != "" {
+			engines, err := client.GetAvailableDBEngines()
+			if err != nil {
+				return "", err
+			}
+			valid := false
+			for _, engine := range engines {
+				if engine == c.DatabaseEngine {
+					valid = true
+					break
+				}
+			}
+			if !valid {
+				return "", fmt.Errorf("Cannot validate database engine '%s'. Must be one of '%s'", c.DatabaseEngine, strings.Join(engines, "', '"))
+			}
+		}
+
+		if c.DatabaseClass != "" {
+			classes, err := client.GetAvailableDBInstances()
+			if err != nil {
+				return "", err
+			}
+			valid := false
+			for _, class := range classes {
+				if class == c.DatabaseClass {
+					valid = true
+					break
+				}
+			}
+			if !valid {
+				return "", fmt.Errorf("Cannot validate database class '%s'. Must be one of '%s'", c.DatabaseClass, strings.Join(classes, "', '"))
+			}
+		}
 
 		if *wantedProjectName != "" {
 			valid, same, fmtName, err := client.CheckProjectName(*wantedProjectName)
@@ -79,7 +119,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 			definitiveName = generatedName
 		}
 
-		taskId, err = client.CreateProject(definitiveName, *infraType)
+		taskId, err = client.CreateProject(definitiveName, *infraType, c.DatabaseEngine, c.DatabaseClass, !c.DatabaseDisable)
 
 		return fmt.Sprintf("[#%d] Created project '%s'", taskId, definitiveName), err
 	})
