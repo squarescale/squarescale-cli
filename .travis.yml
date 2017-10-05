@@ -1,19 +1,23 @@
 language: go
 go:
-- 1.7.1
-before_install:
-- "./write_netrc.sh"
-- cp .netrc ~
-- chmod 600 .netrc
-- pip3 install requests
-script:
-- make publish
+  - 1.7.1
 services:
-- docker
+  - docker
+before_install:
+  - "./write_netrc.sh"
+  - cp .netrc ~
+  - chmod 600 .netrc
+  - pip3 install requests
+script:
+  - case "$TRAVIS_PULL_REQUEST-$TRAVIS_BRANCH" in
+      false-master)
+        make publish
+        ;;
+      *)
+        make generate
+        ;;
+    esac
 notifications:
   email: false
   slack:
     secure: S1/JUUWeOge7ZLxYinm64jb8I7YLryaFJgsJbWMeYq4QUsAU1nlDvBVue3SgjRJNjYkx8FHm3+b9FNV2xWDTCpEMTh9XS34SpEgCxA85bIQUkJeDS6vALKnu+A59DQ1M9d7eOaoB6HFJ+h+7pwDb5INyRMhidXFqbDxQcbiHQxgvLXfGG0MMN8jzCvl5SWzMVbtdp1V3PWsdVSKcOeIRCxlanBzaE1V7tpunoCBY37abOUo4anmeLygC6B20ECjrS8apogMIk+MbEtRHnx5szzMN5rBhMn+yh1f6ivytibXKOCUYUU5bS+yJPFI5YrLpMP0vfgQVDjI+zUwCFiJmjooIQB5swcMCHgcg3Aaj5BEAZVDIneHw4xmm8ZJTF3DWNFFWQBxL1/EU9gSJHFu1LniMwvWBlXQq6kq9YYnHpSqRPO5XYyZptUprqCiXIU/mxMpDT52nkk3nfY8eDC2SxO3K7x3x84kPInanmVkUXfGigPk2I0yUFfj1ThF8g3z0apg31XFUACAnBpH9T/KgwZSkieyTvs1R2vZQsW9Tp3ltRBRWoIuooBCrV5czI4D7if1mFtAlvD3CAK8pC5sx/ev5ir1PjCT/82tr/PxEinHjFTcIDfsRq1h+nJFMyHskFbsjjuU35nxOy+5Xkf4dRqA4vv5A/d3mMp5k9f6Dl9w=
-branches:
-  only:
-  - master
