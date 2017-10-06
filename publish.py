@@ -18,20 +18,23 @@ if releases.status_code != 200:
     print("Error: GET releases " + str(releases.status_code))
     sys.exit(1)
 
-# Clear all previous drafts
-print("Remove old release drafts...")
-for release in releases.json():
-    if release["draft"]:
-        delete_url = url + "/" + str(release["id"])
-        deleted = requests.delete(delete_url, auth=(user, token))
-        if deleted.status_code != 204:
-            print("Error: DELETE draft " + str(deleted.status_code))
-            sys.exit(1)
+git_branch = None
+git_sha_1  = None
+
+try:
+    git_branch = subprocess.check_output(
+        "git describe --exact-match",
+        shell=True, universal_newlines=True).replace("\n", "")
+except Exception:
+    pass
 
 # Find sha1
-git_sha_1 = subprocess.check_output(
-    "git describe --always",
-    shell=True, universal_newlines=True).replace("\n", "")
+if git_branch:
+    git_sha_1 = git_branch
+else:
+    git_sha_1 = subprocess.check_output(
+        "git describe --always",
+        shell=True, universal_newlines=True).replace("\n", "")
 
 # Create new release
 print("Create new release draft...")
@@ -39,7 +42,7 @@ headers = { "Content-Type": "application/json" }
 data = {
     "tag_name": git_sha_1,
     "name": "cli latest release (" + git_sha_1 + ")",
-    "draft": True
+    "draft": git_branch == None
 }
 
 created = requests.post(url, auth=(user, token), headers=headers, data=json.dumps(data))
@@ -65,6 +68,16 @@ for executable in ["sqsc-linux-amd64", "sqsc-darwin-amd64"]:
 
         if uploaded.status_code != 201:
             print("Error: Upload " + executable + " " + str(uploaded.status_code))
+            sys.exit(1)
+
+# Clear all previous drafts
+print("Remove old release drafts...")
+for release in releases.json():
+    if release["draft"]:
+        delete_url = url + "/" + str(release["id"])
+        deleted = requests.delete(delete_url, auth=(user, token))
+        if deleted.status_code != 204:
+            print("Error: DELETE draft " + str(deleted.status_code))
             sys.exit(1)
 
 print("Done.")
