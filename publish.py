@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import os, requests, subprocess, sys
+import os, requests, subprocess, sys, json
 
 user_token = os.environ.get("GITHUB_USER_TOKEN")
 if user_token is None:
@@ -29,14 +29,9 @@ for release in releases.json():
             sys.exit(1)
 
 # Find sha1
-git_sha_1_process = subprocess.run(
-    "git describe --always", stdout=subprocess.PIPE,
-    shell=True, check=True, universal_newlines=True)
-if git_sha_1_process.returncode != 0:
-    print("Error: Cannot retrieve sha1 of this repository")
-    sys.exit(1)
-
-git_sha_1 = git_sha_1_process.stdout.replace("\n", "")
+git_sha_1 = subprocess.check_output(
+    "git describe --always",
+    shell=True, universal_newlines=True).replace("\n", "")
 
 # Create new release
 print("Create new release draft...")
@@ -47,7 +42,7 @@ data = {
     "draft": True
 }
 
-created = requests.post(url, auth=(user, token), headers=headers, json=data)
+created = requests.post(url, auth=(user, token), headers=headers, data=json.dumps(data))
 if created.status_code != 201:
     print("Error: POST draft " + str(created.status_code))
     sys.exit(1)
