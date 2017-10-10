@@ -1,5 +1,20 @@
 #!/usr/bin/env python3
+import sys, subprocess
 import boto3
+
+git_branch = None
+
+try:
+    git_branch = subprocess.check_output(
+        "git rev-parse --abbrev-ref HEAD",
+        shell=True, universal_newlines=True).replace("\n", "")
+except Exception:
+    print("Not on a branch. Exiting.")
+    sys.exit()
+
+if git_branch != "master":
+    print("Not on master branch. Exiting.")
+    sys.exit()
 
 bucket_name = "cli-releases"
 executable_names = ["sqsc-linux-amd64", "sqsc-darwin-amd64"]
