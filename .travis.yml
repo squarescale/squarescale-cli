@@ -8,6 +8,7 @@ addons:
     packages:
       - python3-pip
       - python3-requests
+      - python3-boto3
 before_install:
   - git fetch --tags
   - "./write_netrc.sh"
