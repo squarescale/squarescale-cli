@@ -39,6 +39,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"container delete": func() (cli.Command, error) {
+			return &command.ContainerDeleteCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"env": func() (cli.Command, error) {
 			return &command.EnvCommand{}, nil
 		},

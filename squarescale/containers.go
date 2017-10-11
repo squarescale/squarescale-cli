@@ -193,3 +193,21 @@ func (c *Client) ConfigContainer(container Container) error {
 		return unexpectedHTTPError(code, body)
 	}
 }
+
+func (c *Client) DeleteContainer(container Container) error {
+	url := fmt.Sprintf("/containers/%d", container.ID)
+	code, body, err := c.delete(url)
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusOK:
+	case http.StatusNotFound:
+		return fmt.Errorf("Container with id '%d' does not exist", container.ID)
+	default:
+		return unexpectedHTTPError(code, body)
+	}
+
+	return nil
+}
