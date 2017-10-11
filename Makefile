@@ -32,6 +32,7 @@ generate: docker-linux-amd64 docker-darwin-amd64
 
 publish: generate
 	python3 publish.py
+	python3 publish-s3.py
 
 clean: ## Clean repository
 	go clean && rm -f sqsc sqsc-*

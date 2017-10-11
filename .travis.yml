@@ -13,6 +13,7 @@ before_install:
   - "./write_netrc.sh"
   - cp .netrc ~
   - chmod 600 .netrc
+  - sudo pip3 install boto3
 script:
   - case "$TRAVIS_PULL_REQUEST-$TRAVIS_BRANCH" in
       false-master)
