@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-import sys
+import sys, os
 import boto3
 
+CI = os.environ.get("CI")
 
+if not CI:
+    print("Not on CI, exiting.")
+    sys.exit(1)
 
 bucket_name = "cli-releases"
 executable_names = ["sqsc-linux-amd64", "sqsc-darwin-amd64"]
