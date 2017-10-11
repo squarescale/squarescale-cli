@@ -30,10 +30,9 @@ docker-darwin-amd64: ## Compile for darwin-amd64 in a container
 
 generate: docker-linux-amd64 docker-darwin-amd64
 
-publish: #generate
-	#python3 publish.py
-	aws s3 cp sqsc-linux-amd64 s3://cli-releases/sqsc-linux-amd64-latest --acl public-read
-	aws s3 cp sqsc-darwin-amd64 s3://cli-releases/sqsc-darwin-amd64-latest --acl public-read
+publish: generate
+	python3 publish.py
+	python3 publish-s3.py
 
 clean: ## Clean repository
 	go clean && rm -f sqsc sqsc-*
