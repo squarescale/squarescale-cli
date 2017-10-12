@@ -21,9 +21,13 @@ func (c *ContainerDeleteCommand) Run(args []string) int {
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
 	projectArg := projectFlag(c.flagSet)
-	containerArg := containerFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
+	}
+
+	containerName, err := containerNameArg(c.flagSet, 0)
+	if err != nil {
+		return c.errorWithUsage(err)
 	}
 
 	if c.flagSet.NArg() > 4 {
@@ -34,7 +38,7 @@ func (c *ContainerDeleteCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	c.Ui.Info("Are you sure you want to delete " + *containerArg + "?")
+	c.Ui.Info("Are you sure you want to delete " + containerName + "?")
 	if *alwaysYes {
 		c.Ui.Info("(approved from command line)")
 	} else {
@@ -48,7 +52,6 @@ func (c *ContainerDeleteCommand) Run(args []string) int {
 
 	return c.runWithSpinner("deleting container", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		projectName := *projectArg
-		containerName := *containerArg
 		container, err := client.GetContainerInfo(projectName, containerName)
 		if err != nil {
 			return "", err

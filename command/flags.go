@@ -154,6 +154,15 @@ func nowaitFlag(f *flag.FlagSet) *bool {
 	return f.Bool("nowait", false, "Don't wait for operation to complete")
 }
 
+func containerNameArg(f *flag.FlagSet, arg int) (string, error) {
+	value := f.Arg(arg)
+	if value == "" {
+		return "", errors.New("Container name must be specified")
+	} else {
+		return value, nil
+	}
+}
+
 func projectNameArg(f *flag.FlagSet, arg int) (string, error) {
 	value := f.Arg(arg)
 	if value == "" {
