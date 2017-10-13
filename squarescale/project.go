@@ -14,6 +14,12 @@ type ProjectStatus struct {
 	InfraStatus string `json:"infra_status"`
 }
 
+type UnprovisionError struct {
+	Errors struct {
+		Unprovision []string `json:unprovision`
+	} `json:errors`
+}
+
 // CheckProjectName asks the Squarescale service to validate a given project name.
 func (c *Client) CheckProjectName(name string) (valid bool, same bool, fmtName string, err error) {
 	code, body, err := c.post("/free_name", &jsonObject{"name": name})
@@ -256,6 +262,13 @@ func (c *Client) ProjectUnprovision(project string) error {
 	case http.StatusNoContent:
 	case http.StatusNotFound:
 		return fmt.Errorf("Project '%s' not found", project)
+	case http.StatusUnprocessableEntity:
+		var errJSON UnprovisionError
+		err = json.Unmarshal(body, &errJSON)
+		if err != nil {
+			return err
+		}
+		return fmt.Errorf("Operation failed: %s", errJSON.Errors.Unprovision)
 	default:
 		return unexpectedHTTPError(code, body)
 	}
