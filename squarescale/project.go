@@ -264,7 +264,10 @@ func (c *Client) ProjectUnprovision(project string) error {
 		return fmt.Errorf("Project '%s' not found", project)
 	case http.StatusUnprocessableEntity:
 		var errJSON UnprovisionError
-		json.Unmarshal(body, &errJSON)
+		err = json.Unmarshal(body, &errJSON)
+		if err != nil {
+			return err
+		}
 		return fmt.Errorf("Operation failed: %s", errJSON.Errors.Unprovision)
 	default:
 		return unexpectedHTTPError(code, body)
