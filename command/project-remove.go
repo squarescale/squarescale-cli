@@ -42,6 +42,7 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 		if err != nil {
 			return c.error(err)
 		} else if res != projectName {
+			c.Ui.Error("The name you provided does not match the project name.")
 			return c.cancelled()
 		}
 	}
