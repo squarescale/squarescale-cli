@@ -114,14 +114,6 @@ func clusterSizeFlag(f *flag.FlagSet) *uint {
 	return f.Uint("cluster-size", 0, "Cluster Size")
 }
 
-func dbEngineFlag(f *flag.FlagSet) *string {
-	return f.String("engine", "", "Database engine")
-}
-
-func dbEngineInstanceFlag(f *flag.FlagSet) *string {
-	return f.String("instance", "", "Database engine instance")
-}
-
 func disabledFlag(f *flag.FlagSet, doc string) *bool {
 	return f.Bool("disabled", false, doc)
 }

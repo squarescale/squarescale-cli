@@ -66,22 +66,13 @@ func (c *Client) FindProjectName() (string, error) {
 }
 
 // CreateProject asks the Squarescale platform to create a new project, using the provided name and user token.
-func (c *Client) CreateProject(name, infraType, databaseEngine, databaseClass string, enableDb bool) (taskId int, err error) {
-	dbSettings := jsonObject{
-		"enabled": enableDb,
-	}
-	if databaseEngine != "" {
-		dbSettings["engine"] = databaseEngine
-	}
-	if databaseClass != "" {
-		dbSettings["instance_class"] = databaseClass
-	}
+func (c *Client) CreateProject(name, infraType string, db DbConfig) (taskId int, err error) {
 	payload := &jsonObject{
 		"project": jsonObject{
 			"name":       name,
 			"infra_type": getInfraTypeEnumValue(infraType),
 		},
-		"database": dbSettings,
+		"database": db.ProjectCreationSettings(),
 	}
 
 	code, body, err := c.post("/projects", payload)
