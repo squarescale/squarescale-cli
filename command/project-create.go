@@ -11,10 +11,9 @@ import (
 // ProjectCreateCommand is a cli.Command implementation for creating a Squarescale project.
 type ProjectCreateCommand struct {
 	Meta
-	flagSet         *flag.FlagSet
-	DatabaseEngine  string
-	DatabaseClass   string
-	DatabaseDisable bool
+	flagSet   *flag.FlagSet
+	DbDisable bool
+	Db        squarescale.DbConfig
 }
 
 // Run is part of cli.Command implementation.
@@ -26,12 +25,14 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	wantedProjectName := projectNameFlag(c.flagSet)
 	infraType := infraTypeFlag(c.flagSet)
-	c.flagSet.BoolVar(&c.DatabaseDisable, "no-db", false, "Disable database creation")
-	c.flagSet.StringVar(&c.DatabaseEngine, "db-engine", "", "Select database engine")
-	c.flagSet.StringVar(&c.DatabaseClass, "db-class", "", "Select database instance class")
+	c.flagSet.BoolVar(&c.DbDisable, "no-db", false, "Disable database creation")
+	c.flagSet.StringVar(&c.Db.Engine, "db-engine", "", "Select database engine")
+	c.flagSet.StringVar(&c.Db.Size, "db-size", "", "Select database size")
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
+
+	c.Db.Enabled = !c.DbDisable
 
 	if *wantedProjectName == "" && c.flagSet.Arg(0) != "" {
 		name := c.flagSet.Arg(0)
@@ -52,37 +53,30 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		var definitiveName string
 		var err error
 
-		if c.DatabaseEngine != "" {
+		if c.Db.Engine != "" {
 			engines, err := client.GetAvailableDBEngines()
 			if err != nil {
 				return "", err
 			}
 			valid := false
 			for _, engine := range engines {
-				if engine == c.DatabaseEngine {
+				if engine == c.Db.Engine {
 					valid = true
 					break
 				}
 			}
 			if !valid {
-				return "", fmt.Errorf("Cannot validate database engine '%s'. Must be one of '%s'", c.DatabaseEngine, strings.Join(engines, "', '"))
+				return "", fmt.Errorf("Cannot validate database engine '%s'. Must be one of '%s'", c.Db.Engine, strings.Join(engines, "', '"))
 			}
 		}
 
-		if c.DatabaseClass != "" {
-			classes, err := client.GetAvailableDBInstances()
+		if c.Db.Size != "" {
+			sizes, err := client.GetAvailableDBSizes()
 			if err != nil {
 				return "", err
 			}
-			valid := false
-			for _, class := range classes {
-				if class == c.DatabaseClass {
-					valid = true
-					break
-				}
-			}
-			if !valid {
-				return "", fmt.Errorf("Cannot validate database class '%s'. Must be one of '%s'", c.DatabaseClass, strings.Join(classes, "', '"))
+			if !sizes.CheckId(c.Db.Size) {
+				return "", fmt.Errorf("Cannot validate database size '%s'. Must be one of '%s'", c.Db.Size, strings.Join(sizes.ListIds(), "', '"))
 			}
 		}
 
@@ -119,7 +113,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 			definitiveName = generatedName
 		}
 
-		taskId, err = client.CreateProject(definitiveName, *infraType, c.DatabaseEngine, c.DatabaseClass, !c.DatabaseDisable)
+		taskId, err = client.CreateProject(definitiveName, *infraType, c.Db)
 
 		return fmt.Sprintf("[#%d] Created project '%s'", taskId, definitiveName), err
 	})

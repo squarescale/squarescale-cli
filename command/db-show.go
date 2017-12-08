@@ -33,12 +33,12 @@ func (c *DBShowCommand) Run(args []string) int {
 	}
 
 	return c.runWithSpinner("fetch database configuration", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		enabled, engine, instance, e := client.GetDBConfig(*projectNameArg)
+		db, e := client.GetDBConfig(*projectNameArg)
 		if e != nil {
 			return "", e
 		}
 
-		return c.FormatTable(fmt.Sprintf("DB enabled:\t%v\nDB Engine:\t%s\nDB Instance Class:\t%s", enabled, engine, instance), false), nil
+		return c.FormatTable(fmt.Sprintf("DB enabled:\t%v\nDB Engine:\t%s\nDB Size:\t%s", db.Enabled, db.Engine, db.Size), false), nil
 	})
 }
 
