@@ -34,7 +34,7 @@ func (c *DBListCommand) Run(args []string) int {
 
 		msg := fmtDBListOutput("Available engines", engines)
 
-		sizes, err := client.GetAvailableDBSizes()
+		sizes, err := client.GetDBSizes()
 		if err != nil {
 			return "", err
 		}

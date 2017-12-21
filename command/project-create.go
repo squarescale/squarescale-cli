@@ -71,11 +71,11 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		}
 
 		if c.Db.Size != "" {
-			sizes, err := client.GetAvailableDBSizes()
+			sizes, err := client.GetDBSizes()
 			if err != nil {
 				return "", err
 			}
-			if !sizes.CheckId(c.Db.Size) {
+			if !sizes.CheckID(c.Db.Size) {
 				return "", fmt.Errorf("Cannot validate database size '%s'. Must be one of '%s'", c.Db.Size, strings.Join(sizes.ListIds(), "', '"))
 			}
 		}
