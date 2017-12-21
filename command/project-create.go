@@ -75,8 +75,8 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 			if err != nil {
 				return "", err
 			}
-			if !sizes.CheckID(c.Db.Size) {
-				return "", fmt.Errorf("Cannot validate database size '%s'. Must be one of '%s'", c.Db.Size, strings.Join(sizes.ListIds(), "', '"))
+			if !sizes.CheckID(c.Db.Size, *infraType) {
+				return "", fmt.Errorf("Cannot validate database size '%s'. Must be one of '%s'", c.Db.Size, strings.Join(sizes.ListIds(*infraType), "', '"))
 			}
 		}
 

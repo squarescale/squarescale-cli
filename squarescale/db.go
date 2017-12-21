@@ -10,8 +10,8 @@ import (
 // database the user wants
 type DbSizes interface {
 	ListHuman() []string
-	CheckID(size string) bool
-	ListIds() []string
+	CheckID(size, infraType string) bool
+	ListIds(infraType string) []string
 }
 
 type basicDbSizes struct {
@@ -36,7 +36,7 @@ func (s *basicDbSizes) ListHuman() []string {
 	return res
 }
 
-func (s *basicDbSizes) CheckID(size string) bool {
+func (s *basicDbSizes) CheckID(size, _ string) bool {
 	for k := range s.Sizes {
 		if k == size {
 			return true
@@ -45,7 +45,7 @@ func (s *basicDbSizes) CheckID(size string) bool {
 	return false
 }
 
-func (s *basicDbSizes) ListIds() []string {
+func (s *basicDbSizes) ListIds(_ string) []string {
 	var res []string
 	for k := range s.Sizes {
 		res = append(res, k)
@@ -73,33 +73,37 @@ func (fs *fullDbSizes) ListHuman() []string {
 	return res
 }
 
-func (fs *fullDbSizes) allSizes() map[string]bool {
-	res := make(map[string]bool)
+func (fs *fullDbSizes) allSizes() map[string]map[string]bool {
+	res := make(map[string]map[string]bool)
+	singleNode := make(map[string]bool)
+	ha := make(map[string]bool)
 	for _, v := range fs.SingleNode.Default {
-		res[v] = true
+		singleNode[v] = true
 	}
 	for _, v := range fs.HighAvailability.Default {
-		res[v] = true
+		ha[v] = true
 	}
 	for _, v := range fs.SingleNode.Additional {
-		res[v] = true
+		singleNode[v] = true
 	}
 	for _, v := range fs.HighAvailability.Additional {
-		res[v] = true
+		ha[v] = true
 	}
+	res["single-node"] = singleNode
+	res["high-availability"] = ha
 
 	return res
 }
 
-func (fs *fullDbSizes) CheckID(size string) bool {
-	_, ok := fs.allSizes()[size]
+func (fs *fullDbSizes) CheckID(size, infraType string) bool {
+	_, ok := fs.allSizes()[infraType][size]
 	return ok
 }
 
-func (fs *fullDbSizes) ListIds() []string {
+func (fs *fullDbSizes) ListIds(infraType string) []string {
 	var res []string
-	for k := range fs.allSizes() {
-		res = append(res, k)
+	for id := range fs.allSizes()[infraType] {
+		res = append(res, id)
 	}
 	return res
 }
