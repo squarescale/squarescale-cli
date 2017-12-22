@@ -6,11 +6,29 @@ import (
 	"net/http"
 )
 
-type DbSizes struct {
+// DbSizes allow to display and validate client side the
+// database the user wants
+type DbSizes interface {
+	ListHuman() []string
+	CheckID(size, infraType string) bool
+	ListIds(infraType string) []string
+}
+
+type basicDbSizes struct {
 	Sizes map[string]string `json:"sizes"`
 }
 
-func (s *DbSizes) ListHuman() []string {
+type fullDbSizes struct {
+	SingleNode       dbSizesWithAdditional `json:"single_node"`
+	HighAvailability dbSizesWithAdditional `json:"high_availability"`
+}
+
+type dbSizesWithAdditional struct {
+	Default    []string `json:"default"`
+	Additional []string `json:"additional"`
+}
+
+func (s *basicDbSizes) ListHuman() []string {
 	var res []string
 	for k, v := range s.Sizes {
 		res = append(res, k+": "+v)
@@ -18,8 +36,8 @@ func (s *DbSizes) ListHuman() []string {
 	return res
 }
 
-func (s *DbSizes) CheckId(size string) bool {
-	for k, _ := range s.Sizes {
+func (s *basicDbSizes) CheckID(size, _ string) bool {
+	for k := range s.Sizes {
 		if k == size {
 			return true
 		}
@@ -27,16 +45,71 @@ func (s *DbSizes) CheckId(size string) bool {
 	return false
 }
 
-func (s *DbSizes) ListIds() []string {
+func (s *basicDbSizes) ListIds(_ string) []string {
 	var res []string
-	for k, _ := range s.Sizes {
+	for k := range s.Sizes {
 		res = append(res, k)
 	}
 	return res
 }
 
-// GetAvailableDBInstances returns all the database instances available for use in Squarescale.
-func (c *Client) GetAvailableDBSizes() (*DbSizes, error) {
+func (fs *fullDbSizes) ListHuman() []string {
+	var res []string
+	res = append(res, "Single Node infrastructure")
+	for _, v := range fs.SingleNode.Default {
+		res = append(res, "\t"+v)
+	}
+	for _, v := range fs.SingleNode.Additional {
+		res = append(res, "\t["+v+"]")
+	}
+	res = append(res, "High Availability infrastructure")
+	for _, v := range fs.HighAvailability.Default {
+		res = append(res, "\t"+v)
+	}
+	for _, v := range fs.HighAvailability.Additional {
+		res = append(res, "\t["+v+"]")
+	}
+
+	return res
+}
+
+func (fs *fullDbSizes) allSizes() map[string]map[string]bool {
+	res := make(map[string]map[string]bool)
+	singleNode := make(map[string]bool)
+	ha := make(map[string]bool)
+	for _, v := range fs.SingleNode.Default {
+		singleNode[v] = true
+	}
+	for _, v := range fs.HighAvailability.Default {
+		ha[v] = true
+	}
+	for _, v := range fs.SingleNode.Additional {
+		singleNode[v] = true
+	}
+	for _, v := range fs.HighAvailability.Additional {
+		ha[v] = true
+	}
+	res["single-node"] = singleNode
+	res["high-availability"] = ha
+
+	return res
+}
+
+func (fs *fullDbSizes) CheckID(size, infraType string) bool {
+	_, ok := fs.allSizes()[infraType][size]
+	return ok
+}
+
+func (fs *fullDbSizes) ListIds(infraType string) []string {
+	var res []string
+	for id := range fs.allSizes()[infraType] {
+		res = append(res, id)
+	}
+	return res
+}
+
+// GetAvailableDBSizes returns all the database instances available for use in Squarescale.
+func (c *Client) GetAvailableDBSizes() (DbSizes, error) {
 	code, body, err := c.get("/db/sizes")
 	if err != nil {
 		return nil, err
@@ -46,7 +119,7 @@ func (c *Client) GetAvailableDBSizes() (*DbSizes, error) {
 		return nil, unexpectedHTTPError(code, body)
 	}
 
-	var sizeList DbSizes
+	var sizeList basicDbSizes
 	sizeList.Sizes = map[string]string{}
 
 	err = json.Unmarshal(body, &sizeList)
@@ -55,6 +128,30 @@ func (c *Client) GetAvailableDBSizes() (*DbSizes, error) {
 	}
 
 	return &sizeList, nil
+}
+
+func (c *Client) GetDBSizes() (DbSizes, error) {
+	code, body, err := c.get("/db/sizes/infra")
+	if err != nil {
+		return nil, err
+	}
+
+	if code == http.StatusUnauthorized {
+		// not authorized to see new db sizes? Fallback to old db sizes
+		return c.GetAvailableDBSizes()
+	}
+	if code != http.StatusOK {
+		return nil, unexpectedHTTPError(code, body)
+	}
+
+	var sizes fullDbSizes
+
+	err = json.Unmarshal(body, &sizes)
+	if err != nil {
+		return nil, err
+	}
+
+	return &sizes, nil
 }
 
 // GetAvailableDBEngines returns all the database engines available for use in Squarescale.
