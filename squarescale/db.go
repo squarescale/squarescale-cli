@@ -130,6 +130,19 @@ func (c *Client) GetAvailableDBSizes() (DbSizes, error) {
 	return &sizeList, nil
 }
 
+func (c *Client) HasNewDB() bool {
+	code, _, err := c.get("/db/sizes/infra")
+	if err != nil {
+		return false
+	}
+
+	if code == http.StatusUnauthorized {
+		return false
+	}
+
+	return true
+}
+
 func (c *Client) GetDBSizes() (DbSizes, error) {
 	code, body, err := c.get("/db/sizes/infra")
 	if err != nil {

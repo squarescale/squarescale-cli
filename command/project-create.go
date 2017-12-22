@@ -80,6 +80,19 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 			}
 		}
 
+		if !c.DbDisable && c.Db.Engine == "" && c.Db.Size == "" {
+			c.Db.Engine = "postgres"
+			if client.HasNewDB() {
+				if *infraType == "single-node" {
+					c.Db.Size = "dev"
+				} else {
+					c.Db.Size = "small"
+				}
+			} else {
+				c.Db.Size = "micro"
+			}
+		}
+
 		if *wantedProjectName != "" {
 			valid, same, fmtName, err := client.CheckProjectName(*wantedProjectName)
 			if err != nil {
