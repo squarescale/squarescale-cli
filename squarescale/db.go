@@ -136,7 +136,7 @@ func (c *Client) HasNewDB() bool {
 		return false
 	}
 
-	if code == http.StatusUnauthorized {
+	if code == http.StatusForbidden {
 		return false
 	}
 
@@ -149,7 +149,7 @@ func (c *Client) GetDBSizes() (DbSizes, error) {
 		return nil, err
 	}
 
-	if code == http.StatusUnauthorized {
+	if code == http.StatusForbidden {
 		// not authorized to see new db sizes? Fallback to old db sizes
 		return c.GetAvailableDBSizes()
 	}
