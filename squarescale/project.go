@@ -65,13 +65,23 @@ func (c *Client) FindProjectName() (string, error) {
 	return response.Name, nil
 }
 
+func projectSettings(name, infraType string, nodeSize string) jsonObject {
+	projectSettings := jsonObject{
+		"name":       name,
+		"infra_type": getInfraTypeEnumValue(infraType),
+	}
+
+	if nodeSize != "" {
+		projectSettings["node_size"] = "dev"
+	}
+
+	return projectSettings
+}
+
 // CreateProject asks the Squarescale platform to create a new project, using the provided name and user token.
-func (c *Client) CreateProject(name, infraType string, db DbConfig) (taskId int, err error) {
+func (c *Client) CreateProject(name, infraType string, nodeSize string, db DbConfig) (taskId int, err error) {
 	payload := &jsonObject{
-		"project": jsonObject{
-			"name":       name,
-			"infra_type": getInfraTypeEnumValue(infraType),
-		},
+		"project":  projectSettings(name, infraType, nodeSize),
 		"database": db.ProjectCreationSettings(),
 	}
 

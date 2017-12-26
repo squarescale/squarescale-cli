@@ -52,6 +52,11 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	res := c.runWithSpinner("create project", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var definitiveName string
 		var err error
+		var nodeSize string
+
+		if *infraType == "single-node" && client.HasNodeSize() {
+			nodeSize = "dev"
+		}
 
 		if c.Db.Engine != "" {
 			engines, err := client.GetAvailableDBEngines()
@@ -126,7 +131,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 			definitiveName = generatedName
 		}
 
-		taskId, err = client.CreateProject(definitiveName, *infraType, c.Db)
+		taskId, err = client.CreateProject(definitiveName, *infraType, nodeSize, c.Db)
 
 		return fmt.Sprintf("[#%d] Created project '%s'", taskId, definitiveName), err
 	})
