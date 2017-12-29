@@ -54,8 +54,12 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		var err error
 		var nodeSize string
 
-		if *infraType == "single-node" && client.HasNodeSize() {
-			nodeSize = "dev"
+		if client.HasNodeSize() {
+			if *infraType == "single-node" {
+				nodeSize = "dev"
+			} else {
+				nodeSize = "small"
+			}
 		}
 
 		if c.Db.Engine != "" {
