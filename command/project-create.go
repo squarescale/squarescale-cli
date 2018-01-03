@@ -54,14 +54,14 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		var definitiveName string
 		var err error
 
-		if client.HasNodeSize() {
+		nodeSizes, err := client.GetClusterNodeSizes()
+		if err != nil {
+			return "", err
+		}
+		if nodeSizes != nil {
 			if *nodeSize != "" {
-				nodeSizes, err := client.GetClusterNodeSizes()
-				if err != nil {
-					return "", err
-				}
-				if !nodeSizes.CheckID(*nodeSize, *infraType) {
-					return "", fmt.Errorf("Cannot validate node size '%s'. Must be one of '%s'", *nodeSize, strings.Join(nodeSizes.ListIds(*infraType), "', '"))
+				if !nodeSizes.CheckSize(*nodeSize, *infraType) {
+					return "", fmt.Errorf("Cannot validate node size '%s'. Must be one of '%s'", *nodeSize, strings.Join(nodeSizes.ListSizes(*infraType), "', '"))
 				}
 			} else {
 				if *infraType == "single-node" {

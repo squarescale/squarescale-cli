@@ -8,11 +8,11 @@ import (
 // NodeSizes allow to display and validate client side the
 // node size the user wants
 type NodeSizes interface {
-	CheckID(size, infraType string) bool
-	ListIds(infraType string) []string
+	CheckSize(size, infraType string) bool
+	ListSizes(infraType string) []string
 }
 
-type nodeSizes struct {
+type nodeSizesResponse struct {
 	SingleNode       nodeSizesWithAdditional `json:"single_node"`
 	HighAvailability nodeSizesWithAdditional `json:"high_availability"`
 }
@@ -22,39 +22,29 @@ type nodeSizesWithAdditional struct {
 	Additional []string `json:"additional"`
 }
 
-func (ns *nodeSizes) allSizes() map[string]map[string]bool {
-	res := make(map[string]map[string]bool)
-	singleNode := make(map[string]bool)
-	ha := make(map[string]bool)
-	for _, v := range ns.SingleNode.Default {
-		singleNode[v] = true
-	}
-	for _, v := range ns.HighAvailability.Default {
-		ha[v] = true
-	}
-	for _, v := range ns.SingleNode.Additional {
-		singleNode[v] = true
-	}
-	for _, v := range ns.HighAvailability.Additional {
-		ha[v] = true
-	}
-	res["single-node"] = singleNode
-	res["high-availability"] = ha
+type nodeSizes struct {
+	ByInfraType map[string][]string
+}
+
+func (ns *nodeSizesResponse) flattenSizes() map[string][]string {
+	res := make(map[string][]string)
+	res["single-node"] = append(ns.SingleNode.Default, ns.SingleNode.Additional...)
+	res["high-availability"] = append(ns.HighAvailability.Default, ns.HighAvailability.Additional...)
 
 	return res
 }
 
-func (ns *nodeSizes) CheckID(size, infraType string) bool {
-	_, ok := ns.allSizes()[infraType][size]
-	return ok
+func (ns *nodeSizes) CheckSize(size, infraType string) bool {
+	for _, v := range ns.ByInfraType[infraType] {
+		if v == size {
+			return true
+		}
+	}
+	return false
 }
 
-func (ns *nodeSizes) ListIds(infraType string) []string {
-	var res []string
-	for id := range ns.allSizes()[infraType] {
-		res = append(res, id)
-	}
-	return res
+func (ns *nodeSizes) ListSizes(infraType string) []string {
+	return ns.ByInfraType[infraType]
 }
 
 // GetClusterNodeSizes asks the Squarescale API for available cluster node sizes
@@ -64,30 +54,23 @@ func (c *Client) GetClusterNodeSizes() (NodeSizes, error) {
 		return nil, err
 	}
 
+	if code == http.StatusForbidden {
+		return nil, nil
+	}
+
 	if code != http.StatusOK {
 		return nil, unexpectedHTTPError(code, body)
 	}
 
-	var sizes nodeSizes
+	var response nodeSizesResponse
 
-	err = json.Unmarshal(body, &sizes)
+	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return nil, err
 	}
 
+	var sizes nodeSizes
+	sizes.ByInfraType = response.flattenSizes()
+
 	return &sizes, nil
-}
-
-// HasNodeSize is true if user can use node sizes
-func (c *Client) HasNodeSize() bool {
-	code, _, err := c.get("/infra/node/sizes?all=true")
-	if err != nil {
-		return false
-	}
-
-	if code == http.StatusForbidden {
-		return false
-	}
-
-	return true
 }
