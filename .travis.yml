@@ -15,12 +15,15 @@ before_install:
   - chmod 600 .netrc
   - sudo pip3 install awscli
 script:
+  - make generate
+  - make lint
+after_success:
   - case "$TRAVIS_PULL_REQUEST-$TRAVIS_BRANCH" in
       false-master)
-        make publish
+        make publish-staging
         ;;
-      *)
-        make generate
+      false-production)
+        make publish
         ;;
     esac
 notifications:

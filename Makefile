@@ -30,8 +30,12 @@ docker-darwin-amd64: ## Compile for darwin-amd64 in a container
 
 generate: docker-linux-amd64 docker-darwin-amd64
 
-publish: generate
+publish-staging: ## Publish existing generated build to github draft and s3 as staging
 	python3 publish.py
+	aws s3 cp sqsc-linux-amd64 s3://cli-releases/sqsc-linux-amd64-staging-latest --acl public-read
+	aws s3 cp sqsc-darwin-amd64 s3://cli-releases/sqsc-darwin-amd64-staging-latest --acl public-read
+
+publish: ## Publish existing generated build
 	aws s3 cp sqsc-linux-amd64 s3://cli-releases/sqsc-linux-amd64-latest --acl public-read
 	aws s3 cp sqsc-darwin-amd64 s3://cli-releases/sqsc-darwin-amd64-latest --acl public-read
 
@@ -39,5 +43,5 @@ clean: ## Clean repository
 	go clean && rm -f sqsc sqsc-*
 
 lint: ## Lint Docker
-	docker run --rm -v $$PWD:/root/ projectatomic/dockerfile-lint dockerfile_lint
-	hadolint Dockerfile
+	$(DOCKER_CMD) -v $$PWD:/root/ projectatomic/dockerfile-lint dockerfile_lint
+	$(DOCKER_CMD) -i sjourdan/hadolint < Dockerfile
