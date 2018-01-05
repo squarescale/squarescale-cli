@@ -203,5 +203,5 @@ func infraTypeFlag(f *flag.FlagSet) *string {
 }
 
 func nodeSizeFlag(f *flag.FlagSet) *string {
-	return f.String("node-size", "small", "Set the cluster node size.")
+	return f.String("node-size", "", "Set the cluster node size.")
 }
