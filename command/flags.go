@@ -110,10 +110,6 @@ func containerLimitNetFlag(f *flag.FlagSet) *int {
 	return f.Int("net", -1, "This is an indicative limit of how much network bandwidth your service requires.")
 }
 
-func clusterSizeFlag(f *flag.FlagSet) *uint {
-	return f.Uint("cluster-size", 0, "Cluster Size")
-}
-
 func disabledFlag(f *flag.FlagSet, doc string) *bool {
 	return f.Bool("disabled", false, doc)
 }

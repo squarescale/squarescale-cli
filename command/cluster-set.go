@@ -13,6 +13,7 @@ import (
 type ClusterSetCommand struct {
 	Meta
 	flagSet *flag.FlagSet
+	Cluster squarescale.ClusterConfig
 }
 
 // Run is part of cli.Command implementation.
@@ -21,13 +22,13 @@ func (c *ClusterSetCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	nowait := nowaitFlag(c.flagSet)
 	projectNameArg := projectFlag(c.flagSet)
-	clusterSizeArg := clusterSizeFlag(c.flagSet)
+	c.flagSet.UintVar(&c.Cluster.Size, "size", 0, "Cluster Size")
 	alwaysYes := yesFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if *clusterSizeArg == 0 {
+	if c.Cluster.Size == 0 {
 		return c.errorWithUsage(fmt.Errorf("You must specify a cluster size"))
 	}
 
@@ -45,20 +46,27 @@ func (c *ClusterSetCommand) Run(args []string) int {
 
 	var taskId int
 
-	res := c.runWithSpinner("change cluster size", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := c.runWithSpinner("scale project cluster", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
-		currentSize, e := client.GetClusterSize(*projectNameArg)
+		cluster, e := client.GetClusterConfig(*projectNameArg)
 		if e != nil {
 			return "", e
 		}
 
-		if currentSize == *clusterSizeArg {
+		if c.Cluster.Size == cluster.Size {
 			*nowait = true
-			return fmt.Sprintf("cluster is already size %d", currentSize), nil
+			return fmt.Sprintf("Cluster for project '%s' is already configured with these parameters", *projectNameArg), nil
 		}
 
-		taskId, err = client.SetClusterSize(*projectNameArg, *clusterSizeArg)
-		return fmt.Sprintf("[#%d] changed cluster size from %d to %d", taskId, currentSize, *clusterSizeArg), err
+		cluster.Update(c.Cluster)
+
+		taskId, err = client.ConfigCluster(*projectNameArg, cluster)
+
+		msg := fmt.Sprintf(
+			"[#%d] Successfully set cluster for project '%s': %s",
+			taskId, *projectNameArg, cluster.String())
+
+		return msg, err
 	})
 	if res != 0 {
 		return res
