@@ -72,7 +72,7 @@ func projectSettings(name, infraType string, nodeSize string) jsonObject {
 	}
 
 	if nodeSize != "" {
-		projectSettings["node_size"] = "dev"
+		projectSettings["node_size"] = nodeSize
 	}
 
 	return projectSettings

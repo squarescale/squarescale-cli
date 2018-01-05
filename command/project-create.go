@@ -25,6 +25,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	wantedProjectName := projectNameFlag(c.flagSet)
 	infraType := infraTypeFlag(c.flagSet)
+	nodeSize := nodeSizeFlag(c.flagSet)
 	c.flagSet.BoolVar(&c.DbDisable, "no-db", false, "Disable database creation")
 	c.flagSet.StringVar(&c.Db.Engine, "db-engine", "", "Select database engine")
 	c.flagSet.StringVar(&c.Db.Size, "db-size", "", "Select database size")
@@ -52,13 +53,22 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	res := c.runWithSpinner("create project", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var definitiveName string
 		var err error
-		var nodeSize string
 
-		if client.HasNodeSize() {
-			if *infraType == "single-node" {
-				nodeSize = "dev"
+		nodeSizes, err := client.GetClusterNodeSizes()
+		if err != nil {
+			return "", err
+		}
+		if nodeSizes != nil {
+			if *nodeSize != "" {
+				if !nodeSizes.CheckSize(*nodeSize, *infraType) {
+					return "", fmt.Errorf("Cannot validate node size '%s'. Must be one of '%s'", *nodeSize, strings.Join(nodeSizes.ListSizes(*infraType), "', '"))
+				}
 			} else {
-				nodeSize = "small"
+				if *infraType == "single-node" {
+					*nodeSize = "dev"
+				} else {
+					*nodeSize = "small"
+				}
 			}
 		}
 
@@ -135,7 +145,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 			definitiveName = generatedName
 		}
 
-		taskId, err = client.CreateProject(definitiveName, *infraType, nodeSize, c.Db)
+		taskId, err = client.CreateProject(definitiveName, *infraType, *nodeSize, c.Db)
 
 		return fmt.Sprintf("[#%d] Created project '%s'", taskId, definitiveName), err
 	})
@@ -190,4 +200,8 @@ func (c *ProjectCreateCommand) askConfirmName(alwaysYes *bool, name string) erro
 
 func infraTypeFlag(f *flag.FlagSet) *string {
 	return f.String("infra-type", "high-availability", "Set the infrastructure configuration.")
+}
+
+func nodeSizeFlag(f *flag.FlagSet) *string {
+	return f.String("node-size", "", "Set the cluster node size.")
 }
