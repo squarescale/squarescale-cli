@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -28,12 +29,13 @@ func (c *ClusterSetCommand) Run(args []string) int {
 		return 1
 	}
 
-	if c.Cluster.Size == 0 {
-		return c.errorWithUsage(fmt.Errorf("You must specify a cluster size"))
-	}
-
 	if c.flagSet.NArg() > 0 {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	}
+
+	err := validateClusterSetCommandArgs(*projectNameArg, c.Cluster)
+	if err != nil {
+		return c.errorWithUsage(err)
 	}
 
 	c.Ui.Warn(fmt.Sprintf("Changing cluster settings for project '%s' may cause a downtime.", *projectNameArg))
@@ -100,4 +102,16 @@ usage: sqsc cluster set [options]
 
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+}
+
+func validateClusterSetCommandArgs(project string, cluster squarescale.ClusterConfig) error {
+	if err := validateProjectName(project); err != nil {
+		return err
+	}
+
+	if cluster.Size == 0 {
+		return errors.New("Size cannot be empty or 0.")
+	}
+
+	return nil
 }
