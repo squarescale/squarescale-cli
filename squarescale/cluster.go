@@ -2,9 +2,60 @@ package squarescale
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 )
+
+// NodeSizes allow to display and validate client side the
+// node size the user wants
+type NodeSizes interface {
+	CheckSize(size, infraType string) (bool, error)
+	ListSizes(infraType string) ([]string, error)
+}
+
+type nodeSizes struct {
+	SingleNode       nodeSizesWithAdditional `json:"single_node"`
+	HighAvailability nodeSizesWithAdditional `json:"high_availability"`
+	ByInfraType      map[string][]string
+}
+
+type nodeSizesWithAdditional struct {
+	Default    []string `json:"default"`
+	Additional []string `json:"additional"`
+}
+
+func (ns *nodeSizes) CheckSize(size, infraType string) (bool, error) {
+	if ns.ByInfraType == nil {
+		return false, errors.New("Node sizes were not flattened before calling CheckSize")
+	}
+
+	for _, v := range ns.ByInfraType[infraType] {
+		if v == size {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func (ns *nodeSizes) ListSizes(infraType string) ([]string, error) {
+	if ns.ByInfraType == nil {
+		return nil, errors.New("Node sizes were not flattened before calling ListSizes")
+	}
+
+	return ns.ByInfraType[infraType], nil
+}
+
+func (ns *nodeSizes) flattenSizes() {
+	ns.ByInfraType = make(map[string][]string)
+	ns.ByInfraType["single-node"] = append(
+		ns.SingleNode.Default,
+		ns.SingleNode.Additional...)
+	ns.ByInfraType["high-availability"] = append(
+		ns.HighAvailability.Default,
+		ns.HighAvailability.Additional...)
+}
 
 // GetClusterSize asks the Squarescale API for the cluster size of a project.
 func (c *Client) GetClusterConfig(project string) (*ClusterConfig, error) {
@@ -24,6 +75,33 @@ func (c *Client) GetClusterConfig(project string) (*ClusterConfig, error) {
 	}
 
 	return &cluster, nil
+}
+
+// GetClusterNodeSizes asks the Squarescale API for available cluster node sizes
+func (c *Client) GetClusterNodeSizes() (NodeSizes, error) {
+	code, body, err := c.get("/infra/node/sizes?all=true")
+	if err != nil {
+		return nil, err
+	}
+
+	if code == http.StatusForbidden {
+		return nil, nil
+	}
+
+	if code != http.StatusOK {
+		return nil, unexpectedHTTPError(code, body)
+	}
+
+	var sizes nodeSizes
+
+	err = json.Unmarshal(body, &sizes)
+	if err != nil {
+		return nil, err
+	}
+
+	sizes.flattenSizes()
+
+	return &sizes, nil
 }
 
 // ConfigCluster calls the Squarescale API to update the cluster size for a given project.
@@ -68,13 +146,31 @@ func (c *Client) ConfigCluster(project string, cluster *ClusterConfig) (taskid i
 }
 
 type ClusterConfig struct {
-	Size uint `json:"cluster_size"`
+	InfraType string `json:"infra_type"`
+	Size      uint   `json:"cluster_size"`
+	NodeSize  string `json:"node_size"`
 }
 
 func (cluster *ClusterConfig) Update(other ClusterConfig) {
 	if other.Size != 0 {
 		cluster.Size = other.Size
 	}
+	if other.InfraType != "" {
+		cluster.InfraType = other.InfraType
+	}
+	if other.NodeSize != "" {
+		cluster.NodeSize = other.NodeSize
+	}
+}
+
+func (cluster *ClusterConfig) ProjectCreationSettings() jsonObject {
+	clusterSettings := jsonObject{
+		"infra_type": getInfraTypeEnumValue(cluster.InfraType),
+	}
+	if cluster.NodeSize != "" {
+		clusterSettings["node_size"] = cluster.NodeSize
+	}
+	return clusterSettings
 }
 
 func (cluster *ClusterConfig) ConfigSettings() jsonObject {
@@ -85,5 +181,15 @@ func (cluster *ClusterConfig) ConfigSettings() jsonObject {
 }
 
 func (cluster *ClusterConfig) String() string {
-	return fmt.Sprintf("%d nodes", cluster.Size)
+	infraType := strings.ToTitle(strings.Replace(cluster.InfraType, "-", " ", 1))
+
+	return fmt.Sprintf(
+		"%s cluster with %d %s nodes",
+		infraType,
+		cluster.Size,
+		cluster.NodeSize)
+}
+
+func getInfraTypeEnumValue(infraType string) string {
+	return strings.Replace(infraType, "-", "_", 1)
 }

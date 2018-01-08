@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 )
 
@@ -65,23 +64,20 @@ func (c *Client) FindProjectName() (string, error) {
 	return response.Name, nil
 }
 
-func projectSettings(name, infraType string, nodeSize string) jsonObject {
+func projectSettings(name string, cluster ClusterConfig) jsonObject {
 	projectSettings := jsonObject{
-		"name":       name,
-		"infra_type": getInfraTypeEnumValue(infraType),
+		"name": name,
 	}
-
-	if nodeSize != "" {
-		projectSettings["node_size"] = nodeSize
+	for attr, value := range cluster.ProjectCreationSettings() {
+		projectSettings[attr] = value
 	}
-
 	return projectSettings
 }
 
 // CreateProject asks the Squarescale platform to create a new project, using the provided name and user token.
-func (c *Client) CreateProject(name, infraType string, nodeSize string, db DbConfig) (taskId int, err error) {
+func (c *Client) CreateProject(name string, cluster ClusterConfig, db DbConfig) (taskId int, err error) {
 	payload := &jsonObject{
-		"project":  projectSettings(name, infraType, nodeSize),
+		"project":  projectSettings(name, cluster),
 		"database": db.ProjectCreationSettings(),
 	}
 
@@ -108,10 +104,6 @@ func (c *Client) CreateProject(name, infraType string, nodeSize string, db DbCon
 	}
 
 	return response.Task, err
-}
-
-func getInfraTypeEnumValue(infraType string) string {
-	return strings.Replace(infraType, "-", "_", 1)
 }
 
 type Project struct {
