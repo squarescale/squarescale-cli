@@ -14,6 +14,7 @@ type ProjectCreateCommand struct {
 	flagSet   *flag.FlagSet
 	DbDisable bool
 	Db        squarescale.DbConfig
+	Cluster   squarescale.ClusterConfig
 }
 
 // Run is part of cli.Command implementation.
@@ -24,8 +25,8 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	nowait := nowaitFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
 	wantedProjectName := projectNameFlag(c.flagSet)
-	infraType := infraTypeFlag(c.flagSet)
-	nodeSize := nodeSizeFlag(c.flagSet)
+	c.flagSet.StringVar(&c.Cluster.InfraType, "infra-type", "high-availability", "Set the infrastructure configuration.")
+	c.flagSet.StringVar(&c.Cluster.NodeSize, "node-size", "", "Set the cluster node size.")
 	c.flagSet.BoolVar(&c.DbDisable, "no-db", false, "Disable database creation")
 	c.flagSet.StringVar(&c.Db.Engine, "db-engine", "", "Select database engine")
 	c.flagSet.StringVar(&c.Db.Size, "db-size", "", "Select database size")
@@ -44,8 +45,8 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
 	}
 
-	if *infraType != "high-availability" && *infraType != "single-node" {
-		return c.errorWithUsage(fmt.Errorf("Unknown infrastructure type: %v. Correct values are high-availability or single-node", *infraType))
+	if c.Cluster.InfraType != "high-availability" && c.Cluster.InfraType != "single-node" {
+		return c.errorWithUsage(fmt.Errorf("Unknown infrastructure type: %v. Correct values are high-availability or single-node", c.Cluster.InfraType))
 	}
 
 	var taskId int
@@ -54,22 +55,26 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		var definitiveName string
 		var err error
 
-		nodeSizes, err := client.GetClusterNodeSizes()
-		if err != nil {
-			return "", err
-		}
-		if nodeSizes != nil {
-			if *nodeSize != "" {
-				if !nodeSizes.CheckSize(*nodeSize, *infraType) {
-					return "", fmt.Errorf("Cannot validate node size '%s'. Must be one of '%s'", *nodeSize, strings.Join(nodeSizes.ListSizes(*infraType), "', '"))
-				}
-			} else {
-				if *infraType == "single-node" {
-					*nodeSize = "dev"
-				} else {
-					*nodeSize = "small"
-				}
+		if c.Cluster.NodeSize != "" {
+			nodeSizes, err := client.GetClusterNodeSizes()
+			if err != nil {
+				return "", err
 			}
+			valid, err := nodeSizes.CheckSize(c.Cluster.NodeSize, c.Cluster.InfraType)
+			if err != nil {
+				return "", err
+			}
+			if !valid {
+				availableSizes, err := nodeSizes.ListSizes(c.Cluster.InfraType)
+				if err != nil {
+					return "", err
+				}
+				return "", fmt.Errorf("Cannot validate node size '%s'. Must be one of '%s'", c.Cluster.NodeSize, strings.Join(availableSizes, "', '"))
+			}
+		} else if c.Cluster.InfraType == "single-node" {
+			c.Cluster.NodeSize = "dev"
+		} else {
+			c.Cluster.NodeSize = "small"
 		}
 
 		if c.Db.Engine != "" {
@@ -94,15 +99,15 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 			if err != nil {
 				return "", err
 			}
-			if !sizes.CheckID(c.Db.Size, *infraType) {
-				return "", fmt.Errorf("Cannot validate database size '%s'. Must be one of '%s'", c.Db.Size, strings.Join(sizes.ListIds(*infraType), "', '"))
+			if !sizes.CheckID(c.Db.Size, c.Cluster.InfraType) {
+				return "", fmt.Errorf("Cannot validate database size '%s'. Must be one of '%s'", c.Db.Size, strings.Join(sizes.ListIds(c.Cluster.InfraType), "', '"))
 			}
 		}
 
 		if !c.DbDisable && c.Db.Engine == "" && c.Db.Size == "" {
 			c.Db.Engine = "postgres"
 			if client.HasNewDB() {
-				if *infraType == "single-node" {
+				if c.Cluster.InfraType == "single-node" {
 					c.Db.Size = "dev"
 				} else {
 					c.Db.Size = "small"
@@ -145,7 +150,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 			definitiveName = generatedName
 		}
 
-		taskId, err = client.CreateProject(definitiveName, *infraType, *nodeSize, c.Db)
+		taskId, err = client.CreateProject(definitiveName, c.Cluster, c.Db)
 
 		return fmt.Sprintf("[#%d] Created project '%s'", taskId, definitiveName), err
 	})
@@ -196,12 +201,4 @@ func (c *ProjectCreateCommand) askConfirmName(alwaysYes *bool, name string) erro
 
 	c.startSpinner()
 	return nil
-}
-
-func infraTypeFlag(f *flag.FlagSet) *string {
-	return f.String("infra-type", "high-availability", "Set the infrastructure configuration.")
-}
-
-func nodeSizeFlag(f *flag.FlagSet) *string {
-	return f.String("node-size", "", "Set the cluster node size.")
 }

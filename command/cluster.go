@@ -6,7 +6,7 @@ import (
 	"github.com/mitchellh/cli"
 )
 
-// ClusterCommand is a cli.Command implementation for top level `sqsc container` command.
+// ClusterCommand is a cli.Command implementation for top level `sqsc cluster` command.
 type ClusterCommand struct {
 }
 
