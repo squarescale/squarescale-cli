@@ -13,6 +13,7 @@ import (
 type NodeSizes interface {
 	CheckSize(size, infraType string) (bool, error)
 	ListSizes(infraType string) ([]string, error)
+	ListHuman() []string
 }
 
 type nodeSizes struct {
@@ -47,6 +48,26 @@ func (ns *nodeSizes) ListSizes(infraType string) ([]string, error) {
 	return ns.ByInfraType[infraType], nil
 }
 
+func (ns *nodeSizes) ListHuman() []string {
+	var res []string
+	res = append(res, "Single Node infrastructure")
+	for _, v := range ns.SingleNode.Default {
+		res = append(res, "\t"+v)
+	}
+	for _, v := range ns.SingleNode.Additional {
+		res = append(res, "\t["+v+"]")
+	}
+	res = append(res, "High Availability infrastructure")
+	for _, v := range ns.HighAvailability.Default {
+		res = append(res, "\t"+v)
+	}
+	for _, v := range ns.HighAvailability.Additional {
+		res = append(res, "\t["+v+"]")
+	}
+
+	return res
+}
+
 func (ns *nodeSizes) flattenSizes() {
 	ns.ByInfraType = make(map[string][]string)
 	ns.ByInfraType["single-node"] = append(
@@ -55,6 +76,20 @@ func (ns *nodeSizes) flattenSizes() {
 	ns.ByInfraType["high-availability"] = append(
 		ns.HighAvailability.Default,
 		ns.HighAvailability.Additional...)
+}
+
+type emptyNodeSizes struct{}
+
+func (ns *emptyNodeSizes) CheckSize(size, infraType string) (bool, error) {
+	return false, nil
+}
+
+func (ns *emptyNodeSizes) ListSizes(infraType string) ([]string, error) {
+	return []string{}, nil
+}
+
+func (ns *emptyNodeSizes) ListHuman() []string {
+	return []string{"Your cluster will use nodes with 1 vCPU and 2 GiB of RAM"}
 }
 
 // GetClusterSize asks the Squarescale API for the cluster size of a project.
@@ -85,7 +120,7 @@ func (c *Client) GetClusterNodeSizes() (NodeSizes, error) {
 	}
 
 	if code == http.StatusForbidden {
-		return nil, nil
+		return &emptyNodeSizes{}, nil
 	}
 
 	if code != http.StatusOK {
