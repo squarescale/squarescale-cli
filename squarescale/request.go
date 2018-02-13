@@ -18,6 +18,10 @@ const supportedAPI string = "1"
 
 type jsonObject map[string]interface{}
 
+type APIClient interface {
+	Get(path string) (int, []byte, error)
+}
+
 // Client is the basic structure to make API calls to Squarescale services
 type Client struct {
 	httpClient        http.Client // http.client is concurrently safe and should be reused across multiple connections
@@ -48,6 +52,10 @@ func (c *Client) cableHeaders() (*http.Header, error) {
 	h.Set("API-Version", supportedAPI)
 	h.Set("Origin", c.endpoint)
 	return &h, nil
+}
+
+func (c *Client) Get(path string) (int, []byte, error) {
+	return c.get(path)
 }
 
 func (c *Client) get(path string) (int, []byte, error) {

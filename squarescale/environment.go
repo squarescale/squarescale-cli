@@ -12,32 +12,8 @@ type Environment struct {
 	PerService map[string]map[string]string `json:"per_service"`
 }
 
-// EnvironmentVariables gets all the environment variables specified for the project.
-func (c *Client) EnvironmentVariables(project string) (*Environment, error) {
-	return c.envVariables(project)
-}
-
-// SetEnvironmentVariables sets all the environment variables specified for the project.
-func (c *Client) SetEnvironmentVariables(project string, env *Environment) error {
-	code, body, err := c.put("/projects/"+project+"/environment/custom", &jsonObject{"environment": env, "format": "json"})
-	if err != nil {
-		return err
-	}
-
-	switch code {
-	case http.StatusNoContent:
-		return nil
-	case http.StatusNotFound:
-		return fmt.Errorf("Project '%s' not found", project)
-	case http.StatusUnprocessableEntity:
-		return fmt.Errorf("%s", body)
-	default:
-		return unexpectedHTTPError(code, body)
-	}
-}
-
-func (c *Client) envVariables(project string) (*Environment, error) {
-	code, body, err := c.get("/projects/" + project + "/environment")
+func NewEnvironment(c APIClient, project string) (*Environment, error) {
+	code, body, err := c.Get("/projects/" + project + "/environment")
 	if err != nil {
 		return nil, err
 	}
@@ -57,4 +33,23 @@ func (c *Client) envVariables(project string) (*Environment, error) {
 	}
 
 	return &env, nil
+}
+
+// SetEnvironmentVariables sets all the environment variables specified for the project.
+func (c *Client) SetEnvironmentVariables(project string, env *Environment) error {
+	code, body, err := c.put("/projects/"+project+"/environment/custom", &jsonObject{"environment": env, "format": "json"})
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusNoContent:
+		return nil
+	case http.StatusNotFound:
+		return fmt.Errorf("Project '%s' not found", project)
+	case http.StatusUnprocessableEntity:
+		return fmt.Errorf("%s", body)
+	default:
+		return unexpectedHTTPError(code, body)
+	}
 }
