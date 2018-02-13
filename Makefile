@@ -16,7 +16,8 @@ build: deps ## Build CLI (./sqsc binary)
 	$(GO_CMD) -o sqsc
 
 deps: ## Install dependencies inside $GOPATH
-	go get ./...
+	go get github.com/onsi/ginkgo/ginkgo
+	go get -v -t ./...
 
 build-docker: build
 	CGO_ENABLED=0 $(GO_CMD) -o sqsc-docker
@@ -45,3 +46,6 @@ clean: ## Clean repository
 lint: ## Lint Docker
 	$(DOCKER_CMD) -v $$PWD:/root/ projectatomic/dockerfile-lint dockerfile_lint
 	$(DOCKER_CMD) -i sjourdan/hadolint < Dockerfile
+
+tests: ## Run test suites in all packages
+	ginkgo -r
