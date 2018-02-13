@@ -58,4 +58,39 @@ var _ = Describe("NewEnvironment", func() {
 			Expect(env).To(Equal(expectedEnv))
 		})
 	})
+
+	Describe("when API response contains keys not matched in the Environment struct", func() {
+		BeforeEach(func() {
+			apiStatusCode = 200
+			apiResponse = []byte(`{
+			  "default": {"DB_NAME":"dbstaging"},
+			  "global": {"MY_CUSTOM_GLOBAL":"one"},
+			  "per_service": {
+				"wordpress": {
+				  "WORDPRESS_DB":"wordpress",
+				  "default": {},
+				  "custom": {"WORDPRESS_DB":"wordpress"}
+				}
+			  },
+			  "project": {
+				"default": {"DB_NAME":"dbstaging"},
+				"custom": {"MY_CUSTOM_GLOBAL":"one"}
+			  }
+			}`)
+			apiError = nil
+		})
+
+		It("can unmarshal the response into an Environment", func() {
+			expectedEnv := &Environment{
+				Preset: map[string]string{"DB_NAME": "dbstaging"},
+				Global: map[string]string{"MY_CUSTOM_GLOBAL": "one"},
+				PerService: map[string]map[string]string{
+					"wordpress": map[string]string{"WORDPRESS_DB": "wordpress"},
+				},
+			}
+			env, err = NewEnvironment(&client, "whatever")
+
+			Expect(env).To(Equal(expectedEnv))
+		})
+	})
 })

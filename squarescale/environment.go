@@ -26,10 +26,40 @@ func NewEnvironment(c APIClient, project string) (*Environment, error) {
 		return nil, unexpectedHTTPError(code, body)
 	}
 
-	var env Environment
-	err = json.Unmarshal(body, &env)
+	var (
+		result map[string]interface{}
+		env    Environment
+	)
+
+	err = json.Unmarshal(body, &result)
 	if err != nil {
 		return nil, err
+	}
+
+	env = Environment{
+		Preset:     make(map[string]string),
+		Global:     make(map[string]string),
+		PerService: make(map[string]map[string]string),
+	}
+	for name, value := range result["default"].(map[string]interface{}) {
+		env.Preset[name] = value.(string)
+	}
+	for name, value := range result["global"].(map[string]interface{}) {
+		env.Global[name] = value.(string)
+	}
+	for service, vars := range result["per_service"].(map[string]interface{}) {
+		env.PerService[service] = make(map[string]string)
+
+		for name, value := range vars.(map[string]interface{}) {
+			switch v := value.(type) {
+			default:
+				fmt.Printf("Unexpected value type %T", v)
+			case string:
+				env.PerService[service][name] = value.(string)
+			case map[string]interface{}:
+				continue
+			}
+		}
 	}
 
 	return &env, nil
