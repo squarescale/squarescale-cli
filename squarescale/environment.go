@@ -12,8 +12,8 @@ type Environment struct {
 	PerService map[string]map[string]string `json:"per_service"`
 }
 
-func NewEnvironment(c APIClient, project string) (*Environment, error) {
-	code, body, err := c.Get("/projects/" + project + "/environment")
+func NewEnvironment(c *Client, project string) (*Environment, error) {
+	code, body, err := c.get("/projects/" + project + "/environment")
 	if err != nil {
 		return nil, err
 	}

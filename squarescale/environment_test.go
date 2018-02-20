@@ -1,48 +1,53 @@
 package squarescale_test
 
 import (
+	"github.com/onsi/gomega/ghttp"
 	. "github.com/squarescale/squarescale-cli/squarescale"
+	"net/http"
 )
-
-type mockedAPI struct {
-	statusCode int
-	response   []byte
-	err        error
-}
-
-func (api *mockedAPI) Get(path string) (int, []byte, error) {
-	return api.statusCode, api.response, api.err
-}
 
 var _ = Describe("NewEnvironment", func() {
 	var (
-		client        mockedAPI
-		apiStatusCode int
-		apiResponse   []byte
-		apiError      error
-		env           *Environment
-		err           error
+		server     *ghttp.Server
+		client     *Client
+		project    string
+		statusCode int
+		response   interface{}
+		env        *Environment
+		err        error
 	)
 
-	JustBeforeEach(func() {
-		client = mockedAPI{
-			statusCode: apiStatusCode,
-			response:   apiResponse,
-			err:        apiError,
-		}
+	BeforeEach(func() {
+		server = ghttp.NewServer()
+		client = NewClient(server.URL(), "token")
+		project = "whatever"
+
+		server.AppendHandlers(ghttp.CombineHandlers(
+			ghttp.VerifyRequest("GET", "/projects/"+project+"/environment"),
+			ghttp.VerifyContentType("application/json"),
+			ghttp.RespondWithJSONEncodedPtr(&statusCode, &response),
+		))
+	})
+
+	AfterEach(func() {
+		server.Close()
+	})
+
+	It("should make a request to fetch environment variables", func() {
+		NewEnvironment(client, project)
+		Expect(server.ReceivedRequests()).To(HaveLen(1))
 	})
 
 	Describe("when API response object matches the Environment struct", func() {
 		BeforeEach(func() {
-			apiStatusCode = 200
-			apiResponse = []byte(`{
-			  "default": {"DB_NAME":"dbstaging"},
-			  "global": {"MY_CUSTOM_GLOBAL":"one"},
-			  "per_service": {
-				"wordpress": {"WORDPRESS_DB":"wordpress"}
-			  }
-			}`)
-			apiError = nil
+			statusCode = http.StatusOK
+			response = map[string]interface{}{
+				"default": map[string]string{"DB_NAME": "dbstaging"},
+				"global":  map[string]string{"MY_CUSTOM_GLOBAL": "one"},
+				"per_service": map[string]map[string]string{
+					"wordpress": map[string]string{"WORDPRESS_DB": "wordpress"},
+				},
+			}
 		})
 
 		It("can unmarshal the response into an Environment", func() {
@@ -53,7 +58,7 @@ var _ = Describe("NewEnvironment", func() {
 					"wordpress": map[string]string{"WORDPRESS_DB": "wordpress"},
 				},
 			}
-			env, err = NewEnvironment(&client, "whatever")
+			env, err = NewEnvironment(client, "whatever")
 
 			Expect(env).To(Equal(expectedEnv))
 		})
@@ -61,23 +66,22 @@ var _ = Describe("NewEnvironment", func() {
 
 	Describe("when API response contains keys not matched in the Environment struct", func() {
 		BeforeEach(func() {
-			apiStatusCode = 200
-			apiResponse = []byte(`{
-			  "default": {"DB_NAME":"dbstaging"},
-			  "global": {"MY_CUSTOM_GLOBAL":"one"},
-			  "per_service": {
-				"wordpress": {
-				  "WORDPRESS_DB":"wordpress",
-				  "default": {},
-				  "custom": {"WORDPRESS_DB":"wordpress"}
-				}
-			  },
-			  "project": {
-				"default": {"DB_NAME":"dbstaging"},
-				"custom": {"MY_CUSTOM_GLOBAL":"one"}
-			  }
-			}`)
-			apiError = nil
+			statusCode = http.StatusOK
+			response = map[string]interface{}{
+				"default": map[string]string{"DB_NAME": "dbstaging"},
+				"global":  map[string]string{"MY_CUSTOM_GLOBAL": "one"},
+				"per_service": map[string]map[string]interface{}{
+					"wordpress": map[string]interface{}{
+						"WORDPRESS_DB": "wordpress",
+						"default":      map[string]string{},
+						"custom":       map[string]string{"WORDPRESS_DB": "wordpress"},
+					},
+				},
+				"project": map[string]map[string]string{
+					"default": map[string]string{"DB_NAME": "dbstaging"},
+					"custom":  map[string]string{"MY_CUSTOM_GLOBAL": "one"},
+				},
+			}
 		})
 
 		It("can unmarshal the response into an Environment", func() {
@@ -88,7 +92,7 @@ var _ = Describe("NewEnvironment", func() {
 					"wordpress": map[string]string{"WORDPRESS_DB": "wordpress"},
 				},
 			}
-			env, err = NewEnvironment(&client, "whatever")
+			env, err = NewEnvironment(client, "whatever")
 
 			Expect(env).To(Equal(expectedEnv))
 		})
