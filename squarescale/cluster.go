@@ -198,6 +198,8 @@ func (cluster *ClusterConfig) Update(other ClusterConfig) {
 	}
 }
 
+// ProjectCreationSettings returns a JSON representation of the ClusterConfig as
+// expected by the API for the creation of a cluster.
 func (cluster *ClusterConfig) ProjectCreationSettings() JSONObject {
 	clusterSettings := JSONObject{
 		"infra_type": getInfraTypeEnumValue(cluster.InfraType),
@@ -208,6 +210,8 @@ func (cluster *ClusterConfig) ProjectCreationSettings() JSONObject {
 	return clusterSettings
 }
 
+// ConfigSettings returns a JSON representation of the ClusterConfig as
+// expected by the API for the update of a cluster's settings.
 func (cluster *ClusterConfig) ConfigSettings() JSONObject {
 	clusterSettings := JSONObject{
 		"desired_size": cluster.Size,

@@ -1,12 +1,10 @@
 package command
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"strings"
 
-	"github.com/olekukonko/tablewriter"
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
@@ -22,26 +20,12 @@ func (c *EnvGetCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	project := projectFlag(c.flagSet)
 	container := containerFlag(c.flagSet)
-	preSet := c.flagSet.Bool("preset", false, "Print pre-set variables")
-	global := c.flagSet.Bool("global", false, "Print global variables")
+	all := c.flagSet.Bool("all", false, "Print all variables")
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	noFlag := !*global && *container == "" && !*preSet
-	printGlobal := *global || noFlag
-	printPreset := *preSet || noFlag
-
-	var printFunction func(string, *map[string]string, *bytes.Buffer)
-	if c.niceFormat {
-		printFunction = prettyPrintVars
-	} else {
-		printFunction = printVars
-	}
-
-	queryvar := c.flagSet.Arg(0)
-	queryval := ""
 	if c.flagSet.NArg() > 1 {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
@@ -50,72 +34,26 @@ func (c *EnvGetCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
+	queryVar := c.flagSet.Arg(0)
+
 	return c.runWithSpinner("list environment variables", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		env, err := squarescale.NewEnvironment(client, *project)
 		if err != nil {
 			return "", err
 		}
 
-		var linesBuffer bytes.Buffer
-
-		if queryvar != "" {
-			queryval = env.Preset[queryvar]
-		} else if printPreset {
-			printFunction("Presets", &env.Preset, &linesBuffer)
+		queryOptions := squarescale.QueryOptions{
+			DisplayAll:   *all,
+			ServiceName:  *container,
+			VariableName: queryVar,
+		}
+		queryResult, err := env.QueryVars(queryOptions)
+		if err != nil {
+			return "", err
 		}
 
-		if queryvar != "" {
-			if val, ok := env.Global[queryvar]; ok && !*preSet {
-				queryval = val
-			}
-		} else if printGlobal {
-			printFunction("Global", &env.Global, &linesBuffer)
-		}
-
-		if noFlag || *container != "" {
-			for containerName, vars := range env.PerService {
-				if queryvar != "" {
-					if val, ok := vars[queryvar]; ok && containerName == *container {
-						queryval = val
-					}
-				} else if containerName == *container || *container == "" {
-					printFunction(containerName, &vars, &linesBuffer)
-				}
-			}
-		}
-
-		if queryvar != "" {
-			return queryval, nil
-		} else {
-			return linesBuffer.String(), nil
-		}
+		return queryResult.String(), nil
 	})
-}
-
-func prettyPrintVars(title string, variables *map[string]string, lines *bytes.Buffer) {
-	lines.WriteString(fmt.Sprintf("%s\n", title))
-
-	if len(*variables) == 0 {
-		lines.WriteString("  none\n")
-	}
-
-	data := make([][]string, 0, len(*variables))
-	for k, v := range *variables {
-		data = append(data, []string{k, v})
-	}
-
-	table := tablewriter.NewWriter(lines)
-	table.AppendBulk(data)
-	table.SetBorder(false)
-	table.SetColumnSeparator("=")
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.Render()
-}
-
-func printVars(title string, variables *map[string]string, lines *bytes.Buffer) {
-	for k, v := range *variables {
-		lines.WriteString(fmt.Sprintf("%s=%s\n", k, v))
-	}
 }
 
 // Synopsis is part of cli.Command implementation.

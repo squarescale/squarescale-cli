@@ -21,7 +21,6 @@ func (c *EnvSetCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	project := projectFlag(c.flagSet)
 	container := containerFlag(c.flagSet)
-	global := c.flagSet.Bool("global", false, "Set up the environment variable for all the containers")
 	remove := c.flagSet.Bool("remove", false, "Remove the key from environment variables")
 
 	if err := c.flagSet.Parse(args); err != nil {
@@ -30,14 +29,6 @@ func (c *EnvSetCommand) Run(args []string) int {
 
 	if err := validateProjectName(*project); err != nil {
 		return c.errorWithUsage(err)
-	}
-
-	if !*global && *container == "" {
-		return c.errorWithUsage(errors.New("Must either provide a container name or set as global."))
-	}
-
-	if *global && *container != "" {
-		return c.errorWithUsage(errors.New("Cannot set as global and provide a container name."))
 	}
 
 	var key, value string
@@ -64,24 +55,36 @@ func (c *EnvSetCommand) Run(args []string) int {
 		}
 
 		var msg string
-		if *global && *remove {
-			delete(env.Global, key)
-			msg = fmt.Sprintf("Successfully removed global variable '%s'", key)
-		} else if *global {
-			env.Global[key] = value
-			msg = fmt.Sprintf("Successfully set global variable '%s' to value '%s'", key, value)
-		} else if *remove {
-			delete(env.PerService[*container], key)
-			msg = fmt.Sprintf("Successfully removed variable '%s' for container '%s'", key, *container)
-		} else {
-			if _, present := env.PerService[*container]; !present {
-				env.PerService[*container] = make(map[string]string)
+
+		if *container != "" {
+			service, err := env.GetServiceGroup(*container)
+			if err != nil {
+				return "", err
 			}
-			env.PerService[*container][key] = value
-			msg = fmt.Sprintf("Successfully set variable '%s' to value '%s' for container '%s'", key, value, *container)
+
+			if *remove {
+				if err = service.RemoveVariable(key); err != nil {
+					return "", err
+				}
+				msg = fmt.Sprintf("Successfully removed variable '%s' for container '%s'",
+					key, *container)
+			} else {
+				service.SetVariable(key, value)
+				msg = fmt.Sprintf(
+					"Successfully set variable '%s' to value '%s' for container '%s'",
+					key, value, *container)
+			}
+		} else if *remove {
+			if err = env.Project.RemoveVariable(key); err != nil {
+				return "", err
+			}
+			msg = fmt.Sprintf("Successfully removed global variable '%s'", key)
+		} else {
+			env.Project.SetVariable(key, value)
+			msg = fmt.Sprintf("Successfully set global variable '%s' to value '%s'", key, value)
 		}
 
-		return msg, client.SetEnvironmentVariables(*project, env)
+		return msg, env.CommitEnvironment(client, *project)
 	})
 }
 

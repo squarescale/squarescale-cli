@@ -211,6 +211,8 @@ func (db *DbConfig) Update(other DbConfig) {
 	}
 }
 
+// ProjectCreationSettings returns a JSON representation of the DbConfig as
+// expected by the API for the creation of a database.
 func (db *DbConfig) ProjectCreationSettings() JSONObject {
 	dbSettings := JSONObject{
 		"enabled": db.Enabled,
@@ -224,6 +226,8 @@ func (db *DbConfig) ProjectCreationSettings() JSONObject {
 	return dbSettings
 }
 
+// ConfigSettings returns a JSON representation of the DbConfig as
+// expected by the API for the update of a database's settings.
 func (db *DbConfig) ConfigSettings() JSONObject {
 	dbSettings := JSONObject{
 		"db_enabled": db.Enabled,
