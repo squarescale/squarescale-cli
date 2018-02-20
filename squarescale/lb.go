@@ -10,11 +10,11 @@ import (
 
 // DisableLB asks the Squarescale service to deactivate the load balancer.
 func (c *Client) DisableLB(project string) (int, error) {
-	payload := &jsonObject{
-		"load_balancer": jsonObject{
+	payload := &JSONObject{
+		"load_balancer": JSONObject{
 			"active": false,
 		},
-		"project": jsonObject{
+		"project": JSONObject{
 			"load_balancer": false,
 		},
 	}
@@ -27,8 +27,8 @@ func (c *Client) ConfigLB(project string, container, port int, https bool, cert 
 	if cert_chain == nil {
 		cert_chain = []string{}
 	}
-	payload := &jsonObject{
-		"load_balancer": jsonObject{
+	payload := &JSONObject{
+		"load_balancer": JSONObject{
 			"active":            true,
 			"container_id":      container,
 			"https":             https,
@@ -36,17 +36,17 @@ func (c *Client) ConfigLB(project string, container, port int, https bool, cert 
 			"certificate_chain": cert_chain,
 			"secret_key":        secret_key,
 		},
-		"containers": jsonObject{
-			strconv.Itoa(container): jsonObject{
+		"containers": JSONObject{
+			strconv.Itoa(container): JSONObject{
 				"web_port": port,
 			},
 		},
-		"project": jsonObject{
+		"project": JSONObject{
 			"load_balancer": true,
 		},
 		"web-container": strconv.Itoa(container),
-		"container": jsonObject{
-			strconv.Itoa(container): jsonObject{
+		"container": JSONObject{
+			strconv.Itoa(container): JSONObject{
 				"web-port": strconv.Itoa(port),
 			},
 		},
@@ -55,7 +55,7 @@ func (c *Client) ConfigLB(project string, container, port int, https bool, cert 
 	return c.updateLBConfig(project, payload)
 }
 
-func (c *Client) updateLBConfig(project string, payload *jsonObject) (int, error) {
+func (c *Client) updateLBConfig(project string, payload *JSONObject) (int, error) {
 	code, body, err := c.post("/projects/"+project+"/load_balancer", payload)
 	if err != nil {
 		return 0, err

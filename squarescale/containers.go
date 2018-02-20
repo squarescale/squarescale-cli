@@ -150,7 +150,7 @@ func (c *Client) GetContainerInfo(project, shortName string) (Container, error) 
 
 // ConfigContainer calls the API to update the number of instances and update command.
 func (c *Client) ConfigContainer(container Container) error {
-	cont := jsonObject{}
+	cont := JSONObject{}
 	if container.PreCommand != nil {
 		cont["pre_command"] = container.PreCommand
 	}
@@ -163,7 +163,7 @@ func (c *Client) ConfigContainer(container Container) error {
 	if container.BuildService != "" {
 		cont["build_service"] = container.BuildService
 	}
-	limits := jsonObject{}
+	limits := JSONObject{}
 	if container.Limits.Memory >= 0 {
 		limits["mem"] = container.Limits.Memory
 	}
@@ -178,7 +178,7 @@ func (c *Client) ConfigContainer(container Container) error {
 	}
 	cont["limits"] = limits
 
-	payload := &jsonObject{"container": cont}
+	payload := &JSONObject{"container": cont}
 	code, body, err := c.put(fmt.Sprintf("/containers/%d", container.ID), payload)
 	if err != nil {
 		return err

@@ -67,7 +67,7 @@ func NewEnvironment(c *Client, project string) (*Environment, error) {
 
 // SetEnvironmentVariables sets all the environment variables specified for the project.
 func (c *Client) SetEnvironmentVariables(project string, env *Environment) error {
-	code, body, err := c.put("/projects/"+project+"/environment/custom", &jsonObject{"environment": env, "format": "json"})
+	code, body, err := c.put("/projects/"+project+"/environment/custom", &JSONObject{"environment": env, "format": "json"})
 	if err != nil {
 		return err
 	}

@@ -8,11 +8,11 @@ import (
 
 // AddRepository asks the Squarescale service to attach the provided repository to the project.
 func (c *Client) AddRepository(project, repoURL, buildService string) error {
-	payload := &jsonObject{
-		"repository": jsonObject{
+	payload := &JSONObject{
+		"repository": JSONObject{
 			"url": repoURL,
 		},
-		"container": jsonObject{
+		"container": JSONObject{
 			"build_service": buildService,
 		},
 	}

@@ -16,7 +16,8 @@ import (
 
 const supportedAPI string = "1"
 
-type jsonObject map[string]interface{}
+// JSONObject is a simple struct matching a JSON object with any kind of values
+type JSONObject map[string]interface{}
 
 // Client is the basic structure to make API calls to Squarescale services
 type Client struct {
@@ -54,11 +55,11 @@ func (c *Client) get(path string) (int, []byte, error) {
 	return c.request("GET", path, nil)
 }
 
-func (c *Client) post(path string, payload *jsonObject) (int, []byte, error) {
+func (c *Client) post(path string, payload *JSONObject) (int, []byte, error) {
 	return c.request("POST", path, payload)
 }
 
-func (c *Client) patch(path string, payload *jsonObject) (int, []byte, error) {
+func (c *Client) patch(path string, payload *JSONObject) (int, []byte, error) {
 	return c.request("PATCH", path, payload)
 }
 
@@ -66,11 +67,11 @@ func (c *Client) delete(path string) (int, []byte, error) {
 	return c.request("DELETE", path, nil)
 }
 
-func (c *Client) put(path string, payload *jsonObject) (int, []byte, error) {
+func (c *Client) put(path string, payload *JSONObject) (int, []byte, error) {
 	return c.request("PUT", path, payload)
 }
 
-func (c *Client) request(method, path string, payload *jsonObject) (int, []byte, error) {
+func (c *Client) request(method, path string, payload *JSONObject) (int, []byte, error) {
 	var bodyReader io.Reader
 	if payload != nil {
 		payloadBytes, err := json.Marshal(payload)

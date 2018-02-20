@@ -21,7 +21,7 @@ type UnprovisionError struct {
 
 // CheckProjectName asks the Squarescale service to validate a given project name.
 func (c *Client) CheckProjectName(name string) (valid bool, same bool, fmtName string, err error) {
-	code, body, err := c.post("/free_name", &jsonObject{"name": name})
+	code, body, err := c.post("/free_name", &JSONObject{"name": name})
 	if err != nil {
 		return
 	}
@@ -64,8 +64,8 @@ func (c *Client) FindProjectName() (string, error) {
 	return response.Name, nil
 }
 
-func projectSettings(name string, cluster ClusterConfig) jsonObject {
-	projectSettings := jsonObject{
+func projectSettings(name string, cluster ClusterConfig) JSONObject {
+	projectSettings := JSONObject{
 		"name": name,
 	}
 	for attr, value := range cluster.ProjectCreationSettings() {
@@ -76,7 +76,7 @@ func projectSettings(name string, cluster ClusterConfig) jsonObject {
 
 // CreateProject asks the Squarescale platform to create a new project, using the provided name and user token.
 func (c *Client) CreateProject(name string, cluster ClusterConfig, db DbConfig) (taskId int, err error) {
-	payload := &jsonObject{
+	payload := &JSONObject{
 		"project":  projectSettings(name, cluster),
 		"database": db.ProjectCreationSettings(),
 	}
@@ -163,7 +163,7 @@ func (c *Client) ProjectSlackURL(project string) (string, error) {
 
 // ProjectURL asks the Squarescale service the url of the project if available, using the provided token.
 func (c *Client) SetProjectSlackURL(project, url string) error {
-	code, body, err := c.post("/projects/"+project+"/slack", &jsonObject{"project": &jsonObject{"slack_webhook": url}})
+	code, body, err := c.post("/projects/"+project+"/slack", &JSONObject{"project": &JSONObject{"slack_webhook": url}})
 	if err != nil {
 		return err
 	}
