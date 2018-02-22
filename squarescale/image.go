@@ -7,8 +7,8 @@ import (
 
 // AddImage asks the Squarescale service to attach an image to the project.
 func (c *Client) AddImage(project, dockerImage string) error {
-	payload := &jsonObject{
-		"docker_image": jsonObject{
+	payload := &JSONObject{
+		"docker_image": JSONObject{
 			"name": dockerImage,
 		},
 	}

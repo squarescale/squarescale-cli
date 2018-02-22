@@ -211,8 +211,10 @@ func (db *DbConfig) Update(other DbConfig) {
 	}
 }
 
-func (db *DbConfig) ProjectCreationSettings() jsonObject {
-	dbSettings := jsonObject{
+// ProjectCreationSettings returns a JSON representation of the DbConfig as
+// expected by the API for the creation of a database.
+func (db *DbConfig) ProjectCreationSettings() JSONObject {
+	dbSettings := JSONObject{
 		"enabled": db.Enabled,
 	}
 	if db.Engine != "" {
@@ -224,8 +226,10 @@ func (db *DbConfig) ProjectCreationSettings() jsonObject {
 	return dbSettings
 }
 
-func (db *DbConfig) ConfigSettings() jsonObject {
-	dbSettings := jsonObject{
+// ConfigSettings returns a JSON representation of the DbConfig as
+// expected by the API for the update of a database's settings.
+func (db *DbConfig) ConfigSettings() JSONObject {
+	dbSettings := JSONObject{
 		"db_enabled": db.Enabled,
 	}
 	if db.Engine != "" {
@@ -263,7 +267,7 @@ func (c *Client) GetDBConfig(project string) (*DbConfig, error) {
 
 // ConfigDB calls the Squarescale API to update database scale options for a given project.
 func (c *Client) ConfigDB(project string, db *DbConfig) (taskId int, err error) {
-	payload := &jsonObject{
+	payload := &JSONObject{
 		"project": db.ConfigSettings(),
 	}
 

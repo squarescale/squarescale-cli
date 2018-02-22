@@ -141,7 +141,7 @@ func (c *Client) GetClusterNodeSizes() (NodeSizes, error) {
 
 // ConfigCluster calls the Squarescale API to update the cluster size for a given project.
 func (c *Client) ConfigCluster(project string, cluster *ClusterConfig) (taskid int, err error) {
-	payload := &jsonObject{
+	payload := &JSONObject{
 		"cluster": cluster.ConfigSettings(),
 	}
 
@@ -198,8 +198,10 @@ func (cluster *ClusterConfig) Update(other ClusterConfig) {
 	}
 }
 
-func (cluster *ClusterConfig) ProjectCreationSettings() jsonObject {
-	clusterSettings := jsonObject{
+// ProjectCreationSettings returns a JSON representation of the ClusterConfig as
+// expected by the API for the creation of a cluster.
+func (cluster *ClusterConfig) ProjectCreationSettings() JSONObject {
+	clusterSettings := JSONObject{
 		"infra_type": getInfraTypeEnumValue(cluster.InfraType),
 	}
 	if cluster.NodeSize != "" {
@@ -208,8 +210,10 @@ func (cluster *ClusterConfig) ProjectCreationSettings() jsonObject {
 	return clusterSettings
 }
 
-func (cluster *ClusterConfig) ConfigSettings() jsonObject {
-	clusterSettings := jsonObject{
+// ConfigSettings returns a JSON representation of the ClusterConfig as
+// expected by the API for the update of a cluster's settings.
+func (cluster *ClusterConfig) ConfigSettings() JSONObject {
+	clusterSettings := JSONObject{
 		"desired_size": cluster.Size,
 	}
 	return clusterSettings
