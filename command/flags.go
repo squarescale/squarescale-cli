@@ -78,16 +78,8 @@ func containerBuildServiceFlag(f *flag.FlagSet) *string {
 	return f.String("build-service", "", "Build service to use (internal|travis)")
 }
 
-func containerNoUpdateCmdFlag(f *flag.FlagSet) *bool {
-	return f.Bool("no-update", false, "Disable update command")
-}
-
 func containerNoRunCmdFlag(f *flag.FlagSet) *bool {
 	return f.Bool("no-command", false, "Disable command override")
-}
-
-func containerUpdateCmdFlag(f *flag.FlagSet) *string {
-	return f.String("update", "", "Update command to run for each build")
 }
 
 func containerRunCmdFlag(f *flag.FlagSet) *string {

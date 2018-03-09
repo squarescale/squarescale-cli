@@ -24,8 +24,6 @@ func (c *ContainerSetCommand) Run(args []string) int {
 	containerArg := containerFlag(c.flagSet)
 	nInstancesArg := containerInstancesFlag(c.flagSet)
 	buildServiceArg := containerBuildServiceFlag(c.flagSet)
-	updateCmdArg := containerUpdateCmdFlag(c.flagSet)
-	noUpdateCmdArg := containerNoUpdateCmdFlag(c.flagSet)
 	runCmdArg := containerRunCmdFlag(c.flagSet)
 	limitMemoryArg := containerLimitMemoryFlag(c.flagSet)
 	limitCPUArg := containerLimitCPUFlag(c.flagSet)
@@ -47,10 +45,6 @@ func (c *ContainerSetCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Container short name cannot be empty."))
 	}
 
-	if *noUpdateCmdArg && *updateCmdArg != "" {
-		return c.errorWithUsage(errors.New("Cannot specify an update command and disable it at the same time"))
-	}
-
 	if *noRunCmdArg && *runCmdArg != "" {
 		return c.errorWithUsage(errors.New("Cannot specify an override command and disable it at the same time"))
 	}
@@ -60,8 +54,8 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			c.Ui.Warn("Number of instances cannot be 0 or negative. This value won't be set.")
 		}
 
-		if *updateCmdArg == "" && *buildServiceArg == "" && *runCmdArg == "" && !*noRunCmdArg && !*noUpdateCmdArg && *limitCPUArg < 0 && *limitMemoryArg < 0 && *limitNetArg < 0 {
-			err := errors.New("Invalid values provided for instance number and update command.")
+		if *buildServiceArg == "" && *runCmdArg == "" && !*noRunCmdArg && *limitCPUArg < 0 && *limitMemoryArg < 0 && *limitNetArg < 0 {
+			err := errors.New("Invalid values provided for instance number.")
 			return c.errorWithUsage(err)
 		}
 	}
@@ -80,20 +74,6 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			c.info("Configure service with %d instances", *nInstancesArg)
 		}
 
-		if *updateCmdArg != "" {
-			c.info("Configure service with update command: %s", *updateCmdArg)
-			container.PreCommand, err = shellquote.Split(*updateCmdArg)
-			if err != nil {
-				return "", err
-			}
-			if container.PreCommand == nil {
-				container.PreCommand = []string{}
-			}
-		}
-		if *noUpdateCmdArg {
-			c.info("Configure service without update command")
-			container.PreCommand = []string{}
-		}
 		if *runCmdArg != "" {
 			c.info("Configure service with run command: %s", *runCmdArg)
 			container.RunCommand, err = shellquote.Split(*runCmdArg)
