@@ -11,7 +11,6 @@ import (
 type Container struct {
 	ID                   int                  `json:"id"`
 	ShortName            string               `json:"short_url"`
-	PreCommand           []string             `json:"pre_command"`
 	RunCommand           []string             `json:"run_command"`
 	Running              int                  `json:"running"`
 	Size                 int                  `json:"size"`
@@ -31,8 +30,7 @@ type Container struct {
 }
 
 type ContainerNomadStatus struct {
-	Service    JobNomadStatus `json:"service"`
-	PreCommand JobNomadStatus `json:"pre_command"`
+	Service JobNomadStatus `json:"service"`
 }
 
 type JobNomadStatus struct {
@@ -151,9 +149,6 @@ func (c *Client) GetContainerInfo(project, shortName string) (Container, error) 
 // ConfigContainer calls the API to update the number of instances and update command.
 func (c *Client) ConfigContainer(container Container) error {
 	cont := JSONObject{}
-	if container.PreCommand != nil {
-		cont["pre_command"] = container.PreCommand
-	}
 	if container.RunCommand != nil {
 		cont["run_command"] = container.RunCommand
 	}

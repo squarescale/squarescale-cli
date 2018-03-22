@@ -52,9 +52,6 @@ func (c *ContainerShowCommand) Run(args []string) int {
 				continue
 			}
 			st, _ := co.Status()
-			if co.NomadStatus.PreCommand.PlacementFailure {
-				st += ", pre-command error"
-			}
 			if co.NomadStatus.Service.PlacementFailure {
 				st += ", service error"
 			}
@@ -63,7 +60,6 @@ func (c *ContainerShowCommand) Run(args []string) int {
 			tbl += fmt.Sprintf("Name:\t%s\n", co.ShortName)
 			tbl += fmt.Sprintf("Status:\t%s\n", st)
 			tbl += fmt.Sprintf("Size:\t%d/%d\n", co.Running, co.Size)
-			tbl += fmt.Sprintf("Pre Command:\t%s\n", shellquote.Join(co.PreCommand...))
 			tbl += fmt.Sprintf("Run Command:\t%s\n", shellquote.Join(co.RunCommand...))
 			tbl += fmt.Sprintf("Web:\t%v\n", co.Web)
 			tbl += fmt.Sprintf("Web Port:\t%d\n", co.WebPort)
@@ -87,13 +83,6 @@ func (c *ContainerShowCommand) Run(args []string) int {
 			}
 
 			placementErrors := false
-			if co.NomadStatus.PreCommand.PlacementFailure {
-				placementErrors = true
-				msg += fmt.Sprintf("Pre Command Errors:\n")
-				for _, e := range co.NomadStatus.PreCommand.Errors("pre command") {
-					msg += fmt.Sprintf("  - %s\n", e)
-				}
-			}
 
 			if co.NomadStatus.Service.PlacementFailure {
 				placementErrors = true
