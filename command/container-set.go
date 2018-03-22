@@ -127,16 +127,13 @@ func (c *ContainerSetCommand) Help() string {
 usage: sqsc container set [options]
 
   Set container runtime parameters for a Squarescale project.
-  '-update' options is an update command which will be run at
-  each build for the specified container, eg "rake db:migrate".
   Containers are specified using the form '${USER}/${REPOSITORY}'
 
 Example:
   sqsc container set                \
-      --project="my-rails-project"  \
-      --container="my-name/my-repo" \
-      --instances=42                \
-      --update="rake db:migrate"
+      -project="my-rails-project"  \
+      -container="my-name/my-repo" \
+      -instances=42
 
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
