@@ -40,8 +40,7 @@ func GeneratePersonalToken(login, password string, prompt OneTimePasswordPrompt)
 		var req *http.Request
 		var res *http.Response
 		params := ghAuthorizationRequestParams{
-			Scopes: []string{"user"},
-			Note:   "Squarescale CLI",
+			Note: "Squarescale CLI",
 		}
 
 		if i > 1 {
