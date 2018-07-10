@@ -24,7 +24,7 @@ func (c *RepositoryAddCommand) Run(args []string) int {
 	project := projectFlag(c.flagSet)
 	buildService := buildServiceFlag(c.flagSet)
 	url := repoUrlFlag(c.flagSet)
-	instances := containerInstancesFlag(c.flagSet)
+	instances := repoOrImageInstancesFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -38,13 +38,8 @@ func (c *RepositoryAddCommand) Run(args []string) int {
 	}
 
 	if *instances <= 0 {
-		if *instances != -1 {
-			err := errors.New("Invalid values provided for instance number")
-			return c.errorWithUsage(err)
-		}
-		// default value, ignored
-		c.Ui.Warn("Number of instances cannot be 0 or negative. Ignored and using default value")
-		instances = nil
+		err := errors.New("Invalid value provided for instances count: it cannot be 0 or negative")
+		return c.errorWithUsage(err)
 	}
 
 	err := validateProjectName(*project)
@@ -62,8 +57,8 @@ func (c *RepositoryAddCommand) Run(args []string) int {
 
 	label := fmt.Sprintf("add repository '%s' to project '%s'", gitRemote, *project)
 	return c.runWithSpinner(label, endpoint.String(), func(client *squarescale.Client) (string, error) {
-		msg := fmt.Sprintf("Successfully added repository '%s' to project '%s'", gitRemote, *project)
-		res := client.AddRepository(*project, gitRemote, *buildService, instances)
+		msg := fmt.Sprintf("Successfully added repository '%s' to project '%s' (%v instance(s))", gitRemote, *project, *instances)
+		res := client.AddRepository(*project, gitRemote, *buildService, *instances)
 		time.Sleep(30 * time.Second)
 		return msg, res
 	})
