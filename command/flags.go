@@ -152,6 +152,10 @@ func projectNameArg(f *flag.FlagSet, arg int) (string, error) {
 	}
 }
 
+func repoOrImageInstancesFlag(f *flag.FlagSet) *int {
+	return f.Int("instances", 1, "Number of container instances at creation")
+}
+
 func validateProjectName(project string) error {
 	if project == "" {
 		return errors.New("Project name must be specified")
