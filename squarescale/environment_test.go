@@ -193,10 +193,14 @@ var _ = Describe("Environment", func() {
 			})
 
 			It("folds service variables", func() {
-				Expect(env.Services[0].Variables).To(ContainElement(&Variable{
+				svc, err := env.GetServiceGroup("wordpress")
+				Expect(err).To(BeNil())
+				Expect(svc.Variables).To(ContainElement(&Variable{
 					Key: "DB_NAME", Value: "dbwordpress", Predefined: true,
 				}))
-				Expect(env.Services[1].Variables).To(ContainElement(&Variable{
+				svc, err = env.GetServiceGroup("rabbitmq")
+				Expect(err).To(BeNil())
+				Expect(svc.Variables).To(ContainElement(&Variable{
 					Key: "DB_NAME", Value: "rabbit", Predefined: false,
 				}))
 			})
