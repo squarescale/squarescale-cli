@@ -20,13 +20,14 @@ type ProjectCreateCommand struct {
 // Run is part of cli.Command implementation.
 func (c *ProjectCreateCommand) Run(args []string) int {
 	// Parse flags
+	var nodeSize string
 	c.flagSet = newFlagSet(c, c.Ui)
 	alwaysYes := yesFlag(c.flagSet)
 	nowait := nowaitFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
 	wantedProjectName := projectNameFlag(c.flagSet)
 	c.flagSet.StringVar(&c.Cluster.InfraType, "infra-type", "high-availability", "Set the infrastructure configuration")
-	c.flagSet.StringVar(&c.Cluster.NodeSize, "node-size", "", "Set the cluster node size")
+	c.flagSet.StringVar(&nodeSize, "node-size", "", "Set the cluster node size")
 	c.flagSet.BoolVar(&c.DbDisable, "no-db", false, "Disable database creation")
 	c.flagSet.StringVar(&c.Db.Engine, "db-engine", "", "Select database engine")
 	c.flagSet.StringVar(&c.Db.Size, "db-size", "", "Select database size")
@@ -55,21 +56,15 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		var definitiveName string
 		var err error
 
-		if c.Cluster.NodeSize != "" {
+		if nodeSize != "" {
 			nodeSizes, err := client.GetClusterNodeSizes()
 			if err != nil {
 				return "", err
 			}
-			valid, err := nodeSizes.CheckSize(c.Cluster.NodeSize, c.Cluster.InfraType)
-			if err != nil {
-				return "", err
-			}
-			if !valid {
-				availableSizes, err := nodeSizes.ListSizes(c.Cluster.InfraType)
-				if err != nil {
-					return "", err
-				}
-				return "", fmt.Errorf("Cannot validate node size '%s'. Must be one of '%s'", c.Cluster.NodeSize, strings.Join(availableSizes, "', '"))
+			c.Cluster.NodeSize = nodeSizes.CheckSize(nodeSize, c.Cluster.InfraType)
+			if c.Cluster.NodeSize == "" {
+				availableSizes := nodeSizes.ListSizes(c.Cluster.InfraType)
+				return "", fmt.Errorf("Cannot validate node size '%s'. Must be one of:\n* %s", nodeSize, strings.Join(availableSizes, "\n* "))
 			}
 		} else if c.Cluster.InfraType == "single-node" {
 			c.Cluster.NodeSize = "dev"
