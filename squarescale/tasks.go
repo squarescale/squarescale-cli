@@ -145,7 +145,7 @@ func (c *Client) WaitTask(id int) (*Task, error) {
 			err := json.Unmarshal(ev.Event.Message, &msg)
 			task = msg.Task
 			if err != nil {
-				return nil, fmt.Errorf("Could not unmarshal JSON %s: %v", string(ev.Event.Message))
+				return nil, fmt.Errorf("Could not unmarshal JSON %s: %v", string(ev.Event.Message), err)
 			}
 		}
 	}

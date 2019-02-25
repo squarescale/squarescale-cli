@@ -2,7 +2,6 @@ package squarescale
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -11,8 +10,8 @@ import (
 // NodeSizes allow to display and validate client side the
 // node size the user wants
 type NodeSizes interface {
-	CheckSize(size, infraType string) (bool, error)
-	ListSizes(infraType string) ([]string, error)
+	CheckSize(size, infraType string) string
+	ListSizes(infraType string) []string
 	ListHuman() []string
 }
 
@@ -20,6 +19,7 @@ type nodeSizes struct {
 	SingleNode       nodeSizesWithAdditional `json:"single_node"`
 	HighAvailability nodeSizesWithAdditional `json:"high_availability"`
 	ByInfraType      map[string][]string
+	PriceList        nodeSizesPriceList `json:"price_list"`
 }
 
 type nodeSizesWithAdditional struct {
@@ -27,25 +27,65 @@ type nodeSizesWithAdditional struct {
 	Additional []string `json:"additional"`
 }
 
-func (ns *nodeSizes) CheckSize(size, infraType string) (bool, error) {
-	if ns.ByInfraType == nil {
-		return false, errors.New("Node sizes were not flattened before calling CheckSize")
-	}
-
-	for _, v := range ns.ByInfraType[infraType] {
-		if v == size {
-			return true, nil
-		}
-	}
-	return false, nil
+type nodeSizesPriceList struct {
+	Monthly struct {
+		NodeSize map[string]float64 `json:"node_size"`
+	} `json:"monthly"`
+	Hourly struct {
+		NodeSize map[string]float64 `json:"node_size"`
+	} `json:"hourly"`
+	Descriptions struct {
+		NodeSize map[string]string `json:"node_size"`
+	} `json:"descriptions"`
+	PublicNames struct {
+		NodeSize map[string]string `json:"node_size"`
+	} `json:"public_names"`
 }
 
-func (ns *nodeSizes) ListSizes(infraType string) ([]string, error) {
+type nodeSizesPriceListMonthly struct{}
+
+func (ns *nodeSizes) CheckSize(size, infraType string) string {
 	if ns.ByInfraType == nil {
-		return nil, errors.New("Node sizes were not flattened before calling ListSizes")
+		panic("Node sizes were not flattened before calling CheckSize")
 	}
 
-	return ns.ByInfraType[infraType], nil
+	allowedCodes := ns.ByInfraType[infraType]
+	sizeLower := strings.ToLower(size)
+
+	// Check size ids only if allowed
+	if AllowNodeSizeIds {
+		for _, code := range allowedCodes {
+			if code == size {
+				return code
+			}
+		}
+	}
+
+	// Check public name
+	for _, code := range allowedCodes {
+		if strings.ToLower(ns.PriceList.PublicNames.NodeSize[code]) == sizeLower {
+			return code
+		}
+	}
+
+	return ""
+}
+
+func (ns *nodeSizes) ListSizes(infraType string) []string {
+	if ns.ByInfraType == nil {
+		panic("Node sizes were not flattened before calling ListSizes")
+	}
+
+	var res []string
+
+	for _, code := range ns.ByInfraType[infraType] {
+		res = append(res, fmt.Sprintf("[$%6.2f/month] '%s': %s",
+			ns.PriceList.Monthly.NodeSize[code],
+			ns.PriceList.PublicNames.NodeSize[code],
+			ns.PriceList.Descriptions.NodeSize[code]))
+	}
+
+	return res
 }
 
 func (ns *nodeSizes) ListHuman() []string {
@@ -80,12 +120,12 @@ func (ns *nodeSizes) flattenSizes() {
 
 type emptyNodeSizes struct{}
 
-func (ns *emptyNodeSizes) CheckSize(size, infraType string) (bool, error) {
-	return false, nil
+func (ns *emptyNodeSizes) CheckSize(size, infraType string) string {
+	return ""
 }
 
-func (ns *emptyNodeSizes) ListSizes(infraType string) ([]string, error) {
-	return []string{}, nil
+func (ns *emptyNodeSizes) ListSizes(infraType string) []string {
+	return []string{}
 }
 
 func (ns *emptyNodeSizes) ListHuman() []string {
@@ -128,6 +168,20 @@ func (c *Client) GetClusterNodeSizes() (NodeSizes, error) {
 	}
 
 	var sizes nodeSizes
+
+	err = json.Unmarshal(body, &sizes)
+	if err != nil {
+		return nil, err
+	}
+
+	code, body, err = c.get("/price_list")
+	if err != nil {
+		return nil, err
+	}
+
+	if code != http.StatusOK {
+		return nil, unexpectedHTTPError(code, body)
+	}
 
 	err = json.Unmarshal(body, &sizes)
 	if err != nil {
