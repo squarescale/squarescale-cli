@@ -56,20 +56,22 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		var definitiveName string
 		var err error
 
-		if nodeSize != "" {
-			nodeSizes, err := client.GetClusterNodeSizes()
-			if err != nil {
-				return "", err
+		if nodeSize == "" {
+			if c.Cluster.InfraType == "single-node" {
+				nodeSize = "dev"
+			} else {
+				nodeSize = "small"
 			}
-			c.Cluster.NodeSize = nodeSizes.CheckSize(nodeSize, c.Cluster.InfraType)
-			if c.Cluster.NodeSize == "" {
-				availableSizes := nodeSizes.ListSizes(c.Cluster.InfraType)
-				return "", fmt.Errorf("Cannot validate node size '%s'. Must be one of:\n* %s", nodeSize, strings.Join(availableSizes, "\n* "))
-			}
-		} else if c.Cluster.InfraType == "single-node" {
-			c.Cluster.NodeSize = "dev"
-		} else {
-			c.Cluster.NodeSize = "small"
+		}
+
+		nodeSizes, err := client.GetClusterNodeSizes()
+		if err != nil {
+			return "", err
+		}
+		c.Cluster.NodeSize = nodeSizes.CheckSize(nodeSize, c.Cluster.InfraType)
+		if c.Cluster.NodeSize == "" {
+			availableSizes := nodeSizes.ListSizes(c.Cluster.InfraType)
+			return "", fmt.Errorf("Cannot validate node size '%s'. Must be one of:\n* %s", nodeSize, strings.Join(availableSizes, "\n* "))
 		}
 
 		if c.Db.Engine != "" {
