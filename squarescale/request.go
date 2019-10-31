@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"mime"
 	"net/http"
 	"strings"
 
@@ -87,8 +88,10 @@ func (c *Client) request(method, path string, payload *JSONObject) (int, []byte,
 		return 0, []byte{}, err
 	}
 
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
+	ct := mime.TypeByExtension(".json")
+
+	req.Header.Set("Content-Type", ct)
+	req.Header.Set("Accept", ct)
 	req.Header.Set("Authorization", "bearer "+c.token)
 	req.Header.Set("API-Version", supportedAPI)
 
@@ -103,7 +106,14 @@ func (c *Client) request(method, path string, payload *JSONObject) (int, []byte,
 		return 0, []byte{}, err
 	}
 
-	return res.StatusCode, bytes, nil
+	if !strings.Contains(res.Header.Get("Content-Type"), ct) {
+		err = fmt.Errorf(
+			"Invalid response content type, got %q instead of %q.\nDo you use the right value for -endpoint=%s ?",
+			res.Header.Get("Content-Type"), ct, c.endpoint,
+		)
+	}
+
+	return res.StatusCode, bytes, err
 }
 
 func unexpectedHTTPError(code int, body []byte) error {
