@@ -7,10 +7,11 @@ import (
 )
 
 // AddRepository asks the Squarescale service to attach the provided repository to the project.
-func (c *Client) AddRepository(project, repoURL, buildService string, instances int) error {
+func (c *Client) AddRepository(project, repoURL, branch, buildService string, instances int) error {
 	payload := JSONObject{
 		"repository": JSONObject{
-			"url": repoURL,
+			"url":    repoURL,
+			"branch": branch,
 		},
 		"container": JSONObject{
 			"build_service": buildService,

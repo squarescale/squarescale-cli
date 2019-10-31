@@ -25,6 +25,8 @@ func (c *RepositoryAddCommand) Run(args []string) int {
 	buildService := buildServiceFlag(c.flagSet)
 	url := repoUrlFlag(c.flagSet)
 	instances := repoOrImageInstancesFlag(c.flagSet)
+	branch := c.flagSet.String("branch", "master", "Git branch")
+
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -58,7 +60,7 @@ func (c *RepositoryAddCommand) Run(args []string) int {
 	label := fmt.Sprintf("add repository '%s' to project '%s'", gitRemote, *project)
 	return c.runWithSpinner(label, endpoint.String(), func(client *squarescale.Client) (string, error) {
 		msg := fmt.Sprintf("Successfully added repository '%s' to project '%s' (%v instance(s))", gitRemote, *project, *instances)
-		res := client.AddRepository(*project, gitRemote, *buildService, *instances)
+		res := client.AddRepository(*project, gitRemote, *branch, *buildService, *instances)
 		time.Sleep(30 * time.Second)
 		return msg, res
 	})
