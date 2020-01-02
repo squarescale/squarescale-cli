@@ -11,8 +11,8 @@ import (
 	"net/http"
 	"strings"
 
-	actioncable "github.com/bgentry/actioncable-go"
 	multierr "github.com/hashicorp/go-multierror"
+	actioncable "github.com/squarescale/actioncable-go"
 )
 
 const supportedAPI string = "1"
