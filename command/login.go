@@ -3,10 +3,9 @@ package command
 import (
 	"flag"
 	"fmt"
+	"os"
 	"strings"
 
-	"github.com/squarescale/squarescale-cli/github"
-	"github.com/squarescale/squarescale-cli/squarescale"
 	"github.com/squarescale/squarescale-cli/tokenstore"
 )
 
@@ -29,40 +28,29 @@ func (c *LoginCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	// Retrieve credentials from user input
-	login, pw, err := c.askForCredentials()
-	if err != nil {
-		return c.error(err)
-	}
-
-	oneTimePW, ghToken, ghTokenURL, err := github.GeneratePersonalToken(login, pw, c.Ui)
-	if err != nil {
-		return c.error(err)
-	}
-
-	c.Ui.Info("Forward GitHub authorization to Squarescale")
-
-	res := 0
-	sqscToken, err := squarescale.ObtainTokenFromGitHub(endpoint.String(), ghToken)
-	if err != nil {
-		res = c.error(err)
-
-	} else {
-		err = tokenstore.SaveToken(endpoint.String(), sqscToken)
+	var apiKey string
+	var err error
+	apiKey = os.Getenv("SQSC_API_KEY")
+	if apiKey == "" {
+		// Retrieve credentials from user input
+		apiKey, err = c.askForCredentials()
 		if err != nil {
-			res = c.error(err)
-
-		} else {
-			c.Ui.Info(fmt.Sprintf("Successfully authenticated as user %s", login))
+			return c.error(err)
 		}
 	}
 
-	err = github.RevokePersonalToken(ghTokenURL, login, pw, oneTimePW)
-	if err == nil {
-		c.Ui.Info("Revoke temporary GitHub token")
+	err = tokenstore.SaveToken(endpoint.String(), apiKey)
+	if err != nil {
+		return c.error(err)
+	} else {
+		_, err = c.ensureLogin(endpoint.String())
+		if err != nil {
+			return c.error(err)
+		} else {
+			c.Ui.Info(fmt.Sprintf("Successfully authenticated !"))
+			return 0
+		}
 	}
-
-	return res
 }
 
 // Synopsis is part of cli.Command implementation.
@@ -75,22 +63,16 @@ func (c *LoginCommand) Help() string {
 	helpText := `
 usage: sqsc login [options]
 
-  Logs the user in Squarescale services. Uses GitHub credentials to register.
+  Logs the user in Squarescale services.
 
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
 
-func (c *LoginCommand) askForCredentials() (string, string, error) {
-	login, err := c.Ui.Ask("GitHub login:")
+func (c *LoginCommand) askForCredentials() (string, error) {
+	apiKey, err := c.Ui.AskSecret("API key (typing will be hidden):")
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
-
-	pw, err := c.Ui.AskSecret("GitHub password (typing will be hidden):")
-	if err != nil {
-		return "", "", err
-	}
-
-	return login, pw, err
+	return apiKey, err
 }
