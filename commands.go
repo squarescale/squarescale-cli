@@ -149,19 +149,6 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
-		"repository": func() (cli.Command, error) {
-			return &command.RepositoryCommand{}, nil
-		},
-		"repository add": func() (cli.Command, error) {
-			return &command.RepositoryAddCommand{
-				Meta: *meta,
-			}, nil
-		},
-		"repository list": func() (cli.Command, error) {
-			return &command.RepositoryListCommand{
-				Meta: *meta,
-			}, nil
-		},
 		"logs": func() (cli.Command, error) {
 			return &command.LogsCommand{
 				Meta: *meta,
