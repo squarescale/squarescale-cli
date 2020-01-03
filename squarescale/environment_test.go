@@ -2,9 +2,10 @@ package squarescale_test
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/onsi/gomega/ghttp"
 	. "github.com/squarescale/squarescale-cli/squarescale"
-	"net/http"
 )
 
 var _ = Describe("Environment", func() {
@@ -52,6 +53,7 @@ var _ = Describe("Environment", func() {
 			server = ghttp.NewServer()
 			client = NewClient(server.URL(), "token")
 			project = "whatever"
+			statusCode = 200
 
 			server.AppendHandlers(ghttp.CombineHandlers(
 				ghttp.VerifyRequest("GET", "/projects/"+project+"/environment"),
@@ -558,6 +560,7 @@ var _ = Describe("VariableGroup", func() {
 			server = ghttp.NewServer()
 			client = NewClient(server.URL(), "token")
 			project = "whatever"
+			statusCode = 200
 
 			environment = &Environment{
 				Project: &VariableGroup{
