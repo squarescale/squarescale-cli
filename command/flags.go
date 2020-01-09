@@ -72,6 +72,10 @@ func portFlag(f *flag.FlagSet) *int {
 	return f.Int("port", -1, "Port number")
 }
 
+func exprFlag(f *flag.FlagSet) *string {
+	return f.String("expr", "", "custom domain expression")
+}
+
 func containerInstancesFlag(f *flag.FlagSet) *int {
 	return f.Int("instances", -1, "Number of container instances")
 }

@@ -25,6 +25,7 @@ func (c *LBSetCommand) Run(args []string) int {
 	project := projectFlag(c.flagSet)
 	containerArg := containerFlag(c.flagSet)
 	portArg := portFlag(c.flagSet)
+	exprArg := exprFlag(c.flagSet)
 	disabledArg := disabledFlag(c.flagSet, "Disable load balancer")
 	httpsArg := httpsFlag(c.flagSet)
 	certArg := certFlag(c.flagSet)
@@ -110,7 +111,7 @@ func (c *LBSetCommand) Run(args []string) int {
 			container.WebPort = *portArg
 		}
 
-		taskId, err = client.ConfigLB(*project, container.ID, container.WebPort, *httpsArg, cert, certChain, secretKey)
+		taskId, err = client.ConfigLB(*project, container.ID, container.WebPort, *exprArg, *httpsArg, cert, certChain, secretKey)
 		msg := fmt.Sprintf(
 			"[#%d] Successfully configured load balancer (enabled = '%v', container = '%s', port = '%d') for project '%s'",
 			taskId, true, *containerArg, container.WebPort, *project)
@@ -148,6 +149,8 @@ usage: sqsc lb set [options]
   Configure the load balancer associated to a Squarescale project.
   "--container" and "--port" flags must be specified together.
 
+  If you want access the service through a CNAME dns entry, you have
+  to specify a regex expression that match this entry with "--expr".
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

@@ -23,7 +23,7 @@ func (c *Client) DisableLB(project string) (int, error) {
 }
 
 // ConfigLB sets the load balancer configuration for a given project.
-func (c *Client) ConfigLB(project string, container, port int, https bool, cert string, cert_chain []string, secret_key string) (int, error) {
+func (c *Client) ConfigLB(project string, container, port int, exprArg string, https bool, cert string, cert_chain []string, secret_key string) (int, error) {
 	if cert_chain == nil {
 		cert_chain = []string{}
 	}
@@ -38,7 +38,8 @@ func (c *Client) ConfigLB(project string, container, port int, https bool, cert 
 		},
 		"containers": JSONObject{
 			strconv.Itoa(container): JSONObject{
-				"web_port": port,
+				"web_port":                 port,
+				"custom_domain_expression": exprArg,
 			},
 		},
 		"project": JSONObject{

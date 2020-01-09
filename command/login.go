@@ -30,7 +30,7 @@ func (c *LoginCommand) Run(args []string) int {
 
 	var apiKey string
 	var err error
-	apiKey = os.Getenv("SQSC_API_KEY")
+	apiKey = os.Getenv("SQSC_TOKEN")
 	if apiKey == "" {
 		// Retrieve credentials from user input
 		apiKey, err = c.askForCredentials()
