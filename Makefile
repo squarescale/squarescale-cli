@@ -18,26 +18,27 @@ build: deps ## Build CLI (./sqsc binary)
 deps: ## Install dependencies inside $GOPATH
 	go get github.com/onsi/ginkgo/ginkgo
 
-build-docker: build
-	CGO_ENABLED=0 $(GO_CMD) -o sqsc-docker
-	docker build -t sqsc-cli .
-
 docker-linux-amd64: ## Compile for linux-amd64 in a container
 	$(DOCKER_CMD) $(MOUNT_FLAGS) -e GOOS=linux -e GOARCH=amd64 golang:1.13 $(GO_CMD) -o sqsc-linux-amd64
 
 docker-darwin-amd64: ## Compile for darwin-amd64 in a container
 	$(DOCKER_CMD) $(MOUNT_FLAGS) -e GOOS=darwin -e GOARCH=amd64 golang:1.13 $(GO_CMD) -o sqsc-darwin-amd64
 
-generate: docker-linux-amd64 docker-darwin-amd64
+docker-alpine-amd64: ## Compile for linux-amd64 alpine in a container
+	$(DOCKER_CMD) $(MOUNT_FLAGS) -e CGO_ENABLED=0 -e GOOS=darwin -e GOARCH=amd64 golang:1.13 $(GO_CMD) -o sqsc-alpine-amd64
+
+generate: docker-linux-amd64 docker-darwin-amd64 docker-alpine-amd64
 
 publish-staging: ## Publish existing generated build to github draft and s3 as staging
 	python3 publish.py
 	aws s3 cp sqsc-linux-amd64 s3://cli-releases/sqsc-linux-amd64-staging-latest --acl public-read
 	aws s3 cp sqsc-darwin-amd64 s3://cli-releases/sqsc-darwin-amd64-staging-latest --acl public-read
+	aws s3 cp sqsc-alpine-amd64 s3://cli-releases/sqsc-alpine-amd64-staging-latest --acl public-read
 
 publish: ## Publish existing generated build
 	aws s3 cp sqsc-linux-amd64 s3://cli-releases/sqsc-linux-amd64-latest --acl public-read
 	aws s3 cp sqsc-darwin-amd64 s3://cli-releases/sqsc-darwin-amd64-latest --acl public-read
+	aws s3 cp sqsc-alpine-amd64 s3://cli-releases/sqsc-alpine-amd64-latest --acl public-read
 
 clean: ## Clean repository
 	go clean && rm -f sqsc sqsc-*
