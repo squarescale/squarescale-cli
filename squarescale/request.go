@@ -106,8 +106,6 @@ func (c *Client) request(method, path string, payload *JSONObject) (int, []byte,
 		return 0, []byte{}, err
 	}
 
-	//fmt.Println(string(bytes))
-
 	if !strings.Contains(res.Header.Get("Content-Type"), ct) {
 		err = fmt.Errorf(
 			"Invalid response content type, got %q instead of %q.\nDo you use the right value for -endpoint=%s ?",
