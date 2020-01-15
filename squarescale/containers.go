@@ -16,14 +16,11 @@ type Container struct {
 	Size                 int                  `json:"size"`
 	Web                  bool                 `json:"web"`
 	WebPort              int                  `json:"web_port"`
-	Type                 string               `json:"type"`
-	BuildStatus          string               `json:"build_status"`
 	BuildOutOfDate       bool                 `json:"build_out_of_date"`
 	Scheduled            bool                 `json:"scheduled"`
 	RepositoryConfigured bool                 `json:"repository_configured"`
 	PreCommandStatus     string               `json:"pre_command_status"`
 	RefreshCallbacks     []string             `json:"refresh_callbacks"`
-	BuildCallbacks       []string             `json:"build_callbacks"`
 	BuildService         string               `json:"build_service"`
 	Limits               ContainerLimits      `json:"limits"`
 	NomadStatus          ContainerNomadStatus `json:"nomad_status"`
@@ -82,28 +79,6 @@ type ContainerLimits struct {
 	CPU    int `json:"cpu"`
 	IOPS   int `json:"iops"`
 	Net    int `json:"net"`
-}
-
-func (c *Container) Status() (string, string) {
-	if !c.RepositoryConfigured {
-		return "no_ci", "Travis not configured"
-	} else if c.BuildStatus == "no_build" {
-		return "no_build", "Build not started"
-	} else if c.BuildStatus == "error" {
-		return "build_error", "Build error"
-	} else if c.BuildStatus == "running" {
-		return "build_progress", "Build running"
-	} else if c.BuildOutOfDate {
-		return "build_too_old", "Build too old"
-	} else if !c.Scheduled {
-		return "not_scheduled", "Job not scheduled yet"
-	} else if c.PreCommandStatus == "error" {
-		return "update_error", "Update command failed"
-	} else if c.PreCommandStatus != "ok" {
-		return "update_progress", "Update command in progress"
-	} else {
-		return "running", "Running"
-	}
 }
 
 // GetContainers gets all the containers attached to a Project

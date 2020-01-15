@@ -21,7 +21,6 @@ func (c *ContainerShowCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	projectArg := projectFlag(c.flagSet)
 	containerArg := filterNameFlag(c.flagSet)
-	typeArg := filterTypeFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -48,17 +47,8 @@ func (c *ContainerShowCommand) Run(args []string) int {
 			if *containerArg != "" && *containerArg != co.ShortName {
 				continue
 			}
-			if *typeArg != "" && *typeArg != co.Type {
-				continue
-			}
-			st, _ := co.Status()
-			if co.NomadStatus.Service.PlacementFailure {
-				st += ", service error"
-			}
 			tbl := ""
-			tbl += fmt.Sprintf("Type:\t%s\n", co.Type)
 			tbl += fmt.Sprintf("Name:\t%s\n", co.ShortName)
-			tbl += fmt.Sprintf("Status:\t%s\n", st)
 			tbl += fmt.Sprintf("Size:\t%d/%d\n", co.Running, co.Size)
 			tbl += fmt.Sprintf("Run Command:\t%s\n", shellquote.Join(co.RunCommand...))
 			tbl += fmt.Sprintf("Web:\t%v\n", co.Web)
@@ -72,12 +62,6 @@ func (c *ContainerShowCommand) Run(args []string) int {
 			if len(co.RefreshCallbacks) > 0 {
 				msg += fmt.Sprintf("Refresh callbacks:\n")
 				for _, url := range co.RefreshCallbacks {
-					msg += fmt.Sprintf("  - %s\n", url)
-				}
-			}
-			if len(co.BuildCallbacks) > 0 {
-				msg += fmt.Sprintf("Rebuild callbacks:\n")
-				for _, url := range co.BuildCallbacks {
 					msg += fmt.Sprintf("  - %s\n", url)
 				}
 			}

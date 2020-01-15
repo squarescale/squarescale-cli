@@ -38,16 +38,12 @@ func (c *ContainerListCommand) Run(args []string) int {
 			return "", err
 		}
 
-		var msg string = "Type\tName\tStatus\tSize\tWeb\tPort\n"
+		var msg string = "Name\tSize\tWeb\tPort\n"
 		for _, c := range containers {
 			if *containerArg != "" && *containerArg != c.ShortName {
 				continue
 			}
-			st, _ := c.Status()
-			if c.NomadStatus.Service.PlacementFailure {
-				st += " (error)"
-			}
-			msg += fmt.Sprintf("%s\t%s\t%s\t%d/%d\t%v\t%d\n", c.Type, c.ShortName, st, c.Running, c.Size, c.Web, c.WebPort)
+			msg += fmt.Sprintf("%s\t%d/%d\t%v\t%d\n", c.ShortName, c.Running, c.Size, c.Web, c.WebPort)
 		}
 
 		if len(containers) == 0 {
