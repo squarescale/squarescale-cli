@@ -24,7 +24,7 @@ after_success:
       false-master)
         make publish-staging
         ;;
-      false-production)
+      false-env-production)
         make publish
         ;;
     esac
