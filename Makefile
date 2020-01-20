@@ -25,7 +25,7 @@ docker-darwin-amd64: ## Compile for darwin-amd64 in a container
 	$(DOCKER_CMD) $(MOUNT_FLAGS) -e GOOS=darwin -e GOARCH=amd64 golang:1.13 $(GO_CMD) -o sqsc-darwin-amd64
 
 docker-alpine-amd64: ## Compile for linux-amd64 alpine in a container
-	$(DOCKER_CMD) $(MOUNT_FLAGS) -e CGO_ENABLED=0 -e GOOS=darwin -e GOARCH=amd64 golang:1.13 $(GO_CMD) -o sqsc-alpine-amd64
+	$(DOCKER_CMD) $(MOUNT_FLAGS) -e CGO_ENABLED=0 -e GOOS=amd64 -e GOARCH=amd64 golang:1.13 $(GO_CMD) -o sqsc-alpine-amd64
 
 generate: docker-linux-amd64 docker-darwin-amd64 docker-alpine-amd64
 
