@@ -20,6 +20,7 @@ func (c *ImageAddCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	project := projectFlag(c.flagSet)
+	serviceName := c.flagSet.String("servicename", "", "service name")
 	image := c.flagSet.String("name", "", "Docker image name")
 	username := c.flagSet.String("username", "", "Username")
 	password := c.flagSet.String("password", "", "Password")
@@ -39,7 +40,7 @@ func (c *ImageAddCommand) Run(args []string) int {
 
 	return c.runWithSpinner("add docker image", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		msg := fmt.Sprintf("Successfully added docker image '%s' to project '%s' (%v instance(s))", *image, *project, *instances)
-		return msg, client.AddImage(*project, *image, *username, *password, *instances)
+		return msg, client.AddImage(*project, *image, *username, *password, *instances, *serviceName)
 	})
 }
 
