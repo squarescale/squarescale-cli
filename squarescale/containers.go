@@ -11,6 +11,7 @@ import (
 type Container struct {
 	ID                   int                  `json:"id"`
 	ShortName            string               `json:"short_url"`
+	Name                 string               `json:"name"`
 	RunCommand           []string             `json:"run_command"`
 	Running              int                  `json:"running"`
 	Size                 int                  `json:"size"`
@@ -113,7 +114,7 @@ func (c *Client) GetContainerInfo(project, shortName string) (Container, error) 
 	}
 
 	for _, container := range containers {
-		if container.ShortName == shortName {
+		if container.Name == shortName {
 			return container, nil
 		}
 	}
