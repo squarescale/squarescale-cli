@@ -48,7 +48,7 @@ func (c *ContainerShowCommand) Run(args []string) int {
 				continue
 			}
 			tbl := ""
-			tbl += fmt.Sprintf("Name:\t%s\n", co.ShortName)
+			tbl += fmt.Sprintf("Name:\t%s\n", co.Name)
 			tbl += fmt.Sprintf("Size:\t%d/%d\n", co.Running, co.Size)
 			tbl += fmt.Sprintf("Run Command:\t%s\n", shellquote.Join(co.RunCommand...))
 			tbl += fmt.Sprintf("Web:\t%v\n", co.Web)

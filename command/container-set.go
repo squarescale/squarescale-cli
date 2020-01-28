@@ -42,7 +42,7 @@ func (c *ContainerSetCommand) Run(args []string) int {
 	}
 
 	if *containerArg == "" {
-		return c.errorWithUsage(errors.New("Container short name cannot be empty."))
+		return c.errorWithUsage(errors.New("Container name cannot be empty."))
 	}
 
 	if *noRunCmdArg && *runCmdArg != "" {

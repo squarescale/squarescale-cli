@@ -106,20 +106,20 @@ func (c *Client) GetContainers(project string) ([]Container, error) {
 	return containersByID, nil
 }
 
-// GetContainerInfo gets the container of a project based on its short name.
-func (c *Client) GetContainerInfo(project, shortName string) (Container, error) {
+// GetContainerInfo gets the container of a project based on its name.
+func (c *Client) GetContainerInfo(project, name string) (Container, error) {
 	containers, err := c.GetContainers(project)
 	if err != nil {
 		return Container{}, err
 	}
 
 	for _, container := range containers {
-		if container.Name == shortName {
+		if container.Name == name {
 			return container, nil
 		}
 	}
 
-	return Container{}, fmt.Errorf("Container '%s' not found for project '%s'", shortName, project)
+	return Container{}, fmt.Errorf("Container '%s' not found for project '%s'", name, project)
 }
 
 // ConfigContainer calls the API to update the number of instances and update command.

@@ -43,7 +43,7 @@ func (c *ContainerListCommand) Run(args []string) int {
 			if *containerArg != "" && *containerArg != c.ShortName {
 				continue
 			}
-			msg += fmt.Sprintf("%s\t%d/%d\t%v\t%d\n", c.ShortName, c.Running, c.Size, c.Web, c.WebPort)
+			msg += fmt.Sprintf("%s\t%d/%d\t%v\t%d\n", c.Name, c.Running, c.Size, c.Web, c.WebPort)
 		}
 
 		if len(containers) == 0 {
