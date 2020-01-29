@@ -32,10 +32,14 @@ func (c *LoginCommand) Run(args []string) int {
 	var err error
 	apiKey = os.Getenv("SQSC_TOKEN")
 	if apiKey == "" {
-		// Retrieve credentials from user input
-		apiKey, err = c.askForCredentials()
-		if err != nil {
-			return c.error(err)
+		// Retrieve credentials from previous session (token storage)
+		apiKey, err = tokenstore.GetToken(endpoint.String())
+		if err != nil || apiKey == "" {
+			// Retrieve credentials from user input
+			apiKey, err = c.askForCredentials()
+			if err != nil {
+				return c.error(err)
+			}
 		}
 	}
 
