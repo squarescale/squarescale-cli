@@ -12,6 +12,7 @@ require (
 	github.com/hashicorp/errwrap v0.0.0-20141028054710-7554cd9344ce
 	github.com/hashicorp/go-multierror v0.0.0-20161216184304-ed905158d874
 	github.com/jpillora/backoff v0.0.0-20170222002228-06c7a16c845d
+	github.com/jpillora/go-mime v0.0.0-20150326152935-4e683937836d
 	github.com/kballard/go-shellquote v0.0.0-20150810074751-d8ec1a69a250
 	github.com/mattn/go-colorable v0.0.7-0.20160930000958-c0ff2b41c8d7
 	github.com/mattn/go-isatty v0.0.0-20160806122752-66b8e73f3f5c

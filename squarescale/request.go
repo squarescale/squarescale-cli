@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"mime"
 	"net/http"
 	"strings"
 
+	mime "github.com/jpillora/go-mime"
 	multierr "github.com/hashicorp/go-multierror"
 	actioncable "github.com/squarescale/actioncable-go"
 )
