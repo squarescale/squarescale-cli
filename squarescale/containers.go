@@ -5,7 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 )
+
+type ContainerEnv struct {
+	Key        string `json:"key"`
+	Value      string `json:"value"`
+	Predefined bool   `json:"predefined"`
+}
 
 // Container describes a project container as returned by the Squarescale API
 type Container struct {
@@ -25,6 +32,34 @@ type Container struct {
 	BuildService         string               `json:"build_service"`
 	Limits               ContainerLimits      `json:"limits"`
 	NomadStatus          ContainerNomadStatus `json:"nomad_status"`
+	CustomEnv            []ContainerEnv       `json:"custom_environment"`
+}
+
+func (c *Container) SetEnv(path string) error {
+
+	var env map[string]string
+
+	file, err := os.Open(path)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Some error happened when reading env file : %s", err))
+	}
+
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&env)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Some error happened when unmarshall env file : %s", err))
+	}
+
+	c.CustomEnv = make([]ContainerEnv, len(env), len(env))
+	i := 0
+
+	for k, v := range env {
+		c.CustomEnv[i] = ContainerEnv{Key: k, Value: v}
+		i++
+	}
+	return nil
 }
 
 type ContainerNomadStatus struct {
@@ -148,6 +183,9 @@ func (c *Client) ConfigContainer(container Container) error {
 		limits["net"] = container.Limits.Net
 	}
 	cont["limits"] = limits
+	if container.CustomEnv != nil {
+		cont["custom_environment"] = container.CustomEnv
+	}
 
 	payload := &JSONObject{"container": cont}
 	code, body, err := c.put(fmt.Sprintf("/containers/%d", container.ID), payload)

@@ -140,6 +140,10 @@ func nowaitFlag(f *flag.FlagSet) *bool {
 	return f.Bool("nowait", false, "Don't wait for operation to complete")
 }
 
+func envFileFlag(f *flag.FlagSet) *string {
+	return f.String("env", "", "json file with all env variable")
+}
+
 func containerNameArg(f *flag.FlagSet, arg int) (string, error) {
 	value := f.Arg(arg)
 	if value == "" {

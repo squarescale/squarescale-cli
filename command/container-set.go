@@ -29,6 +29,7 @@ func (c *ContainerSetCommand) Run(args []string) int {
 	limitCPUArg := containerLimitCPUFlag(c.flagSet)
 	limitNetArg := containerLimitNetFlag(c.flagSet)
 	noRunCmdArg := containerNoRunCmdFlag(c.flagSet)
+	envCmdArg := envFileFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -106,6 +107,13 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			c.info("Configure service with network bandwidth limit of %d Mbps", *limitNetArg)
 			container.Limits.Net = *limitNetArg
 		}
+		if *envCmdArg != "" {
+			c.info("Configure service with some env")
+			err := container.SetEnv(*envCmdArg)
+			if err != nil {
+				c.error(err)
+			}
+		}
 
 		msg := fmt.Sprintf(
 			"Successfully configured container '%s' for project '%s'",
@@ -127,13 +135,14 @@ func (c *ContainerSetCommand) Help() string {
 usage: sqsc container set [options]
 
   Set container runtime parameters for a Squarescale project.
-  Containers are specified using the form '${USER}/${REPOSITORY}'
+  Containers are specified using their given name.
 
 Example:
   sqsc container set                \
-      -project="my-rails-project"  \
-      -container="my-name/my-repo" \
-      -instances=42
+      -project="my-rails-project"   \
+      -container="my-name/my-repo"  \
+      -instances=42                 \
+      -e env.json
 
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
