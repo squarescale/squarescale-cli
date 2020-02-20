@@ -24,5 +24,6 @@ require (
 	github.com/sirupsen/logrus v0.11.6-0.20170515105910-5e5dc898656f
 	github.com/squarescale/actioncable-go v0.0.0-20170317113929-64a1c46f363e
 	github.com/squarescale/go-netrc v0.0.0-20160921100341-49f67159ae13
+	github.com/squarescale/logger v0.1.0
 	golang.org/x/sys v0.0.0-20180909124046-d0be0721c37e
 )

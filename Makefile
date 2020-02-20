@@ -30,7 +30,6 @@ docker-alpine-amd64: ## Compile for linux-amd64 alpine in a container
 generate: docker-linux-amd64 docker-darwin-amd64 docker-alpine-amd64
 
 publish-staging: ## Publish existing generated build to github draft and s3 as staging
-	python3 publish.py
 	aws s3 cp sqsc-linux-amd64 s3://cli-releases/sqsc-linux-amd64-staging-latest --acl public-read
 	aws s3 cp sqsc-darwin-amd64 s3://cli-releases/sqsc-darwin-amd64-staging-latest --acl public-read
 	aws s3 cp sqsc-alpine-amd64 s3://cli-releases/sqsc-alpine-amd64-staging-latest --acl public-read

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/squarescale/logger"
 )
 
 const (
@@ -30,6 +32,10 @@ type Task struct {
 	UpdatedAt     string          `json:"updated_at"`
 	Hold          bool            `json:"hold"`
 	CableToken    string          `json:"table_token"`
+}
+
+func (t Task) String() string {
+	return fmt.Sprintf("task of type %s for project %d with id: %d and status %s", t.TaskType, t.ProjectId, t.Id, t.Status)
 }
 
 func (t *Task) CreatedTime() (time.Time, error) {
@@ -112,43 +118,13 @@ func (c *Client) WaitTask(id int) (*Task, error) {
 		return &task, err
 	}
 
-	for task.Status == StatusDone || task.Status == StatusCancelled {
-		return &task, nil
+	logger.Info.Println("wait for task : ", task)
+
+	for task.Status != StatusDone && task.Status != StatusCancelled && err == nil {
+		time.Sleep(5 * time.Second)
+		task, err = c.GetTask(id)
+		logger.Debug.Println("task status update: ", task)
 	}
 
-	var subscription struct {
-		Channel string `json:"channel"`
-		TaskId  int    `json:"task_id"`
-	}
-
-	subscription.Channel = "TaskChannel"
-	subscription.TaskId = id
-	subsc, err := json.Marshal(subscription)
-	if err != nil {
-		return nil, err
-	}
-
-	ch, err := c.cableClient().SubscribeWith(subsc)
-	if err != nil {
-		return nil, err
-	}
-	defer c.cableClient().Unsubscribe("TaskChannel")
-
-	for task.Status != StatusDone && task.Status != StatusCancelled {
-		ev := <-ch
-		if ev.Err != nil {
-			return nil, err
-		} else if len(ev.Event.Message) > 0 {
-			var msg struct {
-				Task Task `json:"task"`
-			}
-			err := json.Unmarshal(ev.Event.Message, &msg)
-			task = msg.Task
-			if err != nil {
-				return nil, fmt.Errorf("Could not unmarshal JSON %s: %v", string(ev.Event.Message), err)
-			}
-		}
-	}
-
-	return &task, nil
+	return &task, err
 }

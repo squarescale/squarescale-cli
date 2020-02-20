@@ -51,6 +51,8 @@ github.com/squarescale/actioncable-go v0.0.0-20170317113929-64a1c46f363e h1:4nDt
 github.com/squarescale/actioncable-go v0.0.0-20170317113929-64a1c46f363e/go.mod h1:geaj7xSJaAL1Trxbg0cKBcrSKdDgJBAkvXe9yvqvLPs=
 github.com/squarescale/go-netrc v0.0.0-20160921100341-49f67159ae13 h1:nw3T36ywpNg2FVpnnCrYD52DEubPJeWyDMaCy3/aIRk=
 github.com/squarescale/go-netrc v0.0.0-20160921100341-49f67159ae13/go.mod h1:lcpQ1RwHpMQPzlPGeBsJTyedOvIUY36K/thqOv1MyRE=
+github.com/squarescale/logger v0.1.0 h1:t/cD0ivQcFZ9+4wfN2D29qQZfTBDHm8nCd4RAt1joSU=
+github.com/squarescale/logger v0.1.0/go.mod h1:battSqTnP00zFYdM2mRCZqAgczNeVemJzNTw6k9pg4k=
 golang.org/x/net v0.0.0-20180906233101-161cd47e91fd h1:nTDtHvHSdCn1m6ITfMRqtOd/9+7a3s8RBNOZ3eYZzJA=
 golang.org/x/net v0.0.0-20180906233101-161cd47e91fd/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
