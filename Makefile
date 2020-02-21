@@ -29,6 +29,19 @@ docker-alpine-amd64: ## Compile for linux-amd64 alpine in a container
 
 generate: docker-linux-amd64 docker-darwin-amd64 docker-alpine-amd64
 
+docker-linux-amd64-local: ## Compile for linux-amd64 in a container
+	GOOS=linux GOARCH=amd64 $(GO_CMD) -o sqsc-linux-amd64
+
+docker-darwin-amd64-local: ## Compile for darwin-amd64 in a container
+	GOOS=darwin GOARCH=amd64 $(GO_CMD) -o sqsc-darwin-amd64
+
+docker-alpine-amd64-local: ## Compile for linux-amd64 alpine in a container
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO_CMD) -o sqsc-alpine-amd64
+
+generate-local: docker-linux-amd64-local docker-darwin-amd64-local docker-alpine-amd64-local
+
+
+
 publish-staging: ## Publish existing generated build to github draft and s3 as staging
 	aws s3 cp sqsc-linux-amd64 s3://cli-releases/sqsc-linux-amd64-staging-latest --acl public-read
 	aws s3 cp sqsc-darwin-amd64 s3://cli-releases/sqsc-darwin-amd64-staging-latest --acl public-read

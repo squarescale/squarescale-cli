@@ -19,11 +19,11 @@ require (
 	github.com/mattn/go-runewidth v0.0.3-0.20170201023540-14207d285c6c
 	github.com/mitchellh/cli v0.0.0-20160815184615-fcf521421aa2
 	github.com/olekukonko/tablewriter v0.0.0-20170128050532-febf2d34b54a
-	github.com/onsi/ginkgo v1.11.0
+	github.com/onsi/ginkgo v1.12.0
 	github.com/onsi/gomega v1.7.1
 	github.com/sirupsen/logrus v0.11.6-0.20170515105910-5e5dc898656f
 	github.com/squarescale/actioncable-go v0.0.0-20170317113929-64a1c46f363e
 	github.com/squarescale/go-netrc v0.0.0-20160921100341-49f67159ae13
 	github.com/squarescale/logger v0.1.0
-	golang.org/x/sys v0.0.0-20180909124046-d0be0721c37e
+	golang.org/x/sys v0.0.0-20191120155948-bd437916bb0e
 )
