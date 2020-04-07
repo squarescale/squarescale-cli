@@ -38,24 +38,7 @@ func nominalCase(t *testing.T) {
 
 		/*
 			{
-				"limits" => {
-					"mem" => self.container.limits["mem"],
-					"cpu" => self.container.limits["cpu"],
-					"net" => self.container.limits["net"],
-					"iops" => self.container.limits["iops"]
-				},
-				"custom_environment" => self.container.custom_environment,
-				"default_environment" => self.container.default_environment,
-				"run_command" => self.container.run_command.join(" "),
-				"status" => {
-					"infra" => self.container.display_infra_status,
-					"schedule" => {
-						"running" => 0,
-						"instances" => 0,
-						"level" => self.scheduled ? :ok : :waiting,
-						"message" => self.scheduled ? 'Scheduled' : 'Waiting schedule'
-					}
-				},
+
 				"docker_image" => {"name" => self.container.docker_image.name},
 				"refresh_url" => self.container.container_callbacks.map { |cb| cb.full_url_path(:refresh) }[0],
 				"volumes" => self.mounted_volumes
@@ -68,7 +51,6 @@ func nominalCase(t *testing.T) {
 		resBody := `
 			[
 				{
-					"id": 42,
 					"name": "my-little-batch",
 					"periodic": true,
 					"cron_expression": "* * * * *",
@@ -78,7 +60,24 @@ func nominalCase(t *testing.T) {
 							"cpu": 100,
 							"iops": 0,
 							"net": 1
-					}
+					},
+					"custom_environment": "final-environment",
+					"default_environment": "basic-environment",
+					"run_command": ["command1"],
+					"status": {
+						"infra": "ok",
+						"schedule": {
+							"running": 0,
+							"instances": 0,
+							"level": "ok",
+							"message": "Scheduled"
+						}
+					},
+					"docker_image": {
+						"name": "my-little-image"
+					},
+					"refresh_url": ["new-url"],
+					"mounted_volumes": "volume1"
 				}
 			]
 		`
