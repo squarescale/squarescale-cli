@@ -22,7 +22,7 @@ func nominalCase(t *testing.T) {
 
 	/*
 		1 OK - completer la payload et la vérifier dans le then (regarder exemples sur infrastructure-scheduler)
-		2 vérifier dans le "mock" http que l'url soit correcte
+		2 OK - vérifier dans le "mock" http que l'url soit correcte
 		3 vérifier que l'on ai bien le token passé au bon endroit
 		4 tester Not Found (à faire dans un autre cas de tests)
 		4 tester Internal server error (à faire dans un autre cas de tests)
@@ -35,6 +35,13 @@ func nominalCase(t *testing.T) {
 	projectName := "titi"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		var path string = r.URL.Path
+
+		if path != "/projects/"+projectName+"/batches" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/titi/batches", path)
+		}
+
 		resBody := `
 			[
 				{
