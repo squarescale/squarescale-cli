@@ -23,7 +23,7 @@ func nominalCase(t *testing.T) {
 	/*
 		1 OK - completer la payload et la vérifier dans le then (regarder exemples sur infrastructure-scheduler)
 		2 OK - vérifier dans le "mock" http que l'url soit correcte
-		3 vérifier que l'on ai bien le token passé au bon endroit
+		3 OK - vérifier que l'on ai bien le token passé au bon endroit
 		4 tester Not Found (à faire dans un autre cas de tests)
 		4 tester Internal server error (à faire dans un autre cas de tests)
 
@@ -77,6 +77,11 @@ func nominalCase(t *testing.T) {
 		`
 
 		w.Header().Set("Content-Type", "application/json")
+
+		if (r.Header.Get("Authorization")) != "bearer some-token" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+		}
+
 		w.Write([]byte(resBody))
 	}))
 
