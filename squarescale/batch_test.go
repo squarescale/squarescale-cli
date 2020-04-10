@@ -1,7 +1,6 @@
 package squarescale_test
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -21,16 +20,6 @@ func TestGetBatches(t *testing.T) {
 }
 
 func nominalCase(t *testing.T) {
-
-	/*
-		1 OK - completer la payload et la vérifier dans le then (regarder exemples sur infrastructure-scheduler)
-		2 OK - vérifier dans le "mock" http que l'url soit correcte
-		3 OK - vérifier que l'on ai bien le token passé au bon endroit
-		4 tester Not Found (à faire dans un autre cas de tests)
-		4 tester Internal server error (à faire dans un autre cas de tests)
-
-
-	*/
 
 	// given
 	token := "some-token"
@@ -93,8 +82,6 @@ func nominalCase(t *testing.T) {
 
 	// when
 	batches, err := cli.GetBatches(projectName)
-
-	fmt.Println(batches)
 
 	// then
 	if err != nil {
@@ -210,10 +197,7 @@ func NotFoundCase(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	batches, err := cli.GetBatches(projectName)
-
-	fmt.Println(batches)
-	fmt.Println(err)
+	_, err := cli.GetBatches(projectName)
 
 	// then
 
@@ -224,5 +208,28 @@ func NotFoundCase(t *testing.T) {
 }
 
 func InternalServerErrorCase(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "titi"
 
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.WriteHeader(500)
+
+	}))
+
+	defer server.Close()
+
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, err := cli.GetBatches(projectName)
+
+	// then
+
+	if err == nil {
+		t.Fatalf("Error is not raised with 500 Answer")
+	}
 }
