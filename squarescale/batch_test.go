@@ -15,6 +15,8 @@ func TestGetBatches(t *testing.T) {
 	t.Run("nominal get batches", nominalCase)
 
 	// other cases
+	t.Run("test of Not Found Page", NotFoundCase)
+	t.Run("test of Internal Server Error ", InternalServerErrorCase)
 
 }
 
@@ -100,7 +102,7 @@ func nominalCase(t *testing.T) {
 	}
 
 	if len(batches) != 1 {
-		t.Fatalf("Expect %d, got %d", 1, len(batches))
+		t.Fatalf("Expect batches to contain one element %d, but got actually %d", 1, len(batches))
 	}
 
 	if batches[0].Name != "my-little-batch" {
@@ -186,5 +188,41 @@ func nominalCase(t *testing.T) {
 	if batches[0].Volumes != "volume1" {
 		t.Errorf("Expect batchesRefreshUrl %s , got %s", "volume1", batches[0].Volumes)
 	}
+
+}
+
+func NotFoundCase(t *testing.T) {
+
+	// given
+	token := "some-token"
+	projectName := "titi"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.WriteHeader(404)
+
+	}))
+
+	defer server.Close()
+
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	batches, err := cli.GetBatches(projectName)
+
+	fmt.Println(batches)
+	fmt.Println(err)
+
+	// then
+
+	if err == nil {
+		t.Fatalf("Error is not raised with 404 Answer")
+	}
+
+}
+
+func InternalServerErrorCase(t *testing.T) {
 
 }
