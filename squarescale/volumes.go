@@ -8,6 +8,7 @@ import (
 
 // Volume describes a project container as returned by the Squarescale API
 type Volume struct {
+	ID                int    `json:"id"`
 	Name              string `json:"name"`
 	Size              int    `json:"size"`
 	Type              string `json:"type"`
@@ -39,4 +40,38 @@ func (c *Client) GetVolumes(project string) ([]Volume, error) {
 
 	return volumesByID, nil
 
+}
+
+// GetVolumeInfo gets the volume of a project based on its name.
+func (c *Client) GetVolumeInfo(project, name string) (Volume, error) {
+	volumes, err := c.GetVolumes(project)
+	if err != nil {
+		return Volume{}, err
+	}
+
+	for _, volume := range volumes {
+		if volume.Name == name {
+			return volume, nil
+		}
+	}
+
+	return Volume{}, fmt.Errorf("Volume '%s' not found for project '%s'", name, project)
+}
+
+func (c *Client) DeleteVolume(project string, volume Volume) error {
+	url := fmt.Sprintf("/projects/%s/volumes/%s", project, volume.Name)
+	code, body, err := c.delete(url)
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusOK:
+	case http.StatusNotFound:
+		return fmt.Errorf("Volume '%s' does not exist", volume.Name)
+	default:
+		return unexpectedHTTPError(code, body)
+	}
+
+	return nil
 }

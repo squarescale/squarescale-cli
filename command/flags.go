@@ -153,6 +153,15 @@ func containerNameArg(f *flag.FlagSet, arg int) (string, error) {
 	}
 }
 
+func volumeNameArg(f *flag.FlagSet, arg int) (string, error) {
+	value := f.Arg(arg)
+	if value == "" {
+		return "", errors.New("Volume name must be specified")
+	} else {
+		return value, nil
+	}
+}
+
 func projectNameArg(f *flag.FlagSet, arg int) (string, error) {
 	value := f.Arg(arg)
 	if value == "" {
