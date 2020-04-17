@@ -61,6 +61,25 @@ func (c *Client) GetVolumeInfo(project, name string) (Volume, error) {
 	return Volume{}, fmt.Errorf("Volume '%s' not found for project '%s'", name, project)
 }
 
+// WaitVolume wait the volume of a project based on its name.
+func (c *Client) WaitVolume(project, name string) (Volume, error) {
+	volume, err := c.GetVolumeInfo(project, name)
+	if err != nil {
+		return volume, err
+	}
+
+	logger.Info.Println("wait for volume : ", volume.Name)
+
+	for volume.Status != "provisionned" && err == nil {
+		time.Sleep(5 * time.Second)
+		volume, err = c.GetVolumeInfo(project, name)
+		logger.Debug.Println("volume status update: ", volume.Name)
+	}
+
+	return volume, err
+}
+
+// DeleteVolume delete volume of a project based on its name.
 func (c *Client) DeleteVolume(project string, volume Volume) error {
 	url := fmt.Sprintf("/projects/%s/volumes/%s", project, volume.Name)
 	code, body, err := c.delete(url)
@@ -77,4 +96,28 @@ func (c *Client) DeleteVolume(project string, volume Volume) error {
 	}
 
 	return nil
+}
+
+// AddVolume add volume of a project based on its name.
+func (c *Client) AddVolume(project string, name string, size int, volumeType string, zone string) error {
+	payload := JSONObject{
+		"name": name,
+		"size": size,
+		"type": volumeType,
+		"zone": zone,
+	}
+
+	url := fmt.Sprintf("/projects/%s/volumes", project)
+	code, body, err := c.post(url, &payload)
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusOK:
+	default:
+		return nil
+	}
+
+	return unexpectedHTTPError(code, body)
 }

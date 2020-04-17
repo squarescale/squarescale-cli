@@ -29,6 +29,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 		"volume": func() (cli.Command, error) {
 			return &command.VolumeCommand{}, nil
 		},
+		"volume add": func() (cli.Command, error) {
+			return &command.VolumeAddCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"volume list": func() (cli.Command, error) {
 			return &command.VolumeListCommand{
 				Meta: *meta,
