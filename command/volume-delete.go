@@ -21,6 +21,8 @@ func (c *VolumeDeleteCommand) Run(args []string) int {
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
 	projectArg := projectFlag(c.flagSet)
+	nowait := nowaitFlag(c.flagSet)
+
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -50,7 +52,7 @@ func (c *VolumeDeleteCommand) Run(args []string) int {
 		}
 	}
 
-	return c.runWithSpinner("deleting volume", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := c.runWithSpinner("deleting volume", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		projectName := *projectArg
 		volume, err := client.GetVolumeInfo(projectName, volumeName)
 		if err != nil {
@@ -59,6 +61,22 @@ func (c *VolumeDeleteCommand) Run(args []string) int {
 		err = client.DeleteVolume(projectName, volume)
 		return "", err
 	})
+	if res != 0 {
+		return res
+	}
+
+	if !*nowait {
+		c.runWithSpinner("wait for volume delete", endpoint.String(), func(client *squarescale.Client) (string, error) {
+			_, err := client.WaitProject(*projectArg)
+			if err != nil {
+				return "", err
+			} else {
+				return "", nil
+			}
+		})
+	}
+
+	return 0
 }
 
 // Synopsis is part of cli.Command implementation.

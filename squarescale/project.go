@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/squarescale/logger"
 )
 
 type ProjectStatus struct {
@@ -240,6 +242,24 @@ func (c *Client) ProjectStatus(project string) (*ProjectStatus, error) {
 	}
 
 	return &status, nil
+}
+
+// WaitProject wait project provisioning
+func (c *Client) WaitProject(project string) (*ProjectStatus, error) {
+	projectStatus, err := c.ProjectStatus(project)
+	if err != nil {
+		return projectStatus, err
+	}
+
+	logger.Info.Println("wait for project : ", project)
+
+	for projectStatus.InfraStatus != "ok" && err == nil {
+		time.Sleep(5 * time.Second)
+		projectStatus, err = c.ProjectStatus(project)
+		logger.Debug.Println("project status update: ", project)
+	}
+
+	return projectStatus, err
 }
 
 // ProjectUnprovision unprovisions a project

@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
+
+	"github.com/squarescale/logger"
 )
 
 // Volume describes a project container as returned by the Squarescale API
@@ -17,7 +20,7 @@ type Volume struct {
 	Status            string `json:"status"`
 }
 
-// GetVolume gets all the volumes attached to a Project
+// GetVolumes gets all the volumes attached to a Project
 func (c *Client) GetVolumes(project string) ([]Volume, error) {
 	code, body, err := c.get("/projects/" + project + "/volumes")
 	if err != nil {
