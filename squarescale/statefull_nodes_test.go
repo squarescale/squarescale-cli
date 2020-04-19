@@ -10,7 +10,7 @@ import (
 
 func TestStatefullNodes(t *testing.T) {
 
-	// cli.GetStatefullNodes
+	// GetStatefullNodes
 	t.Run("nominal get statefull nodes", nominalCaseForGetStatefullNodes)
 
 	t.Run("test unknown project", UnknownProjectOnGetStatefullNodes)
@@ -184,6 +184,7 @@ func CannotUnmarshalOnGetStatefullNodes(t *testing.T) {
 	// when
 	_, err := cli.GetStatefullNodes("unknown-project")
 
+	// then
 	if err == nil {
 		t.Fatalf("Error is not raised %s", err)
 	}
@@ -222,6 +223,7 @@ func HTTPErrorOnGetStatefullNodes(t *testing.T) {
 	// when
 	_, err := cli.GetStatefullNodes("bad-project")
 
+	// then
 	if err == nil {
 		t.Fatalf("Error is not raised %s", err)
 	}
@@ -242,6 +244,7 @@ func UnexpectedErrorOnGetStatefullNodes(t *testing.T) {
 	// when
 	_, err := cli.GetStatefullNodes(projectName)
 
+	// then
 	if err == nil {
 		t.Fatalf("Error is not raised")
 	}
