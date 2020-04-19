@@ -12,6 +12,7 @@ func TestGetVolumes(t *testing.T) {
 
 	// nominal case
 	t.Run("nominal get volumes", nominalCaseForVolumes)
+	t.Run("nominal get volumes", nominalCaseForVolumeInfo)
 
 	// other cases
 	t.Run("test Not Found Page", NotFoundCaseForVolume)
@@ -25,14 +26,14 @@ func TestGetVolumes(t *testing.T) {
 func nominalCaseForVolumes(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "titi"
+	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/titi/volumes", path)
+			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/volumes", path)
 		}
 
 		resBody := `
@@ -128,8 +129,58 @@ func nominalCaseForVolumes(t *testing.T) {
 	if volumes[1].Status != "not_provisionned" {
 		t.Errorf("Expect volumeStatus %s , got %s", "not_provisionned", volumes[1].Status)
 	}
+}
 
-	volume, err := cli.GetVolumeInfo(projectName, volumes[0].Name)
+func nominalCaseForVolumeInfo(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		var path string = r.URL.Path
+
+		if path != "/projects/"+projectName+"/volumes" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/volumes", path)
+		}
+
+		resBody := `
+		[
+			{
+				"id": 30,
+				"name": "vol02a",
+				"size": 1,
+				"type": "gp2",
+				"zone": "eu-west-1a",
+				"statefull_node_name": "node02",
+				"status": "provisionned"
+			},
+			{
+				"id": 31,
+				"name": "vol02b",
+				"size": 3,
+				"type": "io1",
+				"zone": "eu-west-1b",
+				"statefull_node_name": null,
+				"status": "not_provisionned"
+			}
+		]
+		`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		if (r.Header.Get("Authorization")) != "bearer some-token" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+		}
+
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	volume, err := cli.GetVolumeInfo(projectName, "vol02a")
 
 	if err != nil {
 		t.Fatalf("Expect no error, got %s", err)
@@ -163,14 +214,14 @@ func nominalCaseForVolumes(t *testing.T) {
 func NotFoundCaseForVolume(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "titi"
+	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/titi/volumes", path)
+			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/volumes", path)
 		}
 
 		resBody := `
@@ -212,7 +263,7 @@ func NotFoundCaseForVolume(t *testing.T) {
 	_, err := cli.GetVolumeInfo(projectName, "missing-volume")
 
 	if err == nil {
-		t.Fatalf("Error is not raised with `Volume 'missing-volume' not found for project 'titi'`")
+		t.Fatalf("Error is not raised with `Volume 'missing-volume' not found for project 'my-project'`")
 	}
 }
 
@@ -244,21 +295,21 @@ func NotFoundCaseForProject(t *testing.T) {
 	_, err := cli.GetVolumeInfo("/projects/not-a-project/volumes", "a-volume")
 
 	if err == nil {
-		t.Fatalf("Error is not raised with `Volume 'missing-volume' not found for project 'titi'`")
+		t.Fatalf("Error is not raised with `Volume 'missing-volume' not found for project 'my-project'`")
 	}
 }
 
 func CantUnmarshal(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "titi"
+	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/titi/volumes", path)
+			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/volumes", path)
 		}
 
 		resBody := `
@@ -288,7 +339,7 @@ func CantUnmarshal(t *testing.T) {
 func InternalServerErrorCaseForVolumes(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "titi"
+	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -310,7 +361,7 @@ func InternalServerErrorCaseForVolumes(t *testing.T) {
 func UnexpectedErrorOnGet(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "titi"
+	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	}))
