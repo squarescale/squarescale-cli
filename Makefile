@@ -61,3 +61,9 @@ lint: ## Lint Docker
 
 tests: ## Run test suites in all packages
 	ginkgo -r
+
+coverage: ## Run test suites in all packages with code coverage
+	go test ./... -cover -coverprofile=coverage.out
+
+coverage_html: ## Show code coverage html report
+	go tool cover -html=coverage.out -o coverage.html

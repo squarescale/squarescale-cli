@@ -4,3 +4,5 @@
 sqsc*
 squarescale-cli
 .envrc
+coverage.out
+coverage.html
