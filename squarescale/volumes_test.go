@@ -95,7 +95,11 @@ func nominalCaseForVolumes(t *testing.T) {
 	}
 
 	if len(volumes) != 2 {
-		t.Fatalf("Expect volumes to contain one element %d, but got actually %d", 1, len(volumes))
+		t.Fatalf("Expect volumes to contain one element %d, but got actually %d", 2, len(volumes))
+	}
+
+	if volumes[0].ID != 30 {
+		t.Errorf("Expect volumeID %d, got %d", 30, volumes[0].ID)
 	}
 
 	if volumes[0].Name != "vol02a" {
@@ -120,6 +124,10 @@ func nominalCaseForVolumes(t *testing.T) {
 
 	if volumes[0].Status != "provisionned" {
 		t.Errorf("Expect volumeStatus %s , got %s", "provisionned", volumes[0].Status)
+	}
+
+	if volumes[1].ID != 31 {
+		t.Errorf("Expect volumeID %d, got %d", 31, volumes[1].ID)
 	}
 
 	if volumes[1].Name != "vol02b" {
