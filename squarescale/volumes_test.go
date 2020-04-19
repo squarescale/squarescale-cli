@@ -14,8 +14,11 @@ func TestGetVolumes(t *testing.T) {
 	t.Run("nominal get volumes", nominalCaseForVolumes)
 
 	// other cases
-	t.Run("test of Not Found Page", NotFoundCaseForVolume)
-	t.Run("test of Internal Server Error ", InternalServerErrorCaseForVolumes)
+	t.Run("test Not Found Page", NotFoundCaseForVolume)
+	t.Run("test Not Found Page", NotFoundCaseForProject)
+	t.Run("test badly JSON", CantUnmarshal)
+	t.Run("test Internal Server Error ", InternalServerErrorCaseForVolumes)
+	t.Run("test HTTP error", UnexpectedErrorOnGet)
 
 }
 
@@ -213,7 +216,39 @@ func NotFoundCaseForVolume(t *testing.T) {
 	}
 }
 
-func InternalServerErrorCaseForVolumes(t *testing.T) {
+func NotFoundCaseForProject(t *testing.T) {
+	// given
+	token := "some-token"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resBody := `
+		{
+			"error": "No project found for config name: not-a-project"
+		}
+		`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		if (r.Header.Get("Authorization")) != "bearer some-token" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+		}
+
+		w.WriteHeader(404)
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, err := cli.GetVolumeInfo("/projects/not-a-project/volumes", "a-volume")
+
+	if err == nil {
+		t.Fatalf("Error is not raised with `Volume 'missing-volume' not found for project 'titi'`")
+	}
+}
+
+func CantUnmarshal(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "titi"
@@ -226,6 +261,36 @@ func InternalServerErrorCaseForVolumes(t *testing.T) {
 			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/titi/volumes", path)
 		}
 
+		resBody := `
+		{]
+		`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		if (r.Header.Get("Authorization")) != "bearer some-token" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+		}
+
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, err := cli.GetVolumes(projectName)
+
+	if err == nil {
+		t.Fatalf("Expect error`invalid character ']' looking for beginning of object key string`, got %s", err)
+	}
+}
+
+func InternalServerErrorCaseForVolumes(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "titi"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		w.WriteHeader(500)
@@ -239,5 +304,24 @@ func InternalServerErrorCaseForVolumes(t *testing.T) {
 	// when
 	if err == nil {
 		t.Fatalf("Error is not raised with 500 Answer")
+	}
+}
+
+func UnexpectedErrorOnGet(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "titi"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	_, err := cli.GetVolumes(projectName)
+
+	// when
+	if err == nil {
+		t.Fatalf("Error is not raised")
 	}
 }
