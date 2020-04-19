@@ -13,6 +13,7 @@ func TestGetVolumes(t *testing.T) {
 	// nominal case
 	t.Run("nominal get volumes", nominalCaseForVolumes)
 	t.Run("nominal get volumes", nominalCaseForVolumeInfo)
+	t.Run("nominal get volumes", nominalCaseForVolumeAdd)
 
 	// other cases
 	t.Run("test Not Found Page", NotFoundCaseForVolume)
@@ -208,6 +209,52 @@ func nominalCaseForVolumeInfo(t *testing.T) {
 
 	if volume.Status != "provisionned" {
 		t.Errorf("Expect volumeStatus %s , got %s", "provisionned", volume.Status)
+	}
+}
+
+func nominalCaseForVolumeAdd(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		var path string = r.URL.Path
+
+		if path != "/projects/"+projectName+"/volumes" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/volumes", path)
+		}
+
+		resBody := `
+		{
+			"id": 61,
+			"name": "vol02c1",
+			"size": 1,
+			"type": "gp2",
+			"zone": "eu-west-1c",
+			"statefull_node_name": null,
+			"status": "not_provisionned"
+		}
+		`
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(201)
+
+		if (r.Header.Get("Authorization")) != "bearer some-token" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+		}
+
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.AddVolume(projectName, "vol02c1", 1, "gp2", "eu-west-1c")
+
+	if err != nil {
+		t.Fatalf("Expect no error, got %s", err)
 	}
 }
 
