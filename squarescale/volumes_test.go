@@ -1,6 +1,7 @@
 package squarescale_test
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,16 +13,30 @@ func TestGetVolumes(t *testing.T) {
 
 	// nominal case
 	t.Run("nominal get volumes", nominalCaseForVolumes)
-	t.Run("nominal get volumes", nominalCaseForVolumeInfo)
-	t.Run("nominal get volumes", nominalCaseForVolumeAdd)
+	t.Run("nominal volume info", nominalCaseForVolumeInfo)
+	t.Run("nominal volume add", nominalCaseForVolumeAdd)
+	t.Run("nominal volume delete", nominalCaseForVolumeDelete)
+	t.Run("nominal volume wait", nominalCaseForWaitVolume)
 
 	// other cases
-	t.Run("test Not Found Page", NotFoundCaseForVolume)
-	t.Run("test Not Found Page", NotFoundCaseForProject)
-	t.Run("test badly JSON", CantUnmarshal)
-	t.Run("test Internal Server Error ", InternalServerErrorCaseForVolumes)
-	t.Run("test HTTP error", UnexpectedErrorOnGet)
+	t.Run("test badly JSON", CantUnmarshal)                                 // cli.GetVolumes
+	t.Run("test Internal Server Error ", InternalServerErrorCaseForVolumes) // cli.GetVolumes
+	t.Run("test HTTP error", UnexpectedErrorOnGet)                          // cli.GetVolumes
 
+	t.Run("test Not Found Page", NotFoundCaseForVolume)  // cli.GetVolumeInfo
+	t.Run("test Not Found Page", NotFoundCaseForProject) // cli.GetVolumeInfo
+
+	t.Run("test Duplicate volume name on VolumeAdd", DuplicateVolumeErrorCaseForVolumeAdd) // cli.AddVolume
+	t.Run("test Unknown project on VolumeAdd", UnknownProjectErrorCaseForVolumeAdd)        // cli.AddVolume
+	t.Run("test Internal Server Error on VolumeAdd", InternalServerErrorCaseForVolumeAdd)  // cli.AddVolume
+	t.Run("test HTTP Error on VolumeAdd", UnexpectedHTTPErrorVolumeAdd)                    // cli.AddVolume
+
+	t.Run("test Unknown project on VolumeDelete", UnknownProjectErrorCaseForVolumeDelete)       // cli.DeleteVolume
+	t.Run("test Unknown project on VolumeDelete", UnknownVolumeErrorCaseForVolumeDelete)        // cli.DeleteVolume
+	t.Run("test Internal Server Error on VolumeDelete", InternalServerErrorCaseForVolumeDelete) // cli.DeleteVolume
+	t.Run("test HTTP Error on VolumeDelete", UnexpectedHTTPErrorVolumeDelete)                   // cli.DeleteVolume
+
+	t.Run("test Internal Server Error on WaitVolume", InternalServerErrorCaseForWaitVolume) // cli.DeleteVolume
 }
 
 func nominalCaseForVolumes(t *testing.T) {
@@ -258,6 +273,94 @@ func nominalCaseForVolumeAdd(t *testing.T) {
 	}
 }
 
+func nominalCaseForVolumeDelete(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+	volumeName := "my-volume"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		var path string = r.URL.Path
+
+		if path != "/projects/"+projectName+"/volumes/"+volumeName {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/volumes/my-volume", path)
+		}
+
+		resBody := `
+		null
+		`
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+
+		if (r.Header.Get("Authorization")) != "bearer some-token" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+		}
+
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.DeleteVolume(projectName, volumeName)
+
+	if err != nil {
+		t.Fatalf("Expect no error, got %s", err)
+	}
+}
+
+func nominalCaseForWaitVolume(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+	volumeName := "my-volume"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		var path string = r.URL.Path
+
+		if path != "/projects/"+projectName+"/volumes" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/volumes", path)
+		}
+
+		resBody := `
+		[
+			{
+				"id": 30,
+				"name": "my-volume",
+				"size": 1,
+				"type": "gp2",
+				"zone": "eu-west-1a",
+				"statefull_node_name": "node02",
+				"status": "provisionned"
+			}
+		]
+		`
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+
+		if (r.Header.Get("Authorization")) != "bearer some-token" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+		}
+
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, err := cli.WaitVolume(projectName, volumeName)
+
+	if err != nil {
+		t.Fatalf("Expect no error, got %s", err)
+	}
+}
+
 func NotFoundCaseForVolume(t *testing.T) {
 	// given
 	token := "some-token"
@@ -346,6 +449,112 @@ func NotFoundCaseForProject(t *testing.T) {
 	}
 }
 
+func DuplicateVolumeErrorCaseForVolumeAdd(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resBody := `
+		{"error":"PG::UniqueViolation: ERROR:  duplicate key value violates unique constraint \"index_volumes_on_cluster_id_and_name\"\nDETAIL:  Key (cluster_id, name)=(6163, vol02c1) already exists.\n: INSERT INTO \"volumes\" (\"name\", \"size\", \"type\", \"zone\", \"cluster_id\", \"status\") VALUES ($1, $2, $3, $4, $5, $6) RETURNING \"id\""}
+		`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		if (r.Header.Get("Authorization")) != "bearer some-token" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+		}
+
+		w.WriteHeader(409)
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.AddVolume(projectName, "vol02c", 1, "gp2", "eu-west-1c")
+
+	if err == nil {
+		t.Fatalf("Error is not raised")
+	}
+}
+
+func UnknownProjectErrorCaseForVolumeAdd(t *testing.T) {
+	// given
+	token := "some-token"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resBody := `
+		{"error":"No project found for config name: another-project"}
+		`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		if (r.Header.Get("Authorization")) != "bearer some-token" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+		}
+
+		w.WriteHeader(404)
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.AddVolume("another-project", "vol02c1", 1, "gp2", "eu-west-1c")
+
+	if err == nil {
+		t.Fatalf("Error is not raised %s", err)
+	}
+}
+
+func InternalServerErrorCaseForVolumeAdd(t *testing.T) {
+	// given
+	token := "some-token"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(500)
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.AddVolume("another-project", "vol02c1", 1, "gp2", "eu-west-1c")
+
+	if err == nil {
+		t.Fatalf("Error is not raised")
+	}
+}
+
+func UnexpectedHTTPErrorVolumeAdd(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		if (r.Header.Get("Authorization")) != "bearer some-token" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+		}
+
+		w.WriteHeader(666)
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	err := cli.AddVolume(projectName, "vol02c1", 1, "gp2", "eu-west-1c")
+
+	// when
+	if err == nil {
+		t.Fatalf("Error is not raised")
+	}
+}
+
 func CantUnmarshal(t *testing.T) {
 	// given
 	token := "some-token"
@@ -419,6 +628,134 @@ func UnexpectedErrorOnGet(t *testing.T) {
 	_, err := cli.GetVolumes(projectName)
 
 	// when
+	if err == nil {
+		t.Fatalf("Error is not raised")
+	}
+}
+
+func UnknownProjectErrorCaseForVolumeDelete(t *testing.T) {
+	// given
+	token := "some-token"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resBody := `{"error":"No project found for config name: unknown-project"}`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		if (r.Header.Get("Authorization")) != "bearer some-token" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+		}
+
+		w.WriteHeader(404)
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.DeleteVolume("unknown-project", "vol02c1")
+
+	if err == nil {
+		t.Fatalf("Error is not raised %s", err)
+	}
+
+	if fmt.Sprintf("%s", err) != "{\"error\":\"No project found for config name: unknown-project\"}" {
+		t.Fatalf("Error raised `%s` is not `{\"error\":\"No project found for config name: unknown-project\"}`", err)
+	}
+}
+
+func UnknownVolumeErrorCaseForVolumeDelete(t *testing.T) {
+	// given
+	token := "some-token"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resBody := `{"error":"Couldn't find Volume with [WHERE \"volumes\".\"cluster_id\" = $1 AND \"volumes\".\"name\" = $2]"}`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		if (r.Header.Get("Authorization")) != "bearer some-token" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+		}
+
+		w.WriteHeader(404)
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.DeleteVolume("my-project", "vol02c1")
+
+	if err == nil {
+		t.Fatalf("Error is not raised %s", err)
+	}
+
+	if fmt.Sprintf("%s", err) != "{\"error\":\"No volume found for name: vol02c1\"}" {
+		t.Fatalf("Error raised `%s` is not `{\"error\":\"No volume found for name: vol02c1\"}`", err)
+	}
+}
+
+func InternalServerErrorCaseForVolumeDelete(t *testing.T) {
+	// given
+	token := "some-token"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(500)
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.DeleteVolume("my-project", "vol02c1")
+
+	if err == nil {
+		t.Fatalf("Error is not raised")
+	}
+}
+
+func UnexpectedHTTPErrorVolumeDelete(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		if (r.Header.Get("Authorization")) != "bearer some-token" {
+			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+		}
+
+		w.WriteHeader(666)
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	err := cli.DeleteVolume(projectName, "vol02c1")
+
+	// when
+	if err == nil {
+		t.Fatalf("Error is not raised")
+	}
+}
+
+func InternalServerErrorCaseForWaitVolume(t *testing.T) {
+	// given
+	token := "some-token"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(500)
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, err := cli.WaitVolume("my-project", "vol02c1")
+
 	if err == nil {
 		t.Fatalf("Error is not raised")
 	}

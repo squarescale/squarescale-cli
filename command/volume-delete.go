@@ -54,11 +54,7 @@ func (c *VolumeDeleteCommand) Run(args []string) int {
 
 	res := c.runWithSpinner("deleting volume", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		projectName := *projectArg
-		volume, err := client.GetVolumeInfo(projectName, volumeName)
-		if err != nil {
-			return "", err
-		}
-		err = client.DeleteVolume(projectName, volume)
+		err := client.DeleteVolume(projectName, volumeName)
 		return "", err
 	})
 	if res != 0 {

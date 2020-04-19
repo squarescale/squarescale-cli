@@ -34,11 +34,14 @@ func (c *VolumeAddCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	c.runWithSpinner("add volume", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := c.runWithSpinner("add volume", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		msg := fmt.Sprintf("Successfully added volume '%s' to project '%s'", *name, *project)
 		err := client.AddVolume(*project, *name, *size, *volumeType, *zone)
 		return msg, err
 	})
+	if res != 0 {
+		return res
+	}
 
 	if !*nowait {
 		c.runWithSpinner("wait for volume add", endpoint.String(), func(client *squarescale.Client) (string, error) {

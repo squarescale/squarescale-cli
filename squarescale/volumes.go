@@ -80,8 +80,8 @@ func (c *Client) WaitVolume(project, name string) (Volume, error) {
 }
 
 // DeleteVolume delete volume of a project based on its name.
-func (c *Client) DeleteVolume(project string, volume Volume) error {
-	url := fmt.Sprintf("/projects/%s/volumes/%s", project, volume.Name)
+func (c *Client) DeleteVolume(project string, volume string) error {
+	url := fmt.Sprintf("/projects/%s/volumes/%s", project, volume)
 	code, body, err := c.delete(url)
 	if err != nil {
 		return err
@@ -89,13 +89,15 @@ func (c *Client) DeleteVolume(project string, volume Volume) error {
 
 	switch code {
 	case http.StatusOK:
+		return nil
 	case http.StatusNotFound:
-		return fmt.Errorf("Volume '%s' does not exist", volume.Name)
+		if fmt.Sprintf("%s", body) == `{"error":"Couldn't find Volume with [WHERE \"volumes\".\"cluster_id\" = $1 AND \"volumes\".\"name\" = $2]"}` {
+			return fmt.Errorf("{\"error\":\"No volume found for name: %s\"}", volume)
+		}
+		return fmt.Errorf("%s", body)
 	default:
 		return unexpectedHTTPError(code, body)
 	}
-
-	return nil
 }
 
 // AddVolume add volume of a project based on its name.
@@ -114,10 +116,13 @@ func (c *Client) AddVolume(project string, name string, size int, volumeType str
 	}
 
 	switch code {
-	case http.StatusOK:
-	default:
+	case http.StatusCreated:
 		return nil
+	case http.StatusConflict:
+		return fmt.Errorf("Volume already exist: %s", project)
+	case http.StatusNotFound:
+		return unexpectedHTTPError(code, body)
+	default:
+		return unexpectedHTTPError(code, body)
 	}
-
-	return unexpectedHTTPError(code, body)
 }
