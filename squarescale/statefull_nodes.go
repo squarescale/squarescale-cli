@@ -39,3 +39,34 @@ func (c *Client) GetStatefullNodes(project string) ([]StatefullNode, error) {
 
 	return statefullNodesByID, nil
 }
+
+// AddStatefullNode add a new statefull node
+func (c *Client) AddStatefullNode(project string, name string, nodeType string, zone string) (StatefullNode, error) {
+	var newStatefullNode StatefullNode
+
+	payload := JSONObject{
+		"name":      name,
+		"node_type": nodeType,
+		"zone":      zone,
+	}
+	code, body, err := c.post("/projects/"+project+"/statefull_nodes", &payload)
+	if err != nil {
+		return newStatefullNode, err
+	}
+
+	switch code {
+	case http.StatusCreated:
+	case http.StatusNotFound:
+		return newStatefullNode, fmt.Errorf("Project '%s' does not exist", project)
+	case http.StatusConflict:
+		return newStatefullNode, fmt.Errorf("Statefull node already exist on project '%s': %s", project, name)
+	default:
+		return newStatefullNode, unexpectedHTTPError(code, body)
+	}
+
+	if err := json.Unmarshal(body, &newStatefullNode); err != nil {
+		return newStatefullNode, err
+	}
+
+	return newStatefullNode, nil
+}
