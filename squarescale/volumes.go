@@ -119,7 +119,7 @@ func (c *Client) AddVolume(project string, name string, size int, volumeType str
 	case http.StatusCreated:
 		return nil
 	case http.StatusConflict:
-		return fmt.Errorf("Volume already exist: %s", project)
+		return fmt.Errorf("Volume already exist on project '%s': %s", project, name)
 	case http.StatusNotFound:
 		return unexpectedHTTPError(code, body)
 	default:

@@ -510,6 +510,10 @@ func DuplicateVolumeErrorCaseForVolumeAdd(t *testing.T) {
 	if err == nil {
 		t.Fatalf("Error is not raised")
 	}
+
+	if fmt.Sprintf("%s", err) != "Volume already exist on project 'my-project': vol02c" {
+		t.Fatalf("Error raised is node `Volume already exist on project 'my-project': vol02c`: `%s`", err)
+	}
 }
 
 func UnknownProjectErrorCaseForVolumeAdd(t *testing.T) {
