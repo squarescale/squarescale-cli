@@ -56,6 +56,58 @@ func projectNameFlag(f *flag.FlagSet) *string {
 	return f.String("name", "", "Project name")
 }
 
+func batchNameFlag(f *flag.FlagSet) *string {
+	return f.String("name", "", "Batch name")
+}
+
+func batchDockerImageNameFlag(f *flag.FlagSet) *string {
+	return f.String("imageName", "", "docker image name")
+}
+
+func batchDockerImagePrivateFlag(f *flag.FlagSet) *bool {
+	return f.Bool("imagePrivate", false, "docker image is private")
+}
+
+func batchDockerImageUsernameFlag(f *flag.FlagSet) *string {
+	return f.String("imageUser", "", "docker image user")
+}
+
+func batchDockerImagePasswordFlag(f *flag.FlagSet) *string {
+	return f.String("imagePwd", "", "docker image user")
+}
+
+func batchPeriodicFlag(f *flag.FlagSet) *bool {
+	return f.Bool("periodic", false, "batch periodicity")
+}
+
+func batchCronExpressionFlag(f *flag.FlagSet) *string {
+	return f.String("cron", "", "cron expression")
+}
+
+func batchTimeZoneNameFlag(f *flag.FlagSet) *string {
+	return f.String("time", "", "time zone name")
+}
+
+func batchLimitNetFlag(f *flag.FlagSet) *int {
+	return f.Int("net", 1, "This is an indicative limit of how much network bandwidth your service requires.")
+}
+
+func batchLimitMemoryFlag(f *flag.FlagSet) *int {
+	return f.Int("mem", 256, "This is the maximum amount of memory your service will be able to use until it is killed and restarted automatically.")
+}
+
+func batchLimitIopsFlag(f *flag.FlagSet) *int {
+	return f.Int("iops", 0, "This is an indicative limit of how many I/O operation per second your service requires.")
+}
+
+func batchLimitCpuFlag(f *flag.FlagSet) *int {
+	return f.Int("cpu", 100, "This is an indicative limit of how much CPU your service requires.")
+}
+
+func batchVolumeBindNameFlag(f *flag.FlagSet) *string {
+	return f.String("volName", "", "name of volume bind")
+}
+
 func containerFlag(f *flag.FlagSet) *string {
 	return f.String("container", "", "Container to configure")
 }

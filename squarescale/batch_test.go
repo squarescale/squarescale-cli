@@ -16,10 +16,16 @@ func TestBatches(t *testing.T) {
 
 	t.Run("Test project not found on getBatches", ProjectNotFoundOnGetBatches)
 
+	// createBatches
+	t.Run("Nominal case on createBatches", nominalCaseOnCreateBatches)
+
+	t.Run("Test project not found on createBatches", ProjectNotFoundOnCreateBatches)
+	t.Run("Test to create a duplicate on CreateBatches", DuplicateBatchOnCreateBatches)
+
 	//Error Cases
-	t.Run("Test HTTP client error on batch methods (get)", ClientHTTPErrorOnBatchMethods)
-	t.Run("Test internal server error on batch methods (get)", InternalServerErrorOnBatchMethods)
-	t.Run("Test badly JSON on batch methods (get)", CantUnmarshalOnBatchMethods)
+	t.Run("Test HTTP client error on batch methods (get, create)", ClientHTTPErrorOnBatchMethods)
+	t.Run("Test internal server error on batch methods (get, create)", InternalServerErrorOnBatchMethods)
+	t.Run("Test badly JSON on batch methods (get, create)", CantUnmarshalOnBatchMethods)
 }
 
 func nominalCaseOnGetBatches(t *testing.T) {
@@ -232,10 +238,295 @@ func ProjectNotFoundOnGetBatches(t *testing.T) {
 
 }
 
+func nominalCaseOnCreateBatches(t *testing.T) {
+
+	//Given
+	token := "some-token"
+	batchName := "my-little-batch"
+	projectName := "my-project"
+	periodicBatch := true
+	cronExpression := "* * * * *"
+	timeZoneName := "Europe/Paris"
+	limitNet := 1
+	limitMemory := 256
+	limitIOPS := 0
+	limitCPU := 100
+	dockerImageName := "mydockerimage"
+	dockerImagePrivate := false
+	dockerImageUsername := "me"
+	dockerImagePassword := "pwd"
+	batchVolumesBindName := ""
+	dockerImageContent := squarescale.DockerImageInfos{
+		Name:     dockerImageName,
+		Private:  dockerImagePrivate,
+		Username: dockerImageUsername,
+		Password: dockerImagePassword,
+	}
+	batchLimitsContent := squarescale.BatchLimits{
+		NET:    limitNet,
+		Memory: limitMemory,
+		IOPS:   limitIOPS,
+		CPU:    limitCPU,
+	}
+	batchCommonContent := squarescale.BatchCommon{
+		Name:           batchName,
+		Periodic:       periodicBatch,
+		CronExpression: cronExpression,
+		TimeZoneName:   timeZoneName,
+		Limits:         batchLimitsContent,
+	}
+	batchVolumesBindContent := squarescale.BatchVolumesBind{
+		Name: batchVolumesBindName,
+	}
+	batchOrderContent := squarescale.BatchOrder{
+		BatchCommon: batchCommonContent,
+		DockerImage: dockerImageContent,
+		VolumesBind: []squarescale.BatchVolumesBind{batchVolumesBindContent},
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		checkPath(t, "/projects/"+projectName+"/batches", r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
+
+		resBody := `
+			[
+				{
+					"name": "my-little-batch",
+					"periodic": true,
+        			"cron_expression": "* * * * *",
+        			"time_zone_name": "Europe/Paris",
+        			"docker_image": {
+          				"name": "mydockerimage",
+          				"private": true,
+          				"username": "someUserName",
+          				"password": "somePassword"
+        			},
+        		"volumes_to_bind": [{"name": "vol1"}, {"name": "vol2"}],
+        		"limits": {
+          			"mem": 256,
+          			"cpu": 100,
+          			"iops": 40,
+          			"net": 256
+        			}
+				}
+			]
+		`
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(201)
+
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	batches, err := cli.CreateBatch(projectName, batchOrderContent)
+
+	var expectedString string
+	var expectedInt int
+	var expectedBool bool
+
+	if err != nil {
+		t.Fatalf("Expect no error, got %s", err)
+	}
+
+	expectedInt = 1
+	if len(batches) != expectedInt {
+		t.Errorf("Expected batches to contain %d element, but got actually %d", expectedInt, len(batches))
+	}
+
+	expectedString = "my-little-batch"
+	if batches[0].Name != expectedString {
+		t.Errorf("Expected batches.Name to be '%s', but got '%s' instead", expectedString, batches[0].Name)
+	}
+
+	expectedBool = true
+	if batches[0].Periodic != expectedBool {
+		t.Errorf("Expected batches.Periodic to be '%t', but got '%t' instead", expectedBool, batches[0].Periodic)
+	}
+
+	expectedString = "* * * * *"
+	if batches[0].CronExpression != expectedString {
+		t.Errorf("Expected batches.CronExpression to be '%s', but got '%s' instead", expectedString, batches[0].CronExpression)
+	}
+
+	expectedString = "Europe/Paris"
+	if batches[0].TimeZoneName != expectedString {
+		t.Errorf("Expected batches.TimeZoneName to be '%s', but got '%s' instead", expectedString, batches[0].TimeZoneName)
+	}
+
+	expectedString = "mydockerimage"
+	if batches[0].DockerImage.Name != expectedString {
+		t.Errorf("Expected batches.DockerImage.Name to be '%s', but got '%s' instead", expectedString, batches[0].DockerImage.Name)
+	}
+
+	expectedBool = true
+	if batches[0].DockerImage.Private != expectedBool {
+		t.Errorf("Expected batches.DockerImage.Private to be '%t', but got '%t' instead", expectedBool, batches[0].DockerImage.Private)
+	}
+
+	expectedString = "someUserName"
+	if batches[0].DockerImage.Username != expectedString {
+		t.Errorf("Expected batches.DockerImage.Username to be '%s', but got '%s' instead", expectedString, batches[0].DockerImage.Username)
+	}
+
+	expectedString = "somePassword"
+	if batches[0].DockerImage.Password != expectedString {
+		t.Errorf("Expected batches.DockerImage.Password to be '%s', but got '%s' instead", expectedString, batches[0].DockerImage.Password)
+	}
+
+	expectedInt = 2
+	if len(batches[0].VolumesBind) != expectedInt {
+		t.Errorf("Expected batches.VolumesBind to contain %d element, but got actually %d", expectedInt, len(batches[0].VolumesBind))
+	}
+
+	expectedString = "vol1"
+	if batches[0].VolumesBind[0].Name != expectedString {
+		t.Errorf("Expected batches.VolumesBind[0].Name to be '%s', but got '%s' instead", expectedString, batches[0].VolumesBind[0].Name)
+	}
+
+	expectedString = "vol2"
+	if batches[0].VolumesBind[1].Name != expectedString {
+		t.Errorf("Expected batches.VolumesBind[1].Name to be '%s', but got '%s' instead", expectedString, batches[0].VolumesBind[1].Name)
+	}
+
+	expectedInt = 256
+	if batches[0].Limits.Memory != expectedInt {
+		t.Errorf("Expected batches.Limits.Memory to be %d, but got %d instead", expectedInt, batches[0].Limits.Memory)
+	}
+
+	expectedInt = 100
+	if batches[0].Limits.CPU != expectedInt {
+		t.Errorf("Expected batches.Limits.CPU to be %d, but got %d instead", expectedInt, batches[0].Limits.CPU)
+	}
+
+	expectedInt = 40
+	if batches[0].Limits.IOPS != expectedInt {
+		t.Errorf("Expected batches.Limits.IOPS to be %d, but got %d instead", expectedInt, batches[0].Limits.IOPS)
+	}
+
+	expectedInt = 256
+	if batches[0].Limits.NET != expectedInt {
+		t.Errorf("Expected batches.Limits.NET to be %d, but got %d instead", expectedInt, batches[0].Limits.NET)
+	}
+
+}
+
+func ProjectNotFoundOnCreateBatches(t *testing.T) {
+
+	// given
+	token := "some-token"
+	projectName := "unknow-project"
+	batchName := "my-little-batch"
+	dockerImageName := "mydockerimage"
+	dockerImageContent := squarescale.DockerImageInfos{
+		Name: dockerImageName,
+	}
+	batchCommonContent := squarescale.BatchCommon{
+		Name: batchName,
+	}
+	batchOrderContent := squarescale.BatchOrder{
+		BatchCommon: batchCommonContent,
+		DockerImage: dockerImageContent,
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		resBody := `{"error":"No project found for config name: unknown-project"}`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.WriteHeader(404)
+
+		w.Write([]byte(resBody))
+
+	}))
+
+	defer server.Close()
+
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, errOnGet := cli.CreateBatch(projectName, batchOrderContent)
+
+	// then
+
+	expectedError := `1 error occurred: No project found for config name: unknow-project`
+	if errOnGet == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", errOnGet) == expectedError {
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
+	}
+
+}
+
+func DuplicateBatchOnCreateBatches(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+	batchName := "my-little-batch"
+	dockerImageName := "mydockerimage"
+	dockerImageContent := squarescale.DockerImageInfos{
+		Name: dockerImageName,
+	}
+	batchCommonContent := squarescale.BatchCommon{
+		Name: batchName,
+	}
+	batchOrderContent := squarescale.BatchOrder{
+		BatchCommon: batchCommonContent,
+		DockerImage: dockerImageContent,
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		resBody := `{"error":"PG::UniqueViolation: ERROR:  duplicate key value violates unique constraint \"batch_name_uq\"\nDETAIL:  Key (name, project_id)=(batch2, 4) already exists.\n: INSERT INTO \"batches\" (\"name\", \"project_id\") VALUES ($1, $2) RETURNING \"id\""}`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.WriteHeader(409)
+
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, err := cli.CreateBatch(projectName, batchOrderContent)
+
+	// then
+	expectedError := "Batch already exist on project 'my-project'"
+	if err == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
+	}
+}
+
 func ClientHTTPErrorOnBatchMethods(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
+	batchName := "my-little-batch"
+	dockerImageName := "mydockerimage"
+	dockerImageContent := squarescale.DockerImageInfos{
+		Name: dockerImageName,
+	}
+	batchCommonContent := squarescale.BatchCommon{
+		Name: batchName,
+	}
+	batchOrderContent := squarescale.BatchOrder{
+		BatchCommon: batchCommonContent,
+		DockerImage: dockerImageContent,
+	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -247,10 +538,15 @@ func ClientHTTPErrorOnBatchMethods(t *testing.T) {
 
 	// when
 	_, errOnGet := cli.GetBatches(projectName)
+	_, errOnCreate := cli.CreateBatch(projectName, batchOrderContent)
 
 	// then
 	if errOnGet == nil {
 		t.Errorf("Error is not raised on GetBatches")
+	}
+
+	if errOnCreate == nil {
+		t.Errorf("Error is not raised on CreateBatch")
 	}
 
 }
@@ -259,6 +555,18 @@ func InternalServerErrorOnBatchMethods(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "bad-project"
+	batchName := "my-little-batch"
+	dockerImageName := "mydockerimage"
+	dockerImageContent := squarescale.DockerImageInfos{
+		Name: dockerImageName,
+	}
+	batchCommonContent := squarescale.BatchCommon{
+		Name: batchName,
+	}
+	batchOrderContent := squarescale.BatchOrder{
+		BatchCommon: batchCommonContent,
+		DockerImage: dockerImageContent,
+	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -274,6 +582,7 @@ func InternalServerErrorOnBatchMethods(t *testing.T) {
 
 	// when
 	_, errOnGet := cli.GetBatches(projectName)
+	_, errOnCreate := cli.CreateBatch(projectName, batchOrderContent)
 
 	// then
 	expectedError := "An unexpected error occurred (code: 500)"
@@ -284,18 +593,44 @@ func InternalServerErrorOnBatchMethods(t *testing.T) {
 	if fmt.Sprintf("%s", errOnGet) != expectedError {
 		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
 	}
+
+	if errOnCreate == nil {
+		t.Errorf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", errOnCreate) != expectedError {
+		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
+	}
 }
 
 func CantUnmarshalOnBatchMethods(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
+	batchName := "my-little-batch"
+	dockerImageName := "mydockerimage"
+	dockerImageContent := squarescale.DockerImageInfos{
+		Name: dockerImageName,
+	}
+	batchCommonContent := squarescale.BatchCommon{
+		Name: batchName,
+	}
+	batchOrderContent := squarescale.BatchOrder{
+		BatchCommon: batchCommonContent,
+		DockerImage: dockerImageContent,
+	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		resBody := `{]`
 
 		w.Header().Set("Content-Type", "application/json")
+
+		if r.Method == "POST" { // Manage Add
+			w.WriteHeader(201)
+		} else {
+			w.WriteHeader(200)
+		}
 
 		w.Write([]byte(resBody))
 	}))
@@ -305,6 +640,7 @@ func CantUnmarshalOnBatchMethods(t *testing.T) {
 
 	// when
 	_, errOnGet := cli.GetBatches(projectName)
+	_, errOnCreate := cli.CreateBatch(projectName, batchOrderContent)
 
 	// then
 	expectedError := "invalid character ']' looking for beginning of object key string"
@@ -314,5 +650,13 @@ func CantUnmarshalOnBatchMethods(t *testing.T) {
 
 	if fmt.Sprintf("%s", errOnGet) != expectedError {
 		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
+	}
+
+	if errOnCreate == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", errOnCreate) != expectedError {
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnCreate)
 	}
 }
