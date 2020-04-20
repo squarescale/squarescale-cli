@@ -25,6 +25,5 @@ require (
 	github.com/squarescale/actioncable-go v0.0.0-20170317113929-64a1c46f363e
 	github.com/squarescale/go-netrc v0.0.0-20160921100341-49f67159ae13
 	github.com/squarescale/logger v0.1.0
-	github.com/stretchr/testify v1.5.1 // indirect
 	golang.org/x/sys v0.0.0-20191120155948-bd437916bb0e
 )
