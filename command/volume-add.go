@@ -45,7 +45,7 @@ func (c *VolumeAddCommand) Run(args []string) int {
 
 	if !*nowait {
 		c.runWithSpinner("wait for volume add", endpoint.String(), func(client *squarescale.Client) (string, error) {
-			volume, err := client.WaitVolume(*project, *name)
+			volume, err := client.WaitVolume(*project, *name, 5)
 			if err != nil {
 				return "", err
 			} else {

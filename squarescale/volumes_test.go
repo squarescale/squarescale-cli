@@ -336,16 +336,25 @@ func nominalCaseForWaitVolume(t *testing.T) {
 	token := "some-token"
 	projectName := "my-project"
 	volumeName := "my-volume"
+	httptestCount := 0
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		var path string = r.URL.Path
+		var volumeStatus string
 
 		if path != "/projects/"+projectName+"/volumes" {
 			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/volumes", path)
 		}
 
-		resBody := `
+		httptestCount++
+
+		if httptestCount < 2 {
+			volumeStatus = "not_provisionned"
+		} else {
+			volumeStatus = "provisionned"
+		}
+		resBody := fmt.Sprintf(`
 		[
 			{
 				"id": 30,
@@ -354,10 +363,10 @@ func nominalCaseForWaitVolume(t *testing.T) {
 				"type": "gp2",
 				"zone": "eu-west-1a",
 				"statefull_node_name": "node02",
-				"status": "provisionned"
+				"status": "%s"
 			}
 		]
-		`
+		`, volumeStatus)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
@@ -373,7 +382,7 @@ func nominalCaseForWaitVolume(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.WaitVolume(projectName, volumeName)
+	_, err := cli.WaitVolume(projectName, volumeName, 0)
 
 	// then
 	if err != nil {
@@ -787,7 +796,7 @@ func InternalServerErrorCaseForWaitVolume(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.WaitVolume("my-project", "vol02c1")
+	_, err := cli.WaitVolume("my-project", "vol02c1", 0)
 
 	// then
 	if err == nil {

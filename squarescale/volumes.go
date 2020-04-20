@@ -62,7 +62,7 @@ func (c *Client) GetVolumeInfo(project, name string) (Volume, error) {
 }
 
 // WaitVolume wait the volume of a project based on its name.
-func (c *Client) WaitVolume(project, name string) (Volume, error) {
+func (c *Client) WaitVolume(project, name string, timeToWait int64) (Volume, error) {
 	volume, err := c.GetVolumeInfo(project, name)
 	if err != nil {
 		return volume, err
@@ -71,7 +71,7 @@ func (c *Client) WaitVolume(project, name string) (Volume, error) {
 	logger.Info.Println("wait for volume : ", volume.Name)
 
 	for volume.Status != "provisionned" && err == nil {
-		time.Sleep(5 * time.Second)
+		time.Sleep(time.Duration(timeToWait) * time.Second)
 		volume, err = c.GetVolumeInfo(project, name)
 		logger.Debug.Println("volume status update: ", volume.Name)
 	}
