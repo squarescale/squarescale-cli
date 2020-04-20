@@ -77,52 +77,67 @@ func nominalCaseForGetStatefullNodes(t *testing.T) {
 	// when
 	statefullNodes, err := cli.GetStatefullNodes(projectName)
 
+	// then
+	var expectedInt int
+	var expectedString string
+
 	if err != nil {
-		t.Fatalf("Expect no error, got %s", err)
+		t.Fatalf("Expect no error, got `%s`", err)
 	}
 
-	if len(statefullNodes) != 2 {
-		t.Fatalf("Expect statefull_nodes to contain one element %d, but got actually %d", 2, len(statefullNodes))
+	expectedInt = 2
+	if len(statefullNodes) != expectedInt {
+		t.Fatalf("Expect statefull_nodes to contain %d elements, but got actually %d", expectedInt, len(statefullNodes))
 	}
 
-	if statefullNodes[0].ID != 23 {
-		t.Errorf("Expect statefullNodeID `%d`, got `%d`", 23, statefullNodes[0].ID)
+	expectedInt = 23
+	if statefullNodes[0].ID != expectedInt {
+		t.Errorf("Expect statefullNode.ID `%d`, got `%d`", expectedInt, statefullNodes[0].ID)
 	}
 
-	if statefullNodes[0].Name != "nodeb" {
-		t.Errorf("Expect statefullNodeName `%s`, got `%s`", "nodeb", statefullNodes[0].Name)
+	expectedString = "nodeb"
+	if statefullNodes[0].Name != expectedString {
+		t.Errorf("Expect statefullNode.Name `%s`, got `%s`", expectedString, statefullNodes[0].Name)
 	}
 
-	if statefullNodes[0].NodeType != "t2.micro" {
-		t.Errorf("Expect statefullNodeNodeType `%s`, got `%s`", "t2.micro", statefullNodes[0].NodeType)
+	expectedString = "t2.micro"
+	if statefullNodes[0].NodeType != expectedString {
+		t.Errorf("Expect statefullNode.NodeType `%s`, got `%s`", expectedString, statefullNodes[0].NodeType)
 	}
 
-	if statefullNodes[0].Zone != "eu-west-1b" {
-		t.Errorf("Expect statefullNodeZone `%s`, got `%s`", "eu-west-1b", statefullNodes[0].Zone)
+	expectedString = "eu-west-1b"
+	if statefullNodes[0].Zone != expectedString {
+		t.Errorf("Expect statefullNode.Zone `%s`, got `%s`", expectedString, statefullNodes[0].Zone)
 	}
 
-	if statefullNodes[0].Status != "provisionned" {
-		t.Errorf("Expect statefullNodeStatus `%s`, got `%s`", "provisionned", statefullNodes[0].Status)
+	expectedString = "provisionned"
+	if statefullNodes[0].Status != expectedString {
+		t.Errorf("Expect statefullNode.Status `%s`, got `%s`", expectedString, statefullNodes[0].Status)
 	}
 
-	if statefullNodes[1].ID != 22 {
-		t.Errorf("Expect statefullNodeID `%d`, got `%d`", 22, statefullNodes[1].ID)
+	expectedInt = 22
+	if statefullNodes[1].ID != expectedInt {
+		t.Errorf("Expect statefullNode.ID `%d`, got `%d`", expectedInt, statefullNodes[1].ID)
 	}
 
-	if statefullNodes[1].Name != "test1" {
-		t.Errorf("Expect statefullNodeName `%s`, got `%s`", "test1", statefullNodes[1].Name)
+	expectedString = "test1"
+	if statefullNodes[1].Name != expectedString {
+		t.Errorf("Expect statefullNode.Name `%s`, got `%s`", expectedString, statefullNodes[1].Name)
 	}
 
-	if statefullNodes[1].NodeType != "t2.micro" {
-		t.Errorf("Expect statefullNodeNodeType `%s`, got `%s`", "t2.micro", statefullNodes[1].NodeType)
+	expectedString = "t2.micro"
+	if statefullNodes[1].NodeType != expectedString {
+		t.Errorf("Expect statefullNode.NodeType `%s`, got `%s`", expectedString, statefullNodes[1].NodeType)
 	}
 
-	if statefullNodes[1].Zone != "eu-west-1a" {
-		t.Errorf("Expect statefullNodeZone `%s`, got `%s`", "eu-west-1a", statefullNodes[1].Zone)
+	expectedString = "eu-west-1a"
+	if statefullNodes[1].Zone != expectedString {
+		t.Errorf("Expect statefullNode.Zone `%s`, got `%s`", expectedString, statefullNodes[1].Zone)
 	}
 
-	if statefullNodes[1].Status != "not_provisionned" {
-		t.Errorf("Expect statefullNodeStatus `%s`, got `%s`", "not_provisionned", statefullNodes[1].Status)
+	expectedString = "not_provisionned"
+	if statefullNodes[1].Status != expectedString {
+		t.Errorf("Expect statefullNode.Status `%s`, got `%s`", expectedString, statefullNodes[1].Status)
 	}
 }
 
@@ -159,10 +174,14 @@ func UnknownProjectOnGetStatefullNodes(t *testing.T) {
 	// when
 	_, err := cli.GetStatefullNodes("unknown-project")
 
+	expectedError := "Project 'unknown-project' does not exist"
 	if err == nil {
-		t.Fatalf("Error is not raised %s", err)
+		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
 
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+	}
 }
 
 func CannotUnmarshalOnGetStatefullNodes(t *testing.T) {
@@ -196,10 +215,14 @@ func CannotUnmarshalOnGetStatefullNodes(t *testing.T) {
 	_, err := cli.GetStatefullNodes("unknown-project")
 
 	// then
+	expectedError := "invalid character ']' looking for beginning of object key string"
 	if err == nil {
-		t.Fatalf("Error is not raised %s", err)
+		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
 
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+	}
 }
 
 func HTTPErrorOnGetStatefullNodes(t *testing.T) {
@@ -235,10 +258,16 @@ func HTTPErrorOnGetStatefullNodes(t *testing.T) {
 	_, err := cli.GetStatefullNodes("bad-project")
 
 	// then
+	expectedError := `1 error occurred:
+
+* error: Hu ho, dummy error`
 	if err == nil {
-		t.Fatalf("Error is not raised %s", err)
+		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
 
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+	}
 }
 
 func UnexpectedErrorOnGetStatefullNodes(t *testing.T) {
@@ -301,28 +330,37 @@ func nominalCaseForAddStatefullNode(t *testing.T) {
 	// when
 	newStatefullNode, err := cli.AddStatefullNode(projectName, nodeName, "t2.micro", "eu-west-1a")
 
+	// then
+	var expectedInt int
+	var expectedString string
+
 	if err != nil {
 		t.Fatalf("Expect no error, got `%s`", err)
 	}
 
-	if newStatefullNode.ID != 23 {
-		t.Errorf("Expect statefullNodeID `%d`, got `%d`", 23, newStatefullNode.ID)
+	expectedInt = 23
+	if newStatefullNode.ID != expectedInt {
+		t.Errorf("Expect statefullNode.ID `%d`, got `%d`", expectedInt, newStatefullNode.ID)
 	}
 
-	if newStatefullNode.Name != "node1a" {
-		t.Errorf("Expect statefullNodeName `%s`, got `%s`", "node1a", newStatefullNode.Name)
+	expectedString = "node1a"
+	if newStatefullNode.Name != expectedString {
+		t.Errorf("Expect statefullNode.Name `%s`, got `%s`", expectedString, newStatefullNode.Name)
 	}
 
-	if newStatefullNode.NodeType != "t2.micro" {
-		t.Errorf("Expect statefullNodeNodeType `%s`, got `%s`", "t2.micro", newStatefullNode.NodeType)
+	expectedString = "t2.micro"
+	if newStatefullNode.NodeType != expectedString {
+		t.Errorf("Expect statefullNode.NodeType `%s`, got `%s`", expectedString, newStatefullNode.NodeType)
 	}
 
-	if newStatefullNode.Zone != "eu-west-1c" {
-		t.Errorf("Expect statefullNodeZone `%s`, got `%s`", "eu-west-1c", newStatefullNode.Zone)
+	expectedString = "eu-west-1c"
+	if newStatefullNode.Zone != expectedString {
+		t.Errorf("Expect statefullNode.Zone `%s`, got `%s`", expectedString, newStatefullNode.Zone)
 	}
 
-	if newStatefullNode.Status != "not_provisionned" {
-		t.Errorf("Expect statefullNodeStatus `%s`, got `%s`", "not_provisionned", newStatefullNode.Status)
+	expectedString = "not_provisionned"
+	if newStatefullNode.Status != expectedString {
+		t.Errorf("Expect statefullNode.Status `%s`, got `%s`", expectedString, newStatefullNode.Status)
 	}
 }
 
@@ -360,8 +398,14 @@ func UnknownProjectOnAddStatefullNode(t *testing.T) {
 	// when
 	_, err := cli.AddStatefullNode("unknown-project", nodeName, "t2.micro", "eu-west-1a")
 
+	// then
+	expectedError := "Project 'unknown-project' does not exist"
 	if err == nil {
-		t.Fatalf("Error is not raised")
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -397,12 +441,14 @@ func DuplicateNodeOnAddStatefullNode(t *testing.T) {
 	// when
 	_, err := cli.AddStatefullNode(projectName, nodeName, "t2.micro", "eu-west-1a")
 
+	// then
+	expectedError := "Statefull node already exist on project 'my-project': node1a"
 	if err == nil {
-		t.Fatalf("Error is not raised")
+		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
 
-	if fmt.Sprintf("%s", err) != "Statefull node already exist on project 'my-project': node1a" {
-		t.Fatalf("Error raised is node `Statefull node already exist on project 'my-project': node1a`: `%s`", err)
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -461,10 +507,16 @@ func HTTPErrorOnAddStatefullNode(t *testing.T) {
 	_, err := cli.AddStatefullNode(projectName, nodeName, "t2.micro", "eu-west-1a")
 
 	// then
+	expectedError := `1 error occurred:
+
+* error: Hu ho, dummy error`
 	if err == nil {
-		t.Fatalf("Error is not raised %s", err)
+		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
 
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+	}
 }
 
 func CannotUnmarshalOnAddStatefullNode(t *testing.T) {
@@ -499,7 +551,12 @@ func CannotUnmarshalOnAddStatefullNode(t *testing.T) {
 	_, err := cli.AddStatefullNode(projectName, "node-in-error", "t2.micro", "eu-west-1a")
 
 	// then
+	expectedError := "invalid character ']' looking for beginning of object key string"
 	if err == nil {
-		t.Fatalf("Error is not raised")
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }

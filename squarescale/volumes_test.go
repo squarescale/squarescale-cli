@@ -56,7 +56,7 @@ func nominalCaseForVolumes(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/volumes", path)
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
 		}
 
 		resBody := `
@@ -85,7 +85,7 @@ func nominalCaseForVolumes(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -98,68 +98,86 @@ func nominalCaseForVolumes(t *testing.T) {
 	volumes, err := cli.GetVolumes(projectName)
 
 	// then
+	var expectedInt int
+	var expectedString string
+
 	if err != nil {
-		t.Fatalf("Expect no error, got %s", err)
+		t.Fatalf("Expect no error, got `%s`", err)
 	}
 
-	if len(volumes) != 2 {
-		t.Fatalf("Expect volumes to contain one element %d, but got actually %d", 2, len(volumes))
+	expectedInt = 2
+	if len(volumes) != expectedInt {
+		t.Fatalf("Expect volumes to contain one element `%d`, but got actually `%d`", expectedInt, len(volumes))
 	}
 
-	if volumes[0].ID != 30 {
-		t.Errorf("Expect volumeID %d, got %d", 30, volumes[0].ID)
+	expectedInt = 30
+	if volumes[0].ID != expectedInt {
+		t.Errorf("Expect volume.ID `%d`, got `%d`", expectedInt, volumes[0].ID)
 	}
 
-	if volumes[0].Name != "vol02a" {
-		t.Errorf("Expect volumeName %s , got %s", "vol02a", volumes[0].Name)
+	expectedString = "vol02a"
+	if volumes[0].Name != expectedString {
+		t.Errorf("Expect volume.Name `%s`, got `%s`", expectedString, volumes[0].Name)
 	}
 
-	if volumes[0].Size != 1 {
-		t.Errorf("Expect volumeSize %d , got %d", 1, volumes[0].Size)
+	expectedInt = 1
+	if volumes[0].Size != expectedInt {
+		t.Errorf("Expect volume.Size %d , got %d", expectedInt, volumes[0].Size)
 	}
 
-	if volumes[0].Type != "gp2" {
-		t.Errorf("Expect volumeType %s , got %s", "gp2", volumes[0].Type)
+	expectedString = "gp2"
+	if volumes[0].Type != expectedString {
+		t.Errorf("Expect volume.Type `%s`, got `%s`", expectedString, volumes[0].Type)
 	}
 
-	if volumes[0].Zone != "eu-west-1a" {
-		t.Errorf("Expect volumeZone %s , got %s", "eu-west-1a", volumes[0].Zone)
+	expectedString = "eu-west-1a"
+	if volumes[0].Zone != expectedString {
+		t.Errorf("Expect volume.Zone `%s`, got `%s`", expectedString, volumes[0].Zone)
 	}
 
-	if volumes[0].StatefullNodeName != "node02" {
-		t.Errorf("Expect volumeStatefullNodeName %s , got %s", "node02", volumes[0].StatefullNodeName)
+	expectedString = "node02"
+	if volumes[0].StatefullNodeName != expectedString {
+		t.Errorf("Expect volume.StatefullNodeName `%s`, got `%s`", expectedString, volumes[0].StatefullNodeName)
 	}
 
-	if volumes[0].Status != "provisionned" {
-		t.Errorf("Expect volumeStatus %s , got %s", "provisionned", volumes[0].Status)
+	expectedString = "provisionned"
+	if volumes[0].Status != expectedString {
+		t.Errorf("Expect volume.Status `%s`, got `%s`", expectedString, volumes[0].Status)
 	}
 
-	if volumes[1].ID != 31 {
-		t.Errorf("Expect volumeID %d, got %d", 31, volumes[1].ID)
+	expectedInt = 31
+	if volumes[1].ID != expectedInt {
+		t.Errorf("Expect volume.ID %d, got %d", expectedInt, volumes[1].ID)
 	}
 
-	if volumes[1].Name != "vol02b" {
-		t.Errorf("Expect volumeName %s , got %s", "vol02b", volumes[1].Name)
+	expectedString = "vol02b"
+	if volumes[1].Name != expectedString {
+		t.Errorf("Expect volume.Name `%s`, got `%s`", expectedString, volumes[1].Name)
 	}
 
-	if volumes[1].Size != 3 {
-		t.Errorf("Expect volumeSize %d , got %d", 3, volumes[1].Size)
+	expectedInt = 3
+	if volumes[1].Size != expectedInt {
+		t.Errorf("Expect volume.Size %d , got %d", expectedInt, volumes[1].Size)
 	}
 
-	if volumes[1].Type != "io1" {
-		t.Errorf("Expect volumeType %s , got %s", "io1", volumes[1].Type)
+	expectedString = "io1"
+	if volumes[1].Type != expectedString {
+		t.Errorf("Expect volume.Type `%s`, got `%s`", expectedString, volumes[1].Type)
 	}
 
-	if volumes[1].Zone != "eu-west-1b" {
-		t.Errorf("Expect volumeZone %s , got %s", "eu-west-1b", volumes[1].Zone)
+	expectedString = "eu-west-1b"
+	if volumes[1].Zone != expectedString {
+		t.Errorf("Expect volume.Zone `%s`, got `%s`", expectedString, volumes[1].Zone)
 	}
 
-	if volumes[1].StatefullNodeName != "" {
-		t.Errorf("Expect volumeStatefullNodeName %s , got %s", "", volumes[1].StatefullNodeName)
+	expectedString = ""
+	if volumes[1].StatefullNodeName != expectedString {
+		t.Errorf("Expect volume.StatefullNodeName `%s`, got `%s`", expectedString, volumes[1].StatefullNodeName)
 	}
 
-	if volumes[1].Status != "not_provisionned" {
-		t.Errorf("Expect volumeStatus %s , got %s", "not_provisionned", volumes[1].Status)
+	expectedString = "not_provisionned"
+	if volumes[1].Status != expectedString {
+		t.Errorf("Expect volume.Status `%s`, got `%s`", expectedString, volumes[1].Status)
 	}
 }
 
@@ -173,7 +191,7 @@ func nominalCaseForVolumeInfo(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/volumes", path)
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
 		}
 
 		resBody := `
@@ -202,7 +220,7 @@ func nominalCaseForVolumeInfo(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -215,32 +233,41 @@ func nominalCaseForVolumeInfo(t *testing.T) {
 	volume, err := cli.GetVolumeInfo(projectName, "vol02a")
 
 	// then
+	var expectedInt int
+	var expectedString string
+
 	if err != nil {
-		t.Fatalf("Expect no error, got %s", err)
+		t.Fatalf("Expect no error, got `%s`", err)
 	}
 
-	if volume.Name != "vol02a" {
-		t.Errorf("Expect volumeName %s , got %s", "vol02a", volume.Name)
+	expectedString = "vol02a"
+	if volume.Name != expectedString {
+		t.Errorf("Expect volume.Name `%s`, got `%s`", expectedString, volume.Name)
 	}
 
-	if volume.Size != 1 {
-		t.Errorf("Expect volumeSize %d , got %d", 1, volume.Size)
+	expectedInt = 1
+	if volume.Size != expectedInt {
+		t.Errorf("Expect volume.Size `%d` , got `%d`", expectedInt, volume.Size)
 	}
 
-	if volume.Type != "gp2" {
-		t.Errorf("Expect volumeType %s , got %s", "gp2", volume.Type)
+	expectedString = "gp2"
+	if volume.Type != expectedString {
+		t.Errorf("Expect volume.Type `%s`, got `%s`", expectedString, volume.Type)
 	}
 
-	if volume.Zone != "eu-west-1a" {
-		t.Errorf("Expect volumeZone %s , got %s", "eu-west-1a", volume.Zone)
+	expectedString = "eu-west-1a"
+	if volume.Zone != expectedString {
+		t.Errorf("Expect volume.Zone `%s`, got `%s`", expectedString, volume.Zone)
 	}
 
-	if volume.StatefullNodeName != "node02" {
-		t.Errorf("Expect volumeStatefullNodeName %s , got %s", "node02", volume.StatefullNodeName)
+	expectedString = "node02"
+	if volume.StatefullNodeName != expectedString {
+		t.Errorf("Expect volume.StatefullNodeName `%s`, got `%s`", expectedString, volume.StatefullNodeName)
 	}
 
-	if volume.Status != "provisionned" {
-		t.Errorf("Expect volumeStatus %s , got %s", "provisionned", volume.Status)
+	expectedString = "provisionned"
+	if volume.Status != expectedString {
+		t.Errorf("Expect volume.Status `%s`, got `%s`", expectedString, volume.Status)
 	}
 }
 
@@ -254,7 +281,7 @@ func nominalCaseForVolumeAdd(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/volumes", path)
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
 		}
 
 		resBody := `
@@ -273,7 +300,7 @@ func nominalCaseForVolumeAdd(t *testing.T) {
 		w.WriteHeader(201)
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -287,7 +314,7 @@ func nominalCaseForVolumeAdd(t *testing.T) {
 
 	// then
 	if err != nil {
-		t.Fatalf("Expect no error, got %s", err)
+		t.Fatalf("Expect no error, got `%s`", err)
 	}
 }
 
@@ -302,7 +329,7 @@ func nominalCaseForVolumeDelete(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes/"+volumeName {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/volumes/my-volume", path)
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "/projects/my-project/volumes/my-volume", path)
 		}
 
 		resBody := `
@@ -313,7 +340,7 @@ func nominalCaseForVolumeDelete(t *testing.T) {
 		w.WriteHeader(200)
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -327,7 +354,7 @@ func nominalCaseForVolumeDelete(t *testing.T) {
 
 	// then
 	if err != nil {
-		t.Fatalf("Expect no error, got %s", err)
+		t.Fatalf("Expect no error, got `%s`", err)
 	}
 }
 
@@ -344,7 +371,7 @@ func nominalCaseForWaitVolume(t *testing.T) {
 		var volumeStatus string
 
 		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/volumes", path)
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
 		}
 
 		httptestCount++
@@ -372,7 +399,7 @@ func nominalCaseForWaitVolume(t *testing.T) {
 		w.WriteHeader(200)
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -386,7 +413,7 @@ func nominalCaseForWaitVolume(t *testing.T) {
 
 	// then
 	if err != nil {
-		t.Fatalf("Expect no error, got %s", err)
+		t.Fatalf("Expect no error, got `%s`", err)
 	}
 }
 
@@ -400,7 +427,7 @@ func NotFoundVolumeForGetVolumeInfo(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/volumes", path)
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
 		}
 
 		resBody := `
@@ -429,7 +456,7 @@ func NotFoundVolumeForGetVolumeInfo(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -442,8 +469,13 @@ func NotFoundVolumeForGetVolumeInfo(t *testing.T) {
 	_, err := cli.GetVolumeInfo(projectName, "missing-volume")
 
 	// then
+	expectedError := "Volume 'missing-volume' not found for project 'my-project'"
 	if err == nil {
-		t.Fatalf("Error is not raised with `Volume 'missing-volume' not found for project 'my-project'`")
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -461,7 +493,7 @@ func NotFoundProjectForGetVolumeInfo(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(404)
@@ -472,11 +504,16 @@ func NotFoundProjectForGetVolumeInfo(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.GetVolumeInfo("/projects/not-a-project/volumes", "a-volume")
+	_, err := cli.GetVolumeInfo("not-a-project", "a-volume")
 
 	// then
+	expectedError := "Project 'not-a-project' does not exist"
 	if err == nil {
-		t.Fatalf("Error is not raised with `Volume 'missing-volume' not found for project 'my-project'`")
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -493,7 +530,7 @@ func DuplicateVolumeErrorCaseForVolumeAdd(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(409)
@@ -507,12 +544,13 @@ func DuplicateVolumeErrorCaseForVolumeAdd(t *testing.T) {
 	err := cli.AddVolume(projectName, "vol02c", 1, "gp2", "eu-west-1c")
 
 	// then
+	expectedError := "Volume already exist on project 'my-project': vol02c"
 	if err == nil {
-		t.Fatalf("Error is not raised")
+		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
 
-	if fmt.Sprintf("%s", err) != "Volume already exist on project 'my-project': vol02c" {
-		t.Fatalf("Error raised is node `Volume already exist on project 'my-project': vol02c`: `%s`", err)
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -528,7 +566,7 @@ func UnknownProjectErrorCaseForVolumeAdd(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(404)
@@ -542,8 +580,15 @@ func UnknownProjectErrorCaseForVolumeAdd(t *testing.T) {
 	err := cli.AddVolume("another-project", "vol02c1", 1, "gp2", "eu-west-1c")
 
 	// then
+	expectedError := `1 error occurred:
+
+* error: No project found for config name: another-project`
 	if err == nil {
-		t.Fatalf("Error is not raised %s", err)
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -576,10 +621,10 @@ func UnexpectedHTTPErrorVolumeAdd(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
-		w.WriteHeader(666)
+		w.WriteHeader(500)
 	}))
 
 	defer server.Close()
@@ -589,8 +634,13 @@ func UnexpectedHTTPErrorVolumeAdd(t *testing.T) {
 	err := cli.AddVolume(projectName, "vol02c1", 1, "gp2", "eu-west-1c")
 
 	// then
+	expectedError := "An unexpected error occurred (code: 500)"
 	if err == nil {
-		t.Fatalf("Error is not raised")
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -604,7 +654,7 @@ func CantUnmarshalOnGetVolumes(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/volumes", path)
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
 		}
 
 		resBody := `
@@ -614,7 +664,7 @@ func CantUnmarshalOnGetVolumes(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -627,8 +677,13 @@ func CantUnmarshalOnGetVolumes(t *testing.T) {
 	_, err := cli.GetVolumes(projectName)
 
 	// then
+	expectedError := "invalid character ']' looking for beginning of object key string"
 	if err == nil {
-		t.Fatalf("Expect error`invalid character ']' looking for beginning of object key string`, got %s", err)
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -650,8 +705,13 @@ func InternalServerErrorCaseForVolumes(t *testing.T) {
 	_, err := cli.GetVolumes(projectName)
 
 	// then
+	expectedError := "An unexpected error occurred (code: 500)"
 	if err == nil {
-		t.Fatalf("Error is not raised with 500 Answer")
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -685,7 +745,7 @@ func UnknownProjectErrorCaseForVolumeDelete(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(404)
@@ -699,12 +759,13 @@ func UnknownProjectErrorCaseForVolumeDelete(t *testing.T) {
 	err := cli.DeleteVolume("unknown-project", "vol02c1")
 
 	// then
+	expectedError := `{"error":"No project found for config name: unknown-project"}`
 	if err == nil {
-		t.Fatalf("Error is not raised %s", err)
+		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
 
-	if fmt.Sprintf("%s", err) != "{\"error\":\"No project found for config name: unknown-project\"}" {
-		t.Fatalf("Error raised `%s` is not `{\"error\":\"No project found for config name: unknown-project\"}`", err)
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -718,7 +779,7 @@ func UnknownVolumeErrorCaseForVolumeDelete(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(404)
@@ -732,12 +793,13 @@ func UnknownVolumeErrorCaseForVolumeDelete(t *testing.T) {
 	err := cli.DeleteVolume("my-project", "vol02c1")
 
 	// then
+	expectedError := `{"error":"No volume found for name: vol02c1"}`
 	if err == nil {
-		t.Fatalf("Error is not raised %s", err)
+		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
 
-	if fmt.Sprintf("%s", err) != "{\"error\":\"No volume found for name: vol02c1\"}" {
-		t.Fatalf("Error raised `%s` is not `{\"error\":\"No volume found for name: vol02c1\"}`", err)
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -770,10 +832,10 @@ func UnexpectedHTTPErrorVolumeDelete(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
-		w.WriteHeader(666)
+		w.WriteHeader(500)
 	}))
 
 	defer server.Close()
@@ -783,8 +845,13 @@ func UnexpectedHTTPErrorVolumeDelete(t *testing.T) {
 	err := cli.DeleteVolume(projectName, "vol02c1")
 
 	// then
+	expectedError := "An unexpected error occurred (code: 500)"
 	if err == nil {
-		t.Fatalf("Error is not raised")
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
