@@ -40,7 +40,7 @@ func nominalCaseForGetStatefullNodes(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/statefull_nodes", path)
+			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/my-project/statefull_nodes", path)
 		}
 
 		resBody := `
@@ -65,7 +65,7 @@ func nominalCaseForGetStatefullNodes(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -151,7 +151,7 @@ func UnknownProjectOnGetStatefullNodes(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/unknown-project/statefull_nodes", path)
+			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/unknown-project/statefull_nodes", path)
 		}
 
 		resBody := `
@@ -161,7 +161,7 @@ func UnknownProjectOnGetStatefullNodes(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(404)
@@ -194,7 +194,7 @@ func CannotUnmarshalOnGetStatefullNodes(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/unknown-project/statefull_nodes", path)
+			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/unknown-project/statefull_nodes", path)
 		}
 
 		resBody := `{]`
@@ -202,7 +202,7 @@ func CannotUnmarshalOnGetStatefullNodes(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -234,7 +234,7 @@ func HTTPErrorOnGetStatefullNodes(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/bad-project/statefull_nodes", path)
+			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/bad-project/statefull_nodes", path)
 		}
 
 		resBody := `
@@ -244,7 +244,7 @@ func HTTPErrorOnGetStatefullNodes(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(500)
@@ -301,7 +301,7 @@ func nominalCaseForAddStatefullNode(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/statefull_nodes", path)
+			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/my-project/statefull_nodes", path)
 		}
 
 		resBody := `
@@ -317,7 +317,7 @@ func nominalCaseForAddStatefullNode(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(201)
@@ -375,7 +375,7 @@ func UnknownProjectOnAddStatefullNode(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/unknown-project/statefull_nodes", path)
+			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/unknown-project/statefull_nodes", path)
 		}
 
 		resBody := `
@@ -385,7 +385,7 @@ func UnknownProjectOnAddStatefullNode(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(404)
@@ -420,7 +420,7 @@ func DuplicateNodeOnAddStatefullNode(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/my-project/statefull_nodes", path)
+			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/my-project/statefull_nodes", path)
 		}
 
 		resBody := `{"error":"PG::UniqueViolation: ERROR:  duplicate key value violates unique constraint \"index_statefull_nodes_on_cluster_id_and_name\"\nDETAIL:  Key (cluster_id, name)=(6163, nodeb) already exists.\n: INSERT INTO \"statefull_nodes\" (\"name\", \"node_type\", \"zone\", \"cluster_id\", \"status\") VALUES ($1, $2, $3, $4, $5) RETURNING \"id\""}`
@@ -428,7 +428,7 @@ func DuplicateNodeOnAddStatefullNode(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(409)
@@ -483,7 +483,7 @@ func HTTPErrorOnAddStatefullNode(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/bad-project/statefull_nodes", path)
+			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/bad-project/statefull_nodes", path)
 		}
 
 		resBody := `
@@ -493,7 +493,7 @@ func HTTPErrorOnAddStatefullNode(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(500)
@@ -529,7 +529,7 @@ func CannotUnmarshalOnAddStatefullNode(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/unknown-project/statefull_nodes", path)
+			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/unknown-project/statefull_nodes", path)
 		}
 
 		resBody := `{]`
@@ -537,7 +537,7 @@ func CannotUnmarshalOnAddStatefullNode(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(201)

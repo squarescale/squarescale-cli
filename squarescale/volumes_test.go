@@ -56,7 +56,7 @@ func nominalCaseForVolumes(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
 		}
 
 		resBody := `
@@ -85,7 +85,7 @@ func nominalCaseForVolumes(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -191,7 +191,7 @@ func nominalCaseForVolumeInfo(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
 		}
 
 		resBody := `
@@ -220,7 +220,7 @@ func nominalCaseForVolumeInfo(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -281,7 +281,7 @@ func nominalCaseForVolumeAdd(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
 		}
 
 		resBody := `
@@ -300,7 +300,7 @@ func nominalCaseForVolumeAdd(t *testing.T) {
 		w.WriteHeader(201)
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -329,7 +329,7 @@ func nominalCaseForVolumeDelete(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes/"+volumeName {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "/projects/my-project/volumes/my-volume", path)
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "/projects/my-project/volumes/my-volume", path)
 		}
 
 		resBody := `
@@ -340,7 +340,7 @@ func nominalCaseForVolumeDelete(t *testing.T) {
 		w.WriteHeader(200)
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -371,7 +371,7 @@ func nominalCaseForWaitVolume(t *testing.T) {
 		var volumeStatus string
 
 		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
 		}
 
 		httptestCount++
@@ -399,7 +399,7 @@ func nominalCaseForWaitVolume(t *testing.T) {
 		w.WriteHeader(200)
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -427,7 +427,7 @@ func NotFoundVolumeForGetVolumeInfo(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
 		}
 
 		resBody := `
@@ -456,7 +456,7 @@ func NotFoundVolumeForGetVolumeInfo(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -493,7 +493,7 @@ func NotFoundProjectForGetVolumeInfo(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(404)
@@ -530,7 +530,7 @@ func DuplicateVolumeErrorCaseForVolumeAdd(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(409)
@@ -566,7 +566,7 @@ func UnknownProjectErrorCaseForVolumeAdd(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(404)
@@ -621,7 +621,7 @@ func UnexpectedHTTPErrorVolumeAdd(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(500)
@@ -654,7 +654,7 @@ func CantUnmarshalOnGetVolumes(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
 		}
 
 		resBody := `
@@ -664,7 +664,7 @@ func CantUnmarshalOnGetVolumes(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -745,7 +745,7 @@ func UnknownProjectErrorCaseForVolumeDelete(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(404)
@@ -779,7 +779,7 @@ func UnknownVolumeErrorCaseForVolumeDelete(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(404)
@@ -832,7 +832,7 @@ func UnexpectedHTTPErrorVolumeDelete(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.WriteHeader(500)
