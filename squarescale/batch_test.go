@@ -30,7 +30,7 @@ func nominalCase(t *testing.T) {
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/batches" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "/projects/titi/batches", path)
+			t.Fatalf("Wrong path! Expected %s, got %s", "/projects/titi/batches", path)
 		}
 
 		resBody := `
@@ -70,7 +70,7 @@ func nominalCase(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong path ! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
 		w.Write([]byte(resBody))
@@ -84,96 +84,122 @@ func nominalCase(t *testing.T) {
 	batches, err := cli.GetBatches(projectName)
 
 	// then
+	var expectedInt int
+	var expectedString string
+	var expectedBool bool
+
 	if err != nil {
 		t.Fatalf("Expect no error, got %s", err)
 	}
 
-	if len(batches) != 1 {
-		t.Fatalf("Expect batches to contain one element %d, but got actually %d", 1, len(batches))
+	expectedInt = 1
+	if len(batches) != expectedInt {
+		t.Fatalf("Expected batches to contain %d element, but got actually %d", expectedInt, len(batches))
 	}
 
-	if batches[0].Name != "my-little-batch" {
-		t.Errorf("Expect batchName %s , got %s", "my-little-batch", batches[0].Name)
+	expectedString = "my-little-batch"
+	if batches[0].Name != expectedString {
+		t.Errorf("Expected batches.Name to be '%s', but got '%s' instead", expectedString, batches[0].Name)
 	}
 
-	if batches[0].Periodic != true {
-		t.Errorf("Expect batchPeriodic %s , got %t", "true", batches[0].Periodic)
+	expectedBool = true
+	if batches[0].Periodic != expectedBool {
+		t.Errorf("Expected batches.Periodic to be '%t', but got '%t' instead", expectedBool, batches[0].Periodic)
 	}
 
-	if batches[0].CronExpression != "* * * * *" {
-		t.Errorf("Expect batchCronExpression %s , got %s", "* * * * *", batches[0].CronExpression)
+	expectedString = "* * * * *"
+	if batches[0].CronExpression != expectedString {
+		t.Errorf("Expected batches.CronExpression to be '%s', but got '%s' instead", expectedString, batches[0].CronExpression)
 	}
 
-	if batches[0].TimeZoneName != "Europe/Paris" {
-		t.Errorf("Expect batchTimeZoneName %s , got %s", "Europe/Paris", batches[0].TimeZoneName)
+	expectedString = "Europe/Paris"
+	if batches[0].TimeZoneName != expectedString {
+		t.Errorf("Expected batches.TimeZoneName to be '%s', but got '%s' instead", expectedString, batches[0].TimeZoneName)
 	}
 
-	if batches[0].Limits.Memory != 256 {
-		t.Errorf("Expect batchesLimitsMemory %d , got %d", 256, batches[0].Limits.Memory)
+	expectedInt = 256
+	if batches[0].Limits.Memory != expectedInt {
+		t.Errorf("Expected batches.Limits.Memory to be %d, but got %d instead", expectedInt, batches[0].Limits.Memory)
 	}
 
-	if batches[0].Limits.CPU != 100 {
-		t.Errorf("Expect batchesLimitsCPU %d , got %d", 100, batches[0].Limits.CPU)
+	expectedInt = 100
+	if batches[0].Limits.CPU != expectedInt {
+		t.Errorf("Expected batches.Limits.CPU to be %d, but got %d instead", expectedInt, batches[0].Limits.CPU)
 	}
 
-	if batches[0].Limits.NET != 1 {
-		t.Errorf("Expect batchesLimitsNet %d , got %d", 1, batches[0].Limits.NET)
+	expectedInt = 1
+	if batches[0].Limits.NET != expectedInt {
+		t.Errorf("Expected batches.Limits.NET to be %d, but got %d instead", expectedInt, batches[0].Limits.NET)
 	}
 
-	if batches[0].Limits.IOPS != 0 {
-		t.Errorf("Expect batchesLimitsIops %d , got %d", 0, batches[0].Limits.IOPS)
+	expectedInt = 0
+	if batches[0].Limits.IOPS != expectedInt {
+		t.Errorf("Expected batches.Limits.IOPS to be %d, but got %d instead", expectedInt, batches[0].Limits.IOPS)
 	}
 
-	if batches[0].CustomEnvironment != "final-environment" {
-		t.Errorf("Expect batchesCustomEnvironment %s , got %s", "final-environment", batches[0].CustomEnvironment)
+	expectedString = "final-environment"
+	if batches[0].CustomEnvironment != expectedString {
+		t.Errorf("Expected batches.CustomEnvironment to be '%s', but got '%s' instead", expectedString, batches[0].CustomEnvironment)
 	}
 
-	if batches[0].DefaultEnvironment != "basic-environment" {
-		t.Errorf("Expect batchesDefaultEnvironment %s , got %s", "basic-environment", batches[0].DefaultEnvironment)
+	expectedString = "basic-environment"
+	if batches[0].DefaultEnvironment != expectedString {
+		t.Errorf("Expected batches.DefaultEnvironment to be '%s', but got '%s' instead", expectedString, batches[0].DefaultEnvironment)
 	}
 
-	if len(batches[0].RunCommand) != 1 {
-		t.Errorf("Expect batchesRunCommand length of %d , got %d", 1, len(batches[0].RunCommand))
+	expectedInt = 1
+	if len(batches[0].RunCommand) != expectedInt {
+		t.Errorf("Expected batches.RunCommand to contain one element %d, but got actually %d", expectedInt, len(batches[0].RunCommand))
 	}
 
-	if batches[0].RunCommand[0] != "command1" {
-		t.Errorf("Expect batchesRunCommand %s , got %d", "command1", len(batches[0].RunCommand))
+	expectedString = "command1"
+	if batches[0].RunCommand[0] != expectedString {
+		t.Errorf("Expected batches.RunCommand to be '%s', but got '%s' instead", expectedString, batches[0].RunCommand[0])
 	}
 
-	if batches[0].Status.Infra != "ok" {
-		t.Errorf("Expect batchesStatusInfrastructures %s , got %s", "ok", batches[0].Status.Infra)
+	expectedString = "ok"
+	if batches[0].Status.Infra != expectedString {
+		t.Errorf("Expected batches.Status.Infra to be '%s', but got '%s' instead", expectedString, batches[0].Status.Infra)
 	}
 
-	if batches[0].Status.Schedule.Running != 0 {
-		t.Errorf("Expect batchesStatusRunning %d , got %d", 0, batches[0].Status.Schedule.Running)
+	expectedInt = 0
+	if batches[0].Status.Schedule.Running != expectedInt {
+		t.Errorf("Expected batches.Status.Schedule.Running to be %d, but got %d instead", expectedInt, batches[0].Status.Schedule.Running)
 	}
 
-	if batches[0].Status.Schedule.Instances != 0 {
-		t.Errorf("Expect batchesStatusInstances %d , got %d", 0, batches[0].Status.Schedule.Instances)
+	expectedInt = 0
+	if batches[0].Status.Schedule.Instances != expectedInt {
+		t.Errorf("Expected batches.Status.Schedule.Instances to be %d, but got %d instead", expectedInt, batches[0].Status.Schedule.Instances)
 	}
 
-	if batches[0].Status.Schedule.Level != "ok" {
-		t.Errorf("Expect batchesStatusLevel %s , got %s", "ok", batches[0].Status.Schedule.Level)
+	expectedString = "ok"
+	if batches[0].Status.Schedule.Level != expectedString {
+		t.Errorf("Expected batches.Status.Schedule.Level to be '%s', but got '%s' instead", expectedString, batches[0].Status.Schedule.Level)
 	}
 
-	if batches[0].Status.Schedule.Message != "Scheduled" {
-		t.Errorf("Expect batchesStatusMessage %s , got %s", "Scheduled", batches[0].Status.Schedule.Message)
+	expectedString = "Scheduled"
+	if batches[0].Status.Schedule.Message != expectedString {
+		t.Errorf("Expected batches.Status.Schedule.Message to be '%s', but got '%s' instead", expectedString, batches[0].Status.Schedule.Message)
 	}
 
-	if batches[0].DockerImage.Name != "my-little-image" {
-		t.Errorf("Expect batchesDockerImageName %s , got %s", "my-little-image", batches[0].DockerImage.Name)
+	expectedString = "my-little-image"
+	if batches[0].DockerImage.Name != expectedString {
+		t.Errorf("Expected batches.DockerImage.Name to be '%s', but got '%s' instead", expectedString, batches[0].DockerImage.Name)
 	}
 
-	if len(batches[0].RefreshUrl) != 1 {
-		t.Errorf("Expect batchesRefreshUrl length of %d , got %d", 1, len(batches[0].RefreshUrl))
+	expectedInt = 1
+	if len(batches[0].RefreshUrl) != expectedInt {
+		t.Errorf("Expected batches.RefreshUrl to contain one element %d, but got actually %d", expectedInt, len(batches[0].RefreshUrl))
 	}
 
-	if batches[0].RefreshUrl[0] != "new-url" {
-		t.Errorf("Expect batchesRefreshUrl %s , got %s", "new-url", batches[0].RefreshUrl[0])
+	expectedString = "new-url"
+	if batches[0].RefreshUrl[0] != expectedString {
+		t.Errorf("Expected batches.RefreshUrl to be '%s', but got '%s' instead", expectedString, batches[0].RefreshUrl[0])
 	}
 
-	if batches[0].Volumes != "volume1" {
-		t.Errorf("Expect batchesRefreshUrl %s , got %s", "volume1", batches[0].Volumes)
+	expectedString = "volume1"
+	if batches[0].Volumes != expectedString {
+		t.Errorf("Expected batches.Volumes to be '%s', but got '%s' instead", expectedString, batches[0].Volumes)
 	}
 
 }
