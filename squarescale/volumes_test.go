@@ -16,7 +16,6 @@ func TestGetVolumes(t *testing.T) {
 
 	t.Run("test badly JSON", CantUnmarshalOnGetVolumes)
 	t.Run("test Internal Server Error ", InternalServerErrorCaseForVolumes)
-	t.Run("test HTTP error", UnexpectedErrorOnGetVolumes)
 
 	// GetVolumeInfo
 	t.Run("nominal volume info", nominalCaseForVolumeInfo)
@@ -29,7 +28,6 @@ func TestGetVolumes(t *testing.T) {
 
 	t.Run("test Duplicate volume name on VolumeAdd", DuplicateVolumeErrorCaseForVolumeAdd)
 	t.Run("test Unknown project on VolumeAdd", UnknownProjectErrorCaseForVolumeAdd)
-	t.Run("test Internal Server Error on VolumeAdd", InternalServerErrorCaseForVolumeAdd)
 	t.Run("test HTTP Error on VolumeAdd", UnexpectedHTTPErrorVolumeAdd)
 
 	// DeleteVolume
@@ -37,13 +35,13 @@ func TestGetVolumes(t *testing.T) {
 
 	t.Run("test Unknown project on VolumeDelete", UnknownProjectErrorCaseForVolumeDelete)
 	t.Run("test Unknown project on VolumeDelete", UnknownVolumeErrorCaseForVolumeDelete)
-	t.Run("test Internal Server Error on VolumeDelete", InternalServerErrorCaseForVolumeDelete)
 	t.Run("test HTTP Error on VolumeDelete", UnexpectedHTTPErrorVolumeDelete)
 
 	// WaitVolume
 	t.Run("nominal volume wait", nominalCaseForWaitVolume)
 
-	t.Run("test Internal Server Error on WaitVolume", InternalServerErrorCaseForWaitVolume)
+	// Error cases
+	t.Run("test HTTP client error on Volume commands (get, add, delete and wait)", ClientHTTPErrorForVolumesMethods)
 }
 
 func nominalCaseForVolumes(t *testing.T) {
@@ -592,26 +590,6 @@ func UnknownProjectErrorCaseForVolumeAdd(t *testing.T) {
 	}
 }
 
-func InternalServerErrorCaseForVolumeAdd(t *testing.T) {
-	// given
-	token := "some-token"
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(500)
-	}))
-
-	defer server.Close()
-	cli := squarescale.NewClient(server.URL, token)
-
-	// when
-	err := cli.AddVolume("another-project", "vol02c1", 1, "gp2", "eu-west-1c")
-
-	// then
-	if err == nil {
-		t.Fatalf("Error is not raised")
-	}
-}
-
 func UnexpectedHTTPErrorVolumeAdd(t *testing.T) {
 	// given
 	token := "some-token"
@@ -715,26 +693,6 @@ func InternalServerErrorCaseForVolumes(t *testing.T) {
 	}
 }
 
-func UnexpectedErrorOnGetVolumes(t *testing.T) {
-	// given
-	token := "some-token"
-	projectName := "my-project"
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	}))
-
-	defer server.Close()
-	cli := squarescale.NewClient(server.URL, token)
-
-	// when
-	_, err := cli.GetVolumes(projectName)
-
-	// then
-	if err == nil {
-		t.Fatalf("Error is not raised")
-	}
-}
-
 func UnknownProjectErrorCaseForVolumeDelete(t *testing.T) {
 	// given
 	token := "some-token"
@@ -803,26 +761,6 @@ func UnknownVolumeErrorCaseForVolumeDelete(t *testing.T) {
 	}
 }
 
-func InternalServerErrorCaseForVolumeDelete(t *testing.T) {
-	// given
-	token := "some-token"
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(500)
-	}))
-
-	defer server.Close()
-	cli := squarescale.NewClient(server.URL, token)
-
-	// when
-	err := cli.DeleteVolume("my-project", "vol02c1")
-
-	// then
-	if err == nil {
-		t.Fatalf("Error is not raised")
-	}
-}
-
 func UnexpectedHTTPErrorVolumeDelete(t *testing.T) {
 	// given
 	token := "some-token"
@@ -855,22 +793,36 @@ func UnexpectedHTTPErrorVolumeDelete(t *testing.T) {
 	}
 }
 
-func InternalServerErrorCaseForWaitVolume(t *testing.T) {
+func ClientHTTPErrorForVolumesMethods(t *testing.T) {
 	// given
 	token := "some-token"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(500)
 	}))
 
 	defer server.Close()
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.WaitVolume("my-project", "vol02c1", 0)
+	_, errOnGet := cli.GetVolumes("another-project")
+	errOnAdd := cli.AddVolume("another-project", "vol02c1", 1, "gp2", "eu-west-1c")
+	errOnDelete := cli.DeleteVolume("my-project", "vol02c1")
+	_, errOnWait := cli.WaitVolume("my-project", "vol02c1", 0)
 
 	// then
-	if err == nil {
-		t.Fatalf("Error is not raised")
+	if errOnGet == nil {
+		t.Errorf("Error is not raised for GetVolumes")
+	}
+
+	if errOnAdd == nil {
+		t.Errorf("Error is not raised for AddVolume")
+	}
+
+	if errOnDelete == nil {
+		t.Errorf("Error is not raised for DeleteVolume")
+	}
+
+	if errOnWait == nil {
+		t.Errorf("Error is not raised for WaitVolume")
 	}
 }
