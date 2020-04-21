@@ -180,7 +180,7 @@ func UnknownProjectOnGetStatefullNodes(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -221,7 +221,7 @@ func CannotUnmarshalOnGetStatefullNodes(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -266,7 +266,7 @@ func HTTPErrorOnGetStatefullNodes(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -405,7 +405,7 @@ func UnknownProjectOnAddStatefullNode(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -448,7 +448,7 @@ func DuplicateNodeOnAddStatefullNode(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -515,7 +515,7 @@ func HTTPErrorOnAddStatefullNode(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -557,6 +557,6 @@ func CannotUnmarshalOnAddStatefullNode(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }

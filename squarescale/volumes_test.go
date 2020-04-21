@@ -475,7 +475,7 @@ func NotFoundVolumeForGetVolumeInfo(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -513,7 +513,7 @@ func NotFoundProjectForGetVolumeInfo(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -550,7 +550,7 @@ func DuplicateVolumeErrorCaseForVolumeAdd(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -588,7 +588,7 @@ func UnknownProjectErrorCaseForVolumeAdd(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -640,7 +640,7 @@ func UnexpectedHTTPErrorVolumeAdd(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -683,7 +683,7 @@ func CantUnmarshalOnGetVolumes(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -711,7 +711,7 @@ func InternalServerErrorCaseForVolumes(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -765,7 +765,7 @@ func UnknownProjectErrorCaseForVolumeDelete(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -799,7 +799,7 @@ func UnknownVolumeErrorCaseForVolumeDelete(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -851,7 +851,7 @@ func UnexpectedHTTPErrorVolumeDelete(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expexted error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
