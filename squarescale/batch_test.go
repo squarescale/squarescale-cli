@@ -23,14 +23,22 @@ func nominalCase(t *testing.T) {
 
 	// given
 	token := "some-token"
-	projectName := "titi"
+	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		var path string = r.URL.Path
+		var expectedPath string
+		var expectedToken string
 
-		if path != "/projects/"+projectName+"/batches" {
-			t.Fatalf("Wrong path! Expected %s, got %s", "/projects/titi/batches", path)
+		expectedPath = "/projects/" + projectName + "/batches"
+		if path != expectedPath {
+			t.Fatalf("Wrong path! Expected '%s', got '%s'", expectedPath, path)
+		}
+
+		expectedToken = "bearer some-token"
+		if (r.Header.Get("Authorization")) != expectedToken {
+			t.Fatalf("Wrong token! Expected '%s', got '%s'", expectedToken, r.Header.Get("Authorization"))
 		}
 
 		resBody := `
@@ -68,10 +76,6 @@ func nominalCase(t *testing.T) {
 		`
 
 		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.Write([]byte(resBody))
 	}))
@@ -208,9 +212,23 @@ func NotFoundCase(t *testing.T) {
 
 	// given
 	token := "some-token"
-	projectName := "titi"
+	projectName := "unknow-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		var path string = r.URL.Path
+		var expectedPath string
+		var expectedToken string
+
+		expectedPath = "/projects/" + projectName + "/batches"
+		if path != expectedPath {
+			t.Fatalf("Wrong path! Expected '%s', got '%s'", expectedPath, path)
+		}
+
+		expectedToken = "bearer some-token"
+		if (r.Header.Get("Authorization")) != expectedToken {
+			t.Fatalf("Wrong token! Expected '%s', got '%s'", expectedToken, r.Header.Get("Authorization"))
+		}
 
 		w.Header().Set("Content-Type", "application/json")
 
@@ -236,9 +254,23 @@ func NotFoundCase(t *testing.T) {
 func InternalServerErrorCase(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "titi"
+	projectName := "bad-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		var path string = r.URL.Path
+		var expectedPath string
+		var expectedToken string
+
+		expectedPath = "/projects/" + projectName + "/batches"
+		if path != expectedPath {
+			t.Fatalf("Wrong path! Expected '%s', but got '%s'instead", expectedPath, path)
+		}
+
+		expectedToken = "bearer some-token"
+		if (r.Header.Get("Authorization")) != expectedToken {
+			t.Fatalf("Wrong token! Expected '%s', but got '%s' instead", expectedToken, r.Header.Get("Authorization"))
+		}
 
 		w.Header().Set("Content-Type", "application/json")
 
