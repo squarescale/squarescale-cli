@@ -15,7 +15,6 @@ func TestGetVolumes(t *testing.T) {
 	t.Run("nominal get volumes", nominalCaseForVolumes)
 
 	t.Run("test badly JSON", CantUnmarshalOnGetVolumes)
-	t.Run("test Internal Server Error ", InternalServerErrorCaseForVolumes)
 
 	// GetVolumeInfo
 	t.Run("nominal volume info", nominalCaseForVolumeInfo)
@@ -28,20 +27,19 @@ func TestGetVolumes(t *testing.T) {
 
 	t.Run("test Duplicate volume name on VolumeAdd", DuplicateVolumeErrorCaseForVolumeAdd)
 	t.Run("test Unknown project on VolumeAdd", UnknownProjectErrorCaseForVolumeAdd)
-	t.Run("test HTTP Error on VolumeAdd", UnexpectedHTTPErrorVolumeAdd)
 
 	// DeleteVolume
 	t.Run("nominal volume delete", nominalCaseForVolumeDelete)
 
 	t.Run("test Unknown project on VolumeDelete", UnknownProjectErrorCaseForVolumeDelete)
 	t.Run("test Unknown project on VolumeDelete", UnknownVolumeErrorCaseForVolumeDelete)
-	t.Run("test HTTP Error on VolumeDelete", UnexpectedHTTPErrorVolumeDelete)
 
 	// WaitVolume
 	t.Run("nominal volume wait", nominalCaseForWaitVolume)
 
 	// Error cases
-	t.Run("test HTTP client error on Volume commands (get, add, delete and wait)", ClientHTTPErrorForVolumesMethods)
+	t.Run("test HTTP client error on Volume commands (get, add, delete and wait)", ClientHTTPErrorOnVolumesMethods)
+	t.Run("test internal server error on Volume commands (get, add, delete and wait)", InternalServerErrorOnVolumeMethods)
 }
 
 func nominalCaseForVolumes(t *testing.T) {
@@ -590,38 +588,6 @@ func UnknownProjectErrorCaseForVolumeAdd(t *testing.T) {
 	}
 }
 
-func UnexpectedHTTPErrorVolumeAdd(t *testing.T) {
-	// given
-	token := "some-token"
-	projectName := "my-project"
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
-		}
-
-		w.WriteHeader(500)
-	}))
-
-	defer server.Close()
-	cli := squarescale.NewClient(server.URL, token)
-
-	// when
-	err := cli.AddVolume(projectName, "vol02c1", 1, "gp2", "eu-west-1c")
-
-	// then
-	expectedError := "An unexpected error occurred (code: 500)"
-	if err == nil {
-		t.Fatalf("Error is not raised with `%s`", expectedError)
-	}
-
-	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
-	}
-}
-
 func CantUnmarshalOnGetVolumes(t *testing.T) {
 	// given
 	token := "some-token"
@@ -656,34 +622,6 @@ func CantUnmarshalOnGetVolumes(t *testing.T) {
 
 	// then
 	expectedError := "invalid character ']' looking for beginning of object key string"
-	if err == nil {
-		t.Fatalf("Error is not raised with `%s`", expectedError)
-	}
-
-	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
-	}
-}
-
-func InternalServerErrorCaseForVolumes(t *testing.T) {
-	// given
-	token := "some-token"
-	projectName := "my-project"
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-
-		w.WriteHeader(500)
-	}))
-
-	defer server.Close()
-	cli := squarescale.NewClient(server.URL, token)
-
-	// when
-	_, err := cli.GetVolumes(projectName)
-
-	// then
-	expectedError := "An unexpected error occurred (code: 500)"
 	if err == nil {
 		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
@@ -761,39 +699,7 @@ func UnknownVolumeErrorCaseForVolumeDelete(t *testing.T) {
 	}
 }
 
-func UnexpectedHTTPErrorVolumeDelete(t *testing.T) {
-	// given
-	token := "some-token"
-	projectName := "my-project"
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
-		}
-
-		w.WriteHeader(500)
-	}))
-
-	defer server.Close()
-	cli := squarescale.NewClient(server.URL, token)
-
-	// when
-	err := cli.DeleteVolume(projectName, "vol02c1")
-
-	// then
-	expectedError := "An unexpected error occurred (code: 500)"
-	if err == nil {
-		t.Fatalf("Error is not raised with `%s`", expectedError)
-	}
-
-	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
-	}
-}
-
-func ClientHTTPErrorForVolumesMethods(t *testing.T) {
+func ClientHTTPErrorOnVolumesMethods(t *testing.T) {
 	// given
 	token := "some-token"
 
@@ -824,5 +730,50 @@ func ClientHTTPErrorForVolumesMethods(t *testing.T) {
 
 	if errOnWait == nil {
 		t.Errorf("Error is not raised for WaitVolume")
+	}
+}
+
+func InternalServerErrorOnVolumeMethods(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(500)
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, errOnGetVolumes := cli.GetVolumes(projectName)
+	errOnAddVolume := cli.AddVolume(projectName, "vol02c1", 1, "gp2", "eu-west-1c")
+	errOnDeleteVolume := cli.DeleteVolume(projectName, "vol02c1")
+
+	// then
+	expectedError := "An unexpected error occurred (code: 500)"
+	if errOnGetVolumes == nil {
+		t.Errorf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", errOnGetVolumes) != expectedError {
+		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnGetVolumes)
+	}
+
+	if errOnAddVolume == nil {
+		t.Errorf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", errOnAddVolume) != expectedError {
+		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnAddVolume)
+	}
+
+	if errOnDeleteVolume == nil {
+		t.Errorf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", errOnDeleteVolume) != expectedError {
+		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnDeleteVolume)
 	}
 }
