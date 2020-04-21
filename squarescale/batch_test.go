@@ -8,18 +8,16 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-func TestGetBatches(t *testing.T) {
+func TestBatches(t *testing.T) {
 
-	// nominal case
-	t.Run("nominal get batches", nominalCase)
+	// getBatches
+	t.Run("nominal get batches", nominalCaseForGetBatches)
+	t.Run("test unknown project", UnknownProjectOnGetBatches)
 
-	// other cases
-	t.Run("test of Not Found Page", NotFoundCase)
-	t.Run("test of Internal Server Error ", InternalServerErrorCase)
-
+	t.Run("test Internal Server error", HTTPErrorOnGetBatches)
 }
 
-func nominalCase(t *testing.T) {
+func nominalCaseForGetBatches(t *testing.T) {
 
 	// given
 	token := "some-token"
@@ -208,7 +206,7 @@ func nominalCase(t *testing.T) {
 
 }
 
-func NotFoundCase(t *testing.T) {
+func UnknownProjectOnGetBatches(t *testing.T) {
 
 	// given
 	token := "some-token"
@@ -254,7 +252,7 @@ func NotFoundCase(t *testing.T) {
 
 }
 
-func InternalServerErrorCase(t *testing.T) {
+func HTTPErrorOnGetBatches(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "bad-project"
