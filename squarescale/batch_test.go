@@ -230,9 +230,12 @@ func NotFoundCase(t *testing.T) {
 			t.Fatalf("Wrong token! Expected '%s', got '%s'", expectedToken, r.Header.Get("Authorization"))
 		}
 
+		resBody := `{"error":"No project found for config name: unknown-project"}`
+
 		w.Header().Set("Content-Type", "application/json")
 
 		w.WriteHeader(404)
+		w.Write([]byte(resBody))
 
 	}))
 
@@ -246,7 +249,7 @@ func NotFoundCase(t *testing.T) {
 	// then
 
 	if err == nil {
-		t.Fatalf("Error is not raised with 404 Answer")
+		t.Fatalf("Error is not raised: error = %s", err)
 	}
 
 }
@@ -272,9 +275,12 @@ func InternalServerErrorCase(t *testing.T) {
 			t.Fatalf("Wrong token! Expected '%s', but got '%s' instead", expectedToken, r.Header.Get("Authorization"))
 		}
 
+		resBody := `{"error":"Hu ho, dummy error"}`
+
 		w.Header().Set("Content-Type", "application/json")
 
 		w.WriteHeader(500)
+		w.Write([]byte(resBody))
 
 	}))
 
@@ -288,6 +294,6 @@ func InternalServerErrorCase(t *testing.T) {
 	// then
 
 	if err == nil {
-		t.Fatalf("Error is not raised with 500 Answer")
+		t.Fatalf("Error is not raised: error = %s", err)
 	}
 }
