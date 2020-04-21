@@ -175,7 +175,7 @@ func UnknownProjectOnGetStatefullNodes(t *testing.T) {
 	_, err := cli.GetStatefullNodes("unknown-project")
 
 	expectedError := "Project 'unknown-project' does not exist"
-	if err != nil {
+	if err == nil {
 		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
 
