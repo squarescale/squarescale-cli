@@ -1,6 +1,7 @@
 package squarescale_test
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,7 +13,7 @@ func TestBatches(t *testing.T) {
 
 	// getBatches
 	t.Run("Nominal case on getBatches", nominalCaseOnGetBatches)
-	//t.Run("test unknown project", UnknownProjectOnGetBatches)
+	t.Run("Test project not found on getBatches", ProjectNotFoundOnGetBatches)
 
 	//Error Cases
 	t.Run("Test HTTP client error on batch methods (get)", ClientHTTPErrorOnBatchMethods)
@@ -208,6 +209,51 @@ func nominalCaseOnGetBatches(t *testing.T) {
 
 }
 
+func ProjectNotFoundOnGetBatches(t *testing.T) {
+
+	// given
+	token := "some-token"
+	projectName := "unknow-project"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		var expectedToken string
+
+		expectedToken = "bearer some-token"
+		if (r.Header.Get("Authorization")) != expectedToken {
+			t.Fatalf("Wrong token! Expected '%s', got '%s'", expectedToken, r.Header.Get("Authorization"))
+		}
+
+		resBody := `{"error":"No project found for config name: unknown-project"}`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.WriteHeader(404)
+
+		w.Write([]byte(resBody))
+
+	}))
+
+	defer server.Close()
+
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, errOnGet := cli.GetBatches(projectName)
+
+	// then
+
+	expectedError := `1 error occurred: No project found for config name: unknow-project`
+	if errOnGet == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", errOnGet) == expectedError {
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
+	}
+
+}
+
 func ClientHTTPErrorOnBatchMethods(t *testing.T) {
 	// given
 	token := "some-token"
@@ -256,50 +302,4 @@ func InternalServerErrorOnVolumeMethods(t *testing.T) {
 	if errOnGet == nil {
 		t.Errorf("Error is not raised with `%s`", expectedError)
 	}
-}
-
-func UnknownProjectOnGetBatches(t *testing.T) {
-
-	// given
-	token := "some-token"
-	projectName := "unknow-project"
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		var path string = r.URL.Path
-		var expectedPath string
-		var expectedToken string
-
-		expectedPath = "/projects/" + projectName + "/batches"
-		if path != expectedPath {
-			t.Fatalf("Wrong path! Expected '%s', got '%s'", expectedPath, path)
-		}
-
-		expectedToken = "bearer some-token"
-		if (r.Header.Get("Authorization")) != expectedToken {
-			t.Fatalf("Wrong token! Expected '%s', got '%s'", expectedToken, r.Header.Get("Authorization"))
-		}
-
-		resBody := `{"error":"No project found for config name: unknown-project"}`
-
-		w.Header().Set("Content-Type", "application/json")
-
-		w.WriteHeader(404)
-		w.Write([]byte(resBody))
-
-	}))
-
-	defer server.Close()
-
-	cli := squarescale.NewClient(server.URL, token)
-
-	// when
-	_, err := cli.GetBatches(projectName)
-
-	// then
-
-	if err == nil {
-		t.Fatalf("Error is not raised: error = %s", err)
-	}
-
 }
