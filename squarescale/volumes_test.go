@@ -10,45 +10,42 @@ import (
 )
 
 func TestGetVolumes(t *testing.T) {
-
 	// GetVolumes
-	t.Run("nominal get volumes", nominalCaseForVolumes)
+	t.Run("Nominal case on GetVolumes", nominalCaseOnGetVolumes)
 
 	// GetVolumeInfo
-	t.Run("nominal volume info", nominalCaseForVolumeInfo)
+	t.Run("Nominal case on GetVolumeInfo", nominalCaseOnGetVolumeInfo)
 
-	t.Run("test Not Found Page", NotFoundVolumeForGetVolumeInfo)
-	t.Run("test Not Found Page", NotFoundProjectForGetVolumeInfo)
+	t.Run("Test volume not found on GetVolumeInfo", VolumeNotFoundOnGetVolumeInfo)
+	t.Run("Test project not found on GetVolumeInfo", ProjectNotFoundOnGetVolumeInfo)
 
 	// AddVolume
-	t.Run("nominal volume add", nominalCaseForVolumeAdd)
+	t.Run("Nominal case on AddVolume", nominalCaseOnAddVolume)
 
-	t.Run("test Duplicate volume name on VolumeAdd", DuplicateVolumeErrorCaseForVolumeAdd)
-	t.Run("test Unknown project on VolumeAdd", UnknownProjectErrorCaseForVolumeAdd)
+	t.Run("Test duplicate volume name on AddVolume", DuplicateVolumeErrorCaseOnAddVolume)
+	t.Run("Test project not found on AddVolume", ProjectNotFoundOnAddVolume)
 
 	// DeleteVolume
-	t.Run("nominal volume delete", nominalCaseForVolumeDelete)
+	t.Run("Nominal case on DeleteVolume", nominalCaseOnDeleteVolume)
 
-	t.Run("test Unknown project on VolumeDelete", UnknownProjectErrorCaseForVolumeDelete)
-	t.Run("test Unknown project on VolumeDelete", UnknownVolumeErrorCaseForVolumeDelete)
+	t.Run("Test volume not found on DeleteVolume", VolumeNotFoundOnDeleteVolume)
+	t.Run("Test project not found on DeleteVolume", ProjectNotFoundOnDeleteVolume)
 
 	// WaitVolume
-	t.Run("nominal volume wait", nominalCaseForWaitVolume)
+	t.Run("Nominal case on WaitVolume", nominalCaseOnWaitVolume)
 
 	// Error cases
-	t.Run("test HTTP client error on Volume commands (get, add, delete and wait)", ClientHTTPErrorOnVolumesMethods)
-	t.Run("test internal server error on Volume commands (get, add, delete and wait)", InternalServerErrorOnVolumeMethods)
-
-	t.Run("test badly JSON on Volumes methods", CantUnmarshalOnVolumesMethods)
+	t.Run("Test HTTP client error on volume methods (get, add, delete and wait)", ClientHTTPErrorOnVolumeMethods)
+	t.Run("Test internal server error on volume methods (get, add, delete and wait)", InternalServerErrorOnVolumeMethods)
+	t.Run("Test badly JSON on volume methods", CantUnmarshalOnVolumeMethods)
 }
 
-func nominalCaseForVolumes(t *testing.T) {
+func nominalCaseOnGetVolumes(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes" {
@@ -177,13 +174,12 @@ func nominalCaseForVolumes(t *testing.T) {
 	}
 }
 
-func nominalCaseForVolumeInfo(t *testing.T) {
+func nominalCaseOnGetVolumeInfo(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes" {
@@ -267,13 +263,12 @@ func nominalCaseForVolumeInfo(t *testing.T) {
 	}
 }
 
-func nominalCaseForVolumeAdd(t *testing.T) {
+func nominalCaseOnAddVolume(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes" {
@@ -314,14 +309,13 @@ func nominalCaseForVolumeAdd(t *testing.T) {
 	}
 }
 
-func nominalCaseForVolumeDelete(t *testing.T) {
+func nominalCaseOnDeleteVolume(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
 	volumeName := "my-volume"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		var path string = r.URL.Path
 
 		if path != "/projects/"+projectName+"/volumes/"+volumeName {
@@ -354,7 +348,7 @@ func nominalCaseForVolumeDelete(t *testing.T) {
 	}
 }
 
-func nominalCaseForWaitVolume(t *testing.T) {
+func nominalCaseOnWaitVolume(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -362,7 +356,6 @@ func nominalCaseForWaitVolume(t *testing.T) {
 	httptestCount := 0
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		var path string = r.URL.Path
 		var volumeStatus string
 
@@ -413,19 +406,12 @@ func nominalCaseForWaitVolume(t *testing.T) {
 	}
 }
 
-func NotFoundVolumeForGetVolumeInfo(t *testing.T) {
+func VolumeNotFoundOnGetVolumeInfo(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		var path string = r.URL.Path
-
-		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
-		}
-
 		resBody := `
 		[
 			{
@@ -475,7 +461,7 @@ func NotFoundVolumeForGetVolumeInfo(t *testing.T) {
 	}
 }
 
-func NotFoundProjectForGetVolumeInfo(t *testing.T) {
+func ProjectNotFoundOnGetVolumeInfo(t *testing.T) {
 	// given
 	token := "some-token"
 
@@ -513,7 +499,7 @@ func NotFoundProjectForGetVolumeInfo(t *testing.T) {
 	}
 }
 
-func DuplicateVolumeErrorCaseForVolumeAdd(t *testing.T) {
+func DuplicateVolumeErrorCaseOnAddVolume(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -550,7 +536,7 @@ func DuplicateVolumeErrorCaseForVolumeAdd(t *testing.T) {
 	}
 }
 
-func UnknownProjectErrorCaseForVolumeAdd(t *testing.T) {
+func ProjectNotFoundOnAddVolume(t *testing.T) {
 	// given
 	token := "some-token"
 
@@ -588,7 +574,7 @@ func UnknownProjectErrorCaseForVolumeAdd(t *testing.T) {
 	}
 }
 
-func UnknownProjectErrorCaseForVolumeDelete(t *testing.T) {
+func ProjectNotFoundOnDeleteVolume(t *testing.T) {
 	// given
 	token := "some-token"
 
@@ -622,7 +608,7 @@ func UnknownProjectErrorCaseForVolumeDelete(t *testing.T) {
 	}
 }
 
-func UnknownVolumeErrorCaseForVolumeDelete(t *testing.T) {
+func VolumeNotFoundOnDeleteVolume(t *testing.T) {
 	// given
 	token := "some-token"
 
@@ -656,7 +642,7 @@ func UnknownVolumeErrorCaseForVolumeDelete(t *testing.T) {
 	}
 }
 
-func ClientHTTPErrorOnVolumesMethods(t *testing.T) {
+func ClientHTTPErrorOnVolumeMethods(t *testing.T) {
 	// given
 	token := "some-token"
 
@@ -735,19 +721,12 @@ func InternalServerErrorOnVolumeMethods(t *testing.T) {
 	}
 }
 
-func CantUnmarshalOnVolumesMethods(t *testing.T) {
+func CantUnmarshalOnVolumeMethods(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		var path string = r.URL.Path
-
-		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
-		}
-
 		resBody := `{]`
 
 		w.Header().Set("Content-Type", "application/json")
