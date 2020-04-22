@@ -11,13 +11,14 @@ import (
 func TestBatches(t *testing.T) {
 
 	// getBatches
-	t.Run("nominal get batches", nominalCaseForGetBatches)
+	t.Run("nominal case on getBatches", nominalCaseOnGetBatches)
 	t.Run("test unknown project", UnknownProjectOnGetBatches)
 
+	t.Run("test HTTP error", UnexpectedErrorOnGetBatches)
 	t.Run("test Internal Server error", HTTPErrorOnGetBatches)
 }
 
-func nominalCaseForGetBatches(t *testing.T) {
+func nominalCaseOnGetBatches(t *testing.T) {
 
 	// given
 	token := "some-token"
@@ -248,6 +249,29 @@ func UnknownProjectOnGetBatches(t *testing.T) {
 
 	if err == nil {
 		t.Fatalf("Error is not raised: error = %s", err)
+	}
+
+}
+
+func UnexpectedErrorOnGetBatches(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+	}))
+
+	defer server.Close()
+
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, err := cli.GetBatches(projectName)
+
+	// then
+	if err == nil {
+		t.Fatalf("Error is not raised")
 	}
 
 }
