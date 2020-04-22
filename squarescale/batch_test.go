@@ -11,12 +11,12 @@ import (
 func TestBatches(t *testing.T) {
 
 	// getBatches
-	t.Run("nominal case on getBatches", nominalCaseOnGetBatches)
+	t.Run("Nominal case on getBatches", nominalCaseOnGetBatches)
 	//t.Run("test unknown project", UnknownProjectOnGetBatches)
 
 	//Error Cases
 	t.Run("Test HTTP client error on batch methods (get)", ClientHTTPErrorOnBatchMethods)
-	//t.Run("test Internal Server error", HTTPErrorOnGetBatches)
+	t.Run("Test internal server error on volume methods (get)", InternalServerErrorOnVolumeMethods)
 }
 
 func nominalCaseOnGetBatches(t *testing.T) {
@@ -231,6 +231,33 @@ func ClientHTTPErrorOnBatchMethods(t *testing.T) {
 
 }
 
+func InternalServerErrorOnVolumeMethods(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "bad-project"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.WriteHeader(500)
+
+	}))
+
+	defer server.Close()
+
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, errOnGet := cli.GetBatches(projectName)
+
+	// then
+	expectedError := "An unexpected error occurred (code: 500)"
+	if errOnGet == nil {
+		t.Errorf("Error is not raised with `%s`", expectedError)
+	}
+}
+
 func UnknownProjectOnGetBatches(t *testing.T) {
 
 	// given
@@ -275,48 +302,4 @@ func UnknownProjectOnGetBatches(t *testing.T) {
 		t.Fatalf("Error is not raised: error = %s", err)
 	}
 
-}
-
-func HTTPErrorOnGetBatches(t *testing.T) {
-	// given
-	token := "some-token"
-	projectName := "bad-project"
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		var path string = r.URL.Path
-		var expectedPath string
-		var expectedToken string
-
-		expectedPath = "/projects/" + projectName + "/batches"
-		if path != expectedPath {
-			t.Fatalf("Wrong path! Expected '%s', but got '%s'instead", expectedPath, path)
-		}
-
-		expectedToken = "bearer some-token"
-		if (r.Header.Get("Authorization")) != expectedToken {
-			t.Fatalf("Wrong token! Expected '%s', but got '%s' instead", expectedToken, r.Header.Get("Authorization"))
-		}
-
-		resBody := `{"error":"Hu ho, dummy error"}`
-
-		w.Header().Set("Content-Type", "application/json")
-
-		w.WriteHeader(500)
-		w.Write([]byte(resBody))
-
-	}))
-
-	defer server.Close()
-
-	cli := squarescale.NewClient(server.URL, token)
-
-	// when
-	_, err := cli.GetBatches(projectName)
-
-	// then
-
-	if err == nil {
-		t.Fatalf("Error is not raised: error = %s", err)
-	}
 }
