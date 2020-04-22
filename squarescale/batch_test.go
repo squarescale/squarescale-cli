@@ -12,10 +12,11 @@ func TestBatches(t *testing.T) {
 
 	// getBatches
 	t.Run("nominal case on getBatches", nominalCaseOnGetBatches)
-	t.Run("test unknown project", UnknownProjectOnGetBatches)
+	//t.Run("test unknown project", UnknownProjectOnGetBatches)
 
-	t.Run("test HTTP error", UnexpectedErrorOnGetBatches)
-	t.Run("test Internal Server error", HTTPErrorOnGetBatches)
+	//Error Cases
+	t.Run("Test HTTP client error on batch methods (get)", ClientHTTPErrorOnBatchMethods)
+	//t.Run("test Internal Server error", HTTPErrorOnGetBatches)
 }
 
 func nominalCaseOnGetBatches(t *testing.T) {
@@ -207,6 +208,29 @@ func nominalCaseOnGetBatches(t *testing.T) {
 
 }
 
+func ClientHTTPErrorOnBatchMethods(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+	}))
+
+	defer server.Close()
+
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, errOnGet := cli.GetBatches(projectName)
+
+	// then
+	if errOnGet == nil {
+		t.Errorf("Error is not raised")
+	}
+
+}
+
 func UnknownProjectOnGetBatches(t *testing.T) {
 
 	// given
@@ -249,29 +273,6 @@ func UnknownProjectOnGetBatches(t *testing.T) {
 
 	if err == nil {
 		t.Fatalf("Error is not raised: error = %s", err)
-	}
-
-}
-
-func UnexpectedErrorOnGetBatches(t *testing.T) {
-	// given
-	token := "some-token"
-	projectName := "my-project"
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-	}))
-
-	defer server.Close()
-
-	cli := squarescale.NewClient(server.URL, token)
-
-	// when
-	_, err := cli.GetBatches(projectName)
-
-	// then
-	if err == nil {
-		t.Fatalf("Error is not raised")
 	}
 
 }
