@@ -14,8 +14,6 @@ func TestGetVolumes(t *testing.T) {
 	// GetVolumes
 	t.Run("nominal get volumes", nominalCaseForVolumes)
 
-	t.Run("test badly JSON", CantUnmarshalOnGetVolumes)
-
 	// GetVolumeInfo
 	t.Run("nominal volume info", nominalCaseForVolumeInfo)
 
@@ -40,6 +38,8 @@ func TestGetVolumes(t *testing.T) {
 	// Error cases
 	t.Run("test HTTP client error on Volume commands (get, add, delete and wait)", ClientHTTPErrorOnVolumesMethods)
 	t.Run("test internal server error on Volume commands (get, add, delete and wait)", InternalServerErrorOnVolumeMethods)
+
+	t.Run("test badly JSON on Volumes methods", CantUnmarshalOnVolumesMethods)
 }
 
 func nominalCaseForVolumes(t *testing.T) {
@@ -588,49 +588,6 @@ func UnknownProjectErrorCaseForVolumeAdd(t *testing.T) {
 	}
 }
 
-func CantUnmarshalOnGetVolumes(t *testing.T) {
-	// given
-	token := "some-token"
-	projectName := "my-project"
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		var path string = r.URL.Path
-
-		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
-		}
-
-		resBody := `
-		{]
-		`
-
-		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
-		}
-
-		w.Write([]byte(resBody))
-	}))
-
-	defer server.Close()
-	cli := squarescale.NewClient(server.URL, token)
-
-	// when
-	_, err := cli.GetVolumes(projectName)
-
-	// then
-	expectedError := "invalid character ']' looking for beginning of object key string"
-	if err == nil {
-		t.Fatalf("Error is not raised with `%s`", expectedError)
-	}
-
-	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
-	}
-}
-
 func UnknownProjectErrorCaseForVolumeDelete(t *testing.T) {
 	// given
 	token := "some-token"
@@ -775,5 +732,46 @@ func InternalServerErrorOnVolumeMethods(t *testing.T) {
 
 	if fmt.Sprintf("%s", errOnDeleteVolume) != expectedError {
 		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnDeleteVolume)
+	}
+}
+
+func CantUnmarshalOnVolumesMethods(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		var path string = r.URL.Path
+
+		if path != "/projects/"+projectName+"/volumes" {
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
+		}
+
+		resBody := `{]`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		if (r.Header.Get("Authorization")) != "bearer some-token" {
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
+		}
+
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, errOnGetVolumes := cli.GetVolumes(projectName)
+
+	// then
+	expectedError := "invalid character ']' looking for beginning of object key string"
+	if errOnGetVolumes == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", errOnGetVolumes) != expectedError {
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnGetVolumes)
 	}
 }
