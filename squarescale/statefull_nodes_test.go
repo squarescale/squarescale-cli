@@ -12,12 +12,12 @@ import (
 func TestStatefullNodes(t *testing.T) {
 
 	// GetStatefullNodes
-	t.Run("Nominal case on GetStatefullNodes", nominalCaseForGetStatefullNodes)
+	t.Run("Nominal case on GetStatefullNodes", nominalCaseOnGetStatefullNodes)
 
 	t.Run("Test project not found on GetStatefullNodes", UnknownProjectOnGetStatefullNodes)
 
 	// AddStatefullNode
-	t.Run("Nominal case on AddStatefullNode", nominalCaseForAddStatefullNode)
+	t.Run("Nominal case on AddStatefullNode", nominalCaseOnAddStatefullNode)
 
 	t.Run("Test project not found on AddStatefullNode", UnknownProjectOnAddStatefullNode)
 	t.Run("Test to create a duplicate on AddStatefullNode", DuplicateNodeOnAddStatefullNode)
@@ -28,7 +28,7 @@ func TestStatefullNodes(t *testing.T) {
 	t.Run("Test badly JSON on statefull nodes methods (get, add)", CantUnmarshalOnStatefullNodeMethods)
 }
 
-func nominalCaseForGetStatefullNodes(t *testing.T) {
+func nominalCaseOnGetStatefullNodes(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -161,7 +161,7 @@ func UnknownProjectOnGetStatefullNodes(t *testing.T) {
 	}
 }
 
-func nominalCaseForAddStatefullNode(t *testing.T) {
+func nominalCaseOnAddStatefullNode(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -312,11 +312,11 @@ func ClientHTTPErrorOnStatefullNodeMethods(t *testing.T) {
 
 	// then
 	if errOnGet == nil {
-		t.Errorf("Error is not raised for GetStatefullNodes")
+		t.Errorf("Error is not raised on GetStatefullNodes")
 	}
 
 	if errOnAdd == nil {
-		t.Errorf("Error is not raised for AddStatefullNodes")
+		t.Errorf("Error is not raised on AddStatefullNodes")
 	}
 }
 

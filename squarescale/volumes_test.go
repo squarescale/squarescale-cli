@@ -641,19 +641,19 @@ func ClientHTTPErrorOnVolumeMethods(t *testing.T) {
 
 	// then
 	if errOnGet == nil {
-		t.Errorf("Error is not raised for GetVolumes")
+		t.Errorf("Error is not raised on GetVolumes")
 	}
 
 	if errOnAdd == nil {
-		t.Errorf("Error is not raised for AddVolume")
+		t.Errorf("Error is not raised on AddVolume")
 	}
 
 	if errOnDelete == nil {
-		t.Errorf("Error is not raised for DeleteVolume")
+		t.Errorf("Error is not raised on DeleteVolume")
 	}
 
 	if errOnWait == nil {
-		t.Errorf("Error is not raised for WaitVolume")
+		t.Errorf("Error is not raised on WaitVolume")
 	}
 }
 
