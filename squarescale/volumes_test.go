@@ -37,7 +37,7 @@ func TestGetVolumes(t *testing.T) {
 	// Error cases
 	t.Run("Test HTTP client error on volume methods (get, add, delete and wait)", ClientHTTPErrorOnVolumeMethods)
 	t.Run("Test internal server error on volume methods (get, add, delete and wait)", InternalServerErrorOnVolumeMethods)
-	t.Run("Test badly JSON on volume methods", CantUnmarshalOnVolumeMethods)
+	t.Run("Test badly JSON on volume methods (get)", CantUnmarshalOnVolumeMethods)
 }
 
 func nominalCaseOnGetVolumes(t *testing.T) {
@@ -46,11 +46,7 @@ func nominalCaseOnGetVolumes(t *testing.T) {
 	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var path string = r.URL.Path
-
-		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
-		}
+		checkPath(t, "/projects/"+projectName+"/volumes", r.URL.Path)
 
 		resBody := `
 		[
@@ -180,11 +176,7 @@ func nominalCaseOnGetVolumeInfo(t *testing.T) {
 	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var path string = r.URL.Path
-
-		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
-		}
+		checkPath(t, "/projects/"+projectName+"/volumes", r.URL.Path)
 
 		resBody := `
 		[
@@ -269,11 +261,7 @@ func nominalCaseOnAddVolume(t *testing.T) {
 	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var path string = r.URL.Path
-
-		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
-		}
+		checkPath(t, "/projects/"+projectName+"/volumes", r.URL.Path)
 
 		resBody := `
 		{
@@ -316,11 +304,7 @@ func nominalCaseOnDeleteVolume(t *testing.T) {
 	volumeName := "my-volume"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var path string = r.URL.Path
-
-		if path != "/projects/"+projectName+"/volumes/"+volumeName {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "/projects/my-project/volumes/my-volume", path)
-		}
+		checkPath(t, "/projects/"+projectName+"/volumes/"+volumeName, r.URL.Path)
 
 		resBody := `
 		null
@@ -356,12 +340,9 @@ func nominalCaseOnWaitVolume(t *testing.T) {
 	httptestCount := 0
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var path string = r.URL.Path
-		var volumeStatus string
+		checkPath(t, "/projects/"+projectName+"/volumes", r.URL.Path)
 
-		if path != "/projects/"+projectName+"/volumes" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "/projects/my-project/volumes", path)
-		}
+		var volumeStatus string
 
 		httptestCount++
 

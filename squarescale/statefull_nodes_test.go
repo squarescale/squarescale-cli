@@ -12,22 +12,20 @@ import (
 func TestStatefullNodes(t *testing.T) {
 
 	// GetStatefullNodes
-	t.Run("nominal get statefull nodes", nominalCaseForGetStatefullNodes)
+	t.Run("Nominal case on GetStatefullNodes", nominalCaseForGetStatefullNodes)
 
-	t.Run("test unknown project", UnknownProjectOnGetStatefullNodes)
-
-	t.Run("test HTTP error", UnexpectedErrorOnGetStatefullNodes)
-	t.Run("test Internal Server error", HTTPErrorOnGetStatefullNodes)
-	t.Run("test badly formed JSON error", CannotUnmarshalOnGetStatefullNodes)
+	t.Run("Test project not found on GetStatefullNodes", UnknownProjectOnGetStatefullNodes)
 
 	// AddStatefullNode
-	t.Run("nominal add statefull node", nominalCaseForAddStatefullNode)
-	t.Run("test unknown project", UnknownProjectOnAddStatefullNode)
-	t.Run("test to create a duplicate statefull node", DuplicateNodeOnAddStatefullNode)
+	t.Run("Nominal case on AddStatefullNode", nominalCaseForAddStatefullNode)
 
-	t.Run("test HTTP error", UnexpectedErrorOnAddStatefullNode)
-	t.Run("test Internal Server error", HTTPErrorOnAddStatefullNode)
-	t.Run("test badly formed JSON error", CannotUnmarshalOnAddStatefullNode)
+	t.Run("Test project not found on AddStatefullNode", UnknownProjectOnAddStatefullNode)
+	t.Run("Test to create a duplicate on AddStatefullNode", DuplicateNodeOnAddStatefullNode)
+
+	// Error cases
+	t.Run("Test HTTP client error on statefull nodes methods (get, add)", ClientHTTPErrorOnStatefullNodeMethods)
+	t.Run("Test internal server error on statefull nodes methods (get, add)", InternalServerErrorOnStatefullNodeMethods)
+	t.Run("Test badly JSON on statefull nodes methods (get, add)", CantUnmarshalOnStatefullNodeMethods)
 }
 
 func nominalCaseForGetStatefullNodes(t *testing.T) {
@@ -36,12 +34,8 @@ func nominalCaseForGetStatefullNodes(t *testing.T) {
 	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		var path string = r.URL.Path
-
-		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/my-project/statefull_nodes", path)
-		}
+		checkPath(t, "/projects/"+projectName+"/statefull_nodes", r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
 		resBody := `
 		[
@@ -63,10 +57,6 @@ func nominalCaseForGetStatefullNodes(t *testing.T) {
 		`
 
 		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.Write([]byte(resBody))
 	}))
@@ -147,22 +137,9 @@ func UnknownProjectOnGetStatefullNodes(t *testing.T) {
 	projectName := "unknown-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		var path string = r.URL.Path
-
-		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/unknown-project/statefull_nodes", path)
-		}
-
-		resBody := `
-		{"error":"No project found for config name: unknown-project"}
-		`
+		resBody := `{"error":"No project found for config name: unknown-project"}`
 
 		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.WriteHeader(404)
 		w.Write([]byte(resBody))
@@ -172,7 +149,7 @@ func UnknownProjectOnGetStatefullNodes(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.GetStatefullNodes("unknown-project")
+	_, err := cli.GetStatefullNodes(projectName)
 
 	expectedError := "Project 'unknown-project' does not exist"
 	if err == nil {
@@ -184,112 +161,6 @@ func UnknownProjectOnGetStatefullNodes(t *testing.T) {
 	}
 }
 
-func CannotUnmarshalOnGetStatefullNodes(t *testing.T) {
-	// given
-	token := "some-token"
-	projectName := "unknown-project"
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		var path string = r.URL.Path
-
-		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/unknown-project/statefull_nodes", path)
-		}
-
-		resBody := `{]`
-
-		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
-		}
-
-		w.Write([]byte(resBody))
-	}))
-
-	defer server.Close()
-	cli := squarescale.NewClient(server.URL, token)
-
-	// when
-	_, err := cli.GetStatefullNodes("unknown-project")
-
-	// then
-	expectedError := "invalid character ']' looking for beginning of object key string"
-	if err == nil {
-		t.Fatalf("Error is not raised with `%s`", expectedError)
-	}
-
-	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
-	}
-}
-
-func HTTPErrorOnGetStatefullNodes(t *testing.T) {
-	// given
-	token := "some-token"
-	projectName := "bad-project"
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var path string = r.URL.Path
-
-		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/bad-project/statefull_nodes", path)
-		}
-
-		resBody := `
-		{"error":"Hu ho, dummy error"}
-		`
-
-		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
-		}
-
-		w.WriteHeader(500)
-		w.Write([]byte(resBody))
-	}))
-
-	defer server.Close()
-	cli := squarescale.NewClient(server.URL, token)
-
-	// when
-	_, err := cli.GetStatefullNodes("bad-project")
-
-	// then
-	expectedError := `1 error occurred:
-
-* error: Hu ho, dummy error`
-	if err == nil {
-		t.Fatalf("Error is not raised with `%s`", expectedError)
-	}
-
-	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
-	}
-}
-
-func UnexpectedErrorOnGetStatefullNodes(t *testing.T) {
-	// given
-	token := "some-token"
-	projectName := "my-project"
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	}))
-
-	defer server.Close()
-	cli := squarescale.NewClient(server.URL, token)
-
-	// when
-	_, err := cli.GetStatefullNodes(projectName)
-
-	// then
-	if err == nil {
-		t.Fatalf("Error is not raised")
-	}
-}
-
 func nominalCaseForAddStatefullNode(t *testing.T) {
 	// given
 	token := "some-token"
@@ -297,12 +168,7 @@ func nominalCaseForAddStatefullNode(t *testing.T) {
 	nodeName := "node1a"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		var path string = r.URL.Path
-
-		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/my-project/statefull_nodes", path)
-		}
+		checkPath(t, "/projects/"+projectName+"/statefull_nodes", r.URL.Path)
 
 		resBody := `
 		{
@@ -371,22 +237,9 @@ func UnknownProjectOnAddStatefullNode(t *testing.T) {
 	nodeName := "node1a"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		var path string = r.URL.Path
-
-		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/unknown-project/statefull_nodes", path)
-		}
-
-		resBody := `
-		{"error":"No project found for config name: unknown-project"}
-		`
+		resBody := `{"error":"No project found for config name: unknown-project"}`
 
 		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.WriteHeader(404)
 		w.Write([]byte(resBody))
@@ -396,7 +249,7 @@ func UnknownProjectOnAddStatefullNode(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.AddStatefullNode("unknown-project", nodeName, "t2.micro", "eu-west-1a")
+	_, err := cli.AddStatefullNode(projectName, nodeName, "t2.micro", "eu-west-1a")
 
 	// then
 	expectedError := "Project 'unknown-project' does not exist"
@@ -416,20 +269,9 @@ func DuplicateNodeOnAddStatefullNode(t *testing.T) {
 	nodeName := "node1a"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		var path string = r.URL.Path
-
-		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/my-project/statefull_nodes", path)
-		}
-
 		resBody := `{"error":"PG::UniqueViolation: ERROR:  duplicate key value violates unique constraint \"index_statefull_nodes_on_cluster_id_and_name\"\nDETAIL:  Key (cluster_id, name)=(6163, nodeb) already exists.\n: INSERT INTO \"statefull_nodes\" (\"name\", \"node_type\", \"zone\", \"cluster_id\", \"status\") VALUES ($1, $2, $3, $4, $5) RETURNING \"id\""}`
 
 		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.WriteHeader(409)
 		w.Write([]byte(resBody))
@@ -452,7 +294,7 @@ func DuplicateNodeOnAddStatefullNode(t *testing.T) {
 	}
 }
 
-func UnexpectedErrorOnAddStatefullNode(t *testing.T) {
+func ClientHTTPErrorOnStatefullNodeMethods(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -465,82 +307,76 @@ func UnexpectedErrorOnAddStatefullNode(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.AddStatefullNode(projectName, nodeName, "t2.micro", "eu-west-1a")
+	_, errOnGet := cli.GetStatefullNodes(projectName)
+	_, errOnAdd := cli.AddStatefullNode(projectName, nodeName, "t2.micro", "eu-west-1a")
 
 	// then
-	if err == nil {
-		t.Fatalf("Error is not raised")
+	if errOnGet == nil {
+		t.Errorf("Error is not raised for GetStatefullNodes")
+	}
+
+	if errOnAdd == nil {
+		t.Errorf("Error is not raised for AddStatefullNodes")
 	}
 }
 
-func HTTPErrorOnAddStatefullNode(t *testing.T) {
+func InternalServerErrorOnStatefullNodeMethods(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "bad-project"
+	projectName := "my-project"
 	nodeName := "node1a"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var path string = r.URL.Path
-
-		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/bad-project/statefull_nodes", path)
-		}
-
-		resBody := `
-		{"error":"Hu ho, dummy error"}
-		`
-
 		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
-		}
-
 		w.WriteHeader(500)
-		w.Write([]byte(resBody))
 	}))
 
 	defer server.Close()
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.AddStatefullNode(projectName, nodeName, "t2.micro", "eu-west-1a")
+	_, errOnGet := cli.GetStatefullNodes(projectName)
+	_, errOnAdd := cli.AddStatefullNode(projectName, nodeName, "t2.micro", "eu-west-1a")
 
 	// then
-	expectedError := `1 error occurred:
-
-* error: Hu ho, dummy error`
-	if err == nil {
-		t.Fatalf("Error is not raised with `%s`", expectedError)
+	expectedError := "An unexpected error occurred (code: 500)"
+	if errOnGet == nil {
+		t.Errorf("Error is not raised with `%s`", expectedError)
 	}
 
-	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+	if fmt.Sprintf("%s", errOnGet) != expectedError {
+		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
+	}
+
+	if errOnAdd == nil {
+		t.Errorf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", errOnAdd) != expectedError {
+		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnAdd)
 	}
 }
 
-func CannotUnmarshalOnAddStatefullNode(t *testing.T) {
+func CantUnmarshalOnStatefullNodeMethods(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "unknown-project"
+	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		var path string = r.URL.Path
-
-		if path != "/projects/"+projectName+"/statefull_nodes" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "/projects/unknown-project/statefull_nodes", path)
-		}
-
 		resBody := `{]`
 
 		w.Header().Set("Content-Type", "application/json")
 
 		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
+			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
 		}
 
-		w.WriteHeader(201)
+		if r.Method == "POST" { // Manage Add
+			w.WriteHeader(201)
+		} else {
+			w.WriteHeader(200)
+		}
+
 		w.Write([]byte(resBody))
 	}))
 
@@ -548,15 +384,24 @@ func CannotUnmarshalOnAddStatefullNode(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.AddStatefullNode(projectName, "node-in-error", "t2.micro", "eu-west-1a")
+	_, errOnGet := cli.GetStatefullNodes(projectName)
+	_, errOnAdd := cli.AddStatefullNode(projectName, "node-in-error", "t2.micro", "eu-west-1a")
 
 	// then
 	expectedError := "invalid character ']' looking for beginning of object key string"
-	if err == nil {
+	if errOnGet == nil {
 		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
 
-	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+	if fmt.Sprintf("%s", errOnGet) != expectedError {
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
+	}
+
+	if errOnAdd == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", errOnAdd) != expectedError {
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnAdd)
 	}
 }
