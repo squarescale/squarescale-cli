@@ -16,6 +16,12 @@ func TestStatefullNodes(t *testing.T) {
 
 	t.Run("Test project not found on GetStatefullNodes", UnknownProjectOnGetStatefullNodes)
 
+	// GetStatefullNodeInfo
+	t.Run("Nominal case on GetStatefullNodeInfo", nominalCaseOnGetStatefullNodeInfo)
+
+	t.Run("Test statefull node not found on GetStatefullNodeInfo", StatefullNodeNotFoundOnGetStatefullNodeInfo)
+	t.Run("Test project not found on GetStatefullNodeInfo", ProjectNotFoundOnGetStatefullNodeInfo)
+
 	// AddStatefullNode
 	t.Run("Nominal case on AddStatefullNode", nominalCaseOnAddStatefullNode)
 
@@ -28,6 +34,9 @@ func TestStatefullNodes(t *testing.T) {
 	t.Run("Test project not found on DeleteStatefullNode", UnknownProjectOnDeleteStatefullNode)
 	t.Run("Test to delete a missing statefull node on DeleteStatefullNode", NodeNotFoundOnDeleteStatefullNode)
 	t.Run("Test to delete a volume when deploy is in progress on DeleteStatefullNode", DeployInProgressOnDeleteStatefullNode)
+
+	// WaitStatefullNode
+	t.Run("Nominal case on WaitStatefullNode", nominalCaseOnWaitStatefullNode)
 
 	// Error cases
 	t.Run("Test HTTP client error on statefull nodes methods (get, add, delete)", ClientHTTPErrorOnStatefullNodeMethods)
@@ -158,6 +167,164 @@ func UnknownProjectOnGetStatefullNodes(t *testing.T) {
 	// when
 	_, err := cli.GetStatefullNodes(projectName)
 
+	expectedError := "Project 'unknown-project' does not exist"
+	if err == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+	}
+}
+
+func nominalCaseOnGetStatefullNodeInfo(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+	nodeName := "node1a"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		checkPath(t, "/projects/"+projectName+"/statefull_nodes", r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
+
+		resBody := `
+		[
+			{
+				"id": 23,
+				"name": "node1a",
+				"node_type": "t2.micro",
+				"zone": "eu-west-1c",
+				"status": "not_provisionned"
+			},
+			{
+				"id": 32,
+				"name": "node1b",
+				"node_type": "t2.micro",
+				"zone": "eu-west-1b",
+				"status": "provisionned"
+			}
+		]
+		`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	theStatefullNode, err := cli.GetStatefullNodeInfo(projectName, nodeName)
+
+	// then
+	var expectedInt int
+	var expectedString string
+
+	if err != nil {
+		t.Fatalf("Expect no error, got `%s`", err)
+	}
+
+	expectedInt = 23
+	if theStatefullNode.ID != expectedInt {
+		t.Errorf("Expect statefullNode.ID `%d`, got `%d`", expectedInt, theStatefullNode.ID)
+	}
+
+	expectedString = "node1a"
+	if theStatefullNode.Name != expectedString {
+		t.Errorf("Expect statefullNode.Name `%s`, got `%s`", expectedString, theStatefullNode.Name)
+	}
+
+	expectedString = "t2.micro"
+	if theStatefullNode.NodeType != expectedString {
+		t.Errorf("Expect statefullNode.NodeType `%s`, got `%s`", expectedString, theStatefullNode.NodeType)
+	}
+
+	expectedString = "eu-west-1c"
+	if theStatefullNode.Zone != expectedString {
+		t.Errorf("Expect statefullNode.Zone `%s`, got `%s`", expectedString, theStatefullNode.Zone)
+	}
+
+	expectedString = "not_provisionned"
+	if theStatefullNode.Status != expectedString {
+		t.Errorf("Expect statefullNode.Status `%s`, got `%s`", expectedString, theStatefullNode.Status)
+	}
+}
+
+func StatefullNodeNotFoundOnGetStatefullNodeInfo(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		checkPath(t, "/projects/"+projectName+"/statefull_nodes", r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
+
+		resBody := `
+		[
+			{
+				"id": 23,
+				"name": "node1a",
+				"node_type": "t2.micro",
+				"zone": "eu-west-1c",
+				"status": "not_provisionned"
+			},
+			{
+				"id": 32,
+				"name": "node1b",
+				"node_type": "t2.micro",
+				"zone": "eu-west-1b",
+				"status": "provisionned"
+			}
+		]
+		`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, err := cli.GetStatefullNodeInfo(projectName, "missing-statefull-node")
+
+	// then
+	expectedError := "Statefull node 'missing-statefull-node' not found for project 'my-project'"
+	if err == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+	}
+}
+
+func ProjectNotFoundOnGetStatefullNodeInfo(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "unknown-project"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		checkPath(t, "/projects/"+projectName+"/statefull_nodes", r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
+
+		resBody := `{"error":"No project found for config name: unknown-project"}`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.WriteHeader(404)
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, err := cli.GetStatefullNodeInfo("unknown-project", "missing-statefull-node")
+
+	// then
 	expectedError := "Project 'unknown-project' does not exist"
 	if err == nil {
 		t.Fatalf("Error is not raised with `%s`", expectedError)
@@ -426,6 +593,57 @@ func DeployInProgressOnDeleteStatefullNode(t *testing.T) {
 	}
 }
 
+func nominalCaseOnWaitStatefullNode(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+	nodeName := "my-node"
+	httptestCount := 0
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		checkPath(t, "/projects/"+projectName+"/statefull_nodes", r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
+
+		var statefullNodeStatus string
+
+		httptestCount++
+
+		if httptestCount < 2 {
+			statefullNodeStatus = "not_provisionned"
+		} else {
+			statefullNodeStatus = "provisionned"
+		}
+		resBody := fmt.Sprintf(`
+		[
+			{
+				"id": 23,
+				"name": "my-node",
+				"node_type": "t2.micro",
+				"zone": "eu-west-1b",
+				"status": "%s"
+				}
+		]
+		`, statefullNodeStatus)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+
+		w.Write([]byte(resBody))
+
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, err := cli.WaitStatefullNode(projectName, nodeName, 0)
+
+	// then
+	if err != nil {
+		t.Fatalf("Expect no error, got `%s`", err)
+	}
+}
+
 func ClientHTTPErrorOnStatefullNodeMethods(t *testing.T) {
 	// given
 	token := "some-token"
@@ -442,6 +660,8 @@ func ClientHTTPErrorOnStatefullNodeMethods(t *testing.T) {
 	_, errOnGet := cli.GetStatefullNodes(projectName)
 	_, errOnAdd := cli.AddStatefullNode(projectName, nodeName, "t2.micro", "eu-west-1a")
 	errOnDelete := cli.DeleteStatefullNode(projectName, nodeName)
+	_, errOnGetInfo := cli.GetStatefullNodeInfo(projectName, nodeName)
+	_, errOnWait := cli.WaitStatefullNode(projectName, nodeName, 0)
 
 	// then
 	if errOnGet == nil {
@@ -454,6 +674,14 @@ func ClientHTTPErrorOnStatefullNodeMethods(t *testing.T) {
 
 	if errOnDelete == nil {
 		t.Errorf("Error is not raised on DeleteStatefullNodes")
+	}
+
+	if errOnGetInfo == nil {
+		t.Errorf("Error is not raised on GetStatefullNodeInfo")
+	}
+
+	if errOnWait == nil {
+		t.Errorf("Error is not raised on WaitStatefullNode")
 	}
 }
 
@@ -475,6 +703,8 @@ func InternalServerErrorOnStatefullNodeMethods(t *testing.T) {
 	_, errOnGet := cli.GetStatefullNodes(projectName)
 	_, errOnAdd := cli.AddStatefullNode(projectName, nodeName, "t2.micro", "eu-west-1a")
 	errOnDelete := cli.DeleteStatefullNode(projectName, nodeName)
+	_, errOnGetInfo := cli.GetStatefullNodeInfo(projectName, nodeName)
+	_, errOnWait := cli.WaitStatefullNode(projectName, nodeName, 0)
 
 	// then
 	expectedError := "An unexpected error occurred (code: 500)"
@@ -500,6 +730,22 @@ func InternalServerErrorOnStatefullNodeMethods(t *testing.T) {
 
 	if fmt.Sprintf("%s", errOnDelete) != expectedError {
 		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnDelete)
+	}
+
+	if errOnGetInfo == nil {
+		t.Errorf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", errOnGetInfo) != expectedError {
+		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnGetInfo)
+	}
+
+	if errOnWait == nil {
+		t.Errorf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", errOnWait) != expectedError {
+		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnWait)
 	}
 }
 

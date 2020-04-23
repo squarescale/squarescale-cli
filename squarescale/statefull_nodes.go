@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
+
+	"github.com/squarescale/logger"
 )
 
 // StatefullNode describes a project container as returned by the Squarescale API
@@ -69,6 +72,40 @@ func (c *Client) AddStatefullNode(project string, name string, nodeType string, 
 	}
 
 	return newStatefullNode, nil
+}
+
+// GetStatefullNodeInfo get information for a statefull node
+func (c *Client) GetStatefullNodeInfo(project string, name string) (StatefullNode, error) {
+	statefullNodes, err := c.GetStatefullNodes(project)
+	if err != nil {
+		return StatefullNode{}, err
+	}
+
+	for _, statefullNode := range statefullNodes {
+		if statefullNode.Name == name {
+			return statefullNode, nil
+		}
+	}
+
+	return StatefullNode{}, fmt.Errorf("Statefull node '%s' not found for project '%s'", name, project)
+}
+
+// WaitStatefullNode wait a new statefull node
+func (c *Client) WaitStatefullNode(project string, name string, timeToWait int64) (StatefullNode, error) {
+	statefullNode, err := c.GetStatefullNodeInfo(project, name)
+	if err != nil {
+		return statefullNode, err
+	}
+
+	logger.Info.Println("wait for statefullNode : ", statefullNode.Name)
+
+	for statefullNode.Status != "provisionned" && err == nil {
+		time.Sleep(time.Duration(timeToWait) * time.Second)
+		statefullNode, err = c.GetStatefullNodeInfo(project, name)
+		logger.Debug.Println("statefullNode status update: ", statefullNode.Name)
+	}
+
+	return statefullNode, err
 }
 
 // DeleteStatefullNode delete a existing statefull node
