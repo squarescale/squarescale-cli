@@ -70,3 +70,26 @@ func (c *Client) AddStatefullNode(project string, name string, nodeType string, 
 
 	return newStatefullNode, nil
 }
+
+// DeleteStatefullNode delete a existing statefull node
+func (c *Client) DeleteStatefullNode(project string, name string) error {
+	code, body, err := c.delete("/projects/" + project + "/statefull_nodes" + name)
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusOK:
+	case http.StatusNotFound:
+		if fmt.Sprintf("%s", body) == `{"error":"Couldn't find StatefullNode with [WHERE \"statefull_nodes\".\"cluster_id\" = $1 AND \"statefull_nodes\".\"name\" = $2]"}` {
+			return fmt.Errorf("Statefull node '%s' does not exist", name)
+		}
+		return fmt.Errorf("Project '%s' does not exist", project)
+	case http.StatusBadRequest:
+		return fmt.Errorf("Deploy probably in progress")
+	default:
+		return unexpectedHTTPError(code, body)
+	}
+
+	return nil
+}
