@@ -169,6 +169,7 @@ func nominalCaseOnAddStatefullNode(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		checkPath(t, "/projects/"+projectName+"/statefull_nodes", r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
 		resBody := `
 		{
@@ -181,10 +182,6 @@ func nominalCaseOnAddStatefullNode(t *testing.T) {
 		`
 
 		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected %s, got %s", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.WriteHeader(201)
 		w.Write([]byte(resBody))

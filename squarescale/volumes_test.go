@@ -47,6 +47,7 @@ func nominalCaseOnGetVolumes(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		checkPath(t, "/projects/"+projectName+"/volumes", r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
 		resBody := `
 		[
@@ -72,10 +73,6 @@ func nominalCaseOnGetVolumes(t *testing.T) {
 		`
 
 		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.Write([]byte(resBody))
 	}))
@@ -177,6 +174,7 @@ func nominalCaseOnGetVolumeInfo(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		checkPath(t, "/projects/"+projectName+"/volumes", r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
 		resBody := `
 		[
@@ -202,10 +200,6 @@ func nominalCaseOnGetVolumeInfo(t *testing.T) {
 		`
 
 		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.Write([]byte(resBody))
 	}))
@@ -262,6 +256,7 @@ func nominalCaseOnAddVolume(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		checkPath(t, "/projects/"+projectName+"/volumes", r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
 		resBody := `
 		{
@@ -277,10 +272,6 @@ func nominalCaseOnAddVolume(t *testing.T) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(201)
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.Write([]byte(resBody))
 	}))
@@ -305,6 +296,7 @@ func nominalCaseOnDeleteVolume(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		checkPath(t, "/projects/"+projectName+"/volumes/"+volumeName, r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
 		resBody := `
 		null
@@ -312,10 +304,6 @@ func nominalCaseOnDeleteVolume(t *testing.T) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.Write([]byte(resBody))
 	}))
@@ -341,6 +329,7 @@ func nominalCaseOnWaitVolume(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		checkPath(t, "/projects/"+projectName+"/volumes", r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
 		var volumeStatus string
 
@@ -367,10 +356,6 @@ func nominalCaseOnWaitVolume(t *testing.T) {
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.Write([]byte(resBody))
 	}))
