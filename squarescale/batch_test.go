@@ -13,11 +13,12 @@ func TestBatches(t *testing.T) {
 
 	// getBatches
 	t.Run("Nominal case on getBatches", nominalCaseOnGetBatches)
+
 	t.Run("Test project not found on getBatches", ProjectNotFoundOnGetBatches)
 
 	//Error Cases
 	t.Run("Test HTTP client error on batch methods (get)", ClientHTTPErrorOnBatchMethods)
-	t.Run("Test internal server error on batch methods (get)", InternalServerErrorOnVolumeMethods)
+	t.Run("Test internal server error on batch methods (get)", InternalServerErrorOnBatchMethods)
 	t.Run("Test badly JSON on batch methods (get)", CantUnmarshalOnBatchMethods)
 }
 
@@ -266,12 +267,12 @@ func ClientHTTPErrorOnBatchMethods(t *testing.T) {
 
 	// then
 	if errOnGet == nil {
-		t.Errorf("Error is not raised")
+		t.Errorf("Error is not raised on GetBatches")
 	}
 
 }
 
-func InternalServerErrorOnVolumeMethods(t *testing.T) {
+func InternalServerErrorOnBatchMethods(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "bad-project"
@@ -296,6 +297,7 @@ func InternalServerErrorOnVolumeMethods(t *testing.T) {
 	if errOnGet == nil {
 		t.Errorf("Error is not raised with `%s`", expectedError)
 	}
+
 }
 
 func CantUnmarshalOnBatchMethods(t *testing.T) {
