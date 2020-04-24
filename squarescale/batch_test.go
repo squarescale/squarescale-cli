@@ -298,6 +298,9 @@ func InternalServerErrorOnBatchMethods(t *testing.T) {
 		t.Errorf("Error is not raised with `%s`", expectedError)
 	}
 
+	if fmt.Sprintf("%s", errOnGet) != expectedError {
+		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
+	}
 }
 
 func CantUnmarshalOnBatchMethods(t *testing.T) {
