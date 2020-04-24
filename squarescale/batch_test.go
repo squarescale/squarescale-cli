@@ -17,7 +17,8 @@ func TestBatches(t *testing.T) {
 
 	//Error Cases
 	t.Run("Test HTTP client error on batch methods (get)", ClientHTTPErrorOnBatchMethods)
-	t.Run("Test internal server error on volume methods (get)", InternalServerErrorOnVolumeMethods)
+	t.Run("Test internal server error on batch methods (get)", InternalServerErrorOnVolumeMethods)
+	t.Run("Test badly JSON on batch methods (get)", CantUnmarshalOnBatchMethods)
 }
 
 func nominalCaseOnGetBatches(t *testing.T) {
@@ -217,13 +218,6 @@ func ProjectNotFoundOnGetBatches(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		var expectedToken string
-
-		expectedToken = "bearer some-token"
-		if (r.Header.Get("Authorization")) != expectedToken {
-			t.Fatalf("Wrong token! Expected '%s', got '%s'", expectedToken, r.Header.Get("Authorization"))
-		}
-
 		resBody := `{"error":"No project found for config name: unknown-project"}`
 
 		w.Header().Set("Content-Type", "application/json")
@@ -249,7 +243,7 @@ func ProjectNotFoundOnGetBatches(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", errOnGet) == expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
 	}
 
 }
@@ -301,5 +295,36 @@ func InternalServerErrorOnVolumeMethods(t *testing.T) {
 	expectedError := "An unexpected error occurred (code: 500)"
 	if errOnGet == nil {
 		t.Errorf("Error is not raised with `%s`", expectedError)
+	}
+}
+
+func CantUnmarshalOnBatchMethods(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		resBody := `{]`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	_, errOnGet := cli.GetBatches(projectName)
+
+	// then
+	expectedError := "invalid character ']' looking for beginning of object key string"
+	if errOnGet == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", errOnGet) != expectedError {
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
 	}
 }
