@@ -44,6 +44,24 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"statefull_node": func() (cli.Command, error) {
+			return &command.StatefullNodeCommand{}, nil
+		},
+		"statefull_node add": func() (cli.Command, error) {
+			return &command.StatefullNodeAddCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"statefull_node list": func() (cli.Command, error) {
+			return &command.StatefullNodeListCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"statefull_node delete": func() (cli.Command, error) {
+			return &command.StatefullNodeDeleteCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"container": func() (cli.Command, error) {
 			return &command.ContainerCommand{}, nil
 		},
