@@ -472,7 +472,7 @@ func nominalCaseOnDeleteStatefullNode(t *testing.T) {
 	nodeName := "node1a"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		checkPath(t, "/projects/"+projectName+"/statefull_nodes"+nodeName, r.URL.Path)
+		checkPath(t, "/projects/"+projectName+"/statefull_nodes/"+nodeName, r.URL.Path)
 		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
 		resBody := `null`
@@ -501,7 +501,7 @@ func UnknownProjectOnDeleteStatefullNode(t *testing.T) {
 	nodeName := "node1a"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		checkPath(t, "/projects/"+projectName+"/statefull_nodes"+nodeName, r.URL.Path)
+		checkPath(t, "/projects/"+projectName+"/statefull_nodes/"+nodeName, r.URL.Path)
 
 		resBody := `{"error":"No project found for config name: not-a-project"}`
 
@@ -535,7 +535,7 @@ func NodeNotFoundOnDeleteStatefullNode(t *testing.T) {
 	nodeName := "missing-node"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		checkPath(t, "/projects/"+projectName+"/statefull_nodes"+nodeName, r.URL.Path)
+		checkPath(t, "/projects/"+projectName+"/statefull_nodes/"+nodeName, r.URL.Path)
 
 		resBody := `{"error":"Couldn't find StatefullNode with [WHERE \"statefull_nodes\".\"cluster_id\" = $1 AND \"statefull_nodes\".\"name\" = $2]"}`
 
@@ -569,7 +569,7 @@ func DeployInProgressOnDeleteStatefullNode(t *testing.T) {
 	nodeName := "my-node"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		checkPath(t, "/projects/"+projectName+"/statefull_nodes"+nodeName, r.URL.Path)
+		checkPath(t, "/projects/"+projectName+"/statefull_nodes/"+nodeName, r.URL.Path)
 
 		w.Header().Set("Content-Type", "application/json")
 

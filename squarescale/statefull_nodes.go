@@ -13,7 +13,6 @@ import (
 type StatefullNode struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name"`
-	Size     int    `json:"size"`
 	NodeType string `json:"node_type"`
 	Zone     string `json:"zone"`
 	Status   string `json:"status"`
@@ -110,7 +109,8 @@ func (c *Client) WaitStatefullNode(project string, name string, timeToWait int64
 
 // DeleteStatefullNode delete a existing statefull node
 func (c *Client) DeleteStatefullNode(project string, name string) error {
-	code, body, err := c.delete("/projects/" + project + "/statefull_nodes" + name)
+	// fmt.Printf("/projects/" + project + "/statefull_nodes/" + name + "\n")
+	code, body, err := c.delete("/projects/" + project + "/statefull_nodes/" + name)
 	if err != nil {
 		return err
 	}
