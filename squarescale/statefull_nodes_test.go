@@ -38,6 +38,13 @@ func TestStatefullNodes(t *testing.T) {
 	// WaitStatefullNode
 	t.Run("Nominal case on WaitStatefullNode", nominalCaseOnWaitStatefullNode)
 
+	// BindVolumeOnStatefullNode
+	t.Run("Nominal case on BindVolumeOnStatefullNode", nominalCaseOnBindVolumeOnStatefullNode)
+
+	t.Run("Test project not found on BindVolumeOnStatefullNode", UnknownProjectOnBindVolumeOnStatefullNode)
+	t.Run("Test volume not found on BindVolumeOnStatefullNode", UnknownVolumeOnBindVolumeOnStatefullNode)
+	t.Run("Test rebind volume already is on BindVolumeOnStatefullNode", RebindVolumeOnBindVolumeOnStatefullNode)
+
 	// Error cases
 	t.Run("Test HTTP client error on statefull nodes methods (get, add, delete)", ClientHTTPErrorOnStatefullNodeMethods)
 	t.Run("Test internal server error on statefull nodes methods (get, add, delete)", InternalServerErrorOnStatefullNodeMethods)
@@ -644,11 +651,144 @@ func nominalCaseOnWaitStatefullNode(t *testing.T) {
 	}
 }
 
+func nominalCaseOnBindVolumeOnStatefullNode(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+	nodeName := "my-node"
+	volumeName := "vol1c"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		checkPath(t, "/projects/"+projectName+"/statefull_nodes/"+nodeName, r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
+
+		resBody := `null`
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+
+		w.Write([]byte(resBody))
+
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.BindVolumeOnStatefullNode(projectName, nodeName, volumeName)
+
+	// then
+	if err != nil {
+		t.Fatalf("Expect no error, got `%s`", err)
+	}
+}
+
+func UnknownProjectOnBindVolumeOnStatefullNode(t *testing.T) {
+	// given
+	token := "some-token"
+	nodeName := "my-node"
+	volumeName := "vol1c"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resBody := `{"error":"not_found"}`
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(404)
+
+		w.Write([]byte(resBody))
+
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.BindVolumeOnStatefullNode("unknown-project", nodeName, volumeName)
+
+	// then
+	expectedError := "Project 'unknown-project' does not exist"
+	if err == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+	}
+}
+
+func UnknownVolumeOnBindVolumeOnStatefullNode(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+	nodeName := "my-node"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resBody := `{"error":"Couldn't find Volume with [WHERE \"volumes\".\"cluster_id\" = $1 AND \"volumes\".\"name\" = $2]"}`
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(404)
+
+		w.Write([]byte(resBody))
+
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.BindVolumeOnStatefullNode(projectName, nodeName, "unknown-volume")
+
+	// then
+	expectedError := "Volume 'unknown-volume' does not exist"
+	if err == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+	}
+}
+
+func RebindVolumeOnBindVolumeOnStatefullNode(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+	nodeName := "my-node"
+	volumeName := "vol1c"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resBody := `{"error":"vol02c already bound with node2c"}`
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(400)
+
+		w.Write([]byte(resBody))
+
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.BindVolumeOnStatefullNode(projectName, nodeName, volumeName)
+
+	// then
+	expectedError := "Volume vol1c already bound with my-node"
+	if err == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+	}
+}
+
 func ClientHTTPErrorOnStatefullNodeMethods(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
 	nodeName := "node1a"
+	volumeName := "vol1c"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	}))
@@ -662,6 +802,7 @@ func ClientHTTPErrorOnStatefullNodeMethods(t *testing.T) {
 	errOnDelete := cli.DeleteStatefullNode(projectName, nodeName)
 	_, errOnGetInfo := cli.GetStatefullNodeInfo(projectName, nodeName)
 	_, errOnWait := cli.WaitStatefullNode(projectName, nodeName, 0)
+	errOnBindVolume := cli.BindVolumeOnStatefullNode(projectName, nodeName, volumeName)
 
 	// then
 	if errOnGet == nil {
@@ -683,6 +824,10 @@ func ClientHTTPErrorOnStatefullNodeMethods(t *testing.T) {
 	if errOnWait == nil {
 		t.Errorf("Error is not raised on WaitStatefullNode")
 	}
+
+	if errOnBindVolume == nil {
+		t.Errorf("Error is not raised on BindVolumeOnStatefullNode")
+	}
 }
 
 func InternalServerErrorOnStatefullNodeMethods(t *testing.T) {
@@ -690,6 +835,7 @@ func InternalServerErrorOnStatefullNodeMethods(t *testing.T) {
 	token := "some-token"
 	projectName := "my-project"
 	nodeName := "node1a"
+	volumeName := "vol1c"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -705,6 +851,7 @@ func InternalServerErrorOnStatefullNodeMethods(t *testing.T) {
 	errOnDelete := cli.DeleteStatefullNode(projectName, nodeName)
 	_, errOnGetInfo := cli.GetStatefullNodeInfo(projectName, nodeName)
 	_, errOnWait := cli.WaitStatefullNode(projectName, nodeName, 0)
+	errOnBindVolume := cli.BindVolumeOnStatefullNode(projectName, nodeName, volumeName)
 
 	// then
 	expectedError := "An unexpected error occurred (code: 500)"
@@ -746,6 +893,14 @@ func InternalServerErrorOnStatefullNodeMethods(t *testing.T) {
 
 	if fmt.Sprintf("%s", errOnWait) != expectedError {
 		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnWait)
+	}
+
+	if errOnBindVolume == nil {
+		t.Errorf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", errOnBindVolume) != expectedError {
+		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnBindVolume)
 	}
 }
 

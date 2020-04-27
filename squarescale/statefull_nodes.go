@@ -130,3 +130,39 @@ func (c *Client) DeleteStatefullNode(project string, name string) error {
 
 	return nil
 }
+
+// BindVolumeOnStatefullNode bind a volume to a statefull node
+func (c *Client) BindVolumeOnStatefullNode(project string, name string, volumeName string) error {
+	var volumeToBind [1]string
+	var volumeToUnbind [0]string
+
+	volumeToBind[0] = volumeName
+
+	payload := JSONObject{
+		"volumes_to_bind":   volumeToBind,
+		"volumes_to_unbind": volumeToUnbind,
+	}
+	fmt.Printf("PUT /projects/%s/statefull_nodes/%s\n", project, name)
+	fmt.Println(payload)
+	code, body, err := c.put("/projects/"+project+"/statefull_nodes/"+name, &payload)
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusOK:
+		fmt.Printf("http.StatusOK\n")
+	case http.StatusNotFound:
+		if fmt.Sprintf("%s", body) == `{"error":"Couldn't find Volume with [WHERE \"volumes\".\"cluster_id\" = $1 AND \"volumes\".\"name\" = $2]"}` {
+			return fmt.Errorf("Volume '%s' does not exist", volumeName)
+		}
+		return fmt.Errorf("Project '%s' does not exist", project)
+	case http.StatusBadRequest:
+		fmt.Printf("http.StatusBadRequest\n")
+		return fmt.Errorf("Volume %s already bound with %s", volumeName, name)
+	default:
+		return unexpectedHTTPError(code, body)
+	}
+
+	return nil
+}
