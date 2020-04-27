@@ -16,20 +16,20 @@ func TestGetVolumes(t *testing.T) {
 	// GetVolumeInfo
 	t.Run("Nominal case on GetVolumeInfo", nominalCaseOnGetVolumeInfo)
 
-	t.Run("Test volume not found on GetVolumeInfo", VolumeNotFoundOnGetVolumeInfo)
-	t.Run("Test project not found on GetVolumeInfo", ProjectNotFoundOnGetVolumeInfo)
+	t.Run("Test volume not found on GetVolumeInfo", UnknownVolumeOnGetVolumeInfo)
+	t.Run("Test project not found on GetVolumeInfo", UnknownProjectOnGetVolumeInfo)
 
 	// AddVolume
 	t.Run("Nominal case on AddVolume", nominalCaseOnAddVolume)
 
 	t.Run("Test duplicate volume name on AddVolume", DuplicateVolumeErrorCaseOnAddVolume)
-	t.Run("Test project not found on AddVolume", ProjectNotFoundOnAddVolume)
+	t.Run("Test project not found on AddVolume", UnknownProjectOnAddVolume)
 
 	// DeleteVolume
 	t.Run("Nominal case on DeleteVolume", nominalCaseOnDeleteVolume)
 
-	t.Run("Test volume not found on DeleteVolume", VolumeNotFoundOnDeleteVolume)
-	t.Run("Test project not found on DeleteVolume", ProjectNotFoundOnDeleteVolume)
+	t.Run("Test volume not found on DeleteVolume", UnknownVolumeOnDeleteVolume)
+	t.Run("Test project not found on DeleteVolume", UnknownProjectOnDeleteVolume)
 
 	// WaitVolume
 	t.Run("Nominal case on WaitVolume", nominalCaseOnWaitVolume)
@@ -372,7 +372,7 @@ func nominalCaseOnWaitVolume(t *testing.T) {
 	}
 }
 
-func VolumeNotFoundOnGetVolumeInfo(t *testing.T) {
+func UnknownVolumeOnGetVolumeInfo(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -403,10 +403,6 @@ func VolumeNotFoundOnGetVolumeInfo(t *testing.T) {
 
 		w.Header().Set("Content-Type", "application/json")
 
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
-		}
-
 		w.Write([]byte(resBody))
 	}))
 
@@ -423,11 +419,11 @@ func VolumeNotFoundOnGetVolumeInfo(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
-func ProjectNotFoundOnGetVolumeInfo(t *testing.T) {
+func UnknownProjectOnGetVolumeInfo(t *testing.T) {
 	// given
 	token := "some-token"
 
@@ -439,10 +435,6 @@ func ProjectNotFoundOnGetVolumeInfo(t *testing.T) {
 		`
 
 		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.WriteHeader(404)
 		w.Write([]byte(resBody))
@@ -461,7 +453,7 @@ func ProjectNotFoundOnGetVolumeInfo(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -476,10 +468,6 @@ func DuplicateVolumeErrorCaseOnAddVolume(t *testing.T) {
 		`
 
 		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.WriteHeader(409)
 		w.Write([]byte(resBody))
@@ -498,11 +486,11 @@ func DuplicateVolumeErrorCaseOnAddVolume(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
-func ProjectNotFoundOnAddVolume(t *testing.T) {
+func UnknownProjectOnAddVolume(t *testing.T) {
 	// given
 	token := "some-token"
 
@@ -512,10 +500,6 @@ func ProjectNotFoundOnAddVolume(t *testing.T) {
 		`
 
 		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.WriteHeader(404)
 		w.Write([]byte(resBody))
@@ -536,11 +520,11 @@ func ProjectNotFoundOnAddVolume(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
-func ProjectNotFoundOnDeleteVolume(t *testing.T) {
+func UnknownProjectOnDeleteVolume(t *testing.T) {
 	// given
 	token := "some-token"
 
@@ -548,10 +532,6 @@ func ProjectNotFoundOnDeleteVolume(t *testing.T) {
 		resBody := `{"error":"No project found for config name: unknown-project"}`
 
 		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.WriteHeader(404)
 		w.Write([]byte(resBody))
@@ -570,11 +550,11 @@ func ProjectNotFoundOnDeleteVolume(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
-func VolumeNotFoundOnDeleteVolume(t *testing.T) {
+func UnknownVolumeOnDeleteVolume(t *testing.T) {
 	// given
 	token := "some-token"
 
@@ -582,10 +562,6 @@ func VolumeNotFoundOnDeleteVolume(t *testing.T) {
 		resBody := `{"error":"Couldn't find Volume with [WHERE \"volumes\".\"cluster_id\" = $1 AND \"volumes\".\"name\" = $2]"}`
 
 		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.WriteHeader(404)
 		w.Write([]byte(resBody))
@@ -604,7 +580,7 @@ func VolumeNotFoundOnDeleteVolume(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -667,7 +643,7 @@ func InternalServerErrorOnVolumeMethods(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", errOnGetVolumes) != expectedError {
-		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnGetVolumes)
+		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnGetVolumes)
 	}
 
 	if errOnAddVolume == nil {
@@ -675,7 +651,7 @@ func InternalServerErrorOnVolumeMethods(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", errOnAddVolume) != expectedError {
-		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnAddVolume)
+		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnAddVolume)
 	}
 
 	if errOnDeleteVolume == nil {
@@ -683,7 +659,7 @@ func InternalServerErrorOnVolumeMethods(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", errOnDeleteVolume) != expectedError {
-		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnDeleteVolume)
+		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnDeleteVolume)
 	}
 }
 
@@ -696,10 +672,6 @@ func CantUnmarshalOnVolumeMethods(t *testing.T) {
 		resBody := `{]`
 
 		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		w.Write([]byte(resBody))
 	}))
@@ -717,6 +689,6 @@ func CantUnmarshalOnVolumeMethods(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", errOnGetVolumes) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnGetVolumes)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnGetVolumes)
 	}
 }

@@ -19,8 +19,8 @@ func TestStatefullNodes(t *testing.T) {
 	// GetStatefullNodeInfo
 	t.Run("Nominal case on GetStatefullNodeInfo", nominalCaseOnGetStatefullNodeInfo)
 
-	t.Run("Test statefull node not found on GetStatefullNodeInfo", StatefullNodeNotFoundOnGetStatefullNodeInfo)
-	t.Run("Test project not found on GetStatefullNodeInfo", ProjectNotFoundOnGetStatefullNodeInfo)
+	t.Run("Test statefull node not found on GetStatefullNodeInfo", UnknownStatefullNodeOnGetStatefullNodeInfo)
+	t.Run("Test project not found on GetStatefullNodeInfo", UnknownProjectOnGetStatefullNodeInfo)
 
 	// AddStatefullNode
 	t.Run("Nominal case on AddStatefullNode", nominalCaseOnAddStatefullNode)
@@ -32,7 +32,7 @@ func TestStatefullNodes(t *testing.T) {
 	t.Run("Nominal case on DeleteStatefullNode", nominalCaseOnDeleteStatefullNode)
 
 	t.Run("Test project not found on DeleteStatefullNode", UnknownProjectOnDeleteStatefullNode)
-	t.Run("Test to delete a missing statefull node on DeleteStatefullNode", NodeNotFoundOnDeleteStatefullNode)
+	t.Run("Test to delete a missing statefull node on DeleteStatefullNode", UnknownStatefullNodeOnDeleteStatefullNode)
 	t.Run("Test to delete a volume when deploy is in progress on DeleteStatefullNode", DeployInProgressOnDeleteStatefullNode)
 
 	// WaitStatefullNode
@@ -180,7 +180,7 @@ func UnknownProjectOnGetStatefullNodes(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -258,15 +258,12 @@ func nominalCaseOnGetStatefullNodeInfo(t *testing.T) {
 	}
 }
 
-func StatefullNodeNotFoundOnGetStatefullNodeInfo(t *testing.T) {
+func UnknownStatefullNodeOnGetStatefullNodeInfo(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		checkPath(t, "/projects/"+projectName+"/statefull_nodes", r.URL.Path)
-		checkAuthorization(t, r.Header.Get("Authorization"), token)
-
 		resBody := `
 		[
 			{
@@ -304,19 +301,15 @@ func StatefullNodeNotFoundOnGetStatefullNodeInfo(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
-func ProjectNotFoundOnGetStatefullNodeInfo(t *testing.T) {
+func UnknownProjectOnGetStatefullNodeInfo(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "unknown-project"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		checkPath(t, "/projects/"+projectName+"/statefull_nodes", r.URL.Path)
-		checkAuthorization(t, r.Header.Get("Authorization"), token)
-
 		resBody := `{"error":"No project found for config name: unknown-project"}`
 
 		w.Header().Set("Content-Type", "application/json")
@@ -338,7 +331,7 @@ func ProjectNotFoundOnGetStatefullNodeInfo(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -436,7 +429,7 @@ func UnknownProjectOnAddStatefullNode(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -468,7 +461,7 @@ func DuplicateNodeOnAddStatefullNode(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -508,8 +501,6 @@ func UnknownProjectOnDeleteStatefullNode(t *testing.T) {
 	nodeName := "node1a"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		checkPath(t, "/projects/"+projectName+"/statefull_nodes/"+nodeName, r.URL.Path)
-
 		resBody := `{"error":"No project found for config name: not-a-project"}`
 
 		w.Header().Set("Content-Type", "application/json")
@@ -531,19 +522,17 @@ func UnknownProjectOnDeleteStatefullNode(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
-func NodeNotFoundOnDeleteStatefullNode(t *testing.T) {
+func UnknownStatefullNodeOnDeleteStatefullNode(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
 	nodeName := "missing-node"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		checkPath(t, "/projects/"+projectName+"/statefull_nodes/"+nodeName, r.URL.Path)
-
 		resBody := `{"error":"Couldn't find StatefullNode with [WHERE \"statefull_nodes\".\"cluster_id\" = $1 AND \"statefull_nodes\".\"name\" = $2]"}`
 
 		w.Header().Set("Content-Type", "application/json")
@@ -565,7 +554,7 @@ func NodeNotFoundOnDeleteStatefullNode(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -576,8 +565,6 @@ func DeployInProgressOnDeleteStatefullNode(t *testing.T) {
 	nodeName := "my-node"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		checkPath(t, "/projects/"+projectName+"/statefull_nodes/"+nodeName, r.URL.Path)
-
 		w.Header().Set("Content-Type", "application/json")
 
 		w.WriteHeader(400)
@@ -596,7 +583,7 @@ func DeployInProgressOnDeleteStatefullNode(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -712,7 +699,7 @@ func UnknownProjectOnBindVolumeOnStatefullNode(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -745,7 +732,7 @@ func UnknownVolumeOnBindVolumeOnStatefullNode(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -779,7 +766,7 @@ func RebindVolumeOnBindVolumeOnStatefullNode(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", err) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, err)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 }
 
@@ -860,7 +847,7 @@ func InternalServerErrorOnStatefullNodeMethods(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", errOnGet) != expectedError {
-		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
+		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
 	}
 
 	if errOnAdd == nil {
@@ -868,7 +855,7 @@ func InternalServerErrorOnStatefullNodeMethods(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", errOnAdd) != expectedError {
-		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnAdd)
+		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnAdd)
 	}
 
 	if errOnDelete == nil {
@@ -876,7 +863,7 @@ func InternalServerErrorOnStatefullNodeMethods(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", errOnDelete) != expectedError {
-		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnDelete)
+		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnDelete)
 	}
 
 	if errOnGetInfo == nil {
@@ -884,7 +871,7 @@ func InternalServerErrorOnStatefullNodeMethods(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", errOnGetInfo) != expectedError {
-		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnGetInfo)
+		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnGetInfo)
 	}
 
 	if errOnWait == nil {
@@ -892,7 +879,7 @@ func InternalServerErrorOnStatefullNodeMethods(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", errOnWait) != expectedError {
-		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnWait)
+		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnWait)
 	}
 
 	if errOnBindVolume == nil {
@@ -900,7 +887,7 @@ func InternalServerErrorOnStatefullNodeMethods(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", errOnBindVolume) != expectedError {
-		t.Errorf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnBindVolume)
+		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnBindVolume)
 	}
 }
 
@@ -913,10 +900,6 @@ func CantUnmarshalOnStatefullNodeMethods(t *testing.T) {
 		resBody := `{]`
 
 		w.Header().Set("Content-Type", "application/json")
-
-		if (r.Header.Get("Authorization")) != "bearer some-token" {
-			t.Fatalf("Wrong token! Expected `%s`, got `%s`", "bearer some-token", r.Header.Get("Authorization"))
-		}
 
 		if r.Method == "POST" { // Manage Add
 			w.WriteHeader(201)
@@ -941,7 +924,7 @@ func CantUnmarshalOnStatefullNodeMethods(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", errOnGet) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
 	}
 
 	if errOnAdd == nil {
@@ -949,6 +932,6 @@ func CantUnmarshalOnStatefullNodeMethods(t *testing.T) {
 	}
 
 	if fmt.Sprintf("%s", errOnAdd) != expectedError {
-		t.Fatalf("Expected error:\n`%s`\nGot:\n`%s`", expectedError, errOnAdd)
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnAdd)
 	}
 }
