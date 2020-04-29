@@ -30,19 +30,8 @@ func nominalCaseOnGetBatches(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		var path string = r.URL.Path
-		var expectedPath string
-		var expectedToken string
-
-		expectedPath = "/projects/" + projectName + "/batches"
-		if path != expectedPath {
-			t.Fatalf("Wrong path! Expected '%s', got '%s'", expectedPath, path)
-		}
-
-		expectedToken = "bearer some-token"
-		if (r.Header.Get("Authorization")) != expectedToken {
-			t.Fatalf("Wrong token! Expected '%s', got '%s'", expectedToken, r.Header.Get("Authorization"))
-		}
+		checkPath(t, "/projects/"+projectName+"/batches", r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
 		resBody := `
 			[
