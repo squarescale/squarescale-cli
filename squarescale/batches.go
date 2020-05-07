@@ -8,18 +8,26 @@ import (
 
 // Batch describes a project container as returned by the Squarescale API
 type Batch struct {
-	Name               string           `json:"name"`
-	Periodic           bool             `json:"periodic"`
-	CronExpression     string           `json:"cron_expression"`
-	TimeZoneName       string           `json:"time_zone_name"`
-	Limits             BatchLimits      `json:"limits"`
-	CustomEnvironment  string           `json:"custom_environment"`
-	DefaultEnvironment string           `json:"default_environment"`
-	RunCommand         []string         `json:"run_command"`
-	Status             BatchStatus      `json:"status"`
-	DockerImage        BatchDockerImage `json:"docker_image"`
-	RefreshUrl         []string         `json:"refresh_url"`
-	Volumes            string           `json:"mounted_volumes"`
+	Name               string                  `json:"name"`
+	Periodic           bool                    `json:"periodic"`
+	CronExpression     string                  `json:"cron_expression"`
+	TimeZoneName       string                  `json:"time_zone_name"`
+	Limits             BatchLimits             `json:"limits"`
+	CustomEnvironment  BatchCustomEnvironment  `json:"custom_environment"`
+	DefaultEnvironment BatchDefaultEnvironment `json:"default_environment"`
+	RunCommand         string                  `json:"run_command"`
+	Status             BatchStatus             `json:"status"`
+	DockerImage        BatchDockerImage        `json:"docker_image"`
+	RefreshUrl         string                  `json:"refresh_url"`
+	Volumes            string                  `json:"mounted_volumes"`
+}
+
+type BatchCustomEnvironment struct {
+	CustomEnvironmentValue string `json:"custom_environment"`
+}
+
+type BatchDefaultEnvironment struct {
+	DefaultEnvironmentValue string `json:"default_environment"`
 }
 
 type BatchLimits struct {

@@ -46,9 +46,13 @@ func nominalCaseOnGetBatches(t *testing.T) {
 							"iops": 0,
 							"net": 1
 					},
-					"custom_environment": "final-environment",
-					"default_environment": "basic-environment",
-					"run_command": ["command1"],
+					"custom_environment": {
+						"custom_environment": "final-environment"
+					},
+					"default_environment": {
+						"default_environment": "basic-environment"
+					},
+					"run_command": "command1",
 					"status": {
 						"display_infra_status": "ok",
 						"schedule": {
@@ -61,7 +65,7 @@ func nominalCaseOnGetBatches(t *testing.T) {
 					"docker_image": {
 						"name": "my-little-image"
 					},
-					"refresh_url": ["new-url"],
+					"refresh_url": "new-url",
 					"mounted_volumes": "volume1"
 				}
 			]
@@ -134,23 +138,18 @@ func nominalCaseOnGetBatches(t *testing.T) {
 	}
 
 	expectedString = "final-environment"
-	if batches[0].CustomEnvironment != expectedString {
-		t.Errorf("Expected batches.CustomEnvironment to be '%s', but got '%s' instead", expectedString, batches[0].CustomEnvironment)
+	if batches[0].CustomEnvironment.CustomEnvironmentValue != expectedString {
+		t.Errorf("Expected batches.CustomEnvironment to be '%s', but got '%s' instead", expectedString, batches[0].CustomEnvironment.CustomEnvironmentValue)
 	}
 
 	expectedString = "basic-environment"
-	if batches[0].DefaultEnvironment != expectedString {
-		t.Errorf("Expected batches.DefaultEnvironment to be '%s', but got '%s' instead", expectedString, batches[0].DefaultEnvironment)
-	}
-
-	expectedInt = 1
-	if len(batches[0].RunCommand) != expectedInt {
-		t.Errorf("Expected batches.RunCommand to contain one element %d, but got actually %d", expectedInt, len(batches[0].RunCommand))
+	if batches[0].DefaultEnvironment.DefaultEnvironmentValue != expectedString {
+		t.Errorf("Expected batches.DefaultEnvironment to be '%s', but got '%s' instead", expectedString, batches[0].DefaultEnvironment.DefaultEnvironmentValue)
 	}
 
 	expectedString = "command1"
-	if batches[0].RunCommand[0] != expectedString {
-		t.Errorf("Expected batches.RunCommand to be '%s', but got '%s' instead", expectedString, batches[0].RunCommand[0])
+	if batches[0].RunCommand != expectedString {
+		t.Errorf("Expected batches.RunCommand to be '%s', but got '%s' instead", expectedString, batches[0].RunCommand)
 	}
 
 	expectedString = "ok"
@@ -183,14 +182,9 @@ func nominalCaseOnGetBatches(t *testing.T) {
 		t.Errorf("Expected batches.DockerImage.Name to be '%s', but got '%s' instead", expectedString, batches[0].DockerImage.Name)
 	}
 
-	expectedInt = 1
-	if len(batches[0].RefreshUrl) != expectedInt {
-		t.Errorf("Expected batches.RefreshUrl to contain one element %d, but got actually %d", expectedInt, len(batches[0].RefreshUrl))
-	}
-
 	expectedString = "new-url"
-	if batches[0].RefreshUrl[0] != expectedString {
-		t.Errorf("Expected batches.RefreshUrl to be '%s', but got '%s' instead", expectedString, batches[0].RefreshUrl[0])
+	if batches[0].RefreshUrl != expectedString {
+		t.Errorf("Expected batches.RefreshUrl to be '%s', but got '%s' instead", expectedString, batches[0].RefreshUrl)
 	}
 
 	expectedString = "volume1"

@@ -34,7 +34,6 @@ func (b *BatchListCommand) Run(args []string) int {
 			return "", err
 		}
 
-		//msg doit retourner la list des batches valides : vérifier si on reçoit une liste des batches ou des ID
 		msg := fmt.Sprintf("list of availables batches: %v", batch)
 
 		return msg, nil
