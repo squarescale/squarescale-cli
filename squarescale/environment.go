@@ -40,12 +40,26 @@ func NewEnvironment(c *Client, project string) (*Environment, error) {
 	return &env, nil
 }
 
+func valueInterface2String(val interface{}) string {
+	switch v := val.(type) {
+	case int:
+		return fmt.Sprintf("%d", v)
+	case float64:
+		return fmt.Sprintf("%.0f", v)
+	case string:
+		return v
+	default:
+		panic(fmt.Sprintf("Don't know how to handle type %T!\n", v))
+	}
+	return ""
+}
+
 // UnmarshalJSON takes care of transforming the JSON representation of an
 // Environment as sent by the API into a proper Environment struct.
 func (env *Environment) UnmarshalJSON(body []byte) error {
 	type Atom struct {
-		Default map[string]string `json:"default"`
-		Custom  map[string]string `json:"custom"`
+		Default map[string]interface{} `json:"default"`
+		Custom  map[string]interface{} `json:"custom"`
 	}
 
 	type Global struct {
@@ -60,11 +74,11 @@ func (env *Environment) UnmarshalJSON(body []byte) error {
 
 	project := &VariableGroup{Name: "Project", Variables: []*Variable{}}
 	for key, value := range result.Project.Default {
-		newVar := &Variable{Key: key, Value: value, Predefined: true}
+		newVar := &Variable{Key: key, Value: valueInterface2String(value), Predefined: true}
 		project.Variables = append(project.Variables, newVar)
 	}
 	for key, value := range result.Project.Custom {
-		newVar := &Variable{Key: key, Value: value, Predefined: false}
+		newVar := &Variable{Key: key, Value: valueInterface2String(value), Predefined: false}
 		project.Variables = append(project.Variables, newVar)
 	}
 	project.Variables = fold(project.Variables)
@@ -74,11 +88,11 @@ func (env *Environment) UnmarshalJSON(body []byte) error {
 		service := &VariableGroup{Name: serviceName, Variables: []*Variable{}}
 
 		for key, value := range serviceEnv.Default {
-			newVar := &Variable{Key: key, Value: value, Predefined: true}
+			newVar := &Variable{Key: key, Value: valueInterface2String(value), Predefined: true}
 			service.Variables = append(service.Variables, newVar)
 		}
 		for key, value := range serviceEnv.Custom {
-			newVar := &Variable{Key: key, Value: value, Predefined: false}
+			newVar := &Variable{Key: key, Value: valueInterface2String(value), Predefined: false}
 			service.Variables = append(service.Variables, newVar)
 		}
 		service.Variables = fold(merge(project.Variables, service.Variables))
