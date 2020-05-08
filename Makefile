@@ -2,8 +2,6 @@ VERSION     = $(shell git describe --always --dirty)
 GO_LD_FLAGS = -ldflags '-X main.GitCommit="$(VERSION)"'
 GO_CMD      = go build -v $(GO_LD_FLAGS)
 DOCKER_CMD  = docker run --rm
-MOUNT_POINT = /go/src/github.com/squarescale/squarescale-cli
-MOUNT_FLAGS = -v "$(PWD)":"$(MOUNT_POINT)" -w "$(MOUNT_POINT)"
 
 .PHONY: all
 
@@ -16,44 +14,33 @@ build: deps ## Build CLI (./sqsc binary)
 	$(GO_CMD) -o sqsc
 
 deps: ## Install dependencies inside $GOPATH
-	go get github.com/onsi/ginkgo/ginkgo
+	go get -v -t -d ./...
 
-docker-linux-amd64: ## Compile for linux-amd64 in a container
-	$(DOCKER_CMD) $(MOUNT_FLAGS) -e GOOS=linux -e GOARCH=amd64 golang:1.13 $(GO_CMD) -o sqsc-linux-amd64
+dist-linux-amd64: ## Compile for linux-amd64 in a container
+	test -d dist || mkdir dist
+	GOOS=linux GOARCH=amd64 $(GO_CMD) -o dist/sqsc-linux-amd64$(DIST_SUFFIX)
 
-docker-darwin-amd64: ## Compile for darwin-amd64 in a container
-	$(DOCKER_CMD) $(MOUNT_FLAGS) -e GOOS=darwin -e GOARCH=amd64 golang:1.13 $(GO_CMD) -o sqsc-darwin-amd64
+dist-darwin-amd64: ## Compile for darwin-amd64 in a container
+	test -d dist || mkdir dist
+	GOOS=darwin GOARCH=amd64 $(GO_CMD) -o dist/sqsc-darwin-amd64$(DIST_SUFFIX)
 
-docker-alpine-amd64: ## Compile for linux-amd64 alpine in a container
-	$(DOCKER_CMD) $(MOUNT_FLAGS) -e CGO_ENABLED=0 -e GOOS=linux -e GOARCH=amd64 golang:1.13 $(GO_CMD) -o sqsc-alpine-amd64
+dist-alpine-amd64: ## Compile for linux-amd64 alpine in a container
+	test -d dist || mkdir dist
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO_CMD) -o dist/sqsc-alpine-amd64$(DIST_SUFFIX)
 
-generate: docker-linux-amd64 docker-darwin-amd64 docker-alpine-amd64
+dist: dist-linux-amd64 dist-darwin-amd64 dist-alpine-amd64
 
-docker-linux-amd64-local: ## Compile for linux-amd64 in a container
-	GOOS=linux GOARCH=amd64 $(GO_CMD) -o sqsc-linux-amd64
+dist-master:
+	DIST_SUFFIX='-staging-latest' make dist
 
-docker-darwin-amd64-local: ## Compile for darwin-amd64 in a container
-	GOOS=darwin GOARCH=amd64 $(GO_CMD) -o sqsc-darwin-amd64
-
-docker-alpine-amd64-local: ## Compile for linux-amd64 alpine in a container
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO_CMD) -o sqsc-alpine-amd64
-
-generate-local: docker-linux-amd64-local docker-darwin-amd64-local docker-alpine-amd64-local
-
-
-
-publish-staging: ## Publish existing generated build to github draft and s3 as staging
-	aws s3 cp sqsc-linux-amd64 s3://cli-releases/sqsc-linux-amd64-staging-latest --acl public-read
-	aws s3 cp sqsc-darwin-amd64 s3://cli-releases/sqsc-darwin-amd64-staging-latest --acl public-read
-	aws s3 cp sqsc-alpine-amd64 s3://cli-releases/sqsc-alpine-amd64-staging-latest --acl public-read
-
-publish: ## Publish existing generated build
-	aws s3 cp sqsc-linux-amd64 s3://cli-releases/sqsc-linux-amd64-latest --acl public-read
-	aws s3 cp sqsc-darwin-amd64 s3://cli-releases/sqsc-darwin-amd64-latest --acl public-read
-	aws s3 cp sqsc-alpine-amd64 s3://cli-releases/sqsc-alpine-amd64-latest --acl public-read
+dist-production:
+	DIST_SUFFIX='-latest' make dist
 
 clean: ## Clean repository
-	go clean && rm -f sqsc sqsc-*
+	go clean && rm -rf sqsc sqsc-* dist/
+
+clean-dist: ## Clean repository
+	rm -rf dist/
 
 lint: ## Lint Docker
 	$(DOCKER_CMD) -v $$PWD:/root/ projectatomic/dockerfile-lint dockerfile_lint
