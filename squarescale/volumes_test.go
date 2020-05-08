@@ -529,8 +529,9 @@ func ProjectNotFoundOnAddVolume(t *testing.T) {
 
 	// then
 	expectedError := `1 error occurred:
+	* error: No project found for config name: another-project
 
-* error: No project found for config name: another-project`
+`
 	if err == nil {
 		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
