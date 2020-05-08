@@ -16,19 +16,35 @@ build: deps ## Build CLI (./sqsc binary)
 deps: ## Install dependencies inside $GOPATH
 	go get -v -t -d ./...
 
-dist-linux-amd64: ## Compile for linux-amd64 in a container
-	test -d dist || mkdir dist
-	GOOS=linux GOARCH=amd64 $(GO_CMD) -o dist/sqsc-linux-amd64$(DIST_SUFFIX)
-
-dist-darwin-amd64: ## Compile for darwin-amd64 in a container
+dist-darwin-amd64: ## Compile for darwin-amd64
 	test -d dist || mkdir dist
 	GOOS=darwin GOARCH=amd64 $(GO_CMD) -o dist/sqsc-darwin-amd64$(DIST_SUFFIX)
 
-dist-alpine-amd64: ## Compile for linux-amd64 alpine in a container
+dist-freebsd-amd64: ## Compile for freebsd-amd64
 	test -d dist || mkdir dist
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO_CMD) -o dist/sqsc-alpine-amd64$(DIST_SUFFIX)
+	GOOS=freebsd GOARCH=amd64 $(GO_CMD) -o dist/sqsc-freebsd-amd64$(DIST_SUFFIX)
 
-dist: dist-linux-amd64 dist-darwin-amd64 dist-alpine-amd64
+dist-linux-amd64: ## Compile for linux-amd64
+	test -d dist || mkdir dist
+	GOOS=linux GOARCH=amd64 $(GO_CMD) -o dist/sqsc-linux-amd64$(DIST_SUFFIX)
+
+dist-linux-arm: ## Compile for linux-arm
+	test -d dist || mkdir dist
+	GOOS=linux GOARCH=arm $(GO_CMD) -o dist/sqsc-linux-arm$(DIST_SUFFIX)
+
+dist-linux-arm64: ## Compile for linux-arm64
+	test -d dist || mkdir dist
+	GOOS=linux GOARCH=arm64 $(GO_CMD) -o dist/sqsc-linux-arm64$(DIST_SUFFIX)
+
+dist-openbsd-amd64: ## Compile for openbsd-amd64
+	test -d dist || mkdir dist
+	GOOS=openbsd GOARCH=amd64 $(GO_CMD) -o dist/sqsc-openbsd-amd64$(DIST_SUFFIX)
+
+dist-windows-amd64: ## Compile for windows-amd64
+	test -d dist || mkdir dist
+	GOOS=windows GOARCH=amd64 $(GO_CMD) -o dist/sqsc-windows-amd64$(DIST_SUFFIX).exe
+
+dist: dist-darwin-amd64 dist-freebsd-amd64 dist-linux-amd64 dist-linux-arm dist-linux-arm64 dist-openbsd-amd64 dist-windows-amd64
 
 dist-master:
 	DIST_SUFFIX='-staging-latest' make dist
