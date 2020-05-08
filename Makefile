@@ -28,6 +28,10 @@ dist-linux-amd64: ## Compile for linux-amd64
 	test -d dist || mkdir dist
 	GOOS=linux GOARCH=amd64 $(GO_CMD) -o dist/sqsc-linux-amd64$(DIST_SUFFIX)
 
+docker-alpine-amd64: ## Compile for linux-amd64
+	test -d dist || mkdir dist
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GO_CMD) -o dist/sqsc-alpine-amd64$(DIST_SUFFIX)
+
 dist-linux-arm: ## Compile for linux-arm
 	test -d dist || mkdir dist
 	GOOS=linux GOARCH=arm $(GO_CMD) -o dist/sqsc-linux-arm$(DIST_SUFFIX)
@@ -44,7 +48,7 @@ dist-windows-amd64: ## Compile for windows-amd64
 	test -d dist || mkdir dist
 	GOOS=windows GOARCH=amd64 $(GO_CMD) -o dist/sqsc-windows-amd64$(DIST_SUFFIX).exe
 
-dist: dist-darwin-amd64 dist-freebsd-amd64 dist-linux-amd64 dist-linux-arm dist-linux-arm64 dist-openbsd-amd64 dist-windows-amd64
+dist: dist-darwin-amd64 dist-freebsd-amd64 dist-linux-amd64 docker-alpine-amd64 dist-linux-arm dist-linux-arm64 dist-openbsd-amd64 dist-windows-amd64
 
 dist-master:
 	DIST_SUFFIX='-staging-latest' make dist
