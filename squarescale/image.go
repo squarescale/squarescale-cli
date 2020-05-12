@@ -23,14 +23,14 @@ func (c *Client) AddImage(project, name, username, password string, instances in
 
 	code, body, err := c.post("/projects/"+project+"/docker_images", &payload)
 	if err != nil {
-		return err
+		return fmt.Errorf("Cannot add docker image '%s' to project '%s' (%d %s)\n\t%s", name, project, code, http.StatusText(code), err)
 	}
 
 	switch code {
 	case http.StatusCreated:
 		return nil
 	default:
-		return readErrors(body, fmt.Sprintf("Cannot add docker image '%s' to project '%s'", name, project))
+		return readErrors(body, fmt.Sprintf("Cannot add docker image '%s' to project '%s' (%d %s)", name, project, code, http.StatusText(code)))
 	}
 }
 

@@ -101,20 +101,28 @@ func (c *Client) request(method, path string, payload *JSONObject) (int, []byte,
 	}
 
 	defer res.Body.Close()
-	bytes, err := ioutil.ReadAll(res.Body)
+	rbytes, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return 0, []byte{}, err
 	}
 
 	// No content type on 204 !!! Damnit
 	if res.StatusCode != http.StatusNoContent && !strings.Contains(res.Header.Get("Content-Type"), ct) {
-		err = fmt.Errorf(
-			"Invalid response content type, got %q instead of %q.\nDo you use the right value for -endpoint=%s ?",
-			res.Header.Get("Content-Type"), ct, c.endpoint,
-		)
+		if res.StatusCode == http.StatusInternalServerError &&
+			strings.Contains(res.Header.Get("Content-Type"), "text/html") &&
+			bytes.Contains(rbytes, []byte("<title>Action Controller: Exception caught</title>")) {
+			err = fmt.Errorf(
+				"Something went wrong on server side. Please report error to support@squarescale.com.",
+			)
+		} else {
+			err = fmt.Errorf(
+				"Invalid response content type, got %q instead of %q.\nDo you use the right value for -endpoint=%s ?",
+				res.Header.Get("Content-Type"), ct, c.endpoint,
+			)
+		}
 	}
 
-	return res.StatusCode, bytes, err
+	return res.StatusCode, rbytes, err
 }
 
 func unexpectedHTTPError(code int, body []byte) error {
