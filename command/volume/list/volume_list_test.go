@@ -19,25 +19,34 @@ func TestVolumeListCommand_Validation(t *testing.T) {
 	ui := cli.NewMockUi()
 	c := New(ui)
 
-	name := "Volume-list"
-	expectedOutput := "Missing argument"
-
-	// Ensure our buffer is always clear
-	if ui.ErrorWriter != nil {
-		ui.ErrorWriter.Reset()
-	}
-	if ui.OutputWriter != nil {
-		ui.OutputWriter.Reset()
-	}
-
-	code := c.Run([]string{})
-	if code == 0 {
-		t.Errorf("%s: expected non-zero exit", name)
+	cases := map[string]struct {
+		args   []string
+		output string
+	}{
+		"0 parameter": {
+			[]string{},
+			"Project need to be specified",
+		},
 	}
 
-	output := ui.ErrorWriter.String()
-	if !strings.Contains(output, expectedOutput) {
-		t.Errorf("%s: expected %q to contain %q", name, output, expectedOutput)
+	for name, tc := range cases {
+		// Ensure our buffer is always clear
+		if ui.ErrorWriter != nil {
+			ui.ErrorWriter.Reset()
+		}
+		if ui.OutputWriter != nil {
+			ui.OutputWriter.Reset()
+		}
+
+		code := c.Run(tc.args)
+		if code == 0 {
+			t.Errorf("%s: expected non-zero exit", name)
+		}
+
+		output := ui.ErrorWriter.String()
+		if !strings.Contains(output, tc.output) {
+			t.Errorf("%s: expected %q to contain %q", name, output, tc.output)
+		}
 	}
 }
 
