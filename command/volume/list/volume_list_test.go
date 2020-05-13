@@ -23,9 +23,13 @@ func TestVolumeListCommand_Validation(t *testing.T) {
 		args   []string
 		output string
 	}{
-		"0 parameter": {
-			[]string{},
-			"Project need to be specified",
+		"missing parameter": {
+			[]string{"volume", "list"},
+			"Error on parsing parameters: Project need to be specified",
+		},
+		"unknown parameter": {
+			[]string{"volume", "list", "-project", "toto", "-unknown-parameter", "dummy-value"},
+			"flag provided but not defined: -unknown-parameter",
 		},
 	}
 
@@ -45,7 +49,7 @@ func TestVolumeListCommand_Validation(t *testing.T) {
 
 		output := ui.ErrorWriter.String()
 		if !strings.Contains(output, tc.output) {
-			t.Errorf("%s: expected %q to contain %q", name, output, tc.output)
+			t.Errorf("`%s`: expected:\n`%q`\nto contain:\n`%q`", name, output, tc.output)
 		}
 	}
 }

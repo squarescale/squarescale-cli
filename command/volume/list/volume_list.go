@@ -3,6 +3,7 @@ package list
 import (
 	"flag"
 	"fmt"
+	"log"
 
 	"github.com/mitchellh/cli"
 	"github.com/squarescale/squarescale-cli/command/flags"
@@ -37,6 +38,8 @@ func (c *cmd) init() {
 }
 
 func (c *cmd) Run(args []string) int {
+	fmt.Printf("%s\n", args)
+	log.Printf("%s\n", args)
 	if err := c.flags.Parse(args); err != nil {
 		return 1
 	}
