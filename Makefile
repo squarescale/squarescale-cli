@@ -12,11 +12,8 @@ all: build
 help: ## This help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-build: deps ## Build CLI (./sqsc binary)
+build: ## Build CLI (./sqsc binary)
 	$(GO_CMD) -o sqsc
-
-deps: ## Install dependencies inside $GOPATH
-	go get github.com/onsi/ginkgo/ginkgo
 
 docker-linux-amd64: ## Compile for linux-amd64 in a container
 	$(DOCKER_CMD) $(MOUNT_FLAGS) -e GOOS=linux -e GOARCH=amd64 golang:1.13 $(GO_CMD) -o sqsc-linux-amd64
@@ -60,7 +57,7 @@ lint: ## Lint Docker
 	$(DOCKER_CMD) -i sjourdan/hadolint < Dockerfile
 
 tests: ## Run test suites in all packages
-	ginkgo -r
+	go test ./...
 
 coverage: ## Run test suites in all packages with code coverage
 	go test ./... -cover -coverprofile=coverage.out
