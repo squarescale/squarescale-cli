@@ -68,8 +68,6 @@ func (c *Client) WaitVolume(project, name string, timeToWait int64) (Volume, err
 		return volume, err
 	}
 
-	logger.Info.Println("wait for volume : ", volume.Name)
-
 	for volume.Status != "provisionned" && err == nil {
 		time.Sleep(time.Duration(timeToWait) * time.Second)
 		volume, err = c.GetVolumeInfo(project, name)

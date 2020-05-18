@@ -96,8 +96,6 @@ func (c *Client) WaitStatefullNode(project string, name string, timeToWait int64
 		return statefullNode, err
 	}
 
-	logger.Info.Println("wait for statefullNode : ", statefullNode.Name)
-
 	for statefullNode.Status != "provisionned" && err == nil {
 		time.Sleep(time.Duration(timeToWait) * time.Second)
 		statefullNode, err = c.GetStatefullNodeInfo(project, name)
@@ -109,7 +107,6 @@ func (c *Client) WaitStatefullNode(project string, name string, timeToWait int64
 
 // DeleteStatefullNode delete a existing statefull node
 func (c *Client) DeleteStatefullNode(project string, name string) error {
-	// fmt.Printf("/projects/" + project + "/statefull_nodes/" + name + "\n")
 	code, body, err := c.delete("/projects/" + project + "/statefull_nodes/" + name)
 	if err != nil {
 		return err
@@ -142,8 +139,6 @@ func (c *Client) BindVolumeOnStatefullNode(project string, name string, volumeNa
 		"volumes_to_bind":   volumeToBind,
 		"volumes_to_unbind": volumeToUnbind,
 	}
-	fmt.Printf("PUT /projects/%s/statefull_nodes/%s\n", project, name)
-	fmt.Println(payload)
 	code, body, err := c.put("/projects/"+project+"/statefull_nodes/"+name, &payload)
 	if err != nil {
 		return err
@@ -151,18 +146,15 @@ func (c *Client) BindVolumeOnStatefullNode(project string, name string, volumeNa
 
 	switch code {
 	case http.StatusOK:
-		fmt.Printf("http.StatusOK\n")
+		return nil
 	case http.StatusNotFound:
 		if fmt.Sprintf("%s", body) == `{"error":"Couldn't find Volume with [WHERE \"volumes\".\"cluster_id\" = $1 AND \"volumes\".\"name\" = $2]"}` {
 			return fmt.Errorf("Volume '%s' does not exist", volumeName)
 		}
 		return fmt.Errorf("Project '%s' does not exist", project)
 	case http.StatusBadRequest:
-		fmt.Printf("http.StatusBadRequest\n")
 		return fmt.Errorf("Volume %s already bound with %s", volumeName, name)
 	default:
 		return unexpectedHTTPError(code, body)
 	}
-
-	return nil
 }
