@@ -189,6 +189,15 @@ func projectNameArg(f *flag.FlagSet, arg int) (string, error) {
 	}
 }
 
+func organizationNameArg(f *flag.FlagSet, arg int) (string, error) {
+	value := f.Arg(arg)
+	if value == "" {
+		return "", errors.New("Organization name must be specified")
+	} else {
+		return value, nil
+	}
+}
+
 func repoOrImageInstancesFlag(f *flag.FlagSet) *int {
 	return f.Int("instances", 1, "Number of container instances at creation")
 }

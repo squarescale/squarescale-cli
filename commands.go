@@ -234,6 +234,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"organization delete": func() (cli.Command, error) {
+			return &command.OrganizationDeleteCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"organization list": func() (cli.Command, error) {
 			return &command.OrganizationListCommand{
 				Meta: *meta,

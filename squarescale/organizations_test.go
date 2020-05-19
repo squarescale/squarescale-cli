@@ -19,6 +19,10 @@ func TestGetOrganization(t *testing.T) {
 	t.Run("Nominal case on AddOrganization", nominalCaseOnAddOrganization)
 	t.Run("Test duplicate organization name on AddOrganization", DuplicateOrganizationErrorCaseOnAddOrganization)
 
+	// Delete Organization
+	t.Run("Nominal case on DeleteOrganization", nominalCaseOnDeleteOrganization)
+	t.Run("Test organization not found on DeleteOrganization", UnknownOrganizationOnDeleteOrganization)
+
 	// List Organization
 	t.Run("Nominal case on ListOrganizations", nominalCaseOnListOrganizations)
 
@@ -130,6 +134,68 @@ func DuplicateOrganizationErrorCaseOnAddOrganization(t *testing.T) {
 	// then
 	expectedError := "Organization already exist: Sqsc"
 
+	if err == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
+	}
+}
+
+// Delete Organization
+func nominalCaseOnDeleteOrganization(t *testing.T) {
+	// give
+	token := "some-token"
+	organizationName := "organization-test"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		checkPath(t, "/organizations/"+organizationName, r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
+
+		resBody := `
+		null
+		`
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	client := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := client.DeleteOrganization(organizationName)
+
+	// then
+	if err != nil {
+		t.Fatalf("Expect no error, got `%s`", err)
+	}
+}
+
+func UnknownOrganizationOnDeleteOrganization(t *testing.T) {
+	// given
+	token := "some-token"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resBody := `{"error":"Organization not found"}`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.WriteHeader(404)
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.DeleteOrganization("toto")
+
+	// then
+	expectedError := `No organization found for name: toto`
 	if err == nil {
 		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
@@ -302,6 +368,7 @@ func ClientHTTPErrorOnOrganizationMethods(t *testing.T) {
 
 	// when
 	errOnAdd := cli.AddOrganization("Sqsc")
+	errOnDelete := cli.DeleteOrganization("Sqsc")
 	_, errOnGet := cli.GetOrganizationInfo("Sqsc")
 	_, errOnList := cli.ListOrganizations()
 
@@ -310,8 +377,12 @@ func ClientHTTPErrorOnOrganizationMethods(t *testing.T) {
 		t.Errorf("Error is not raised on AddOrganization")
 	}
 
+	if errOnDelete == nil {
+		t.Errorf("Error is not raised on DeleteOrganization")
+	}
+
 	if errOnGet == nil {
-		t.Errorf("Error is not raised on AddOrganization")
+		t.Errorf("Error is not raised on GetOrganizationInfo")
 	}
 
 	if errOnList == nil {
@@ -333,6 +404,7 @@ func InternalServerErrorOnOrganizationMethods(t *testing.T) {
 
 	// when
 	errOnAddOrganization := client.AddOrganization("Sqsc")
+	errOnDeleteOrganization := client.DeleteOrganization("Sqsc")
 	_, errOnGetOrganization := client.GetOrganizationInfo("Sqsc")
 	_, errOnListOrganizations := client.ListOrganizations()
 
@@ -340,6 +412,10 @@ func InternalServerErrorOnOrganizationMethods(t *testing.T) {
 	expectedError := "An unexpected error occurred (code: 500)"
 
 	if errOnAddOrganization == nil {
+		t.Errorf("Error is not raised with `%s`", expectedError)
+	}
+
+	if errOnDeleteOrganization == nil {
 		t.Errorf("Error is not raised with `%s`", expectedError)
 	}
 
@@ -353,6 +429,10 @@ func InternalServerErrorOnOrganizationMethods(t *testing.T) {
 
 	if fmt.Sprintf("%s", errOnAddOrganization) != expectedError {
 		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnAddOrganization)
+	}
+
+	if fmt.Sprintf("%s", errOnDeleteOrganization) != expectedError {
+		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnDeleteOrganization)
 	}
 
 	if fmt.Sprintf("%s", errOnGetOrganization) != expectedError {

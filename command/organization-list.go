@@ -74,7 +74,7 @@ func (c *OrganizationListCommand) Synopsis() string {
 // Help is part of cli.Command implementation.
 func (c *OrganizationListCommand) Help() string {
 	helpText := `
-usage: sqsc organization list [options] <organization_name>
+usage: sqsc organization list [options]
 
   List al organizations.
 

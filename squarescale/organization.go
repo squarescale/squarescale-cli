@@ -88,3 +88,22 @@ func (c *Client) ListOrganizations() ([]Organization, error) {
 
 	return organizationsJSON, nil
 }
+
+// DeleteOrganization delete organization based on its name.
+func (c *Client) DeleteOrganization(name string) error {
+	url := fmt.Sprintf("/organizations/%s", name)
+	code, body, err := c.delete(url)
+
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusOK:
+		return nil
+	case http.StatusNotFound:
+		return fmt.Errorf("No organization found for name: %s", name)
+	default:
+		return unexpectedHTTPError(code, body)
+	}
+}
