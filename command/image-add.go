@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
@@ -24,6 +25,7 @@ func (c *ImageAddCommand) Run(args []string) int {
 	image := c.flagSet.String("name", "", "Docker image name")
 	username := c.flagSet.String("username", "", "Username")
 	password := c.flagSet.String("password", "", "Password")
+	volumes := c.flagSet.String("volumes", "", "Volumes")
 	instances := repoOrImageInstancesFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
@@ -38,9 +40,37 @@ func (c *ImageAddCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
+	volumesSplited := strings.Split(*volumes, ",")
+	volumesLength := len(volumesSplited)
+	if *volumes == "" {
+		volumesLength = 0
+	}
+	volumesToBind := make([]squarescale.VolumeToBind, volumesLength)
+	if volumesLength >= 1 {
+		for index, volume := range volumesSplited {
+			volumeSplited := strings.Split(volume, ":")
+			volumeName := volumeSplited[0]
+			mountPoint := volumeSplited[1]
+			var readOnly bool
+			if len(volumeSplited) > 2 {
+				switch strings.ToLower(volumeSplited[2]) {
+				case "ro":
+					readOnly = true
+				case "rw":
+					readOnly = false
+				default:
+					log.Fatal("Read only parameter must be RO or RW")
+				}
+			} else {
+				readOnly = false
+			}
+			volumesToBind[index] = squarescale.VolumeToBind{volumeName, mountPoint, readOnly}
+		}
+	}
+
 	return c.runWithSpinner("add docker image", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		msg := fmt.Sprintf("Successfully added docker image '%s' to project '%s' (%v instance(s))", *image, *project, *instances)
-		return msg, client.AddImage(*project, *image, *username, *password, *instances, *serviceName)
+		return msg, client.AddImage(*project, *image, *username, *password, *instances, *serviceName, volumesToBind)
 	})
 }
 

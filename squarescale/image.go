@@ -6,7 +6,7 @@ import (
 )
 
 // AddImage asks the Squarescale service to attach an image to the project.
-func (c *Client) AddImage(project, name, username, password string, instances int, serviceName string) error {
+func (c *Client) AddImage(project, name, username, password string, instances int, serviceName string, volumeToBind []VolumeToBind) error {
 	payload := JSONObject{
 		"docker_image": c.dockerImage(
 			name,
@@ -14,7 +14,8 @@ func (c *Client) AddImage(project, name, username, password string, instances in
 			password,
 		),
 
-		"size": instances,
+		"size":            instances,
+		"volumes_to_bind": volumeToBind,
 	}
 
 	if len(serviceName) > 0 {

@@ -20,6 +20,13 @@ type Volume struct {
 	Status            string `json:"status"`
 }
 
+// VolumeToBind describe a volume bind to a container
+type VolumeToBind struct {
+	Name       string `json:"volume_name"`
+	MountPoint string `json:"mount_point"`
+	ReadOnly   bool   `json:"read_only"`
+}
+
 // GetVolumes gets all the volumes attached to a Project
 func (c *Client) GetVolumes(project string) ([]Volume, error) {
 	code, body, err := c.get("/projects/" + project + "/volumes")
