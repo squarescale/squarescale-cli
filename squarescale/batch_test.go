@@ -22,10 +22,17 @@ func TestBatches(t *testing.T) {
 	t.Run("Test project not found on createBatches", ProjectNotFoundOnCreateBatches)
 	t.Run("Test to create a duplicate on CreateBatches", DuplicateBatchOnCreateBatches)
 
+	//DeleteBatch
+	t.Run("Nominal case on DeleteBatch", nominalCaseOnDeleteBatch)
+
+	t.Run("Test project not found on DeleteBatch", UnknownProjectOnDeleteBatch)
+	t.Run("Test to delete a missing batch on DeleteBatch", UnknownBatchOnDeleteBatch)
+	t.Run("Test to delete a volume when deploy is in progress on DeleteBatch", DeployInProgressOnDeleteBatch)
+
 	//Error Cases
-	t.Run("Test HTTP client error on batch methods (get, create)", ClientHTTPErrorOnBatchMethods)
-	t.Run("Test internal server error on batch methods (get, create)", InternalServerErrorOnBatchMethods)
-	t.Run("Test badly JSON on batch methods (get, create)", CantUnmarshalOnBatchMethods)
+	t.Run("Test HTTP client error on batch methods (get, create, delete)", ClientHTTPErrorOnBatchMethods)
+	t.Run("Test internal server error on batch methods (get, create, delete)", InternalServerErrorOnBatchMethods)
+	t.Run("Test badly JSON on batch methods (get, create, delete)", CantUnmarshalOnBatchMethods)
 }
 
 func nominalCaseOnGetBatches(t *testing.T) {
@@ -578,6 +585,128 @@ func DuplicateBatchOnCreateBatches(t *testing.T) {
 	}
 }
 
+func nominalCaseOnDeleteBatch(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+	batchName := "my-batch"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		checkPath(t, "/projects/"+projectName+"/batches/"+batchName, r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
+
+		resBody := `null`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.DeleteBatch(projectName, batchName)
+
+	// then
+	if err != nil {
+		t.Fatalf("Expect no error, got `%s`", err)
+	}
+}
+
+func UnknownProjectOnDeleteBatch(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "not-a-project"
+	batchName := "my-batch"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resBody := `{"error":"No project found for config name: not-a-project"}`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.WriteHeader(404)
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.DeleteBatch(projectName, batchName)
+
+	// then
+	expectedError := "Project 'not-a-project' does not exist"
+	if err == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
+	}
+}
+
+func UnknownBatchOnDeleteBatch(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+	batchName := "missing-batch"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resBody := `{"error":"Couldn't find Batch with [WHERE \"batches\".\"cluster_id\" = $1 AND \"batches\".\"name\" = $2]"}`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.WriteHeader(404)
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.DeleteBatch(projectName, batchName)
+
+	// then
+	expectedError := "Batch 'missing-batch' does not exist"
+	if err == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
+	}
+}
+
+func DeployInProgressOnDeleteBatch(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+	batchName := "my-batch"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		w.WriteHeader(400)
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.DeleteBatch(projectName, batchName)
+
+	// then
+	expectedError := "Deploy probably in progress"
+	if err == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
+	}
+}
+
 func ClientHTTPErrorOnBatchMethods(t *testing.T) {
 	// given
 	token := "some-token"
@@ -612,6 +741,7 @@ func ClientHTTPErrorOnBatchMethods(t *testing.T) {
 	// when
 	_, errOnGet := cli.GetBatches(projectName)
 	_, errOnCreate := cli.CreateBatch(projectName, batchOrderContent)
+	errOnDelete := cli.DeleteBatch(projectName, batchName)
 
 	// then
 	if errOnGet == nil {
@@ -620,6 +750,10 @@ func ClientHTTPErrorOnBatchMethods(t *testing.T) {
 
 	if errOnCreate == nil {
 		t.Errorf("Error is not raised on CreateBatch")
+	}
+
+	if errOnDelete == nil {
+		t.Errorf("Error is not raised on DeleteBatch")
 	}
 
 }
@@ -662,6 +796,7 @@ func InternalServerErrorOnBatchMethods(t *testing.T) {
 	// when
 	_, errOnGet := cli.GetBatches(projectName)
 	_, errOnCreate := cli.CreateBatch(projectName, batchOrderContent)
+	errOnDelete := cli.DeleteBatch(projectName, batchName)
 
 	// then
 	expectedError := "An unexpected error occurred (code: 500)"
@@ -679,6 +814,14 @@ func InternalServerErrorOnBatchMethods(t *testing.T) {
 
 	if fmt.Sprintf("%s", errOnCreate) != expectedError {
 		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
+	}
+
+	if errOnDelete == nil {
+		t.Errorf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", errOnDelete) != expectedError {
+		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnDelete)
 	}
 }
 

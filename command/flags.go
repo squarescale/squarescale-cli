@@ -171,6 +171,15 @@ func statefullNodeNameArg(f *flag.FlagSet, arg int) (string, error) {
 	}
 }
 
+func batchNameArg(f *flag.FlagSet, arg int) (string, error) {
+	value := f.Arg(arg)
+	if value == "" {
+		return "", errors.New("Batch name must be specified")
+	} else {
+		return value, nil
+	}
+}
+
 func projectNameArg(f *flag.FlagSet, arg int) (string, error) {
 	value := f.Arg(arg)
 	if value == "" {

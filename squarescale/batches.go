@@ -137,3 +137,26 @@ func (c *Client) GetBatches(project string) ([]RunningBatch, error) {
 	return batchesByID, nil
 
 }
+
+// DeleteBatch delete a existing batch
+func (c *Client) DeleteBatch(project string, name string) error {
+	code, body, err := c.delete("/projects/" + project + "/batches/" + name)
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusOK:
+	case http.StatusNotFound:
+		if fmt.Sprintf("%s", body) == `{"error":"Couldn't find Batch with [WHERE \"batches\".\"cluster_id\" = $1 AND \"batches\".\"name\" = $2]"}` {
+			return fmt.Errorf("Batch '%s' does not exist", name)
+		}
+		return fmt.Errorf("Project '%s' does not exist", project)
+	case http.StatusBadRequest:
+		return fmt.Errorf("Deploy probably in progress")
+	default:
+		return unexpectedHTTPError(code, body)
+	}
+
+	return nil
+}

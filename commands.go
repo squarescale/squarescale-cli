@@ -26,6 +26,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"batch delete": func() (cli.Command, error) {
+			return &command.BatchDeleteCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"cluster": func() (cli.Command, error) {
 			return &command.ClusterCommand{}, nil
 		},
