@@ -78,6 +78,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 		"container": func() (cli.Command, error) {
 			return &command.ContainerCommand{}, nil
 		},
+		"container add": func() (cli.Command, error) {
+			return &command.ContainerAddCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"container list": func() (cli.Command, error) {
 			return &command.ContainerListCommand{
 				Meta: *meta,

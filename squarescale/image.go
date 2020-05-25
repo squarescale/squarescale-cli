@@ -31,7 +31,7 @@ func (c *Client) AddImage(project, name, username, password string, instances in
 	case http.StatusCreated:
 		return nil
 	default:
-		return readErrors(body, fmt.Sprintf("Cannot add docker image '%s' to project '%s' (%d %s)", name, project, code, http.StatusText(code)))
+		return unexpectedHTTPError(code, body)
 	}
 }
 
