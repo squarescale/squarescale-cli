@@ -4,11 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ProjectAddCommand is a cli.Command implementation for creating a Squarescale project.
+// BatchAddCommand is a struct to define a batch
 type BatchAddCommand struct {
 	Meta
 	flagSet   *flag.FlagSet
@@ -21,21 +22,21 @@ type BatchAddCommand struct {
 func (b *BatchAddCommand) Run(args []string) int {
 	// Parse flags
 	b.flagSet = newFlagSet(b, b.Ui)
-	wantedBatchName := batchNameFlag(b.flagSet)
 	endpoint := endpointFlag(b.flagSet)
 	project := projectFlag(b.flagSet)
 
-	DockerImageName := batchDockerImageNameFlag(b.flagSet)
-	DockerImagePrivate := batchDockerImagePrivateFlag(b.flagSet)   // FIXME
-	DockerImageUsername := batchDockerImageUsernameFlag(b.flagSet) // FIXME
-	DockerImagePassword := batchDockerImagePasswordFlag(b.flagSet) // FIXME
-	PeriodicBatch := batchPeriodicFlag(b.flagSet)
-	CronExpression := batchCronExpressionFlag(b.flagSet)
-	TimeZoneName := batchTimeZoneNameFlag(b.flagSet)
-	LimitNet := batchLimitNetFlag(b.flagSet)
-	LimitMemory := batchLimitMemoryFlag(b.flagSet)
-	LimitIOPS := batchLimitIopsFlag(b.flagSet)
-	LimitCPU := batchLimitCpuFlag(b.flagSet)
+	wantedBatchName := b.flagSet.String("name", "", "Batch name")
+	dockerImageName := b.flagSet.String("imageName", "", "docker image name")
+	dockerImagePrivate := b.flagSet.Bool("imagePrivate", false, "docker image is private")
+	dockerImageUsername := b.flagSet.String("imageUser", "", "docker image user")
+	dockerImagePassword := b.flagSet.String("imagePwd", "", "docker image user")
+	periodicBatch := b.flagSet.Bool("periodic", false, "batch periodicity")
+	cronExpression := b.flagSet.String("cron", "", "cron expression")
+	timeZoneName := b.flagSet.String("time", "", "time zone name")
+	limitNet := b.flagSet.Int("net", 1, "This is an indicative limit of how much network bandwidth your service requires.")
+	limitMemory := b.flagSet.Int("mem", 256, "This is the maximum amount of memory your service will be able to use until it is killed and restarted automatically.")
+	limitIOPS := b.flagSet.Int("iops", 0, "This is an indicative limit of how many I/O operation per second your service requires.")
+	limitCPU := b.flagSet.Int("cpu", 100, "This is an indicative limit of how much CPU your service requires.")
 	volumes := b.flagSet.String("volumes", "", "Volumes")
 
 	if err := b.flagSet.Parse(args); err != nil {
@@ -56,45 +57,43 @@ func (b *BatchAddCommand) Run(args []string) int {
 	}
 
 	//check rules
-
 	if *wantedBatchName == "" {
 		return b.errorWithUsage(fmt.Errorf(("Batch name is mandatory. Please, chose a batch name.")))
 	}
 
-	if *DockerImageName == "" {
+	if *dockerImageName == "" {
 		return b.errorWithUsage(fmt.Errorf(("DockerImage name is mandatory. Please, chose a dockerImage name.")))
 	}
 
-	if *DockerImagePrivate == true && *DockerImageUsername == "" {
+	if *dockerImagePrivate == true && *dockerImageUsername == "" {
 		return b.errorWithUsage(fmt.Errorf(("Username is mandatory when the dockerImage is private. Please, complete the username.")))
 	}
 
-	if *DockerImagePrivate == true && *DockerImagePassword == "" {
+	if *dockerImagePrivate == true && *dockerImagePassword == "" {
 		return b.errorWithUsage(fmt.Errorf(("Password is mandatory when the dockerImage is private. Please, complete the password.")))
 	}
 
-	if *PeriodicBatch == true && *CronExpression == "" {
+	if *periodicBatch == true && *cronExpression == "" {
 		return b.errorWithUsage(fmt.Errorf(("Cron_expression is mandatory when the batch is periodic. Please, complete the cron_expression.")))
 	}
 
-	if *PeriodicBatch == true && *TimeZoneName == "" {
+	if *periodicBatch == true && *timeZoneName == "" {
 		return b.errorWithUsage(fmt.Errorf(("Time_zone_name is mandatory when the batch is periodic. Please, complete the time_zone_name.")))
 	}
 
-	// _, err = time.LoadLocation(*TimeZoneName)
-	// if err != nil {
-	// 	return b.errorWithUsage(fmt.Errorf(("Time_zone_name is not in the good format (IANA Time Zone name)")))
-	// }
+	if _, err := time.LoadLocation(*timeZoneName); err != nil {
+		return b.errorWithUsage(fmt.Errorf(("Time_zone_name is not in the good format (IANA Time Zone name)")))
+	}
 
-	if *LimitNet < 0 {
+	if *limitNet < 0 {
 		return b.errorWithUsage(fmt.Errorf(("NET must be strictly greater than 0")))
 	}
 
-	if *LimitMemory <= 10 {
+	if *limitMemory <= 10 {
 		return b.errorWithUsage(fmt.Errorf(("Memory must be greater than or equal to 10MB")))
 	}
 
-	if *LimitCPU < 99 {
+	if *limitCPU < 99 {
 		return b.errorWithUsage(fmt.Errorf(("CPU must be greater than or equal to 100MHz")))
 	}
 
@@ -102,24 +101,24 @@ func (b *BatchAddCommand) Run(args []string) int {
 
 	//payload
 	dockerImageContent := squarescale.DockerImageInfos{
-		Name:     *DockerImageName,
-		Private:  *DockerImagePrivate,
-		Username: *DockerImageUsername,
-		Password: *DockerImagePassword,
+		Name:     *dockerImageName,
+		Private:  *dockerImagePrivate,
+		Username: *dockerImageUsername,
+		Password: *dockerImagePassword,
 	}
 
 	batchLimitContent := squarescale.BatchLimits{
-		NET:    *LimitNet,
-		CPU:    *LimitCPU,
-		Memory: *LimitMemory,
-		IOPS:   *LimitIOPS,
+		NET:    *limitNet,
+		CPU:    *limitCPU,
+		Memory: *limitMemory,
+		IOPS:   *limitIOPS,
 	}
 
 	batchCommonContent := squarescale.BatchCommon{
 		Name:           *wantedBatchName,
-		Periodic:       *PeriodicBatch,
-		CronExpression: *CronExpression,
-		TimeZoneName:   *TimeZoneName,
+		Periodic:       *periodicBatch,
+		CronExpression: *cronExpression,
+		TimeZoneName:   *timeZoneName,
 		Limits:         batchLimitContent,
 	}
 
