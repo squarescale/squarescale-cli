@@ -28,6 +28,10 @@ func (b *BatchListCommand) Run(args []string) int {
 		return b.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", b.flagSet.Args()))
 	}
 
+	if *projectArg == "" {
+		return b.errorWithUsage(fmt.Errorf(("Project name is mandatory. Please, provide a project name.")))
+	}
+
 	return b.runWithSpinner("list batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		batches, err := client.GetBatches(*projectArg)
 		if err != nil {
