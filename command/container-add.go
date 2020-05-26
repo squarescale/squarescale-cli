@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
@@ -40,33 +39,7 @@ func (c *ContainerAddCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	volumesSplited := strings.Split(*volumes, ",")
-	volumesLength := len(volumesSplited)
-	if *volumes == "" {
-		volumesLength = 0
-	}
-	volumesToBind := make([]squarescale.VolumeToBind, volumesLength)
-	if volumesLength >= 1 {
-		for index, volume := range volumesSplited {
-			volumeSplited := strings.Split(volume, ":")
-			volumeName := volumeSplited[0]
-			mountPoint := volumeSplited[1]
-			var readOnly bool
-			if len(volumeSplited) > 2 {
-				switch strings.ToLower(volumeSplited[2]) {
-				case "ro":
-					readOnly = true
-				case "rw":
-					readOnly = false
-				default:
-					log.Fatal("Read only parameter must be RO or RW")
-				}
-			} else {
-				readOnly = false
-			}
-			volumesToBind[index] = squarescale.VolumeToBind{volumeName, mountPoint, readOnly}
-		}
-	}
+	volumesToBind := parseVolumesToBind(*volumes)
 
 	return c.runWithSpinner("add docker image", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		msg := fmt.Sprintf("Successfully added docker image '%s' to project '%s' (%v instance(s))", *image, *project, *instances)

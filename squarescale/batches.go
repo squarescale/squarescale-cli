@@ -7,7 +7,6 @@ import (
 )
 
 // Common
-
 type BatchCommon struct {
 	Name           string      `json:"name"`
 	Periodic       bool        `json:"periodic"`
@@ -24,11 +23,16 @@ type BatchLimits struct {
 }
 
 // Create Batch part
-
 type BatchOrder struct {
 	BatchCommon
-	DockerImage DockerImageInfos   `json:"docker_image"`
-	VolumesBind []BatchVolumesBind `json:"volumes_to_bind"`
+	DockerImage DockerImageInfos `json:"docker_image"`
+	Volumes     []VolumeToBind   `json:"volumes_to_bind"`
+}
+
+type CreatedBatch struct {
+	BatchCommon
+	DockerImage DockerImageInfos `json:"docker_image"`
+	Volumes     []VolumeToBind   `json:"volumes"`
 }
 
 type DockerImageInfos struct {
@@ -38,11 +42,7 @@ type DockerImageInfos struct {
 	Password string `json:"password"`
 }
 
-type BatchVolumesBind struct {
-	Name string `json:"name"`
-}
-
-func (c *Client) CreateBatch(project string, batchOrderContent BatchOrder) ([]BatchOrder, error) {
+func (c *Client) CreateBatch(project string, batchOrderContent BatchOrder) (CreatedBatch, error) {
 
 	payload := &JSONObject{
 		"name":            batchOrderContent.BatchCommon.Name,
@@ -51,38 +51,34 @@ func (c *Client) CreateBatch(project string, batchOrderContent BatchOrder) ([]Ba
 		"cron_expression": batchOrderContent.BatchCommon.CronExpression,
 		"time_zone_name":  batchOrderContent.BatchCommon.TimeZoneName,
 		"limits":          batchOrderContent.BatchCommon.Limits,
-		"volumes_bind":    batchOrderContent.VolumesBind,
+		"volumes_to_bind": batchOrderContent.Volumes,
 	}
 
 	code, body, err := c.post("/projects/"+project+"/batches", payload)
 	if err != nil {
-		return []BatchOrder{}, err
+		return CreatedBatch{}, err
 	}
-
-	fmt.Printf("\npayload: \n`%s`\n", payload)
-	fmt.Printf("\ncode: \n`%d`\n", code)
 
 	switch code {
 	case http.StatusCreated:
 	case http.StatusNotFound:
-		return []BatchOrder{}, fmt.Errorf("Project '%s' does not exist", project)
+		return CreatedBatch{}, fmt.Errorf("Project '%s' does not exist", project)
 	case http.StatusConflict:
-		return []BatchOrder{}, fmt.Errorf("Batch already exist on project '%s'", project)
+		return CreatedBatch{}, fmt.Errorf("Batch already exist on project '%s'", project)
 	default:
-		return []BatchOrder{}, unexpectedHTTPError(code, body)
+		return CreatedBatch{}, unexpectedHTTPError(code, body)
 	}
 
-	var batchesByID []BatchOrder
+	var createdBatch CreatedBatch
 
-	if err := json.Unmarshal(body, &batchesByID); err != nil {
-		return []BatchOrder{}, err
+	if err := json.Unmarshal(body, &createdBatch); err != nil {
+		return CreatedBatch{}, err
 	}
 
-	return batchesByID, err
+	return createdBatch, err
 }
 
 // Get Batch part
-
 type RunningBatch struct {
 	BatchCommon
 	CustomEnvironment  BatchCustomEnvironment  `json:"custom_environment"`
@@ -91,7 +87,7 @@ type RunningBatch struct {
 	Status             BatchStatus             `json:"status"`
 	DockerImage        BatchDockerImage        `json:"docker_image"`
 	RefreshUrl         string                  `json:"refresh_url"`
-	Volumes            string                  `json:"mounted_volumes"`
+	Volumes            []VolumeToBind          `json:"volumes"`
 }
 
 type BatchCustomEnvironment struct {

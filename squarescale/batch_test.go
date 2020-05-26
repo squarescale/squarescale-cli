@@ -56,7 +56,8 @@ func nominalCaseOnGetBatches(t *testing.T) {
 						"custom_environment": "final-environment"
 					},
 					"default_environment": {
-						"default_environment": "basic-environment"
+						"default_environment": "basic-environment",
+						"SQSC_SERVICE_NAME": "my-little-batch"
 					},
 					"run_command": "command1",
 					"status": {
@@ -72,7 +73,17 @@ func nominalCaseOnGetBatches(t *testing.T) {
 						"name": "my-little-image"
 					},
 					"refresh_url": "new-url",
-					"mounted_volumes": "volume1"
+					"volumes": [
+						{
+							"id": 62,
+							"volume_name": "vol04b",
+							"batch_name": "my-little-image",
+							"service_name": null,
+							"mount_point": "/var/data",
+							"read_only": false
+						}
+					]
+
 				}
 			]
 		`
@@ -193,9 +204,19 @@ func nominalCaseOnGetBatches(t *testing.T) {
 		t.Errorf("Expected batches.RefreshUrl to be '%s', but got '%s' instead", expectedString, batches[0].RefreshUrl)
 	}
 
-	expectedString = "volume1"
-	if batches[0].Volumes != expectedString {
-		t.Errorf("Expected batches.Volumes to be '%s', but got '%s' instead", expectedString, batches[0].Volumes)
+	expectedString = "vol04b"
+	if batches[0].Volumes[0].Name != expectedString {
+		t.Errorf("Expected batches[0].Volumes[0].Name to be '%s', but got '%s' instead", expectedString, batches[0].Volumes[0].Name)
+	}
+
+	expectedString = "/var/data"
+	if batches[0].Volumes[0].MountPoint != expectedString {
+		t.Errorf("Expected batches[0].Volumes[0].MountPoint to be '%s', but got '%s' instead", expectedString, batches[0].Volumes[0].MountPoint)
+	}
+
+	expectedBool = false
+	if batches[0].Volumes[0].ReadOnly != expectedBool {
+		t.Errorf("Expected batches[0].Volumes[0].ReadOnly to be '%t', but got '%t' instead", expectedBool, batches[0].Volumes[0].ReadOnly)
 	}
 
 }
@@ -255,7 +276,14 @@ func nominalCaseOnCreateBatches(t *testing.T) {
 	dockerImagePrivate := false
 	dockerImageUsername := "me"
 	dockerImagePassword := "pwd"
-	batchVolumesBindName := ""
+	volumesToBind := make([]squarescale.VolumeToBind, 2)
+	volumesToBind[0].Name = "vol02b"
+	volumesToBind[0].MountPoint = "/usr/share/nginx/html"
+	volumesToBind[0].ReadOnly = false
+	volumesToBind[1].Name = "vol03b"
+	volumesToBind[1].MountPoint = "/mnt"
+	volumesToBind[1].ReadOnly = true
+
 	dockerImageContent := squarescale.DockerImageInfos{
 		Name:     dockerImageName,
 		Private:  dockerImagePrivate,
@@ -275,13 +303,10 @@ func nominalCaseOnCreateBatches(t *testing.T) {
 		TimeZoneName:   timeZoneName,
 		Limits:         batchLimitsContent,
 	}
-	batchVolumesBindContent := squarescale.BatchVolumesBind{
-		Name: batchVolumesBindName,
-	}
 	batchOrderContent := squarescale.BatchOrder{
 		BatchCommon: batchCommonContent,
 		DockerImage: dockerImageContent,
-		VolumesBind: []squarescale.BatchVolumesBind{batchVolumesBindContent},
+		Volumes:     volumesToBind,
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -290,27 +315,42 @@ func nominalCaseOnCreateBatches(t *testing.T) {
 		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
 		resBody := `
-			[
-				{
-					"name": "my-little-batch",
-					"periodic": true,
-        			"cron_expression": "* * * * *",
-        			"time_zone_name": "Europe/Paris",
-        			"docker_image": {
-          				"name": "mydockerimage",
-          				"private": true,
-          				"username": "someUserName",
-          				"password": "somePassword"
-        			},
-        		"volumes_to_bind": [{"name": "vol1"}, {"name": "vol2"}],
-        		"limits": {
-          			"mem": 256,
-          			"cpu": 100,
-          			"iops": 40,
-          			"net": 256
-        			}
+			{
+				"name": "my-little-batch",
+				"periodic": true,
+				"cron_expression": "* * * * *",
+				"time_zone_name": "Europe/Paris",
+				"docker_image": {
+					"name": "mydockerimage",
+					"private": true,
+					"username": "someUserName",
+					"password": "somePassword"
+				},
+				"volumes": [
+					{
+						"id": 51,
+						"volume_name": "vol02b",
+						"batch_name": "my-little-batch",
+						"service_name": null,
+						"mount_point": "/usr/share/nginx/html",
+						"read_only": false
+					},
+					{
+						"id": 52,
+						"volume_name": "vol03b",
+						"batch_name": "my-little-batch",
+						"service_name": null,
+						"mount_point": "/mnt",
+						"read_only": true
+					}
+				],
+				"limits": {
+					"mem": 256,
+					"cpu": 100,
+					"iops": 40,
+					"net": 256
 				}
-			]
+			}
 		`
 
 		w.Header().Set("Content-Type", "application/json")
@@ -324,7 +364,7 @@ func nominalCaseOnCreateBatches(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	batches, err := cli.CreateBatch(projectName, batchOrderContent)
+	batch, err := cli.CreateBatch(projectName, batchOrderContent)
 
 	var expectedString string
 	var expectedInt int
@@ -334,84 +374,99 @@ func nominalCaseOnCreateBatches(t *testing.T) {
 		t.Fatalf("Expect no error, got %s", err)
 	}
 
-	expectedInt = 1
-	if len(batches) != expectedInt {
-		t.Errorf("Expected batches to contain %d element, but got actually %d", expectedInt, len(batches))
-	}
-
 	expectedString = "my-little-batch"
-	if batches[0].Name != expectedString {
-		t.Errorf("Expected batches.Name to be '%s', but got '%s' instead", expectedString, batches[0].Name)
+	if batch.Name != expectedString {
+		t.Errorf("Expected batches.Name to be '%s', but got '%s' instead", expectedString, batch.Name)
 	}
 
 	expectedBool = true
-	if batches[0].Periodic != expectedBool {
-		t.Errorf("Expected batches.Periodic to be '%t', but got '%t' instead", expectedBool, batches[0].Periodic)
+	if batch.Periodic != expectedBool {
+		t.Errorf("Expected batches.Periodic to be '%t', but got '%t' instead", expectedBool, batch.Periodic)
 	}
 
 	expectedString = "* * * * *"
-	if batches[0].CronExpression != expectedString {
-		t.Errorf("Expected batches.CronExpression to be '%s', but got '%s' instead", expectedString, batches[0].CronExpression)
+	if batch.CronExpression != expectedString {
+		t.Errorf("Expected batches.CronExpression to be '%s', but got '%s' instead", expectedString, batch.CronExpression)
 	}
 
 	expectedString = "Europe/Paris"
-	if batches[0].TimeZoneName != expectedString {
-		t.Errorf("Expected batches.TimeZoneName to be '%s', but got '%s' instead", expectedString, batches[0].TimeZoneName)
+	if batch.TimeZoneName != expectedString {
+		t.Errorf("Expected batches.TimeZoneName to be '%s', but got '%s' instead", expectedString, batch.TimeZoneName)
 	}
 
 	expectedString = "mydockerimage"
-	if batches[0].DockerImage.Name != expectedString {
-		t.Errorf("Expected batches.DockerImage.Name to be '%s', but got '%s' instead", expectedString, batches[0].DockerImage.Name)
+	if batch.DockerImage.Name != expectedString {
+		t.Errorf("Expected batches.DockerImage.Name to be '%s', but got '%s' instead", expectedString, batch.DockerImage.Name)
 	}
 
 	expectedBool = true
-	if batches[0].DockerImage.Private != expectedBool {
-		t.Errorf("Expected batches.DockerImage.Private to be '%t', but got '%t' instead", expectedBool, batches[0].DockerImage.Private)
+	if batch.DockerImage.Private != expectedBool {
+		t.Errorf("Expected batches.DockerImage.Private to be '%t', but got '%t' instead", expectedBool, batch.DockerImage.Private)
 	}
 
 	expectedString = "someUserName"
-	if batches[0].DockerImage.Username != expectedString {
-		t.Errorf("Expected batches.DockerImage.Username to be '%s', but got '%s' instead", expectedString, batches[0].DockerImage.Username)
+	if batch.DockerImage.Username != expectedString {
+		t.Errorf("Expected batches.DockerImage.Username to be '%s', but got '%s' instead", expectedString, batch.DockerImage.Username)
 	}
 
 	expectedString = "somePassword"
-	if batches[0].DockerImage.Password != expectedString {
-		t.Errorf("Expected batches.DockerImage.Password to be '%s', but got '%s' instead", expectedString, batches[0].DockerImage.Password)
+	if batch.DockerImage.Password != expectedString {
+		t.Errorf("Expected batches.DockerImage.Password to be '%s', but got '%s' instead", expectedString, batch.DockerImage.Password)
 	}
 
 	expectedInt = 2
-	if len(batches[0].VolumesBind) != expectedInt {
-		t.Errorf("Expected batches.VolumesBind to contain %d element, but got actually %d", expectedInt, len(batches[0].VolumesBind))
+	if len(batch.Volumes) != expectedInt {
+		t.Errorf("Expected batches.Volumes to contain %d element, but got actually %d", expectedInt, len(batch.Volumes))
 	}
 
-	expectedString = "vol1"
-	if batches[0].VolumesBind[0].Name != expectedString {
-		t.Errorf("Expected batches.VolumesBind[0].Name to be '%s', but got '%s' instead", expectedString, batches[0].VolumesBind[0].Name)
+	expectedString = "vol02b"
+	if batch.Volumes[0].Name != expectedString {
+		t.Errorf("Expected batches.Volumes[0].Name to be '%s', but got '%s' instead", expectedString, batch.Volumes[0].Name)
 	}
 
-	expectedString = "vol2"
-	if batches[0].VolumesBind[1].Name != expectedString {
-		t.Errorf("Expected batches.VolumesBind[1].Name to be '%s', but got '%s' instead", expectedString, batches[0].VolumesBind[1].Name)
+	expectedString = "/usr/share/nginx/html"
+	if batch.Volumes[0].MountPoint != expectedString {
+		t.Errorf("Expected batches.Volumes[0].MountPoint to be '%s', but got '%s' instead", expectedString, batch.Volumes[0].MountPoint)
+	}
+
+	expectedBool = false
+	if batch.Volumes[0].ReadOnly != expectedBool {
+		t.Errorf("Expected batches.Volumes[0].ReadOnly to be '%t', but got '%t' instead", expectedBool, batch.Volumes[0].ReadOnly)
+	}
+
+	expectedString = "vol03b"
+	if batch.Volumes[1].Name != expectedString {
+		t.Errorf("Expected batches.Volumes[1].Name to be '%s', but got '%s' instead", expectedString, batch.Volumes[1].Name)
+	}
+
+	expectedString = "/mnt"
+	if batch.Volumes[1].MountPoint != expectedString {
+		t.Errorf("Expected batches.Volumes[1].MountPoint to be '%s', but got '%s' instead", expectedString, batch.Volumes[1].MountPoint)
+	}
+
+	expectedBool = true
+	if batch.Volumes[1].ReadOnly != expectedBool {
+		t.Errorf("Expected batches.Volumes[1].ReadOnly to be '%t', but got '%t' instead", expectedBool, batch.Volumes[1].ReadOnly)
 	}
 
 	expectedInt = 256
-	if batches[0].Limits.Memory != expectedInt {
-		t.Errorf("Expected batches.Limits.Memory to be %d, but got %d instead", expectedInt, batches[0].Limits.Memory)
+	if batch.Limits.Memory != expectedInt {
+		t.Errorf("Expected batches.Limits.Memory to be %d, but got %d instead", expectedInt, batch.Limits.Memory)
 	}
 
 	expectedInt = 100
-	if batches[0].Limits.CPU != expectedInt {
-		t.Errorf("Expected batches.Limits.CPU to be %d, but got %d instead", expectedInt, batches[0].Limits.CPU)
+	if batch.Limits.CPU != expectedInt {
+		t.Errorf("Expected batches.Limits.CPU to be %d, but got %d instead", expectedInt, batch.Limits.CPU)
 	}
 
 	expectedInt = 40
-	if batches[0].Limits.IOPS != expectedInt {
-		t.Errorf("Expected batches.Limits.IOPS to be %d, but got %d instead", expectedInt, batches[0].Limits.IOPS)
+	if batch.Limits.IOPS != expectedInt {
+		t.Errorf("Expected batches.Limits.IOPS to be %d, but got %d instead", expectedInt, batch.Limits.IOPS)
 	}
 
 	expectedInt = 256
-	if batches[0].Limits.NET != expectedInt {
-		t.Errorf("Expected batches.Limits.NET to be %d, but got %d instead", expectedInt, batches[0].Limits.NET)
+	if batch.Limits.NET != expectedInt {
+		t.Errorf("Expected batches.Limits.NET to be %d, but got %d instead", expectedInt, batch.Limits.NET)
 	}
 
 }
@@ -423,6 +478,11 @@ func ProjectNotFoundOnCreateBatches(t *testing.T) {
 	projectName := "unknow-project"
 	batchName := "my-little-batch"
 	dockerImageName := "mydockerimage"
+	volumesToBind := make([]squarescale.VolumeToBind, 1)
+	volumesToBind[0].Name = "vol02b"
+	volumesToBind[0].MountPoint = "/usr/share/nginx/html"
+	volumesToBind[0].ReadOnly = false
+
 	dockerImageContent := squarescale.DockerImageInfos{
 		Name: dockerImageName,
 	}
@@ -432,6 +492,7 @@ func ProjectNotFoundOnCreateBatches(t *testing.T) {
 	batchOrderContent := squarescale.BatchOrder{
 		BatchCommon: batchCommonContent,
 		DockerImage: dockerImageContent,
+		Volumes:     volumesToBind,
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -472,6 +533,11 @@ func DuplicateBatchOnCreateBatches(t *testing.T) {
 	projectName := "my-project"
 	batchName := "my-little-batch"
 	dockerImageName := "mydockerimage"
+	volumesToBind := make([]squarescale.VolumeToBind, 1)
+	volumesToBind[0].Name = "vol02b"
+	volumesToBind[0].MountPoint = "/usr/share/nginx/html"
+	volumesToBind[0].ReadOnly = false
+
 	dockerImageContent := squarescale.DockerImageInfos{
 		Name: dockerImageName,
 	}
@@ -481,6 +547,7 @@ func DuplicateBatchOnCreateBatches(t *testing.T) {
 	batchOrderContent := squarescale.BatchOrder{
 		BatchCommon: batchCommonContent,
 		DockerImage: dockerImageContent,
+		Volumes:     volumesToBind,
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -517,6 +584,11 @@ func ClientHTTPErrorOnBatchMethods(t *testing.T) {
 	projectName := "my-project"
 	batchName := "my-little-batch"
 	dockerImageName := "mydockerimage"
+	volumesToBind := make([]squarescale.VolumeToBind, 1)
+	volumesToBind[0].Name = "vol02b"
+	volumesToBind[0].MountPoint = "/usr/share/nginx/html"
+	volumesToBind[0].ReadOnly = false
+
 	dockerImageContent := squarescale.DockerImageInfos{
 		Name: dockerImageName,
 	}
@@ -526,6 +598,7 @@ func ClientHTTPErrorOnBatchMethods(t *testing.T) {
 	batchOrderContent := squarescale.BatchOrder{
 		BatchCommon: batchCommonContent,
 		DockerImage: dockerImageContent,
+		Volumes:     volumesToBind,
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -557,6 +630,11 @@ func InternalServerErrorOnBatchMethods(t *testing.T) {
 	projectName := "bad-project"
 	batchName := "my-little-batch"
 	dockerImageName := "mydockerimage"
+	volumesToBind := make([]squarescale.VolumeToBind, 1)
+	volumesToBind[0].Name = "vol02b"
+	volumesToBind[0].MountPoint = "/usr/share/nginx/html"
+	volumesToBind[0].ReadOnly = false
+
 	dockerImageContent := squarescale.DockerImageInfos{
 		Name: dockerImageName,
 	}
@@ -566,6 +644,7 @@ func InternalServerErrorOnBatchMethods(t *testing.T) {
 	batchOrderContent := squarescale.BatchOrder{
 		BatchCommon: batchCommonContent,
 		DockerImage: dockerImageContent,
+		Volumes:     volumesToBind,
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -609,6 +688,11 @@ func CantUnmarshalOnBatchMethods(t *testing.T) {
 	projectName := "my-project"
 	batchName := "my-little-batch"
 	dockerImageName := "mydockerimage"
+	volumesToBind := make([]squarescale.VolumeToBind, 1)
+	volumesToBind[0].Name = "vol02b"
+	volumesToBind[0].MountPoint = "/usr/share/nginx/html"
+	volumesToBind[0].ReadOnly = false
+
 	dockerImageContent := squarescale.DockerImageInfos{
 		Name: dockerImageName,
 	}
@@ -618,6 +702,7 @@ func CantUnmarshalOnBatchMethods(t *testing.T) {
 	batchOrderContent := squarescale.BatchOrder{
 		BatchCommon: batchCommonContent,
 		DockerImage: dockerImageContent,
+		Volumes:     volumesToBind,
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

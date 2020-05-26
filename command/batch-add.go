@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
@@ -27,9 +26,9 @@ func (b *BatchAddCommand) Run(args []string) int {
 	project := projectFlag(b.flagSet)
 
 	DockerImageName := batchDockerImageNameFlag(b.flagSet)
-	DockerImagePrivate := batchDockerImagePrivateFlag(b.flagSet)
-	DockerImageUsername := batchDockerImageUsernameFlag(b.flagSet)
-	DockerImagePassword := batchDockerImagePasswordFlag(b.flagSet)
+	DockerImagePrivate := batchDockerImagePrivateFlag(b.flagSet)   // FIXME
+	DockerImageUsername := batchDockerImageUsernameFlag(b.flagSet) // FIXME
+	DockerImagePassword := batchDockerImagePasswordFlag(b.flagSet) // FIXME
 	PeriodicBatch := batchPeriodicFlag(b.flagSet)
 	CronExpression := batchCronExpressionFlag(b.flagSet)
 	TimeZoneName := batchTimeZoneNameFlag(b.flagSet)
@@ -37,7 +36,7 @@ func (b *BatchAddCommand) Run(args []string) int {
 	LimitMemory := batchLimitMemoryFlag(b.flagSet)
 	LimitIOPS := batchLimitIopsFlag(b.flagSet)
 	LimitCPU := batchLimitCpuFlag(b.flagSet)
-	VolumeBindName := batchVolumeBindNameFlag(b.flagSet)
+	volumes := b.flagSet.String("volumes", "", "Volumes")
 
 	if err := b.flagSet.Parse(args); err != nil {
 		return 1
@@ -56,85 +55,83 @@ func (b *BatchAddCommand) Run(args []string) int {
 		return b.errorWithUsage(err)
 	}
 
+	//check rules
+
+	if *wantedBatchName == "" {
+		return b.errorWithUsage(fmt.Errorf(("Batch name is mandatory. Please, chose a batch name.")))
+	}
+
+	if *DockerImageName == "" {
+		return b.errorWithUsage(fmt.Errorf(("DockerImage name is mandatory. Please, chose a dockerImage name.")))
+	}
+
+	if *DockerImagePrivate == true && *DockerImageUsername == "" {
+		return b.errorWithUsage(fmt.Errorf(("Username is mandatory when the dockerImage is private. Please, complete the username.")))
+	}
+
+	if *DockerImagePrivate == true && *DockerImagePassword == "" {
+		return b.errorWithUsage(fmt.Errorf(("Password is mandatory when the dockerImage is private. Please, complete the password.")))
+	}
+
+	if *PeriodicBatch == true && *CronExpression == "" {
+		return b.errorWithUsage(fmt.Errorf(("Cron_expression is mandatory when the batch is periodic. Please, complete the cron_expression.")))
+	}
+
+	if *PeriodicBatch == true && *TimeZoneName == "" {
+		return b.errorWithUsage(fmt.Errorf(("Time_zone_name is mandatory when the batch is periodic. Please, complete the time_zone_name.")))
+	}
+
+	// _, err = time.LoadLocation(*TimeZoneName)
+	// if err != nil {
+	// 	return b.errorWithUsage(fmt.Errorf(("Time_zone_name is not in the good format (IANA Time Zone name)")))
+	// }
+
+	if *LimitNet < 0 {
+		return b.errorWithUsage(fmt.Errorf(("NET must be strictly greater than 0")))
+	}
+
+	if *LimitMemory <= 10 {
+		return b.errorWithUsage(fmt.Errorf(("Memory must be greater than or equal to 10MB")))
+	}
+
+	if *LimitCPU < 99 {
+		return b.errorWithUsage(fmt.Errorf(("CPU must be greater than or equal to 100MHz")))
+	}
+
+	volumesToBind := parseVolumesToBind(*volumes)
+
+	//payload
+	dockerImageContent := squarescale.DockerImageInfos{
+		Name:     *DockerImageName,
+		Private:  *DockerImagePrivate,
+		Username: *DockerImageUsername,
+		Password: *DockerImagePassword,
+	}
+
+	batchLimitContent := squarescale.BatchLimits{
+		NET:    *LimitNet,
+		CPU:    *LimitCPU,
+		Memory: *LimitMemory,
+		IOPS:   *LimitIOPS,
+	}
+
+	batchCommonContent := squarescale.BatchCommon{
+		Name:           *wantedBatchName,
+		Periodic:       *PeriodicBatch,
+		CronExpression: *CronExpression,
+		TimeZoneName:   *TimeZoneName,
+		Limits:         batchLimitContent,
+	}
+
+	batchOrderContent := squarescale.BatchOrder{
+		BatchCommon: batchCommonContent,
+		DockerImage: dockerImageContent,
+		Volumes:     volumesToBind,
+	}
+
 	res := b.runWithSpinner("add batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
 
 		var err error
-
-		//check rules
-
-		if *wantedBatchName == "" {
-			return "", fmt.Errorf("Batch name is mandatory. Please, chose a batch name.")
-		}
-
-		if *DockerImageName == "" {
-			return "", fmt.Errorf("DockerImage name is mandatory. Please, chose a dockerImage name.")
-		}
-
-		if *DockerImagePrivate == true && *DockerImageUsername == "" {
-			return "", fmt.Errorf("Username is mandatory when the dockerImage is private. Please, complete the username.")
-		}
-
-		if *DockerImagePrivate == true && *DockerImagePassword == "" {
-			return "", fmt.Errorf("Password is mandatory when the dockerImage is private. Please, complete the password.")
-		}
-
-		if *PeriodicBatch == true && *CronExpression == "" {
-			return "", fmt.Errorf("Cron_expression is mandatory when the batch is periodic. Please, complete the cron_expression.")
-		}
-
-		if *PeriodicBatch == true && *TimeZoneName == "" {
-			return "", fmt.Errorf("Time_zone_name is mandatory when the batch is periodic. Please, complete the time_zone_name.")
-		}
-
-		_, err = time.LoadLocation(*TimeZoneName)
-		if err != nil {
-			return "", fmt.Errorf("Time_zone_name is not in the good format (IANA Time Zone name)")
-		}
-
-		if *LimitNet < 0 {
-			return "", fmt.Errorf("NET must be strictly greater than 0")
-		}
-
-		if *LimitMemory <= 10 {
-			return "", fmt.Errorf("Memory must be greater than or equal to 10MB")
-		}
-
-		if *LimitCPU < 99 {
-			return "", fmt.Errorf("CPU must be greater than or equal to 100MHz")
-		}
-
-		//payload
-		dockerImageContent := squarescale.DockerImageInfos{
-			Name:     *DockerImageName,
-			Private:  *DockerImagePrivate,
-			Username: *DockerImageUsername,
-			Password: *DockerImagePassword,
-		}
-
-		batchLimitContent := squarescale.BatchLimits{
-			NET:    *LimitNet,
-			CPU:    *LimitCPU,
-			Memory: *LimitMemory,
-			IOPS:   *LimitIOPS,
-		}
-
-		batchCommonContent := squarescale.BatchCommon{
-			Name:           *wantedBatchName,
-			Periodic:       *PeriodicBatch,
-			CronExpression: *CronExpression,
-			TimeZoneName:   *TimeZoneName,
-			Limits:         batchLimitContent,
-		}
-
-		batchVolumesBindContent := squarescale.BatchVolumesBind{
-			Name: *VolumeBindName,
-		}
-
-		batchOrderContent := squarescale.BatchOrder{
-			BatchCommon: batchCommonContent,
-			DockerImage: dockerImageContent,
-			VolumesBind: []squarescale.BatchVolumesBind{batchVolumesBindContent},
-		}
 
 		//create function
 		batch, err := client.CreateBatch(*project, batchOrderContent)
