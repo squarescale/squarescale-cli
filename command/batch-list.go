@@ -29,12 +29,19 @@ func (b *BatchListCommand) Run(args []string) int {
 	}
 
 	return b.runWithSpinner("list batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		batch, err := client.GetBatches(*projectArg)
+		batches, err := client.GetBatches(*projectArg)
 		if err != nil {
 			return "", err
 		}
 
-		msg := fmt.Sprintf("list of availables batches: %v", batch)
+		var msg string = "Name\t\tDocker image\tPeriodic\n"
+		for _, b := range batches {
+			msg += fmt.Sprintf("%s\t%s\t%t\n", b.BatchCommon.Name, b.DockerImage.Name, b.BatchCommon.Periodic)
+		}
+
+		if len(batches) == 0 {
+			msg = "No batch found"
+		}
 
 		return msg, nil
 

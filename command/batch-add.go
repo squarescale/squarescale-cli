@@ -134,9 +134,9 @@ func (b *BatchAddCommand) Run(args []string) int {
 		var err error
 
 		//create function
-		batch, err := client.CreateBatch(*project, batchOrderContent)
+		_, err = client.CreateBatch(*project, batchOrderContent)
 
-		return fmt.Sprintf("[#%+v] Add batch '%s'", batch, *wantedBatchName), err
+		return fmt.Sprintf("Successfully added batch '%s'", *wantedBatchName), err
 	})
 
 	if res != 0 {
