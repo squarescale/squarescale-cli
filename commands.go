@@ -21,8 +21,8 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
-		"batch create": func() (cli.Command, error) {
-			return &command.BatchCreateCommand{
+		"batch add": func() (cli.Command, error) {
+			return &command.BatchAddCommand{
 				Meta: *meta,
 			}, nil
 		},

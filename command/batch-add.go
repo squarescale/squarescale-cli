@@ -9,8 +9,8 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ProjectCreateCommand is a cli.Command implementation for creating a Squarescale project.
-type BatchCreateCommand struct {
+// ProjectAddCommand is a cli.Command implementation for creating a Squarescale project.
+type BatchAddCommand struct {
 	Meta
 	flagSet   *flag.FlagSet
 	DbDisable bool
@@ -19,7 +19,7 @@ type BatchCreateCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (b *BatchCreateCommand) Run(args []string) int {
+func (b *BatchAddCommand) Run(args []string) int {
 	// Parse flags
 	b.flagSet = newFlagSet(b, b.Ui)
 	wantedBatchName := batchNameFlag(b.flagSet)
@@ -56,7 +56,7 @@ func (b *BatchCreateCommand) Run(args []string) int {
 		return b.errorWithUsage(err)
 	}
 
-	res := b.runWithSpinner("create batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := b.runWithSpinner("add batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
 
 		var err error
 
@@ -139,7 +139,7 @@ func (b *BatchCreateCommand) Run(args []string) int {
 		//create function
 		batch, err := client.CreateBatch(*project, batchOrderContent)
 
-		return fmt.Sprintf("[#%+v] Created batch '%s'", batch, *wantedBatchName), err
+		return fmt.Sprintf("[#%+v] Add batch '%s'", batch, *wantedBatchName), err
 	})
 
 	if res != 0 {
@@ -151,16 +151,16 @@ func (b *BatchCreateCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (b *BatchCreateCommand) Synopsis() string {
-	return "Create a new Batch in Squarescale project"
+func (b *BatchAddCommand) Synopsis() string {
+	return "Add a new Batch in Squarescale project"
 }
 
 // Help is part of cli.Command implementation.
-func (b *BatchCreateCommand) Help() string {
+func (b *BatchAddCommand) Help() string {
 	helpText := `
-usage: sqsc batch create [options] <batch_name>
+usage: sqsc batch add [options] <batch_name>
 
-  Creates a new batch using the provided batch name (name is mandatory).
+  Add a new batch using the provided batch name (name is mandatory).
 
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(b.flagSet))
