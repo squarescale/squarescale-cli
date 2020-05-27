@@ -40,8 +40,58 @@ func nominalCaseOnGetOrganizationInfo(t *testing.T) {
 		checkPath(t, "/organizations/Sqsc", r.URL.Path)
 		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
-		resBody := `{"id":6,"name":"Sqsc","collaborators":[{"id":1,"email":"no-reply@squarescale.com","remember_created_at":null,"sign_in_count":0,"current_sign_in_at":null,"last_sign_in_at":null,"current_sign_in_ip":null,"last_sign_in_ip":null,"created_at":"2020-04-27T15:08:38.293Z","updated_at":"2020-05-18T12:43:08.043Z","provider":null,"uid":"154c1a74-ddd8-46b6-9263-44a9e6a508d2","name":"User 1","image":null,"username":"bdumas","admin":true,"max_projects":2,"stripe_source_id":null,"stripe_customer_id":null,"stripe_client_secret":null,"legal_entity":true,"first_name":"","last_name":"","address":"","zip_code":"","state":"","city":"","phone":"","company_name":"","registration_number":"","vat":"","country":"","voucher_code":null,"voucher_remaining_discount":0,"country_code":"","voucher_remaining_discount_bill_period":null}],"projects":[{"id":2,"name":"sub-mariner-aerified","created_at":"2020-05-12T13:09:44.625Z","infra_status":"no_infra"}]}
-		`
+		resBody := `{
+			"id":6,
+			"name":"Sqsc",
+			"collaborators":[
+				{
+					"id":1,
+					"email":"no-reply@squarescale.com",
+					"remember_created_at":null,
+					"sign_in_count":0,
+					"current_sign_in_at":null,
+					"last_sign_in_at":null,
+					"current_sign_in_ip":null,
+					"last_sign_in_ip":null,
+					"created_at":"2020-04-27T15:08:38.293Z",
+					"updated_at":"2020-05-18T12:43:08.043Z",
+					"provider":null,
+					"uid":"154c1a74-ddd8-46b6-9263-44a9e6a508d2",
+					"name":"User 1",
+					"image":null,
+					"username":"bdumas",
+					"admin":true,
+					"max_projects":2,
+					"stripe_source_id":null,
+					"stripe_customer_id":null,
+					"stripe_client_secret":null,
+					"legal_entity":true,
+					"first_name":"",
+					"last_name":"",
+					"address":"",
+					"zip_code":"",
+					"state":"",
+					"city":"",
+					"phone":"",
+					"company_name":"",
+					"registration_number":"",
+					"vat":"",
+					"country":"",
+					"voucher_code":null,
+					"voucher_remaining_discount":0,
+					"country_code":"",
+					"voucher_remaining_discount_bill_period":null
+				}
+			],
+			"projects":[
+				{
+					"id":2,
+					"name":"sub-mariner-aerified",
+					"created_at":"2020-05-12T13:09:44.625Z",
+					"infra_status":"no_infra"
+				}
+			]
+		}`
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(resBody))
