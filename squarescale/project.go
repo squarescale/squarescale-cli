@@ -21,51 +21,6 @@ type UnprovisionError struct {
 	} `json:errors`
 }
 
-// CheckProjectName asks the Squarescale service to validate a given project name.
-func (c *Client) CheckProjectName(name string) (valid bool, same bool, fmtName string, err error) {
-	code, body, err := c.post("/free_name", &JSONObject{"name": name})
-	if err != nil {
-		return
-	}
-
-	if code != http.StatusAccepted {
-		err = unexpectedHTTPError(code, body)
-		return
-	}
-
-	var resBody struct {
-		Valid bool   `json:"valid"`
-		Same  bool   `json:"same"`
-		Name  string `json:"name"`
-	}
-
-	err = json.Unmarshal(body, &resBody)
-	if err != nil {
-		return
-	}
-
-	return resBody.Valid, resBody.Same, resBody.Name, nil
-}
-
-// FindProjectName asks the Squarescale service for a project name, using the provided token.
-func (c *Client) FindProjectName() (string, error) {
-	code, body, err := c.get("/free_name")
-	if code != http.StatusOK {
-		return "", unexpectedHTTPError(code, body)
-	}
-
-	var response struct {
-		Name string `json:"name"`
-	}
-
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		return "", err
-	}
-
-	return response.Name, nil
-}
-
 func projectSettings(name string, cluster ClusterConfig) JSONObject {
 	projectSettings := JSONObject{
 		"name": name,
@@ -76,12 +31,8 @@ func projectSettings(name string, cluster ClusterConfig) JSONObject {
 	return projectSettings
 }
 
-// CreateProject asks the Squarescale platform to create a new project, using the provided name and user token.
-func (c *Client) CreateProject(name string, cluster ClusterConfig, db DbConfig) (taskId int, err error) {
-	payload := &JSONObject{
-		"project":  projectSettings(name, cluster),
-		"database": db.ProjectCreationSettings(),
-	}
+// CreateProject asks the Squarescale platform to create a new project
+func (c *Client) CreateProject(payload *JSONObject) (taskId int, err error) {
 
 	code, body, err := c.post("/projects", payload)
 	if err != nil {

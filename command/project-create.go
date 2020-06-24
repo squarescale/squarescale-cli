@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -11,146 +12,145 @@ import (
 // ProjectCreateCommand is a cli.Command implementation for creating a Squarescale project.
 type ProjectCreateCommand struct {
 	Meta
-	flagSet   *flag.FlagSet
-	DbDisable bool
-	Db        squarescale.DbConfig
-	Cluster   squarescale.ClusterConfig
+	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
 func (c *ProjectCreateCommand) Run(args []string) int {
 	// Parse flags
-	var nodeSize string
 	c.flagSet = newFlagSet(c, c.Ui)
-	alwaysYes := yesFlag(c.flagSet)
-	nowait := nowaitFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
-	wantedProjectName := projectNameFlag(c.flagSet)
-	c.flagSet.StringVar(&c.Cluster.InfraType, "infra-type", "high-availability", "Set the infrastructure configuration")
-	c.flagSet.StringVar(&nodeSize, "node-size", "", "Set the cluster node size")
-	c.flagSet.BoolVar(&c.DbDisable, "no-db", false, "Disable database creation")
-	c.flagSet.StringVar(&c.Db.Engine, "db-engine", "", "Select database engine")
-	c.flagSet.StringVar(&c.Db.Size, "db-size", "", "Select database size")
+	alwaysYes := yesFlag(c.flagSet)
+	name := projectNameFlag(c.flagSet)
+	uuid := c.flagSet.String("uuid", "", "set the uuid of the project")
+	organization := c.flagSet.String("organization", "", "set the organization the project will belongs to")
+	provider := c.flagSet.String("provider", "", "set the cloud provider")
+	region := c.flagSet.String("region", "", "set the cloud provider region")
+	credential := c.flagSet.String("credential", "", "set the credential used to build the infrastructure")
+	infraType := c.flagSet.String("infra-type", "high-availability", "Set the infrastructure configuration")
+	monitoringEngine := c.flagSet.String("monitoring", "none", "Set the monitoring configuration")
+	nodeSize := c.flagSet.String("node-size", "", "Set the cluster node size")
+
+	dbEngine := c.flagSet.String("db-engine", "", "Select database engine")
+	dbSize := c.flagSet.String("db-size", "", "Select database size")
+	dbVersion := c.flagSet.String("db-version", "", "Select database version")
+	nowait := nowaitFlag(c.flagSet)
+
+	payload := squarescale.JSONObject{}
+
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	c.Db.Enabled = !c.DbDisable
-
-	if *wantedProjectName == "" && c.flagSet.Arg(0) != "" {
-		name := c.flagSet.Arg(0)
-		wantedProjectName = &name
+	if *name == "" && c.flagSet.Arg(0) != "" {
+		nameArg := c.flagSet.Arg(0)
+		name = &nameArg
 	}
 
 	if c.flagSet.NArg() > 1 {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
 	}
 
-	if c.Cluster.InfraType != "high-availability" && c.Cluster.InfraType != "single-node" {
-		return c.errorWithUsage(fmt.Errorf("Unknown infrastructure type: %v. Correct values are high-availability or single-node", c.Cluster.InfraType))
+	if *name == "" {
+		return c.errorWithUsage(errors.New("Project name is mandatory"))
+	}
+
+	payload["name"] = *name
+
+	if *uuid != "" {
+		payload["uuid"] = *uuid
+	}
+
+	if *organization != "" {
+		payload["organization_name"] = *organization
+	}
+
+	if *provider == "" {
+		return c.errorWithUsage(errors.New("Cloud provider is mandatory"))
+	}
+
+	payload["provider"] = *provider
+
+	if *region == "" {
+		return c.errorWithUsage(errors.New("Cloud provider region is mandatory"))
+	}
+
+	payload["region"] = *region
+
+	if *credential == "" {
+		return c.errorWithUsage(errors.New("Credential is mandatory"))
+	}
+
+	payload["credential_name"] = *credential
+
+	if *nodeSize == "" {
+		return c.errorWithUsage(errors.New("node size is mandatory"))
+	}
+
+	payload["node_size"] = *nodeSize
+
+	if *infraType != "high-availability" && *infraType != "single-node" {
+		return c.errorWithUsage(fmt.Errorf("Unknown infrastructure type: %v. Correct values are high-availability or single-node", *infraType))
+	} else if *infraType == "high-availability" {
+		payload["infra_type"] = "high_availability"
+	} else {
+		payload["infra_type"] = "single_node"
+	}
+
+	if *monitoringEngine != "none" && *monitoringEngine != "netdata" {
+		return c.errorWithUsage(fmt.Errorf("Unknown monitoring engine: %v. Correct values are none or netdata", *monitoringEngine))
+	} else if *monitoringEngine == "netdata" {
+		payload["monitoring"] = map[string]string{"engine": "netdata", "enabled": "true"}
+	} else {
+		payload["monitoring"] = map[string]string{"engine": "none", "enabled": "false"}
+	}
+
+	if *dbEngine != "" && *dbSize == "" {
+		return c.errorWithUsage(errors.New("if db engine is present, db size must be set"))
+	} else if *dbEngine == "" && *dbSize != "" {
+		return c.errorWithUsage(errors.New("if db size is present, db engine must be set"))
+	} else if *dbEngine != "" && *dbSize != "" {
+		payload["databases"] = []map[string]string{{"engine": *dbEngine, "size": *dbSize, "version": *dbVersion}}
+	}
+
+	// ask confirmation
+	c.Ui.Warn("Project will be created with the following configuration :")
+	c.Ui.Warn(fmt.Sprintf("name : %s", *name))
+	if *uuid != "" {
+		c.Ui.Warn(fmt.Sprintf("uuid : %s", *uuid))
+	}
+	if *organization != "" {
+		c.Ui.Warn(fmt.Sprintf("organization : %s", *organization))
+	}
+	c.Ui.Warn(fmt.Sprintf("cloud provider : %s", *provider))
+	c.Ui.Warn(fmt.Sprintf("cloud provider region : %s", *region))
+	c.Ui.Warn(fmt.Sprintf("credential : %s", *credential))
+	c.Ui.Warn(fmt.Sprintf("node size : %s", *nodeSize))
+	c.Ui.Warn(fmt.Sprintf("infra type : %s", *infraType))
+	c.Ui.Warn(fmt.Sprintf("monitoring engine : %s", *monitoringEngine))
+	if *dbEngine != "" && *dbSize != "" {
+		c.Ui.Warn(fmt.Sprintf("database engine : %s", *dbEngine))
+		c.Ui.Warn(fmt.Sprintf("database size : %s", *dbSize))
+		if *dbVersion != "" {
+			c.Ui.Warn(fmt.Sprintf("database version : %s", *dbVersion))
+		}
+	}
+
+	ok, err := AskYesNo(c.Ui, alwaysYes, "Proceed ?", true)
+	if err != nil {
+		return c.error(err)
+	} else if !ok {
+		return c.error(CancelledError)
 	}
 
 	var taskId int
 
 	res := c.runWithSpinner("create project", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		var definitiveName string
 		var err error
-
-		if nodeSize == "" {
-			if c.Cluster.InfraType == "single-node" {
-				nodeSize = "dev"
-			} else {
-				nodeSize = "small"
-			}
-		}
-
-		nodeSizes, err := client.GetClusterNodeSizes()
-		if err != nil {
-			return "", err
-		}
-		c.Cluster.NodeSize = nodeSizes.CheckSize(nodeSize, c.Cluster.InfraType)
-		if c.Cluster.NodeSize == "" {
-			availableSizes := nodeSizes.ListSizes(c.Cluster.InfraType)
-			return "", fmt.Errorf("Cannot validate node size '%s'. Must be one of:\n* %s", nodeSize, strings.Join(availableSizes, "\n* "))
-		}
-
-		if c.Db.Engine != "" {
-			engines, err := client.GetAvailableDBEngines()
-			if err != nil {
-				return "", err
-			}
-			valid := false
-			for _, engine := range engines {
-				if engine == c.Db.Engine {
-					valid = true
-					break
-				}
-			}
-			if !valid {
-				return "", fmt.Errorf("Cannot validate database engine '%s'. Must be one of '%s'", c.Db.Engine, strings.Join(engines, "', '"))
-			}
-		}
-
-		if c.Db.Size != "" {
-			sizes, err := client.GetDBSizes()
-			if err != nil {
-				return "", err
-			}
-			if !sizes.CheckID(c.Db.Size, c.Cluster.InfraType) {
-				return "", fmt.Errorf("Cannot validate database size '%s'. Must be one of '%s'", c.Db.Size, strings.Join(sizes.ListIds(c.Cluster.InfraType), "', '"))
-			}
-		}
-
-		if !c.DbDisable && c.Db.Engine == "" && c.Db.Size == "" {
-			c.Db.Engine = "postgres"
-			if client.HasNewDB() {
-				if c.Cluster.InfraType == "single-node" {
-					c.Db.Size = "dev"
-				} else {
-					c.Db.Size = "small"
-				}
-			} else {
-				c.Db.Size = "micro"
-			}
-		}
-
-		if *wantedProjectName != "" {
-			valid, same, fmtName, err := client.CheckProjectName(*wantedProjectName)
-			if err != nil {
-				return "", fmt.Errorf("Cannot validate project name '%s'", *wantedProjectName)
-			}
-
-			if !valid {
-				return "", fmt.Errorf(
-					"Project name '%s' is invalid (already taken or not well formed), please choose another one",
-					*wantedProjectName)
-			}
-
-			if !same {
-				if err := c.askConfirmName(alwaysYes, fmtName); err != nil {
-					return "", err
-				}
-			}
-
-			definitiveName = fmtName
-
-		} else {
-			generatedName, err := client.FindProjectName()
-			if err != nil {
-				return "", err
-			}
-
-			if err := c.askConfirmName(alwaysYes, generatedName); err != nil {
-				return "", err
-			}
-
-			definitiveName = generatedName
-		}
-
-		taskId, err = client.CreateProject(definitiveName, c.Cluster, c.Db)
-
-		return fmt.Sprintf("[#%d] Created project '%s'", taskId, definitiveName), err
+		taskId, err = client.CreateProject(&payload)
+		return fmt.Sprintf("[#%d] Created project '%s'", taskId, *name), err
 	})
+
 	if res != 0 {
 		return res
 	}
@@ -177,24 +177,16 @@ func (c *ProjectCreateCommand) Synopsis() string {
 // Help is part of cli.Command implementation.
 func (c *ProjectCreateCommand) Help() string {
 	helpText := `
-usage: sqsc project create [options] <project_name>
+usage: sqsc project create [options]
 
-  Creates a new project using the provided project name. If no project name is
-  provided, then a new name is automatically generated.
+  Creates a new project using the provided options.
 
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
 
-func (c *ProjectCreateCommand) askConfirmName(alwaysYes *bool, name string) error {
+func (c *ProjectCreateCommand) askConfirmation(alwaysYes *bool, name string) error {
 	c.pauseSpinner()
-	c.Ui.Warn(fmt.Sprintf("Project will be created as '%s', is this ok?", name))
-	ok, err := AskYesNo(c.Ui, alwaysYes, "Is this ok?", true)
-	if err != nil {
-		return err
-	} else if !ok {
-		return CancelledError
-	}
 
 	c.startSpinner()
 	return nil

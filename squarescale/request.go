@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"strings"
 
-	mime "github.com/jpillora/go-mime"
 	multierr "github.com/hashicorp/go-multierror"
+	mime "github.com/jpillora/go-mime"
 	actioncable "github.com/squarescale/actioncable-go"
 )
 

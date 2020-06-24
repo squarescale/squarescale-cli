@@ -27,14 +27,7 @@ func (c *ClusterListCommand) Run(args []string) int {
 	}
 
 	return c.runWithSpinner("list available cluster node sizes", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		nodeSizes, err := client.GetClusterNodeSizes()
-		if err != nil {
-			return "", err
-		}
-
-		msg := fmtClusterListOutput("Available node sizes", nodeSizes.ListHuman())
-
-		return msg, nil
+		return "", nil
 	})
 }
 

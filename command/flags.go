@@ -52,6 +52,18 @@ func projectFlag(f *flag.FlagSet) *string {
 	return f.String("project", "", "Squarescale project")
 }
 
+func providerFlag(f *flag.FlagSet) *string {
+	return f.String("provider", "", "Cloud provider name")
+}
+
+func regionFlag(f *flag.FlagSet) *string {
+	return f.String("region", "", "Cloud provider region name")
+}
+
+func organizationFlag(f *flag.FlagSet) *string {
+	return f.String("organization", "", "organization name")
+}
+
 func projectNameFlag(f *flag.FlagSet) *string {
 	return f.String("name", "", "Project name")
 }
