@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/olekukonko/tablewriter"
 	"github.com/squarescale/squarescale-cli/squarescale"
+	"github.com/squarescale/squarescale-cli/ui"
 )
 
 // ProjectListCommand is a cli.Command implementation for listing all Squarescale projects.
@@ -32,16 +34,15 @@ func (c *ProjectListCommand) Run(args []string) int {
 			return "", err
 		}
 
-		var msg string = "Name\tStatus\tSize\n"
-		for _, p := range projects {
-			msg += fmt.Sprintf("%s\t%s\t%d/%d\n", p.Name, p.InfraStatus, p.NomadNodesReady, p.ClusterSize)
-		}
+		var msg string
 
 		if len(projects) == 0 {
 			msg = "No projects found"
+		} else {
+			msg = fmtProjectListOutput(projects)
 		}
 
-		return c.FormatTable(msg, true), nil
+		return msg, nil
 	})
 }
 
@@ -59,4 +60,31 @@ usage: sqsc project list [options]
 
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+}
+
+func fmtProjectListOutput(projects []squarescale.Project) string {
+	tableString := &strings.Builder{}
+	table := tablewriter.NewWriter(tableString)
+	table.SetHeader([]string{"Name", "UUID", "Provider", "Region", "Organization", "Status", "Size"})
+	data := make([][]string, len(projects), len(projects))
+
+	for i, project := range projects {
+		data[i] = []string{
+			project.Name,
+			project.UUID,
+			project.Provider,
+			project.Region,
+			project.Organization,
+			project.InfraStatus,
+			fmt.Sprintf("%d/%d", project.NomadNodesReady, project.ClusterSize),
+		}
+	}
+
+	table.AppendBulk(data)
+
+	ui.FormatTable(table)
+
+	table.Render()
+
+	return tableString.String()
 }

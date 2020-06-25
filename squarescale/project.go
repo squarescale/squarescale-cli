@@ -61,10 +61,18 @@ func (c *Client) CreateProject(payload *JSONObject) (taskId int, err error) {
 
 type Project struct {
 	Name            string `json:"name"`
+	UUID            string `json:"uuid"`
+	Provider        string `json:"provider"`
+	Region          string `json:"region"`
+	Organization    string `string:"organization"`
 	InfraStatus     string `json:"infra_status"`
 	ClusterSize     int    `json:"cluster_size"`
 	NomadNodesReady int    `json:"nomad_nodes_ready"`
 }
+
+/*
+  json.organization p.organization&.name
+*/
 
 // ListProjects asks the Squarescale service for available projects.
 func (c *Client) ListProjects() ([]Project, error) {
