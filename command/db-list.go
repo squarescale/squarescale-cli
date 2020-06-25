@@ -1,11 +1,14 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
 
+	"github.com/olekukonko/tablewriter"
 	"github.com/squarescale/squarescale-cli/squarescale"
+	"github.com/squarescale/squarescale-cli/ui"
 )
 
 // DBListCommand is a cli.Command implementation to list the database engines and instances available for use.
@@ -18,6 +21,9 @@ type DBListCommand struct {
 func (c *DBListCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
+	provider := c.flagSet.String("provider", "", "set the cloud provider")
+	region := c.flagSet.String("region", "", "set the cloud provider region")
+
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -26,22 +32,30 @@ func (c *DBListCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
+	if *provider == "" {
+		return c.errorWithUsage(errors.New("Cloud provider is mandatory"))
+	}
+
+	if *region == "" {
+		return c.errorWithUsage(errors.New("Cloud provider region is mandatory"))
+	}
+
 	return c.runWithSpinner("list available database engines and sizes", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		engines, err := client.GetAvailableDBEngines()
+		engines, err := client.GetAvailableDBEngines(*provider, *region)
 		if err != nil {
 			return "", err
 		}
 
-		msg := fmtDBListOutput("Available engines", engines)
-
-		sizes, err := client.GetDBSizes()
+		sizes, err := client.GetAvailableDBSizes(*provider, *region)
 		if err != nil {
 			return "", err
 		}
 
-		msg += "\n\n"
-		msg += fmtDBListOutput("Available sizes", sizes.ListHuman())
-		return msg, nil
+		var out string = "\n\tAvailable engines\n\n"
+		out += fmtDbEngineListOutput(engines)
+		out += "\n\n\tAvailable sizes\n\n"
+		out += fmtDbSizeListOutput(sizes)
+		return out, nil
 	})
 }
 
@@ -62,12 +76,40 @@ usage: sqsc db list
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
 
-func fmtDBListOutput(title string, lines []string) string {
-	var res string
-	for _, line := range lines {
-		res += fmt.Sprintf("  %s\n", line)
+func fmtDbEngineListOutput(engines []squarescale.DataseEngine) string {
+	tableString := &strings.Builder{}
+	table := tablewriter.NewWriter(tableString)
+
+	table.SetHeader([]string{"Name", "Label", "Version"})
+	data := make([][]string, len(engines), len(engines))
+	for i, engine := range engines {
+		data[i] = []string{engine.Name, engine.Label, engine.Version}
 	}
 
-	res = strings.Trim(res, "\n")
-	return fmt.Sprintf("%s\n\n%s", title, res)
+	table.AppendBulk(data)
+
+	ui.FormatTable(table)
+
+	table.Render()
+
+	return tableString.String()
+}
+
+func fmtDbSizeListOutput(sizes []squarescale.DataseSize) string {
+	tableString := &strings.Builder{}
+	table := tablewriter.NewWriter(tableString)
+	table.SetHeader([]string{"Name", "Description"})
+	data := make([][]string, len(sizes), len(sizes))
+
+	for i, size := range sizes {
+		data[i] = []string{size.Name, size.Description}
+	}
+
+	table.AppendBulk(data)
+
+	ui.FormatTable(table)
+
+	table.Render()
+
+	return tableString.String()
 }

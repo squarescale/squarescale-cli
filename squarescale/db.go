@@ -4,113 +4,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 )
 
-// DbSizes allow to display and validate client side the
-// database the user wants
-type DbSizes interface {
-	ListHuman() []string
-	CheckID(size, infraType string) bool
-	ListIds(infraType string) []string
+type DataseSize struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
-type basicDbSizes struct {
-	Sizes map[string]string `json:"sizes"`
+type DataseEngine struct {
+	Name    string `json:"name"`
+	Label   string `json:"label"`
+	Version string `json:"version"`
 }
 
-type fullDbSizes struct {
-	SingleNode       dbSizesWithAdditional `json:"single_node"`
-	HighAvailability dbSizesWithAdditional `json:"high_availability"`
-}
-
-type dbSizesWithAdditional struct {
-	Default    []string `json:"default"`
-	Additional []string `json:"additional"`
-}
-
-func (s *basicDbSizes) ListHuman() []string {
-	var res []string
-	for k, v := range s.Sizes {
-		res = append(res, k+": "+v)
-	}
-	return res
-}
-
-func (s *basicDbSizes) CheckID(size, _ string) bool {
-	for k := range s.Sizes {
-		if k == size {
-			return true
-		}
-	}
-	return false
-}
-
-func (s *basicDbSizes) ListIds(_ string) []string {
-	var res []string
-	for k := range s.Sizes {
-		res = append(res, k)
-	}
-	return res
-}
-
-func (fs *fullDbSizes) ListHuman() []string {
-	var res []string
-	res = append(res, "Single Node infrastructure")
-	for _, v := range fs.SingleNode.Default {
-		res = append(res, "\t"+v)
-	}
-	for _, v := range fs.SingleNode.Additional {
-		res = append(res, "\t["+v+"]")
-	}
-	res = append(res, "High Availability infrastructure")
-	for _, v := range fs.HighAvailability.Default {
-		res = append(res, "\t"+v)
-	}
-	for _, v := range fs.HighAvailability.Additional {
-		res = append(res, "\t["+v+"]")
-	}
-
-	return res
-}
-
-func (fs *fullDbSizes) allSizes() map[string]map[string]bool {
-	res := make(map[string]map[string]bool)
-	singleNode := make(map[string]bool)
-	ha := make(map[string]bool)
-	for _, v := range fs.SingleNode.Default {
-		singleNode[v] = true
-	}
-	for _, v := range fs.HighAvailability.Default {
-		ha[v] = true
-	}
-	for _, v := range fs.SingleNode.Additional {
-		singleNode[v] = true
-	}
-	for _, v := range fs.HighAvailability.Additional {
-		ha[v] = true
-	}
-	res["single-node"] = singleNode
-	res["high-availability"] = ha
-
-	return res
-}
-
-func (fs *fullDbSizes) CheckID(size, infraType string) bool {
-	_, ok := fs.allSizes()[infraType][size]
-	return ok
-}
-
-func (fs *fullDbSizes) ListIds(infraType string) []string {
-	var res []string
-	for id := range fs.allSizes()[infraType] {
-		res = append(res, id)
-	}
-	return res
-}
-
-// GetAvailableDBSizes returns all the database instances available for use in Squarescale.
-func (c *Client) GetAvailableDBSizes() (DbSizes, error) {
-	code, body, err := c.get("/db/sizes")
+// GetAvailableDBSizes return the db node size available for a cloud provider
+// on a given region
+func (c *Client) GetAvailableDBSizes(provider, region string) ([]DataseSize, error) {
+	code, body, err := c.get(fmt.Sprintf("/infra/providers/%s/regions/%s/database_sizes", provider, url.PathEscape(region)))
 	if err != nil {
 		return nil, err
 	}
@@ -119,69 +30,32 @@ func (c *Client) GetAvailableDBSizes() (DbSizes, error) {
 		return nil, unexpectedHTTPError(code, body)
 	}
 
-	var sizeList basicDbSizes
-	sizeList.Sizes = map[string]string{}
-
-	err = json.Unmarshal(body, &sizeList)
-	if err != nil {
-		return nil, err
-	}
-
-	return &sizeList, nil
-}
-
-func (c *Client) HasNewDB() bool {
-	code, _, err := c.get("/db/sizes/infra")
-	if err != nil {
-		return false
-	}
-
-	if code == http.StatusForbidden {
-		return false
-	}
-
-	return true
-}
-
-func (c *Client) GetDBSizes() (DbSizes, error) {
-	code, body, err := c.get("/db/sizes/infra")
-	if err != nil {
-		return nil, err
-	}
-
-	if code == http.StatusForbidden {
-		// not authorized to see new db sizes? Fallback to old db sizes
-		return c.GetAvailableDBSizes()
-	}
-	if code != http.StatusOK {
-		return nil, unexpectedHTTPError(code, body)
-	}
-
-	var sizes fullDbSizes
+	var sizes []DataseSize
 
 	err = json.Unmarshal(body, &sizes)
 	if err != nil {
 		return nil, err
 	}
 
-	return &sizes, nil
+	return sizes, nil
 }
 
-// GetAvailableDBEngines returns all the database engines available for use in Squarescale.
-func (c *Client) GetAvailableDBEngines() ([]string, error) {
-	code, body, err := c.get("/db/engines")
+// GetAvailableDBEngines returns all the database engines available for a cloud provider
+// on a given region
+func (c *Client) GetAvailableDBEngines(provider, region string) ([]DataseEngine, error) {
+	code, body, err := c.get(fmt.Sprintf("/infra/providers/%s/regions/%s/database_engines", provider, url.PathEscape(region)))
 	if err != nil {
-		return []string{}, err
+		return nil, err
 	}
 
 	if code != http.StatusOK {
-		return []string{}, unexpectedHTTPError(code, body)
+		return nil, unexpectedHTTPError(code, body)
 	}
 
-	var enginesList []string
+	var enginesList []DataseEngine
 	err = json.Unmarshal(body, &enginesList)
 	if err != nil {
-		return []string{}, err
+		return nil, err
 	}
 
 	return enginesList, nil
@@ -265,7 +139,7 @@ func (c *Client) GetDBConfig(project string) (*DbConfig, error) {
 	return &db, nil
 }
 
-// ConfigDB calls the Squarescale API to update database scale options for a given project.
+// ConfigDB calls the Squarescale API to update database options for a given project.
 func (c *Client) ConfigDB(project string, db *DbConfig) (taskId int, err error) {
 	payload := &JSONObject{
 		"project": db.ConfigSettings(),
