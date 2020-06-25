@@ -13,7 +13,6 @@ import (
 type DBSetCommand struct {
 	Meta
 	flagSet *flag.FlagSet
-	Db      squarescale.DbConfig
 }
 
 // Run is part of cli.Command implementation.
@@ -21,27 +20,33 @@ func (c *DBSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	nowait := nowaitFlag(c.flagSet)
-	projectNameArg := projectFlag(c.flagSet)
-	c.flagSet.StringVar(&c.Db.Engine, "engine", "", "Database engine")
-	c.flagSet.StringVar(&c.Db.Size, "size", "", "Database size")
-	dbDisabledArg := c.flagSet.Bool("disabled", false, "Disable database")
+	projectUUID := c.flagSet.String("project-uuid", "", "uuid of the targeted project")
+	dbEngine := c.flagSet.String("engine", "", "Database engine")
+	dbSize := c.flagSet.String("size", "", "Database size")
+	dbVersion := c.flagSet.String("engine-version", "", "Database version")
+	dbDisabled := c.flagSet.Bool("disabled", false, "Disable database")
 	alwaysYes := yesFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	c.Db.Enabled = !*dbDisabledArg
-
 	if c.flagSet.NArg() > 0 {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	err := validateDBSetCommandArgs(*projectNameArg, c.Db)
-	if err != nil {
-		return c.errorWithUsage(err)
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
-	c.Ui.Warn(fmt.Sprintf("Changing cluster settings for project '%s' will cause a downtime.", *projectNameArg))
+	if *dbDisabled && (*dbEngine != "" || *dbSize != "" || *dbVersion != "") {
+		return c.errorWithUsage(errors.New("Cannot specify engine or size or version when disabling database."))
+	}
+
+	if !*dbDisabled && (*dbEngine == "" && *dbEngine == "" && *dbVersion == "") {
+		return c.errorWithUsage(errors.New("Size, engine and version are mandatory."))
+	}
+
+	c.Ui.Warn(fmt.Sprintf("Changing cluster settings for project '%s' will cause a downtime.", *projectUUID))
 	ok, err := AskYesNo(c.Ui, alwaysYes, "Is this ok?", false)
 	if err != nil {
 		return c.error(err)
@@ -53,32 +58,34 @@ func (c *DBSetCommand) Run(args []string) int {
 
 	res := c.runWithSpinner("scale project database", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
-		db, e := client.GetDBConfig(*projectNameArg)
+		db, e := client.GetDBConfig(*projectUUID)
 		if e != nil {
 			return "", e
 		}
 
-		if !c.Db.Enabled && !db.Enabled {
+		if *dbDisabled && !db.Enabled {
 			*nowait = true
-			return fmt.Sprintf("Database for project '%s' is already disabled", *projectNameArg), nil
+			return fmt.Sprintf("Database for project '%s' is already disabled", *projectUUID), nil
 		}
 
-		if c.Db.Engine == db.Engine && c.Db.Size == db.Size {
+		if *dbEngine == db.Engine && *dbSize == db.Size && *dbVersion == db.Version && !*dbDisabled == db.Enabled {
 			*nowait = true
-			return fmt.Sprintf("Database for project '%s' is already configured with these parameters", *projectNameArg), nil
+			return fmt.Sprintf("Database for project '%s' is already configured with these parameters", *projectUUID), nil
 		}
 
-		db.Update(c.Db)
+		payload := squarescale.JSONObject{
+			"database": map[string]interface{}{"enabled": !*dbDisabled, "engine": *dbEngine, "size": *dbSize, "version": *dbVersion},
+		}
 
-		taskId, err = client.ConfigDB(*projectNameArg, db)
+		taskId, err = client.ConfigDB(*projectUUID, &payload)
 
 		var msg string
-		if *dbDisabledArg {
-			msg = fmt.Sprintf("[#%d] Successfully disabled database for project '%s'", taskId, *projectNameArg)
+		if *dbDisabled {
+			msg = fmt.Sprintf("[#%d] Successfully disabled database for project '%s'", taskId, *projectUUID)
 		} else {
 			msg = fmt.Sprintf(
 				"[#%d] Successfully set database for project '%s': %s",
-				taskId, *projectNameArg, db.String())
+				taskId, *projectUUID, db.String())
 		}
 
 		return msg, err
@@ -122,18 +129,7 @@ usage: sqsc db set [options]
 // validateDBSetCommandArgs ensures that the following predicate is satisfied:
 // - 'disabled' is true and (dbEngine and dbInstance are both empty)
 // - 'disabled' is false and (dbEngine or dbInstance is not empty)
-func validateDBSetCommandArgs(project string, db squarescale.DbConfig) error {
-	if err := validateProjectName(project); err != nil {
-		return err
-	}
-
-	if !db.Enabled && (db.Engine != "" || db.Size != "") {
-		return errors.New("Cannot specify engine or size when disabling database.")
-	}
-
-	if db.Enabled && (db.Engine == "" && db.Size == "") {
-		return errors.New("Size and engine cannot be both empty.")
-	}
+func validateDBSetCommandArgs(projectUUID string, db squarescale.DbConfig) error {
 
 	return nil
 }
