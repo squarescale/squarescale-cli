@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"strings"
+	"errors"
 
 	"github.com/kballard/go-shellquote"
 	"github.com/squarescale/squarescale-cli/squarescale"
@@ -19,7 +20,7 @@ type ContainerShowCommand struct {
 func (c *ContainerShowCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	projectArg := projectFlag(c.flagSet)
+	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	containerArg := filterNameFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -29,12 +30,12 @@ func (c *ContainerShowCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if err := validateProjectName(*projectArg); err != nil {
-		return c.errorWithUsage(err)
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
 	return c.runWithSpinner("list containers", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		containers, err := client.GetContainers(*projectArg)
+		containers, err := client.GetServices(*projectUUID)
 		if err != nil {
 			return "", err
 		}
@@ -44,14 +45,13 @@ func (c *ContainerShowCommand) Run(args []string) int {
 			if msg != "" {
 				msg += "\n\n-----------\n\n\n"
 			}
-			if *containerArg != "" && *containerArg != co.ShortName {
+			if *containerArg != "" && *containerArg != co.Name {
 				continue
 			}
 			tbl := ""
 			tbl += fmt.Sprintf("Name:\t%s\n", co.Name)
 			tbl += fmt.Sprintf("Size:\t%d/%d\n", co.Running, co.Size)
 			tbl += fmt.Sprintf("Run Command:\t%s\n", shellquote.Join(co.RunCommand...))
-			tbl += fmt.Sprintf("Web:\t%v\n", co.Web)
 			tbl += fmt.Sprintf("Web Port:\t%d\n", co.WebPort)
 			tbl += fmt.Sprintf("Memory limit:\t%d MB\n", co.Limits.Memory)
 			tbl += fmt.Sprintf("CPU limit:\t%d MHz\n", co.Limits.CPU)
@@ -64,20 +64,6 @@ func (c *ContainerShowCommand) Run(args []string) int {
 				for _, url := range co.RefreshCallbacks {
 					msg += fmt.Sprintf("  - %s\n", url)
 				}
-			}
-
-			placementErrors := false
-
-			if co.NomadStatus.Service.PlacementFailure {
-				placementErrors = true
-				msg += fmt.Sprintf("Service Errors:\n")
-				for _, e := range co.NomadStatus.Service.Errors("service") {
-					msg += fmt.Sprintf("  - %s\n", e)
-				}
-			}
-
-			if placementErrors {
-				msg += fmt.Sprintf("\nThese errors means that your cluster doesn't have enough resources to fit your containers. To solve these errors, you can try to reduce the resource required by your service or increase the cluster size.\n\n")
 			}
 		}
 

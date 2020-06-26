@@ -9,7 +9,7 @@ import (
 )
 
 // DisableLB asks the Squarescale service to deactivate the load balancer.
-func (c *Client) DisableLB(project string) (int, error) {
+func (c *Client) DisableLB(projectUUID string) (int, error) {
 	payload := &JSONObject{
 		"load_balancer": JSONObject{
 			"active": false,
@@ -19,11 +19,11 @@ func (c *Client) DisableLB(project string) (int, error) {
 		},
 	}
 
-	return c.updateLBConfig(project, payload)
+	return c.updateLBConfig(projectUUID, payload)
 }
 
 // ConfigLB sets the load balancer configuration for a given project.
-func (c *Client) ConfigLB(project string, container, port int, exprArg string, https bool, cert string, cert_chain []string, secret_key string) (int, error) {
+func (c *Client) ConfigLB(projectUUID string, container, port int, exprArg string, https bool, cert string, cert_chain []string, secret_key string) (int, error) {
 	if cert_chain == nil {
 		cert_chain = []string{}
 	}
@@ -53,11 +53,11 @@ func (c *Client) ConfigLB(project string, container, port int, exprArg string, h
 		},
 	}
 
-	return c.updateLBConfig(project, payload)
+	return c.updateLBConfig(projectUUID, payload)
 }
 
-func (c *Client) updateLBConfig(project string, payload *JSONObject) (int, error) {
-	code, body, err := c.post("/projects/"+project+"/load_balancer", payload)
+func (c *Client) updateLBConfig(projectUUID string, payload *JSONObject) (int, error) {
+	code, body, err := c.put("/projects/"+projectUUID+"/load_balancers/1", payload) //TODO change it when support more many LB.
 	if err != nil {
 		return 0, err
 	}
@@ -65,10 +65,8 @@ func (c *Client) updateLBConfig(project string, payload *JSONObject) (int, error
 	switch code {
 	case http.StatusOK:
 		break
-	case http.StatusBadRequest:
-		break
 	case http.StatusNotFound:
-		return 0, fmt.Errorf("Project '%s' not found", project)
+		return 0, fmt.Errorf("Project '%s' not found", projectUUID)
 	default:
 		return 0, unexpectedHTTPError(code, body)
 	}
@@ -106,8 +104,8 @@ func (c *Client) updateLBConfig(project string, payload *JSONObject) (int, error
 }
 
 // LoadBalancerEnabled asks if the project load balancer is enabled.
-func (c *Client) LoadBalancerEnabled(project string) (bool, error) {
-	code, body, err := c.get("/projects/" + project)
+func (c *Client) LoadBalancerEnabled(projectUUID string) (bool, error) {
+	code, body, err := c.get("/projects/" + projectUUID)
 	if err != nil {
 		return false, err
 	}
@@ -115,7 +113,7 @@ func (c *Client) LoadBalancerEnabled(project string) (bool, error) {
 	switch code {
 	case http.StatusOK:
 	case http.StatusNotFound:
-		return false, fmt.Errorf("Project '%s' not found", project)
+		return false, fmt.Errorf("Project '%s' not found", projectUUID)
 	default:
 		return false, unexpectedHTTPError(code, body)
 	}
@@ -130,4 +128,34 @@ func (c *Client) LoadBalancerEnabled(project string) (bool, error) {
 	}
 
 	return response.Enabled, nil
+}
+
+type LoadBalancer struct {
+	Port           int    `json:"Port"`
+	ExposedService string `json:"exposed_service"`
+	PublicUrl      string `json:"public_url"`
+}
+
+func (c *Client) LoadBalancerList(projectUUID string) ([]LoadBalancer, error) {
+	code, body, err := c.get("/projects/" + projectUUID + "/load_balancers")
+	if err != nil {
+		return nil, err
+	}
+
+	switch code {
+	case http.StatusOK:
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("Project '%s' not found", projectUUID)
+	default:
+		return nil, unexpectedHTTPError(code, body)
+	}
+
+	var response []LoadBalancer
+
+	err = json.Unmarshal(body, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }

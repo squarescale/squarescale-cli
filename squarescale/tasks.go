@@ -17,7 +17,7 @@ const (
 	StatusDone      = "done"
 )
 
-var ErrInProgress error = errors.New("Task still in progress")
+var ErrInProgress error = errors.New("Connot monitor task.")
 
 type Task struct {
 	Id            int             `json:"id"`

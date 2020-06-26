@@ -20,10 +20,9 @@ type ContainerSetCommand struct {
 func (c *ContainerSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	projectArg := projectFlag(c.flagSet)
-	containerArg := containerFlag(c.flagSet)
+	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	serviceArg := c.flagSet.String("service", "", "select the service")
 	nInstancesArg := containerInstancesFlag(c.flagSet)
-	buildServiceArg := containerBuildServiceFlag(c.flagSet)
 	runCmdArg := containerRunCmdFlag(c.flagSet)
 	limitMemoryArg := containerLimitMemoryFlag(c.flagSet)
 	limitCPUArg := containerLimitCPUFlag(c.flagSet)
@@ -38,12 +37,12 @@ func (c *ContainerSetCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if err := validateProjectName(*projectArg); err != nil {
-		return c.errorWithUsage(err)
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
-	if *containerArg == "" {
-		return c.errorWithUsage(errors.New("Container name cannot be empty."))
+	if *serviceArg == "" {
+		return c.errorWithUsage(errors.New("Service name cannot be empty."))
 	}
 
 	if *noRunCmdArg && *runCmdArg != "" {
@@ -55,14 +54,14 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			c.Ui.Warn("Number of instances cannot be 0 or negative. This value won't be set.")
 		}
 
-		if *buildServiceArg == "" && *runCmdArg == "" && !*noRunCmdArg && *limitCPUArg < 0 && *limitMemoryArg < 0 && *limitNetArg < 0 {
+		if *runCmdArg == "" && !*noRunCmdArg && *limitCPUArg < 0 && *limitMemoryArg < 0 && *limitNetArg < 0 {
 			err := errors.New("Invalid values provided for instance number.")
 			return c.errorWithUsage(err)
 		}
 	}
 
-	return c.runWithSpinner("configure container", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		container, err := client.GetContainerInfo(*projectArg, *containerArg)
+	return c.runWithSpinner("configure service", endpoint.String(), func(client *squarescale.Client) (string, error) {
+		container, err := client.GetServicesInfo(*projectUUID, *serviceArg)
 		if err != nil {
 			return "", err
 		}
@@ -90,11 +89,6 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			container.RunCommand = []string{}
 		}
 
-		if *buildServiceArg != "" {
-			c.info("Configure service with %s build service", *buildServiceArg)
-			container.BuildService = *buildServiceArg
-		}
-
 		if *limitMemoryArg >= 0 {
 			c.info("Configure service with memory limit of %d MB", *limitMemoryArg)
 			container.Limits.Memory = *limitMemoryArg
@@ -117,10 +111,10 @@ func (c *ContainerSetCommand) Run(args []string) int {
 
 		msg := fmt.Sprintf(
 			"Successfully configured container '%s' for project '%s'",
-			*containerArg, *projectArg)
+			*serviceArg, *projectUUID)
 
 		c.Meta.spin.Start()
-		return msg, client.ConfigContainer(container)
+		return msg, client.ConfigService(container)
 	})
 }
 

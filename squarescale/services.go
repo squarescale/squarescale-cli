@@ -1,0 +1,163 @@
+package squarescale
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"net/http"
+	"os"
+)
+
+type ServiceEnv struct {
+	Key        string `json:"key"`
+	Value      string `json:"value"`
+	Predefined bool   `json:"predefined"`
+}
+
+// Service describes a project container as returned by the Squarescale API
+type Service struct {
+	ID               int                  `json:"container_id"`
+	Name             string               `json:"name"`
+	RunCommand       []string             `json:"run_command"`
+	Running          int                  `json:"running"`
+	Size             int                  `json:"size"`
+	WebPort          int                  `json:"web_port"`
+	RefreshCallbacks []string             `json:"refresh_callbacks"`
+	Limits           ServiceLimits        `json:"limits"`
+	CustomEnv        []ServiceEnv         `json:"custom_environment"`
+}
+
+func (c *Service) SetEnv(path string) error {
+
+	var env map[string]string
+
+	file, err := os.Open(path)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Some error happened when reading env file : %s", err))
+	}
+
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&env)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Some error happened when unmarshall env file : %s", err))
+	}
+
+	c.CustomEnv = make([]ServiceEnv, len(env), len(env))
+	i := 0
+
+	for k, v := range env {
+		c.CustomEnv[i] = ServiceEnv{Key: k, Value: v}
+		i++
+	}
+	return nil
+}
+
+type ServiceLimits struct {
+	Memory int `json:"mem"`
+	CPU    int `json:"cpu"`
+	IOPS   int `json:"iops"`
+	Net    int `json:"net"`
+}
+
+// GetContainers gets all the services attached to a Project
+func (c *Client) GetServices(projectUUID string) ([]Service, error) {
+	code, body, err := c.get("/projects/" + projectUUID + "/services")
+	if err != nil {
+		return []Service{}, err
+	}
+
+	switch code {
+	case http.StatusOK:
+	case http.StatusNotFound:
+		return []Service{}, fmt.Errorf("Project '%s' does not exist", projectUUID)
+	default:
+		return []Service{}, unexpectedHTTPError(code, body)
+	}
+
+	var containersByID []Service
+
+	if err := json.Unmarshal(body, &containersByID); err != nil {
+		return []Service{}, err
+	}
+
+	return containersByID, nil
+}
+
+// GetServicesInfo get the service of a project based on its name.
+func (c *Client) GetServicesInfo(projectUUID, name string) (Service, error) {
+	services, err := c.GetServices(projectUUID)
+	if err != nil {
+		return Service{}, err
+	}
+
+	for _, service := range services {
+		if service.Name == name {
+			return service, nil
+		}
+	}
+
+	return Service{}, fmt.Errorf("Service '%s' not found for project '%s'", name, projectUUID)
+}
+
+// ConfigService calls the API to update the number of instances and update command.
+func (c *Client) ConfigService(service Service) error {
+	cont := JSONObject{}
+	if service.RunCommand != nil {
+		cont["run_command"] = service.RunCommand
+	}
+	if service.Size > 0 {
+		cont["size"] = service.Size
+	}
+	limits := JSONObject{}
+	if service.Limits.Memory >= 0 {
+		limits["mem"] = service.Limits.Memory
+	}
+	if service.Limits.CPU >= 0 {
+		limits["cpu"] = service.Limits.CPU
+	}
+	if service.Limits.IOPS >= 0 {
+		limits["iops"] = service.Limits.IOPS
+	}
+	if service.Limits.Net >= 0 {
+		limits["net"] = service.Limits.Net
+	}
+	cont["limits"] = limits
+	if service.CustomEnv != nil {
+		cont["custom_environment"] = service.CustomEnv
+	}
+
+	payload := &JSONObject{"container": cont}
+	code, body, err := c.put(fmt.Sprintf("/containers/%d", service.ID), payload)
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusOK:
+		return nil
+	case http.StatusNotFound:
+		return errors.New("Container does not exist")
+	default:
+		return unexpectedHTTPError(code, body)
+	}
+}
+
+func (c *Client) DeleteService(service Service) error {
+	url := fmt.Sprintf("/containers/%d", service.ID)
+	code, body, err := c.delete(url)
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusOK:
+	case http.StatusNotFound:
+		return fmt.Errorf("service with id '%d' does not exist", service.ID)
+	default:
+		return unexpectedHTTPError(code, body)
+	}
+
+	return nil
+}

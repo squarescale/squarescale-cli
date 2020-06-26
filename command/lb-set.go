@@ -21,9 +21,8 @@ type LBSetCommand struct {
 func (c *LBSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	nowait := nowaitFlag(c.flagSet)
-	project := projectFlag(c.flagSet)
-	containerArg := containerFlag(c.flagSet)
+	projectUUID := c.flagSet.String("project-uuid", "", "uuid of the targeted project")
+	serviceArg := c.flagSet.String("service", "", "select the service")
 	portArg := portFlag(c.flagSet)
 	exprArg := exprFlag(c.flagSet)
 	disabledArg := disabledFlag(c.flagSet, "Disable load balancer")
@@ -39,8 +38,12 @@ func (c *LBSetCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if err := validateLBSetCommandArgs(*project, *containerArg, *portArg, *disabledArg, *certArg, *certChainArg, *secretKeyArg); err != nil {
-		return c.errorWithUsage(err)
+	if *disabledArg && (*serviceArg != "" || *portArg > 0) {
+		return c.errorWithUsage(errors.New("Cannot specify service or port when disabling load balancer."))
+	}
+
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
 	var taskId int
@@ -98,11 +101,11 @@ func (c *LBSetCommand) Run(args []string) int {
 	res := c.runWithSpinner("configure load balancer", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
 		if *disabledArg {
-			taskId, err = client.DisableLB(*project)
-			return fmt.Sprintf("[#%d] Successfully disabled load balancer for project '%s'", taskId, *project), err
+			taskId, err = client.DisableLB(*projectUUID)
+			return fmt.Sprintf("[#%d] Successfully disabled load balancer for project '%s'", taskId, *projectUUID), err
 		}
 
-		container, err := client.GetContainerInfo(*project, *containerArg)
+		container, err := client.GetServicesInfo(*projectUUID, *serviceArg)
 		if err != nil {
 			return "", err
 		}
@@ -111,27 +114,13 @@ func (c *LBSetCommand) Run(args []string) int {
 			container.WebPort = *portArg
 		}
 
-		taskId, err = client.ConfigLB(*project, container.ID, container.WebPort, *exprArg, *httpsArg, cert, certChain, secretKey)
+		taskId, err = client.ConfigLB(*projectUUID, container.ID, container.WebPort, *exprArg, *httpsArg, cert, certChain, secretKey)
 		msg := fmt.Sprintf(
 			"[#%d] Successfully configured load balancer (enabled = '%v', container = '%s', port = '%d') for project '%s'",
-			taskId, true, *containerArg, container.WebPort, *project)
+			taskId, true, *serviceArg, container.WebPort, *projectUUID)
 
 		return msg, err
 	})
-	if res != 0 {
-		return res
-	}
-
-	if !*nowait {
-		res = c.runWithSpinner("wait for load balancer change", endpoint.String(), func(client *squarescale.Client) (string, error) {
-			task, err := client.WaitTask(taskId)
-			if err != nil {
-				return "", err
-			} else {
-				return task.Status, nil
-			}
-		})
-	}
 
 	return res
 }
@@ -158,14 +147,7 @@ usage: sqsc lb set [options]
 // validateLBSetCommandArgs ensures that the following predicate is satisfied:
 // - 'disabled' is true and (container and port are not both specified)
 // - 'disabled' is false and (container or port are specified)
-func validateLBSetCommandArgs(project, container string, port int, disabled bool, cert, certChain, secretKey string) error {
-	if err := validateProjectName(project); err != nil {
-		return err
-	}
-
-	if disabled && (container != "" || port > 0) {
-		return errors.New("Cannot specify container or port when disabling load balancer.")
-	}
+func validateLBSetCommandArgs(container string, port int, disabled bool, cert, certChain, secretKey string) error {
 
 	return nil
 }

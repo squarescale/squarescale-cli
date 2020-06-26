@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"strings"
+	"errors"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
@@ -18,7 +19,7 @@ type ContainerListCommand struct {
 func (c *ContainerListCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	projectArg := projectFlag(c.flagSet)
+	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	containerArg := containerFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -28,22 +29,22 @@ func (c *ContainerListCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if err := validateProjectName(*projectArg); err != nil {
-		return c.errorWithUsage(err)
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
 	return c.runWithSpinner("list containers", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		containers, err := client.GetContainers(*projectArg)
+		containers, err := client.GetServices(*projectUUID)
 		if err != nil {
 			return "", err
 		}
 
-		var msg string = "Name\tSize\tWeb\tPort\n"
+		var msg string = "Name\tSize\tPort\n"
 		for _, c := range containers {
-			if *containerArg != "" && *containerArg != c.ShortName {
+			if *containerArg != "" && *containerArg != c.Name {
 				continue
 			}
-			msg += fmt.Sprintf("%s\t%d/%d\t%v\t%d\n", c.Name, c.Running, c.Size, c.Web, c.WebPort)
+			msg += fmt.Sprintf("%s\t%d/%d\t%d\n", c.Name, c.Running, c.Size, c.WebPort)
 		}
 
 		if len(containers) == 0 {

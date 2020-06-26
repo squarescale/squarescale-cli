@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -18,7 +19,7 @@ type LBURLCommand struct {
 func (c *LBURLCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	project := projectFlag(c.flagSet)
+	projectUUID := c.flagSet.String("project-uuid", "", "uuid of the targeted project")
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -27,17 +28,17 @@ func (c *LBURLCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if err := validateProjectName(*project); err != nil {
-		return c.errorWithUsage(err)
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
 	return c.runWithSpinner("project url", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		url, err := client.ProjectURL(*project)
+		url, err := client.ProjectURL(*projectUUID)
 		if err != nil {
 			return "", err
 		}
 
-		return fmt.Sprintf("Project '%s' is available at %s", *project, url), nil
+		return fmt.Sprintf("Project '%s' is available at %s", *projectUUID, url), nil
 	})
 }
 
