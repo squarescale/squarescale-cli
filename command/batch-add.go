@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -23,7 +24,7 @@ func (b *BatchAddCommand) Run(args []string) int {
 	// Parse flags
 	b.flagSet = newFlagSet(b, b.Ui)
 	endpoint := endpointFlag(b.flagSet)
-	project := projectFlag(b.flagSet)
+	projectUUID := b.flagSet.String("project-uuid", "", "set the uuid of the project")
 
 	wantedBatchName := b.flagSet.String("name", "", "Batch name")
 	dockerImageName := b.flagSet.String("imageName", "", "docker image name")
@@ -43,6 +44,10 @@ func (b *BatchAddCommand) Run(args []string) int {
 		return 1
 	}
 
+	if *projectUUID == "" {
+		return b.errorWithUsage(errors.New("Project uuid is mandatory"))
+	}
+
 	if *wantedBatchName == "" && b.flagSet.Arg(0) != "" {
 		name := b.flagSet.Arg(0)
 		wantedBatchName = &name
@@ -52,7 +57,7 @@ func (b *BatchAddCommand) Run(args []string) int {
 		return b.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", b.flagSet.Args()[1:]))
 	}
 
-	if err := validateProjectName(*project); err != nil {
+	if err := validateProjectName(*projectUUID); err != nil {
 		return b.errorWithUsage(err)
 	}
 
@@ -133,7 +138,7 @@ func (b *BatchAddCommand) Run(args []string) int {
 		var err error
 
 		//create function
-		_, err = client.CreateBatch(*project, batchOrderContent)
+		_, err = client.CreateBatch(*projectUUID, batchOrderContent)
 
 		return fmt.Sprintf("Successfully added batch '%s'", *wantedBatchName), err
 	})

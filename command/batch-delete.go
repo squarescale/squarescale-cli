@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -20,10 +21,14 @@ func (c *BatchDeleteCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
-	projectArg := projectFlag(c.flagSet)
+	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
+	}
+
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
 	batchName, err := batchNameArg(c.flagSet, 0)
@@ -35,7 +40,7 @@ func (c *BatchDeleteCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
 	}
 
-	if err := validateProjectName(*projectArg); err != nil {
+	if err := validateProjectName(*projectUUID); err != nil {
 		return c.errorWithUsage(err)
 	}
 
@@ -52,9 +57,8 @@ func (c *BatchDeleteCommand) Run(args []string) int {
 	}
 
 	res := c.runWithSpinner("deleting batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		projectName := *projectArg
-		fmt.Printf("Delete on project `%s` the batch `%s`\n", projectName, batchName)
-		err := client.DeleteBatch(projectName, batchName) //insérer la fonction dans batches
+		fmt.Printf("Delete on project `%s` the batch `%s`\n", *projectUUID, batchName)
+		err := client.DeleteBatch(*projectUUID, batchName) //insérer la fonction dans batches
 		return "", err
 	})
 	if res != 0 {
