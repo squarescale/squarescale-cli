@@ -42,7 +42,7 @@ type DockerImageInfos struct {
 	Password string `json:"password"`
 }
 
-func (c *Client) CreateBatch(project string, batchOrderContent BatchOrder) (CreatedBatch, error) {
+func (c *Client) CreateBatch(uuid string, batchOrderContent BatchOrder) (CreatedBatch, error) {
 
 	payload := &JSONObject{
 		"name":            batchOrderContent.BatchCommon.Name,
@@ -54,7 +54,7 @@ func (c *Client) CreateBatch(project string, batchOrderContent BatchOrder) (Crea
 		"volumes_to_bind": batchOrderContent.Volumes,
 	}
 
-	code, body, err := c.post("/projects/"+project+"/batches", payload)
+	code, body, err := c.post("/projects/"+uuid+"/batches", payload)
 	if err != nil {
 		return CreatedBatch{}, err
 	}
@@ -62,9 +62,9 @@ func (c *Client) CreateBatch(project string, batchOrderContent BatchOrder) (Crea
 	switch code {
 	case http.StatusCreated:
 	case http.StatusNotFound:
-		return CreatedBatch{}, fmt.Errorf("Project '%s' does not exist", project)
+		return CreatedBatch{}, fmt.Errorf("Project '%s' does not exist", uuid)
 	case http.StatusConflict:
-		return CreatedBatch{}, fmt.Errorf("Batch already exist on project '%s'", project)
+		return CreatedBatch{}, fmt.Errorf("Batch already exist on project '%s'", uuid)
 	default:
 		return CreatedBatch{}, unexpectedHTTPError(code, body)
 	}
@@ -114,8 +114,8 @@ type BatchDockerImage struct {
 	Name string `json:"name"`
 }
 
-func (c *Client) GetBatches(project string) ([]RunningBatch, error) {
-	code, body, err := c.get("/projects/" + project + "/batches")
+func (c *Client) GetBatches(uuid string) ([]RunningBatch, error) {
+	code, body, err := c.get("/projects/" + uuid + "/batches")
 	if err != nil {
 		return []RunningBatch{}, err
 	}
@@ -123,7 +123,7 @@ func (c *Client) GetBatches(project string) ([]RunningBatch, error) {
 	switch code {
 	case http.StatusOK:
 	case http.StatusNotFound:
-		return []RunningBatch{}, fmt.Errorf("Project '%s' does not exist", project)
+		return []RunningBatch{}, fmt.Errorf("Project '%s' does not exist", uuid)
 	default:
 		return []RunningBatch{}, unexpectedHTTPError(code, body)
 	}
@@ -139,8 +139,8 @@ func (c *Client) GetBatches(project string) ([]RunningBatch, error) {
 }
 
 // DeleteBatch delete a existing batch
-func (c *Client) DeleteBatch(project string, name string) error {
-	code, body, err := c.delete("/projects/" + project + "/batches/" + name)
+func (c *Client) DeleteBatch(uuid string, name string) error {
+	code, body, err := c.delete("/projects/" + uuid + "/batches/" + name)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func (c *Client) DeleteBatch(project string, name string) error {
 		if fmt.Sprintf("%s", body) == `{"error":"Couldn't find Batch with [WHERE \"batches\".\"cluster_id\" = $1 AND \"batches\".\"name\" = $2]"}` {
 			return fmt.Errorf("Batch '%s' does not exist", name)
 		}
-		return fmt.Errorf("Project '%s' does not exist", project)
+		return fmt.Errorf("Project '%s' does not exist", uuid)
 	case http.StatusBadRequest:
 		return fmt.Errorf("Deploy probably in progress")
 	default:

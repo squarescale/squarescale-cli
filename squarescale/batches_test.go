@@ -39,11 +39,11 @@ func nominalCaseOnGetBatches(t *testing.T) {
 
 	// given
 	token := "some-token"
-	projectName := "my-project"
+	projectUuid := "d5dde1ad-64ce-4e7c-ade9-43cfd16596d5"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		checkPath(t, "/projects/"+projectName+"/batches", r.URL.Path)
+		checkPath(t, "/projects/"+projectUuid+"/batches", r.URL.Path)
 		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
 		resBody := `
@@ -105,7 +105,7 @@ func nominalCaseOnGetBatches(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	batches, err := cli.GetBatches(projectName)
+	batches, err := cli.GetBatches(projectUuid)
 
 	// then
 	var expectedInt int
@@ -232,7 +232,7 @@ func ProjectNotFoundOnGetBatches(t *testing.T) {
 
 	// given
 	token := "some-token"
-	projectName := "unknow-project"
+	projectUuid := "d5dde1ad-64ce-4e7c-ade9-43cfd16596d5"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -251,7 +251,7 @@ func ProjectNotFoundOnGetBatches(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, errOnGet := cli.GetBatches(projectName)
+	_, errOnGet := cli.GetBatches(projectUuid)
 
 	// then
 
@@ -271,7 +271,7 @@ func nominalCaseOnCreateBatches(t *testing.T) {
 	//Given
 	token := "some-token"
 	batchName := "my-little-batch"
-	projectName := "my-project"
+	projectUuid := "d5dde1ad-64ce-4e7c-ade9-43cfd16596d5"
 	periodicBatch := true
 	cronExpression := "* * * * *"
 	timeZoneName := "Europe/Paris"
@@ -318,7 +318,7 @@ func nominalCaseOnCreateBatches(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		checkPath(t, "/projects/"+projectName+"/batches", r.URL.Path)
+		checkPath(t, "/projects/"+projectUuid+"/batches", r.URL.Path)
 		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
 		resBody := `
@@ -371,7 +371,7 @@ func nominalCaseOnCreateBatches(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	batch, err := cli.CreateBatch(projectName, batchOrderContent)
+	batch, err := cli.CreateBatch(projectUuid, batchOrderContent)
 
 	var expectedString string
 	var expectedInt int
@@ -482,7 +482,7 @@ func ProjectNotFoundOnCreateBatches(t *testing.T) {
 
 	// given
 	token := "some-token"
-	projectName := "unknow-project"
+	projectUuid := "d5dde1ad-64ce-4e7c-ade9-43cfd16596d5"
 	batchName := "my-little-batch"
 	dockerImageName := "mydockerimage"
 	volumesToBind := make([]squarescale.VolumeToBind, 1)
@@ -519,7 +519,7 @@ func ProjectNotFoundOnCreateBatches(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, errOnGet := cli.CreateBatch(projectName, batchOrderContent)
+	_, errOnGet := cli.CreateBatch(projectUuid, batchOrderContent)
 
 	// then
 
@@ -537,7 +537,7 @@ func ProjectNotFoundOnCreateBatches(t *testing.T) {
 func DuplicateBatchOnCreateBatches(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "my-project"
+	projectUuid := "d5dde1ad-64ce-4e7c-ade9-43cfd16596d5"
 	batchName := "my-little-batch"
 	dockerImageName := "mydockerimage"
 	volumesToBind := make([]squarescale.VolumeToBind, 1)
@@ -572,10 +572,10 @@ func DuplicateBatchOnCreateBatches(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.CreateBatch(projectName, batchOrderContent)
+	_, err := cli.CreateBatch(projectUuid, batchOrderContent)
 
 	// then
-	expectedError := "Batch already exist on project 'my-project'"
+	expectedError := "Batch already exist on project 'd5dde1ad-64ce-4e7c-ade9-43cfd16596d5'"
 	if err == nil {
 		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
@@ -588,11 +588,11 @@ func DuplicateBatchOnCreateBatches(t *testing.T) {
 func nominalCaseOnDeleteBatch(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "my-project"
+	projectUuid := "d5dde1ad-64ce-4e7c-ade9-43cfd16596d5"
 	batchName := "my-batch"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		checkPath(t, "/projects/"+projectName+"/batches/"+batchName, r.URL.Path)
+		checkPath(t, "/projects/"+projectUuid+"/batches/"+batchName, r.URL.Path)
 		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
 		resBody := `null`
@@ -606,7 +606,7 @@ func nominalCaseOnDeleteBatch(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	err := cli.DeleteBatch(projectName, batchName)
+	err := cli.DeleteBatch(projectUuid, batchName)
 
 	// then
 	if err != nil {
@@ -617,7 +617,7 @@ func nominalCaseOnDeleteBatch(t *testing.T) {
 func UnknownProjectOnDeleteBatch(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "not-a-project"
+	projectUuid := "d5dde1ad-64ce-4e7c-ade9-43cfd16596d5"
 	batchName := "my-batch"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -633,10 +633,10 @@ func UnknownProjectOnDeleteBatch(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	err := cli.DeleteBatch(projectName, batchName)
+	err := cli.DeleteBatch(projectUuid, batchName)
 
 	// then
-	expectedError := "Project 'not-a-project' does not exist"
+	expectedError := "Project 'd5dde1ad-64ce-4e7c-ade9-43cfd16596d5' does not exist"
 	if err == nil {
 		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
@@ -649,7 +649,7 @@ func UnknownProjectOnDeleteBatch(t *testing.T) {
 func UnknownBatchOnDeleteBatch(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "my-project"
+	projectUuid := "d5dde1ad-64ce-4e7c-ade9-43cfd16596d5"
 	batchName := "missing-batch"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -665,7 +665,7 @@ func UnknownBatchOnDeleteBatch(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	err := cli.DeleteBatch(projectName, batchName)
+	err := cli.DeleteBatch(projectUuid, batchName)
 
 	// then
 	expectedError := "Batch 'missing-batch' does not exist"
@@ -681,7 +681,7 @@ func UnknownBatchOnDeleteBatch(t *testing.T) {
 func DeployInProgressOnDeleteBatch(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "my-project"
+	projectUuid := "d5dde1ad-64ce-4e7c-ade9-43cfd16596d5"
 	batchName := "my-batch"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -694,7 +694,7 @@ func DeployInProgressOnDeleteBatch(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	err := cli.DeleteBatch(projectName, batchName)
+	err := cli.DeleteBatch(projectUuid, batchName)
 
 	// then
 	expectedError := "Deploy probably in progress"
@@ -710,7 +710,7 @@ func DeployInProgressOnDeleteBatch(t *testing.T) {
 func ClientHTTPErrorOnBatchMethods(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "my-project"
+	projectUuid := "d5dde1ad-64ce-4e7c-ade9-43cfd16596d5"
 	batchName := "my-little-batch"
 	dockerImageName := "mydockerimage"
 	volumesToBind := make([]squarescale.VolumeToBind, 1)
@@ -739,9 +739,9 @@ func ClientHTTPErrorOnBatchMethods(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, errOnGet := cli.GetBatches(projectName)
-	_, errOnCreate := cli.CreateBatch(projectName, batchOrderContent)
-	errOnDelete := cli.DeleteBatch(projectName, batchName)
+	_, errOnGet := cli.GetBatches(projectUuid)
+	_, errOnCreate := cli.CreateBatch(projectUuid, batchOrderContent)
+	errOnDelete := cli.DeleteBatch(projectUuid, batchName)
 
 	// then
 	if errOnGet == nil {
@@ -761,7 +761,7 @@ func ClientHTTPErrorOnBatchMethods(t *testing.T) {
 func InternalServerErrorOnBatchMethods(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "bad-project"
+	projectUuid := "d5dde1ad-64ce-4e7c-ade9-43cfd16596d5"
 	batchName := "my-little-batch"
 	dockerImageName := "mydockerimage"
 	volumesToBind := make([]squarescale.VolumeToBind, 1)
@@ -794,9 +794,9 @@ func InternalServerErrorOnBatchMethods(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, errOnGet := cli.GetBatches(projectName)
-	_, errOnCreate := cli.CreateBatch(projectName, batchOrderContent)
-	errOnDelete := cli.DeleteBatch(projectName, batchName)
+	_, errOnGet := cli.GetBatches(projectUuid)
+	_, errOnCreate := cli.CreateBatch(projectUuid, batchOrderContent)
+	errOnDelete := cli.DeleteBatch(projectUuid, batchName)
 
 	// then
 	expectedError := "An unexpected error occurred (code: 500)"
@@ -828,7 +828,7 @@ func InternalServerErrorOnBatchMethods(t *testing.T) {
 func CantUnmarshalOnBatchMethods(t *testing.T) {
 	// given
 	token := "some-token"
-	projectName := "my-project"
+	projectUuid := "d5dde1ad-64ce-4e7c-ade9-43cfd16596d5"
 	batchName := "my-little-batch"
 	dockerImageName := "mydockerimage"
 	volumesToBind := make([]squarescale.VolumeToBind, 1)
@@ -867,8 +867,8 @@ func CantUnmarshalOnBatchMethods(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, errOnGet := cli.GetBatches(projectName)
-	_, errOnCreate := cli.CreateBatch(projectName, batchOrderContent)
+	_, errOnGet := cli.GetBatches(projectUuid)
+	_, errOnCreate := cli.CreateBatch(projectUuid, batchOrderContent)
 
 	// then
 	expectedError := "invalid character ']' looking for beginning of object key string"
