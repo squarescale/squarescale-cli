@@ -40,10 +40,6 @@ func (c *BatchDeleteCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
 	}
 
-	if err := validateProjectName(*projectUUID); err != nil {
-		return c.errorWithUsage(err)
-	}
-
 	c.Ui.Info("Are you sure you want to delete " + batchName + "?")
 	if *alwaysYes {
 		c.Ui.Info("(approved from command line)")

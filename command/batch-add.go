@@ -57,10 +57,6 @@ func (b *BatchAddCommand) Run(args []string) int {
 		return b.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", b.flagSet.Args()[1:]))
 	}
 
-	if err := validateProjectName(*projectUUID); err != nil {
-		return b.errorWithUsage(err)
-	}
-
 	//check rules
 	if *wantedBatchName == "" {
 		return b.errorWithUsage(fmt.Errorf(("Batch name is mandatory. Please, chose a batch name.")))
