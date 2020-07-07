@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -20,11 +21,15 @@ func (c *VolumeDeleteCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
-	projectArg := projectFlag(c.flagSet)
+	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	nowait := nowaitFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
+	}
+
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
 	volumeName, err := volumeNameArg(c.flagSet, 0)
@@ -34,10 +39,6 @@ func (c *VolumeDeleteCommand) Run(args []string) int {
 
 	if c.flagSet.NArg() > 4 {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
-	}
-
-	if err := validateProjectName(*projectArg); err != nil {
-		return c.errorWithUsage(err)
 	}
 
 	c.Ui.Info("Are you sure you want to delete " + volumeName + "?")
@@ -53,8 +54,7 @@ func (c *VolumeDeleteCommand) Run(args []string) int {
 	}
 
 	res := c.runWithSpinner("deleting volume", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		projectName := *projectArg
-		err := client.DeleteVolume(projectName, volumeName)
+		err := client.DeleteVolume(*projectUUID, volumeName)
 		return "", err
 	})
 	if res != 0 {
@@ -63,7 +63,7 @@ func (c *VolumeDeleteCommand) Run(args []string) int {
 
 	if !*nowait {
 		c.runWithSpinner("wait for volume delete", endpoint.String(), func(client *squarescale.Client) (string, error) {
-			_, err := client.WaitProject(*projectArg)
+			_, err := client.WaitProject(*projectUUID)
 			if err != nil {
 				return "", err
 			} else {

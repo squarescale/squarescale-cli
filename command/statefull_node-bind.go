@@ -19,11 +19,15 @@ type StatefullNodeBindCommand struct {
 func (c *StatefullNodeBindCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	project := projectFlag(c.flagSet)
+	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	volumeName := c.flagSet.String("volume-name", "", "Volume name to bind")
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
+	}
+
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
 	if *volumeName == "" {
@@ -41,7 +45,7 @@ func (c *StatefullNodeBindCommand) Run(args []string) int {
 
 	res := c.runWithSpinner("bind statefull node", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		msg := fmt.Sprintf("Successfully binded volume '%s' to statefull_node '%s'", *volumeName, statefullNodeName)
-		err := client.BindVolumeOnStatefullNode(*project, statefullNodeName, *volumeName)
+		err := client.BindVolumeOnStatefullNode(*projectUUID, statefullNodeName, *volumeName)
 		return msg, err
 	})
 	if res != 0 {

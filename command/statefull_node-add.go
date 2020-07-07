@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -18,7 +19,7 @@ type StatefullNodeAddCommand struct {
 func (c *StatefullNodeAddCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	project := projectFlag(c.flagSet)
+	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 
 	nodeType := c.flagSet.String("node-type", "t2.micro", "Statefull node type")
 	zone := c.flagSet.String("zone", "eu-west-1a", "Statefull node zone")
@@ -26,6 +27,10 @@ func (c *StatefullNodeAddCommand) Run(args []string) int {
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
+	}
+
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
 	statefullNodeName, err := statefullNodeNameArg(c.flagSet, 0)
@@ -37,13 +42,9 @@ func (c *StatefullNodeAddCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if err := validateProjectName(*project); err != nil {
-		return c.errorWithUsage(err)
-	}
-
 	res := c.runWithSpinner("add statefull_node", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		msg := fmt.Sprintf("Successfully added statefull_node '%s' to project '%s'", statefullNodeName, *project)
-		_, err := client.AddStatefullNode(*project, statefullNodeName, *nodeType, *zone)
+		msg := fmt.Sprintf("Successfully added statefull_node '%s' to project '%s'", statefullNodeName, *projectUUID)
+		_, err := client.AddStatefullNode(*projectUUID, statefullNodeName, *nodeType, *zone)
 		return msg, err
 	})
 	if res != 0 {
@@ -52,7 +53,7 @@ func (c *StatefullNodeAddCommand) Run(args []string) int {
 
 	if !*nowait {
 		c.runWithSpinner("wait for statefull_node add", endpoint.String(), func(client *squarescale.Client) (string, error) {
-			statefullNode, err := client.WaitStatefullNode(*project, statefullNodeName, 5)
+			statefullNode, err := client.WaitStatefullNode(*projectUUID, statefullNodeName, 5)
 			if err != nil {
 				return "", err
 			} else {

@@ -204,18 +204,18 @@ func (c *Client) ProjectStatus(project string) (*ProjectStatus, error) {
 }
 
 // WaitProject wait project provisioning
-func (c *Client) WaitProject(project string) (*ProjectStatus, error) {
-	projectStatus, err := c.ProjectStatus(project)
+func (c *Client) WaitProject(projectUUID string) (*ProjectStatus, error) {
+	projectStatus, err := c.ProjectStatus(projectUUID)
 	if err != nil {
 		return projectStatus, err
 	}
 
-	logger.Info.Println("wait for project : ", project)
+	logger.Info.Println("wait for project : ", projectUUID)
 
 	for projectStatus.InfraStatus != "ok" && err == nil {
 		time.Sleep(5 * time.Second)
-		projectStatus, err = c.ProjectStatus(project)
-		logger.Debug.Println("project status update: ", project)
+		projectStatus, err = c.ProjectStatus(projectUUID)
+		logger.Debug.Println("project status update: ", projectUUID)
 	}
 
 	return projectStatus, err

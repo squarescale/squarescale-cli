@@ -42,7 +42,7 @@ func (c *DBSetCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Cannot specify engine or size or version when disabling database."))
 	}
 
-	if !*dbDisabled && (*dbEngine == "" && *dbEngine == "" && *dbVersion == "") {
+	if !*dbDisabled && (*dbEngine == "" && *dbSize == "" && *dbVersion == "") {
 		return c.errorWithUsage(errors.New("Size, engine and version are mandatory."))
 	}
 

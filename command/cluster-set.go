@@ -22,7 +22,7 @@ func (c *ClusterSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	nowait := nowaitFlag(c.flagSet)
-	projectNameArg := projectFlag(c.flagSet)
+	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	c.flagSet.UintVar(&c.Cluster.Size, "size", 0, "Cluster Size")
 	alwaysYes := yesFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
@@ -33,12 +33,11 @@ func (c *ClusterSetCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	err := validateClusterSetCommandArgs(*projectNameArg, c.Cluster)
-	if err != nil {
-		return c.errorWithUsage(err)
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
-	c.Ui.Warn(fmt.Sprintf("Changing cluster settings for project '%s' may cause a downtime.", *projectNameArg))
+	c.Ui.Warn(fmt.Sprintf("Changing cluster settings for project '%s' may cause a downtime.", *projectUUID))
 	ok, err := AskYesNo(c.Ui, alwaysYes, "Is this ok?", false)
 	if err != nil {
 		return c.error(err)
@@ -50,23 +49,23 @@ func (c *ClusterSetCommand) Run(args []string) int {
 
 	res := c.runWithSpinner("scale project cluster", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
-		cluster, e := client.GetClusterConfig(*projectNameArg)
+		cluster, e := client.GetClusterConfig(*projectUUID)
 		if e != nil {
 			return "", e
 		}
 
 		if c.Cluster.Size == cluster.Size {
 			*nowait = true
-			return fmt.Sprintf("Cluster for project '%s' is already configured with these parameters", *projectNameArg), nil
+			return fmt.Sprintf("Cluster for project '%s' is already configured with these parameters", *projectUUID), nil
 		}
 
 		cluster.Update(c.Cluster)
 
-		taskId, err = client.ConfigCluster(*projectNameArg, cluster)
+		taskId, err = client.ConfigCluster(*projectUUID, cluster)
 
 		msg := fmt.Sprintf(
 			"[#%d] Successfully set cluster for project '%s': %s",
-			taskId, *projectNameArg, cluster.String())
+			taskId, *projectUUID, cluster.String())
 
 		return msg, err
 	})

@@ -19,7 +19,7 @@ type ContainerAddCommand struct {
 func (c *ContainerAddCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	project := projectFlag(c.flagSet)
+	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	serviceName := c.flagSet.String("servicename", "", "service name")
 	image := c.flagSet.String("name", "", "Docker image name")
 	username := c.flagSet.String("username", "", "Username")
@@ -35,15 +35,19 @@ func (c *ContainerAddCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if err := c.validateArgs(*project, *image, *instances); err != nil {
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	}
+
+	if err := c.validateArgs(*image, *instances); err != nil {
 		return c.errorWithUsage(err)
 	}
 
 	volumesToBind := parseVolumesToBind(*volumes)
 
 	return c.runWithSpinner("add docker image", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		msg := fmt.Sprintf("Successfully added docker image '%s' to project '%s' (%v instance(s))", *image, *project, *instances)
-		return msg, client.AddImage(*project, *image, *username, *password, *instances, *serviceName, volumesToBind)
+		msg := fmt.Sprintf("Successfully added docker image '%s' to project '%s' (%v instance(s))", *image, *projectUUID, *instances)
+		return msg, client.AddImage(*projectUUID, *image, *username, *password, *instances, *serviceName, volumesToBind)
 	})
 }
 
@@ -63,7 +67,7 @@ usage: sqsc container add [options]
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
 
-func (c *ContainerAddCommand) validateArgs(project, image string, instances int) error {
+func (c *ContainerAddCommand) validateArgs(image string, instances int) error {
 	if image == "" {
 		return errors.New("Docker image name cannot be empty")
 	}
@@ -71,6 +75,5 @@ func (c *ContainerAddCommand) validateArgs(project, image string, instances int)
 	if instances <= 0 {
 		return errors.New("Invalid value provided for instances count: it cannot be 0 or negative")
 	}
-
-	return validateProjectName(project)
+	return nil
 }

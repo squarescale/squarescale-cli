@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -20,13 +21,14 @@ func (c *ProjectSlackbotCommand) Run(args []string) int {
 	// Parse flags
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
+	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	projectName, err := projectNameArg(c.flagSet, 0)
-	if err != nil {
-		return c.errorWithUsage(err)
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
 	if c.flagSet.NArg() > 2 {
@@ -36,11 +38,11 @@ func (c *ProjectSlackbotCommand) Run(args []string) int {
 	url := c.flagSet.Arg(1)
 	if url == "" {
 		return c.runWithSpinner("retrieve slack settings", endpoint.String(), func(client *squarescale.Client) (string, error) {
-			return client.ProjectSlackURL(projectName)
+			return client.ProjectSlackURL(*projectUUID)
 		})
 	} else {
 		return c.runWithSpinner(fmt.Sprintf("change slack integration URL to %s", url), endpoint.String(), func(client *squarescale.Client) (string, error) {
-			return url, client.SetProjectSlackURL(projectName, url)
+			return url, client.SetProjectSlackURL(*projectUUID, url)
 		})
 	}
 }

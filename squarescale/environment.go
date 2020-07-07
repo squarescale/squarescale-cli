@@ -18,8 +18,8 @@ type Environment struct {
 
 // NewEnvironment fetches environment variables from the API and returns a
 // new Environment pointer if successful and an error otherwise.
-func NewEnvironment(c *Client, project string) (*Environment, error) {
-	code, body, err := c.get("/projects/" + project + "/environment")
+func NewEnvironment(c *Client, projectUUID string) (*Environment, error) {
+	code, body, err := c.get("/projects/" + projectUUID + "/environment")
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func NewEnvironment(c *Client, project string) (*Environment, error) {
 	switch code {
 	case http.StatusOK:
 	case http.StatusNotFound:
-		return nil, fmt.Errorf("Project '%s' not found", project)
+		return nil, fmt.Errorf("Project '%s' not found", projectUUID)
 	default:
 		return nil, unexpectedHTTPError(code, body)
 	}
@@ -134,7 +134,7 @@ func (env *Environment) JSONObject() (payload JSONObject, err error) {
 
 // CommitEnvironment sends a request to the API to update the project's
 // custom environment with the custom variables defined in the Environment.
-func (env *Environment) CommitEnvironment(c *Client, project string) error {
+func (env *Environment) CommitEnvironment(c *Client, projectUUID string) error {
 	envJSON, err := env.JSONObject()
 	if err != nil {
 		msg := "An error occurred while setting the environment variables."
@@ -143,7 +143,7 @@ func (env *Environment) CommitEnvironment(c *Client, project string) error {
 	}
 	requestBody := &JSONObject{"environment": envJSON, "format": "json"}
 
-	code, body, err := c.put("/projects/"+project+"/environment/custom", requestBody)
+	code, body, err := c.put("/projects/"+projectUUID+"/environment/custom", requestBody)
 	if err != nil {
 		return err
 	}
@@ -152,7 +152,7 @@ func (env *Environment) CommitEnvironment(c *Client, project string) error {
 	case http.StatusNoContent:
 		return nil
 	case http.StatusNotFound:
-		return fmt.Errorf("Project '%s' not found", project)
+		return fmt.Errorf("Project '%s' not found", projectUUID)
 	case http.StatusUnprocessableEntity:
 		return fmt.Errorf("%s", body)
 	default:

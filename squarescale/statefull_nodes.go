@@ -19,8 +19,8 @@ type StatefullNode struct {
 }
 
 // GetStatefullNodes gets all the statefullNodes attached to a Project
-func (c *Client) GetStatefullNodes(project string) ([]StatefullNode, error) {
-	code, body, err := c.get("/projects/" + project + "/statefull_nodes")
+func (c *Client) GetStatefullNodes(projectUUID string) ([]StatefullNode, error) {
+	code, body, err := c.get("/projects/" + projectUUID + "/statefull_nodes")
 	if err != nil {
 		return []StatefullNode{}, err
 	}
@@ -28,7 +28,7 @@ func (c *Client) GetStatefullNodes(project string) ([]StatefullNode, error) {
 	switch code {
 	case http.StatusOK:
 	case http.StatusNotFound:
-		return []StatefullNode{}, fmt.Errorf("Project '%s' does not exist", project)
+		return []StatefullNode{}, fmt.Errorf("Project '%s' does not exist", projectUUID)
 	default:
 		return []StatefullNode{}, unexpectedHTTPError(code, body)
 	}
@@ -43,7 +43,7 @@ func (c *Client) GetStatefullNodes(project string) ([]StatefullNode, error) {
 }
 
 // AddStatefullNode add a new statefull node
-func (c *Client) AddStatefullNode(project string, name string, nodeType string, zone string) (StatefullNode, error) {
+func (c *Client) AddStatefullNode(projectUUID string, name string, nodeType string, zone string) (StatefullNode, error) {
 	var newStatefullNode StatefullNode
 
 	payload := JSONObject{
@@ -51,7 +51,7 @@ func (c *Client) AddStatefullNode(project string, name string, nodeType string, 
 		"node_type": nodeType,
 		"zone":      zone,
 	}
-	code, body, err := c.post("/projects/"+project+"/statefull_nodes", &payload)
+	code, body, err := c.post("/projects/"+projectUUID+"/statefull_nodes", &payload)
 	if err != nil {
 		return newStatefullNode, err
 	}
@@ -59,9 +59,9 @@ func (c *Client) AddStatefullNode(project string, name string, nodeType string, 
 	switch code {
 	case http.StatusCreated:
 	case http.StatusNotFound:
-		return newStatefullNode, fmt.Errorf("Project '%s' does not exist", project)
+		return newStatefullNode, fmt.Errorf("Project '%s' does not exist", projectUUID)
 	case http.StatusConflict:
-		return newStatefullNode, fmt.Errorf("Statefull node already exist on project '%s': %s", project, name)
+		return newStatefullNode, fmt.Errorf("Statefull node already exist on project '%s': %s", projectUUID, name)
 	default:
 		return newStatefullNode, unexpectedHTTPError(code, body)
 	}
@@ -74,8 +74,8 @@ func (c *Client) AddStatefullNode(project string, name string, nodeType string, 
 }
 
 // GetStatefullNodeInfo get information for a statefull node
-func (c *Client) GetStatefullNodeInfo(project string, name string) (StatefullNode, error) {
-	statefullNodes, err := c.GetStatefullNodes(project)
+func (c *Client) GetStatefullNodeInfo(projectUUID string, name string) (StatefullNode, error) {
+	statefullNodes, err := c.GetStatefullNodes(projectUUID)
 	if err != nil {
 		return StatefullNode{}, err
 	}
@@ -86,19 +86,19 @@ func (c *Client) GetStatefullNodeInfo(project string, name string) (StatefullNod
 		}
 	}
 
-	return StatefullNode{}, fmt.Errorf("Statefull node '%s' not found for project '%s'", name, project)
+	return StatefullNode{}, fmt.Errorf("Statefull node '%s' not found for project '%s'", name, projectUUID)
 }
 
 // WaitStatefullNode wait a new statefull node
-func (c *Client) WaitStatefullNode(project string, name string, timeToWait int64) (StatefullNode, error) {
-	statefullNode, err := c.GetStatefullNodeInfo(project, name)
+func (c *Client) WaitStatefullNode(projectUUID string, name string, timeToWait int64) (StatefullNode, error) {
+	statefullNode, err := c.GetStatefullNodeInfo(projectUUID, name)
 	if err != nil {
 		return statefullNode, err
 	}
 
 	for statefullNode.Status != "provisionned" && err == nil {
 		time.Sleep(time.Duration(timeToWait) * time.Second)
-		statefullNode, err = c.GetStatefullNodeInfo(project, name)
+		statefullNode, err = c.GetStatefullNodeInfo(projectUUID, name)
 		logger.Debug.Println("statefullNode status update: ", statefullNode.Name)
 	}
 
@@ -106,8 +106,8 @@ func (c *Client) WaitStatefullNode(project string, name string, timeToWait int64
 }
 
 // DeleteStatefullNode delete a existing statefull node
-func (c *Client) DeleteStatefullNode(project string, name string) error {
-	code, body, err := c.delete("/projects/" + project + "/statefull_nodes/" + name)
+func (c *Client) DeleteStatefullNode(projectUUID string, name string) error {
+	code, body, err := c.delete("/projects/" + projectUUID + "/statefull_nodes/" + name)
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (c *Client) DeleteStatefullNode(project string, name string) error {
 		if fmt.Sprintf("%s", body) == `{"error":"Couldn't find StatefullNode with [WHERE \"statefull_nodes\".\"cluster_id\" = $1 AND \"statefull_nodes\".\"name\" = $2]"}` {
 			return fmt.Errorf("Statefull node '%s' does not exist", name)
 		}
-		return fmt.Errorf("Project '%s' does not exist", project)
+		return fmt.Errorf("Project '%s' does not exist", projectUUID)
 	case http.StatusBadRequest:
 		return fmt.Errorf("Deploy probably in progress")
 	default:
@@ -129,7 +129,7 @@ func (c *Client) DeleteStatefullNode(project string, name string) error {
 }
 
 // BindVolumeOnStatefullNode bind a volume to a statefull node
-func (c *Client) BindVolumeOnStatefullNode(project string, name string, volumeName string) error {
+func (c *Client) BindVolumeOnStatefullNode(projectUUID string, name string, volumeName string) error {
 	var volumeToBind [1]string
 	var volumeToUnbind [0]string
 
@@ -139,7 +139,7 @@ func (c *Client) BindVolumeOnStatefullNode(project string, name string, volumeNa
 		"volumes_to_bind":   volumeToBind,
 		"volumes_to_unbind": volumeToUnbind,
 	}
-	code, body, err := c.put("/projects/"+project+"/statefull_nodes/"+name, &payload)
+	code, body, err := c.put("/projects/"+projectUUID+"/statefull_nodes/"+name, &payload)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func (c *Client) BindVolumeOnStatefullNode(project string, name string, volumeNa
 		if fmt.Sprintf("%s", body) == `{"error":"Couldn't find Volume with [WHERE \"volumes\".\"cluster_id\" = $1 AND \"volumes\".\"name\" = $2]"}` {
 			return fmt.Errorf("Volume '%s' does not exist", volumeName)
 		}
-		return fmt.Errorf("Project '%s' does not exist", project)
+		return fmt.Errorf("Project '%s' does not exist", projectUUID)
 	case http.StatusBadRequest:
 		return fmt.Errorf("Volume %s already bound with %s", volumeName, name)
 	default:

@@ -28,8 +28,8 @@ type VolumeToBind struct {
 }
 
 // GetVolumes gets all the volumes attached to a Project
-func (c *Client) GetVolumes(project string) ([]Volume, error) {
-	code, body, err := c.get("/projects/" + project + "/volumes")
+func (c *Client) GetVolumes(projectUUID string) ([]Volume, error) {
+	code, body, err := c.get("/projects/" + projectUUID + "/volumes")
 	if err != nil {
 		return []Volume{}, err
 	}
@@ -37,7 +37,7 @@ func (c *Client) GetVolumes(project string) ([]Volume, error) {
 	switch code {
 	case http.StatusOK:
 	case http.StatusNotFound:
-		return []Volume{}, fmt.Errorf("Project '%s' does not exist", project)
+		return []Volume{}, fmt.Errorf("Project '%s' does not exist", projectUUID)
 	default:
 		return []Volume{}, unexpectedHTTPError(code, body)
 	}
@@ -53,8 +53,8 @@ func (c *Client) GetVolumes(project string) ([]Volume, error) {
 }
 
 // GetVolumeInfo gets the volume of a project based on its name.
-func (c *Client) GetVolumeInfo(project, name string) (Volume, error) {
-	volumes, err := c.GetVolumes(project)
+func (c *Client) GetVolumeInfo(projectUUID, name string) (Volume, error) {
+	volumes, err := c.GetVolumes(projectUUID)
 	if err != nil {
 		return Volume{}, err
 	}
@@ -65,19 +65,19 @@ func (c *Client) GetVolumeInfo(project, name string) (Volume, error) {
 		}
 	}
 
-	return Volume{}, fmt.Errorf("Volume '%s' not found for project '%s'", name, project)
+	return Volume{}, fmt.Errorf("Volume '%s' not found for project '%s'", name, projectUUID)
 }
 
 // WaitVolume wait the volume of a project based on its name.
-func (c *Client) WaitVolume(project, name string, timeToWait int64) (Volume, error) {
-	volume, err := c.GetVolumeInfo(project, name)
+func (c *Client) WaitVolume(projectUUID, name string, timeToWait int64) (Volume, error) {
+	volume, err := c.GetVolumeInfo(projectUUID, name)
 	if err != nil {
 		return volume, err
 	}
 
 	for volume.Status != "provisionned" && err == nil {
 		time.Sleep(time.Duration(timeToWait) * time.Second)
-		volume, err = c.GetVolumeInfo(project, name)
+		volume, err = c.GetVolumeInfo(projectUUID, name)
 		logger.Debug.Println("volume status update: ", volume.Name)
 	}
 
@@ -85,8 +85,8 @@ func (c *Client) WaitVolume(project, name string, timeToWait int64) (Volume, err
 }
 
 // DeleteVolume delete volume of a project based on its name.
-func (c *Client) DeleteVolume(project string, volume string) error {
-	url := fmt.Sprintf("/projects/%s/volumes/%s", project, volume)
+func (c *Client) DeleteVolume(projectUUID string, volume string) error {
+	url := fmt.Sprintf("/projects/%s/volumes/%s", projectUUID, volume)
 	code, body, err := c.delete(url)
 	if err != nil {
 		return err
@@ -106,7 +106,7 @@ func (c *Client) DeleteVolume(project string, volume string) error {
 }
 
 // AddVolume add volume of a project based on its name.
-func (c *Client) AddVolume(project string, name string, size int, volumeType string, zone string) error {
+func (c *Client) AddVolume(projectUUID string, name string, size int, volumeType string, zone string) error {
 	payload := JSONObject{
 		"name": name,
 		"size": size,
@@ -114,7 +114,7 @@ func (c *Client) AddVolume(project string, name string, size int, volumeType str
 		"zone": zone,
 	}
 
-	url := fmt.Sprintf("/projects/%s/volumes", project)
+	url := fmt.Sprintf("/projects/%s/volumes", projectUUID)
 	code, body, err := c.post(url, &payload)
 	if err != nil {
 		return err
@@ -124,7 +124,7 @@ func (c *Client) AddVolume(project string, name string, size int, volumeType str
 	case http.StatusCreated:
 		return nil
 	case http.StatusConflict:
-		return fmt.Errorf("Volume already exist on project '%s': %s", project, name)
+		return fmt.Errorf("Volume already exist on project '%s': %s", projectUUID, name)
 	case http.StatusNotFound:
 		return unexpectedHTTPError(code, body)
 	default:

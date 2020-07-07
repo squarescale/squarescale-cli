@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -18,10 +19,14 @@ type StatefullNodeListCommand struct {
 func (b *StatefullNodeListCommand) Run(args []string) int {
 	b.flagSet = newFlagSet(b, b.Ui)
 	endpoint := endpointFlag(b.flagSet)
-	projectArg := projectFlag(b.flagSet)
+	projectUUID := b.flagSet.String("project-uuid", "", "set the uuid of the project")
 
 	if err := b.flagSet.Parse(args); err != nil {
 		return 1
+	}
+
+	if *projectUUID == "" {
+		return b.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
 	if b.flagSet.NArg() > 0 {
@@ -29,7 +34,7 @@ func (b *StatefullNodeListCommand) Run(args []string) int {
 	}
 
 	return b.runWithSpinner("list statefull_node", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		statefullNodes, err := client.GetStatefullNodes(*projectArg)
+		statefullNodes, err := client.GetStatefullNodes(*projectUUID)
 		if err != nil {
 			return "", err
 		}

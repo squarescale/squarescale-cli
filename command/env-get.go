@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -18,7 +19,7 @@ type EnvGetCommand struct {
 func (c *EnvGetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	project := projectFlag(c.flagSet)
+	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	container := containerFlag(c.flagSet)
 	all := c.flagSet.Bool("all", false, "Print all variables")
 
@@ -30,14 +31,14 @@ func (c *EnvGetCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if err := validateProjectName(*project); err != nil {
-		return c.errorWithUsage(err)
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
 	queryVar := c.flagSet.Arg(0)
 
 	return c.runWithSpinner("list environment variables", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		env, err := squarescale.NewEnvironment(client, *project)
+		env, err := squarescale.NewEnvironment(client, *projectUUID)
 		if err != nil {
 			return "", err
 		}

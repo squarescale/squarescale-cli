@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -21,34 +22,29 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
+	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	projectName, err := projectNameArg(c.flagSet, 0)
-	if err != nil {
-		return c.errorWithUsage(err)
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
 	if c.flagSet.NArg() > 1 {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
 	}
 
-	c.Ui.Info("Destroy infrastructure and configuration for project " + projectName + "?")
-	if *alwaysYes {
-		c.Ui.Info("(approved from command line)")
-	} else {
-		res, err := c.Ui.Ask("Enter the project name to destroy:")
-		if err != nil {
-			return c.error(err)
-		} else if res != projectName {
-			c.Ui.Error("The name you provided does not match the project name.")
-			return c.cancelled()
-		}
+	c.Ui.Info("Destroy infrastructure and configuration for project " + *projectUUID + "?")
+	ok, err := AskYesNo(c.Ui, alwaysYes, "Proceed ?", true)
+	if err != nil {
+		return c.error(err)
+	} else if !ok {
+		return c.error(CancelledError)
 	}
 
 	res := c.runWithSpinner("unprovision project", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		err := client.ProjectUnprovision(projectName)
+		err := client.ProjectUnprovision(*projectUUID)
 		if err != nil {
 			return "", err
 		}
@@ -57,7 +53,7 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 
 	loop:
 		for {
-			status, err := client.ProjectStatus(projectName)
+			status, err := client.ProjectStatus(*projectUUID)
 			if err != nil {
 				return "", err
 			}
@@ -80,7 +76,7 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 	}
 
 	return c.runWithSpinner("delete project", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		err := client.ProjectDelete(projectName)
+		err := client.ProjectDelete(*projectUUID)
 		if err != nil {
 			return "", err
 		}

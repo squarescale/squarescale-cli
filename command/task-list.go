@@ -2,6 +2,7 @@ package command
 
 import (
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -21,7 +22,7 @@ func (c *TaskListCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	debug := c.flagSet.Bool("debug-details", false, "Show debug info about each task")
-	projectName := projectFlag(c.flagSet)
+	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -31,8 +32,12 @@ func (c *TaskListCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	}
+
 	return c.runWithSpinner("fetch tasks", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		tasks, err := client.GetTasks(*projectName)
+		tasks, err := client.GetTasks(*projectUUID)
 		if err != nil {
 			return "", err
 		}

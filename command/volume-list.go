@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -18,7 +19,7 @@ type VolumeListCommand struct {
 func (b *VolumeListCommand) Run(args []string) int {
 	b.flagSet = newFlagSet(b, b.Ui)
 	endpoint := endpointFlag(b.flagSet)
-	projectArg := projectFlag(b.flagSet)
+	projectUUID := b.flagSet.String("project-uuid", "", "set the uuid of the project")
 
 	if err := b.flagSet.Parse(args); err != nil {
 		return 1
@@ -28,8 +29,12 @@ func (b *VolumeListCommand) Run(args []string) int {
 		return b.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", b.flagSet.Args()))
 	}
 
+	if *projectUUID == "" {
+		return b.errorWithUsage(errors.New("Project uuid is mandatory"))
+	}
+
 	return b.runWithSpinner("list volume", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		volumes, err := client.GetVolumes(*projectArg)
+		volumes, err := client.GetVolumes(*projectUUID)
 		if err != nil {
 			return "", err
 		}

@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -20,7 +21,7 @@ func (c *StatefullNodeDeleteCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
-	projectArg := projectFlag(c.flagSet)
+	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	nowait := nowaitFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
@@ -36,8 +37,8 @@ func (c *StatefullNodeDeleteCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
 	}
 
-	if err := validateProjectName(*projectArg); err != nil {
-		return c.errorWithUsage(err)
+	if *projectUUID == "" {
+		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
 	c.Ui.Info("Are you sure you want to delete " + statefullNodeName + "?")
@@ -53,9 +54,9 @@ func (c *StatefullNodeDeleteCommand) Run(args []string) int {
 	}
 
 	res := c.runWithSpinner("deleting statefull node", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		projectName := *projectArg
-		fmt.Printf("Delete on project `%s` the statefull node `%s`\n", projectName, statefullNodeName)
-		err := client.DeleteStatefullNode(projectName, statefullNodeName)
+		uuid := *projectUUID
+		fmt.Printf("Delete on project `%s` the statefull node `%s`\n", uuid, statefullNodeName)
+		err := client.DeleteStatefullNode(uuid, statefullNodeName)
 		return "", err
 	})
 	if res != 0 {
@@ -64,7 +65,7 @@ func (c *StatefullNodeDeleteCommand) Run(args []string) int {
 
 	if !*nowait {
 		c.runWithSpinner("wait for statefull node delete", endpoint.String(), func(client *squarescale.Client) (string, error) {
-			_, err := client.WaitProject(*projectArg)
+			_, err := client.WaitProject(*projectUUID)
 			if err != nil {
 				return "", err
 			} else {

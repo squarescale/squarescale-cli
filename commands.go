@@ -39,11 +39,6 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
-		"cluster list": func() (cli.Command, error) {
-			return &command.ClusterListCommand{
-				Meta: *meta,
-			}, nil
-		},
 		"volume": func() (cli.Command, error) {
 			return &command.VolumeCommand{}, nil
 		},
@@ -210,11 +205,6 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 		},
 		"status": func() (cli.Command, error) {
 			return &command.StatusCommand{
-				Meta: *meta,
-			}, nil
-		},
-		"logs": func() (cli.Command, error) {
-			return &command.LogsCommand{
 				Meta: *meta,
 			}, nil
 		},
