@@ -24,6 +24,7 @@ func (c *ContainerSetCommand) Run(args []string) int {
 	serviceArg := c.flagSet.String("service", "", "select the service")
 	nInstancesArg := containerInstancesFlag(c.flagSet)
 	runCmdArg := containerRunCmdFlag(c.flagSet)
+	entrypoint := c.flagSet.String("entrypoint", "", "This is the script / program that will be executed")
 	limitMemoryArg := containerLimitMemoryFlag(c.flagSet)
 	limitCPUArg := containerLimitCPUFlag(c.flagSet)
 	limitNetArg := containerLimitNetFlag(c.flagSet)
@@ -87,6 +88,11 @@ func (c *ContainerSetCommand) Run(args []string) int {
 		if *noRunCmdArg {
 			c.info("Configure service without run command")
 			container.RunCommand = []string{}
+		}
+
+		if *entrypoint != "" {
+			c.info("Configure service with entrypoint: %s", *entrypoint)
+			container.Entrypoint = *entrypoint
 		}
 
 		if *limitMemoryArg >= 0 {

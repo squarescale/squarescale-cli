@@ -27,6 +27,8 @@ func (b *BatchAddCommand) Run(args []string) int {
 	projectUUID := b.flagSet.String("project-uuid", "", "set the uuid of the project")
 
 	wantedBatchName := b.flagSet.String("name", "", "Batch name")
+	runCommand := b.flagSet.String("run-command", "", "command / arguments that are used for execution")
+	entrypoint := b.flagSet.String("entrypoint", "", "This is the script / program that will be executed")
 	dockerImageName := b.flagSet.String("imageName", "", "docker image name")
 	dockerImagePrivate := b.flagSet.Bool("imagePrivate", false, "docker image is private")
 	dockerImageUsername := b.flagSet.String("imageUser", "", "docker image user")
@@ -120,6 +122,8 @@ func (b *BatchAddCommand) Run(args []string) int {
 		Periodic:       *periodicBatch,
 		CronExpression: *cronExpression,
 		TimeZoneName:   *timeZoneName,
+		RunCommand:     *runCommand,
+		Entrypoint:     *entrypoint,
 		Limits:         batchLimitContent,
 	}
 

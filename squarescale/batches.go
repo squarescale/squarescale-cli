@@ -13,6 +13,8 @@ type BatchCommon struct {
 	CronExpression string      `json:"cron_expression"`
 	TimeZoneName   string      `json:"time_zone_name"`
 	Limits         BatchLimits `json:"limits"`
+	RunCommand     string      `json:"run_command,omitempty"`
+	Entrypoint     string      `json:"entrypoint,omitempty"`
 }
 
 type BatchLimits struct {

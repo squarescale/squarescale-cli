@@ -16,15 +16,16 @@ type ServiceEnv struct {
 
 // Service describes a project container as returned by the Squarescale API
 type Service struct {
-	ID               int                  `json:"container_id"`
-	Name             string               `json:"name"`
-	RunCommand       []string             `json:"run_command"`
-	Running          int                  `json:"running"`
-	Size             int                  `json:"size"`
-	WebPort          int                  `json:"web_port"`
-	RefreshCallbacks []string             `json:"refresh_callbacks"`
-	Limits           ServiceLimits        `json:"limits"`
-	CustomEnv        []ServiceEnv         `json:"custom_environment"`
+	ID               int           `json:"container_id"`
+	Name             string        `json:"name"`
+	RunCommand       []string      `json:"run_command"`
+	Entrypoint       string        `json:"entrypoint"`
+	Running          int           `json:"running"`
+	Size             int           `json:"size"`
+	WebPort          int           `json:"web_port"`
+	RefreshCallbacks []string      `json:"refresh_callbacks"`
+	Limits           ServiceLimits `json:"limits"`
+	CustomEnv        []ServiceEnv  `json:"custom_environment"`
 }
 
 func (c *Service) SetEnv(path string) error {

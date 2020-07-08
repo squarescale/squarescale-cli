@@ -22,6 +22,8 @@ func (c *ContainerAddCommand) Run(args []string) int {
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	serviceName := c.flagSet.String("servicename", "", "service name")
 	image := c.flagSet.String("name", "", "Docker image name")
+	runCommand := c.flagSet.String("run-command", "", "command / arguments that are used for execution")
+	entrypoint := c.flagSet.String("entrypoint", "", "This is the script / program that will be executed")
 	username := c.flagSet.String("username", "", "Username")
 	password := c.flagSet.String("password", "", "Password")
 	volumes := c.flagSet.String("volumes", "", "Volumes")
@@ -47,7 +49,7 @@ func (c *ContainerAddCommand) Run(args []string) int {
 
 	return c.runWithSpinner("add docker image", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		msg := fmt.Sprintf("Successfully added docker image '%s' to project '%s' (%v instance(s))", *image, *projectUUID, *instances)
-		return msg, client.AddImage(*projectUUID, *image, *username, *password, *instances, *serviceName, volumesToBind)
+		return msg, client.AddImage(*projectUUID, *image, *username, *password, *entrypoint, *runCommand, *instances, *serviceName, volumesToBind)
 	})
 }
 
