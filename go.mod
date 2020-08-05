@@ -1,6 +1,6 @@
 module github.com/squarescale/squarescale-cli
 
-go 1.13
+go 1.14
 
 require (
 	github.com/armon/go-radix v1.0.0 // indirect
