@@ -18,7 +18,8 @@ type OrganizationAddCommand struct {
 func (c *OrganizationAddCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	name := c.flagSet.String("name", "", "Organization name")
+	name := c.flagSet.String("name", "", "name")
+	email := c.flagSet.String("email", "", "contact email")
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -32,9 +33,13 @@ func (c *OrganizationAddCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Name must not be empty, use -name option"))
 	}
 
+	if *email == "" {
+		return c.errorWithUsage(fmt.Errorf("email must not be empty, use -email option"))
+	}
+
 	res := c.runWithSpinner("add organization", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		msg := fmt.Sprintf("Successfully added organization '%s'", *name)
-		err := client.AddOrganization(*name)
+		err := client.AddOrganization(*name, *email)
 		return msg, err
 	})
 

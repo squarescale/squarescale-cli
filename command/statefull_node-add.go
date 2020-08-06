@@ -10,18 +10,18 @@ import (
 )
 
 // StatefullNodeAddCommand is a cli.Command implementation for creating a Squarescale project.
-type StatefullNodeAddCommand struct {
+type StatefulNodeAddCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (c *StatefullNodeAddCommand) Run(args []string) int {
+func (c *StatefulNodeAddCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 
-	nodeType := c.flagSet.String("node-type", "t2.micro", "Statefull node type")
+	nodeType := c.flagSet.String("node-type", "dev", "Statefull node type")
 	zone := c.flagSet.String("zone", "eu-west-1a", "Statefull node zone")
 	nowait := nowaitFlag(c.flagSet)
 
@@ -66,16 +66,16 @@ func (c *StatefullNodeAddCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *StatefullNodeAddCommand) Synopsis() string {
-	return "Add a statefull_node from the project."
+func (c *StatefulNodeAddCommand) Synopsis() string {
+	return "Add a stateful node from the project."
 }
 
 // Help is part of cli.Command implementation.
-func (c *StatefullNodeAddCommand) Help() string {
+func (c *StatefulNodeAddCommand) Help() string {
 	helpText := `
-usage: sqsc statefull_node add [options] <statefull_node_name>
+usage: sqsc stateful node add [options] <stateful_node_name>
 
-  Add a statefull_node on the project.
+  Add a stateful node on the project.
 
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))

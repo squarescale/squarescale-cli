@@ -10,13 +10,13 @@ import (
 )
 
 // StatefullNodeBindCommand is a cli.Command implementation for creating a Squarescale project.
-type StatefullNodeBindCommand struct {
+type StatefulNodeBindCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (c *StatefullNodeBindCommand) Run(args []string) int {
+func (c *StatefulNodeBindCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
@@ -56,16 +56,16 @@ func (c *StatefullNodeBindCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *StatefullNodeBindCommand) Synopsis() string {
+func (c *StatefulNodeBindCommand) Synopsis() string {
 	return "Bind a statefull_node from the project."
 }
 
 // Help is part of cli.Command implementation.
-func (c *StatefullNodeBindCommand) Help() string {
+func (c *StatefulNodeBindCommand) Help() string {
 	helpText := `
-usage: sqsc statefull_node bind [options] <statefull_node_name>
+usage: sqsc stateful node bind [options] <stateful_node_name>
 
-  Bind a statefull_node on the project.
+  Bind a stateful node on the project.
 
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))

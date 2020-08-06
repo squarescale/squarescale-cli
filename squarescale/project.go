@@ -59,6 +59,36 @@ func (c *Client) CreateProject(payload *JSONObject) (taskId int, err error) {
 	return response.Task, err
 }
 
+// ProvisionProject asks the Squarescale platform to provision the project
+func (c *Client) ProvisionProject(projectUUID string) (err error) {
+
+	code, body, err := c.post(fmt.Sprintf("/projects/%s/provision", projectUUID), nil)
+	if err != nil {
+		return err
+	}
+
+	if code != http.StatusNoContent {
+		return unexpectedHTTPError(code, body)
+	}
+
+	return nil
+}
+
+// UNProvisionProject asks the Squarescale platform to provision the project
+func (c *Client) UNProvisionProject(projectUUID string) (err error) {
+
+	code, body, err := c.post(fmt.Sprintf("/projects/%s/unprovision", projectUUID), nil)
+	if err != nil {
+		return err
+	}
+
+	if code != http.StatusNoContent {
+		return unexpectedHTTPError(code, body)
+	}
+
+	return nil
+}
+
 type Project struct {
 	Name            string `json:"name"`
 	UUID            string `json:"uuid"`

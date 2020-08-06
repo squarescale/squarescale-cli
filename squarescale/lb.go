@@ -4,103 +4,43 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
-	"strings"
 )
 
 // DisableLB asks the Squarescale service to deactivate the load balancer.
-func (c *Client) DisableLB(projectUUID string) (int, error) {
+func (c *Client) DisableLB(projectUUID string) error {
 	payload := &JSONObject{
-		"load_balancer": JSONObject{
-			"active": false,
-		},
-		"project": JSONObject{
-			"load_balancer": false,
-		},
+		"active": false,
 	}
 
 	return c.updateLBConfig(projectUUID, payload)
 }
 
 // ConfigLB sets the load balancer configuration for a given project.
-func (c *Client) ConfigLB(projectUUID string, container, port int, exprArg string, https bool, cert string, cert_chain []string, secret_key string) (int, error) {
-	if cert_chain == nil {
-		cert_chain = []string{}
-	}
+func (c *Client) ConfigLB(projectUUID string, cert string, cert_chain string, secret_key string) error {
 	payload := &JSONObject{
-		"load_balancer": JSONObject{
-			"active":            true,
-			"container_id":      container,
-			"https":             https,
-			"certificate_body":  cert,
-			"certificate_chain": cert_chain,
-			"secret_key":        secret_key,
-		},
-		"containers": JSONObject{
-			strconv.Itoa(container): JSONObject{
-				"web_port":                 port,
-				"custom_domain_expression": exprArg,
-			},
-		},
-		"project": JSONObject{
-			"load_balancer": true,
-		},
-		"web-container": strconv.Itoa(container),
-		"container": JSONObject{
-			strconv.Itoa(container): JSONObject{
-				"web-port": strconv.Itoa(port),
-			},
-		},
+		"active":            true,
+		"certificate_body":  cert,
+		"certificate_chain": cert_chain,
+		"secret_key":        secret_key,
+		"https":             len(cert) > 0,
 	}
-
 	return c.updateLBConfig(projectUUID, payload)
 }
 
-func (c *Client) updateLBConfig(projectUUID string, payload *JSONObject) (int, error) {
+func (c *Client) updateLBConfig(projectUUID string, payload *JSONObject) error {
 	code, body, err := c.put("/projects/"+projectUUID+"/load_balancers/1", payload) //TODO change it when support more many LB.
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	switch code {
 	case http.StatusOK:
-		break
+		return nil
 	case http.StatusNotFound:
-		return 0, fmt.Errorf("Project '%s' not found", projectUUID)
+		return fmt.Errorf("Project '%s' not found", projectUUID)
 	default:
-		return 0, unexpectedHTTPError(code, body)
+		return unexpectedHTTPError(code, body)
 	}
-
-	var response struct {
-		Ok              bool                           `json:"ok"`
-		Task            int                            `json:"task"`
-		Errors          map[string][]string            `json:"errors"`
-		ContainerErrors map[string]map[string][]string `json:"container_errors"`
-	}
-
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		return 0, err
-	}
-
-	if !response.Ok {
-		var errs []string
-		for field, v := range response.Errors {
-			for _, msg := range v {
-				errs = append(errs, fmt.Sprintf("%s: %s", field, msg))
-			}
-		}
-		for _, c := range response.ContainerErrors {
-			for field, v := range c {
-				for _, msg := range v {
-					errs = append(errs, fmt.Sprintf("container %s: %s", field, msg))
-				}
-			}
-		}
-		return 0, fmt.Errorf("Bad request: %v", strings.Join(errs, "; "))
-	}
-
-	return response.Task, nil
 }
 
 // LoadBalancerEnabled asks if the project load balancer is enabled.
@@ -131,9 +71,7 @@ func (c *Client) LoadBalancerEnabled(projectUUID string) (bool, error) {
 }
 
 type LoadBalancer struct {
-	Port           int    `json:"Port"`
-	ExposedService string `json:"exposed_service"`
-	PublicUrl      string `json:"public_url"`
+	PublicUrl string `json:"public_url"`
 }
 
 func (c *Client) LoadBalancerList(projectUUID string) ([]LoadBalancer, error) {

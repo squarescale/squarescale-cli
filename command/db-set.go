@@ -19,7 +19,6 @@ type DBSetCommand struct {
 func (c *DBSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	nowait := nowaitFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "uuid of the targeted project")
 	dbEngine := c.flagSet.String("engine", "", "Database engine")
 	dbSize := c.flagSet.String("size", "", "Database size")
@@ -64,12 +63,10 @@ func (c *DBSetCommand) Run(args []string) int {
 		}
 
 		if *dbDisabled && !db.Enabled {
-			*nowait = true
 			return fmt.Sprintf("Database for project '%s' is already disabled", *projectUUID), nil
 		}
 
 		if *dbEngine == db.Engine && *dbSize == db.Size && *dbVersion == db.Version && !*dbDisabled == db.Enabled {
-			*nowait = true
 			return fmt.Sprintf("Database for project '%s' is already configured with these parameters", *projectUUID), nil
 		}
 
@@ -92,17 +89,6 @@ func (c *DBSetCommand) Run(args []string) int {
 	})
 	if res != 0 {
 		return res
-	}
-
-	if !*nowait {
-		res = c.runWithSpinner("wait for database change", endpoint.String(), func(client *squarescale.Client) (string, error) {
-			task, err := client.WaitTask(taskId)
-			if err != nil {
-				return "", err
-			} else {
-				return task.Status, nil
-			}
-		})
 	}
 
 	return res

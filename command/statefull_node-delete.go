@@ -10,13 +10,13 @@ import (
 )
 
 // StatefullNodeDeleteCommand is a cli.Command implementation for creating a Squarescale project.
-type StatefullNodeDeleteCommand struct {
+type StatefulNodeDeleteCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (c *StatefullNodeDeleteCommand) Run(args []string) int {
+func (c *StatefulNodeDeleteCommand) Run(args []string) int {
 	// Parse flags
 	c.flagSet = newFlagSet(c, c.Ui)
 	alwaysYes := yesFlag(c.flagSet)
@@ -78,16 +78,16 @@ func (c *StatefullNodeDeleteCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *StatefullNodeDeleteCommand) Synopsis() string {
+func (c *StatefulNodeDeleteCommand) Synopsis() string {
 	return "Delete a statefull node from the project."
 }
 
 // Help is part of cli.Command implementation.
-func (c *StatefullNodeDeleteCommand) Help() string {
+func (c *StatefulNodeDeleteCommand) Help() string {
 	helpText := `
-usage: sqsc statefull_node delete [options] <statefull_node_name>
+usage: sqsc stateful node delete [options] <stateful_node_name>
 
-  Delete the statefull node from the project.
+  Delete the stateful node from the project.
 
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))

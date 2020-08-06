@@ -4,7 +4,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
@@ -67,10 +66,10 @@ func fmtLoadBalancersListOutput(loadBalancers []squarescale.LoadBalancer) string
 	tableString := &strings.Builder{}
 	table := tablewriter.NewWriter(tableString)
 
-	table.SetHeader([]string{"Port", "Exposed service", "Public URL"})
+	table.SetHeader([]string{"Public URL"})
 	data := make([][]string, len(loadBalancers), len(loadBalancers))
 	for i, loadBalancer := range loadBalancers {
-		data[i] = []string{strconv.Itoa(loadBalancer.Port), loadBalancer.ExposedService, loadBalancer.PublicUrl}
+		data[i] = []string{loadBalancer.PublicUrl}
 	}
 
 	table.AppendBulk(data)

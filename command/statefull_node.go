@@ -7,25 +7,25 @@ import (
 )
 
 // StatefullNodeCommand is a cli.Command implementation for top level `sqsc statefull_node` command.
-type StatefullNodeCommand struct {
+type StatefulNodeCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *StatefullNodeCommand) Run(args []string) int {
+func (c *StatefulNodeCommand) Run(args []string) int {
 	return cli.RunResultHelp
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *StatefullNodeCommand) Synopsis() string {
+func (c *StatefulNodeCommand) Synopsis() string {
 	return "Commands related to a statefull_node"
 }
 
 // Help is part of cli.Command implementation.
-func (c *StatefullNodeCommand) Help() string {
+func (c *StatefulNodeCommand) Help() string {
 	helpText := `
-usage: sqsc statefull_node <subcommand>
+usage: sqsc stateful node <subcommand>
 
-  Run a project statefull_node related command.
+  Run a project stateful node related command.
   List of supported subcommands is available below.
 `
 	return strings.TrimSpace(helpText)

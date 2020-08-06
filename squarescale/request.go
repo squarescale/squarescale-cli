@@ -56,11 +56,11 @@ func (c *Client) get(path string) (int, []byte, error) {
 	return c.request("GET", path, nil)
 }
 
-func (c *Client) post(path string, payload *JSONObject) (int, []byte, error) {
+func (c *Client) post(path string, payload interface{}) (int, []byte, error) {
 	return c.request("POST", path, payload)
 }
 
-func (c *Client) patch(path string, payload *JSONObject) (int, []byte, error) {
+func (c *Client) patch(path string, payload interface{}) (int, []byte, error) {
 	return c.request("PATCH", path, payload)
 }
 
@@ -68,11 +68,11 @@ func (c *Client) delete(path string) (int, []byte, error) {
 	return c.request("DELETE", path, nil)
 }
 
-func (c *Client) put(path string, payload *JSONObject) (int, []byte, error) {
+func (c *Client) put(path string, payload interface{}) (int, []byte, error) {
 	return c.request("PUT", path, payload)
 }
 
-func (c *Client) request(method, path string, payload *JSONObject) (int, []byte, error) {
+func (c *Client) request(method, path string, payload interface{}) (int, []byte, error) {
 	var bodyReader io.Reader
 	if payload != nil {
 		payloadBytes, err := json.Marshal(payload)

@@ -87,6 +87,20 @@ func (c *Client) GetServices(projectUUID string) ([]Service, error) {
 }
 
 // GetServicesInfo get the service of a project based on its name.
+func (c *Client) ScheduleService(projectUUID, name string) error {
+	code, body, err := c.post(fmt.Sprintf("/projects/%s/services/%s/schedule", projectUUID, name), nil)
+	if err != nil {
+		return err
+	}
+
+	if code != http.StatusOK {
+		return unexpectedHTTPError(code, body)
+	}
+
+	return nil
+}
+
+// GetServicesInfo get the service of a project based on its name.
 func (c *Client) GetServicesInfo(projectUUID, name string) (Service, error) {
 	services, err := c.GetServices(projectUUID)
 	if err != nil {

@@ -10,13 +10,13 @@ import (
 )
 
 // StatefullNodeListCommand is a cli.Command implementation for listing all statefull_nodes.
-type StatefullNodeListCommand struct {
+type StatefulNodeListCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (b *StatefullNodeListCommand) Run(args []string) int {
+func (b *StatefulNodeListCommand) Run(args []string) int {
 	b.flagSet = newFlagSet(b, b.Ui)
 	endpoint := endpointFlag(b.flagSet)
 	projectUUID := b.flagSet.String("project-uuid", "", "set the uuid of the project")
@@ -57,16 +57,16 @@ func (b *StatefullNodeListCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (b *StatefullNodeListCommand) Synopsis() string {
+func (b *StatefulNodeListCommand) Synopsis() string {
 	return "Lists the statefull nodes of a Squarescale projects"
 }
 
 // Help is part of cli.Command implementation.
-func (b *StatefullNodeListCommand) Help() string {
+func (b *StatefulNodeListCommand) Help() string {
 	helpText := `
-usage: sqsc statefull_node list [options]
+usage: sqsc stateful node list [options]
 
-  List all statefull nodes of a given Squarescale project.
+  List all stateful nodes of a given Squarescale project.
 
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(b.flagSet))

@@ -20,9 +20,10 @@ type Organization struct {
 }
 
 // AddOrganization add organization
-func (c *Client) AddOrganization(name string) error {
+func (c *Client) AddOrganization(name, email string) error {
 	payload := JSONObject{
-		"name": name,
+		"name":          name,
+		"contact_email": email,
 	}
 
 	url := fmt.Sprintf("/organizations")

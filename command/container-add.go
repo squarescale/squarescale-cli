@@ -26,7 +26,7 @@ func (c *ContainerAddCommand) Run(args []string) int {
 	entrypoint := c.flagSet.String("entrypoint", "", "This is the script / program that will be executed")
 	username := c.flagSet.String("username", "", "Username")
 	password := c.flagSet.String("password", "", "Password")
-	volumes := c.flagSet.String("volumes", "", "Volumes")
+	volumes := c.flagSet.String("volumes", "", "Volumes. format: ${VOL2_NAME}:${VOL2_MOUNT_POINT}:ro,${VOL2_NAME}:${VOL2_MOUNT_POINT}:rw")
 	instances := repoOrImageInstancesFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
