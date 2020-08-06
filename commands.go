@@ -57,26 +57,26 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
-		"statefull_node": func() (cli.Command, error) {
-			return &command.StatefullNodeCommand{}, nil
+		"stateful node": func() (cli.Command, error) {
+			return &command.StatefulNodeCommand{}, nil
 		},
-		"statefull_node add": func() (cli.Command, error) {
-			return &command.StatefullNodeAddCommand{
+		"stateful node add": func() (cli.Command, error) {
+			return &command.StatefulNodeAddCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"statefull_node list": func() (cli.Command, error) {
-			return &command.StatefullNodeListCommand{
+		"stateful node list": func() (cli.Command, error) {
+			return &command.StatefulNodeListCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"statefull_node delete": func() (cli.Command, error) {
-			return &command.StatefullNodeDeleteCommand{
+		"stateful node delete": func() (cli.Command, error) {
+			return &command.StatefulNodeDeleteCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"statefull_node bind": func() (cli.Command, error) {
-			return &command.StatefullNodeBindCommand{
+		"stateful node bind": func() (cli.Command, error) {
+			return &command.StatefulNodeBindCommand{
 				Meta: *meta,
 			}, nil
 		},
@@ -137,6 +137,16 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"project provision": func() (cli.Command, error) {
+			return &command.ProjectProvisionCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"project unprovision": func() (cli.Command, error) {
+			return &command.ProjectUNProvisionCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"project list": func() (cli.Command, error) {
 			return &command.ProjectListCommand{
 				Meta: *meta,
@@ -149,21 +159,6 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 		},
 		"project slackbot": func() (cli.Command, error) {
 			return &command.ProjectSlackbotCommand{
-				Meta: *meta,
-			}, nil
-		},
-		"task show": func() (cli.Command, error) {
-			return &command.TaskShowCommand{
-				Meta: *meta,
-			}, nil
-		},
-		"task list": func() (cli.Command, error) {
-			return &command.TaskListCommand{
-				Meta: *meta,
-			}, nil
-		},
-		"task wait": func() (cli.Command, error) {
-			return &command.TaskWaitCommand{
 				Meta: *meta,
 			}, nil
 		},
@@ -198,11 +193,6 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
-		"lb url": func() (cli.Command, error) {
-			return &command.LBURLCommand{
-				Meta: *meta,
-			}, nil
-		},
 		"status": func() (cli.Command, error) {
 			return &command.StatusCommand{
 				Meta: *meta,
@@ -231,6 +221,22 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 		},
 		"organization list": func() (cli.Command, error) {
 			return &command.OrganizationListCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"service": func() (cli.Command, error) {
+			return &command.ServiceCommand{}, nil
+		},
+		"service schedule": func() (cli.Command, error) {
+			return &command.ServiceScheduleCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"network-rule": func() (cli.Command, error) {
+			return &command.NetworkRuleCommand{}, nil
+		},
+		"network-rule create": func() (cli.Command, error) {
+			return &command.NetworkRuleCreateCommand{
 				Meta: *meta,
 			}, nil
 		},
