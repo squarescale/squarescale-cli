@@ -77,11 +77,9 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 
 	payload["region"] = *region
 
-	if *credential == "" {
-		return c.errorWithUsage(errors.New("Credential is mandatory"))
+	if *credential != "" {
+		payload["credential_name"] = *credential
 	}
-
-	payload["credential_name"] = *credential
 
 	if *nodeSize == "" {
 		return c.errorWithUsage(errors.New("node size is mandatory"))
