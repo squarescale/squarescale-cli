@@ -28,7 +28,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	region := c.flagSet.String("region", "", "set the cloud provider region")
 	credential := c.flagSet.String("credential", "", "set the credential used to build the infrastructure")
 	infraType := c.flagSet.String("infra-type", "high-availability", "Set the infrastructure configuration")
-	monitoringEngine := c.flagSet.String("monitoring", "none", "Set the monitoring configuration")
+	monitoringEngine := c.flagSet.String("monitoring", "", "Set the monitoring configuration")
 	nodeSize := c.flagSet.String("node-size", "", "Set the cluster node size")
 
 	dbEngine := c.flagSet.String("db-engine", "", "Select database engine")
@@ -97,12 +97,12 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		payload["infra_type"] = "single_node"
 	}
 
-	if *monitoringEngine != "none" && *monitoringEngine != "netdata" {
-		return c.errorWithUsage(fmt.Errorf("Unknown monitoring engine: %v. Correct values are none or netdata", *monitoringEngine))
+	if *monitoringEngine != "" && *monitoringEngine != "netdata" {
+		return c.errorWithUsage(fmt.Errorf("Unknown monitoring engine: %v. Correct values are empty-string (aka '') or netdata", *monitoringEngine))
 	} else if *monitoringEngine == "netdata" {
 		payload["monitoring"] = map[string]string{"engine": "netdata", "enabled": "true"}
 	} else {
-		payload["monitoring"] = map[string]string{"engine": "none", "enabled": "false"}
+		payload["monitoring"] = map[string]string{"engine": "", "enabled": "false"}
 	}
 
 	if *dbEngine != "" && *dbSize == "" {
