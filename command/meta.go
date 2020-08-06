@@ -146,10 +146,11 @@ func (m *Meta) ensureLogin(endpoint string) (*squarescale.Client, error) {
 	}
 
 	client := squarescale.NewClient(endpoint, token)
-	if err := client.ValidateToken(); err != nil {
+	user, err := client.ValidateToken()
+	if err != nil {
 		return nil, err
 	}
-
+	client.AddUser(*user)
 	return client, nil
 }
 

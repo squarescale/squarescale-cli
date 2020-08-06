@@ -34,6 +34,11 @@ func projectSettings(name string, cluster ClusterConfig) JSONObject {
 // CreateProject asks the Squarescale platform to create a new project
 func (c *Client) CreateProject(payload *JSONObject) (taskId int, err error) {
 
+	_, ok := (*payload)["credential_name"]
+	if !c.user.IsAdmin && !ok {
+		return 0, errors.New("Credential is mandatory")
+	}
+
 	code, body, err := c.post("/projects", payload)
 	if err != nil {
 		return 0, err

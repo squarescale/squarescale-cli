@@ -26,6 +26,7 @@ type Client struct {
 	cachedCableClient *actioncable.Client
 	endpoint          string
 	token             string
+	user              User
 }
 
 // NewClient creates a new Squarescale client
@@ -35,6 +36,10 @@ func NewClient(endpoint, token string) *Client {
 		token:    token,
 	}
 	return c
+}
+
+func (c *Client) AddUser(user User) {
+	c.user = user
 }
 
 func (c *Client) cableClient() *actioncable.Client {
