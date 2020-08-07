@@ -52,3 +52,21 @@ func (c *Client) CreateNetworkRule(projectUUID, serviceName string, newRule Netw
 
 	return nil
 }
+
+func (c *Client) DeleteNetworkRule(projectUUID, serviceName string, ruleToDelete string) error {
+
+	code, body, err := c.delete(fmt.Sprintf("/projects/%s/services/%s/service_network_rules/%s", projectUUID, serviceName, ruleToDelete))
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusOK:
+	case http.StatusNotFound:
+		return fmt.Errorf("Project '%s' and/or service container '%s' or network rule '%s' does not exist", projectUUID, serviceName, ruleToDelete)
+	default:
+		return unexpectedHTTPError(code, body)
+	}
+
+	return nil
+}

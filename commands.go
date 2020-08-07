@@ -245,5 +245,10 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"network-rule delete": func() (cli.Command, error) {
+			return &command.NetworkRuleDeleteCommand{
+				Meta: *meta,
+			}, nil
+		},
 	}
 }
