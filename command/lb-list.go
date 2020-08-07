@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
@@ -78,5 +79,5 @@ func fmtLoadBalancersListOutput(loadBalancers []squarescale.LoadBalancer) string
 
 	table.Render()
 
-	return tableString.String()
+	return string(regexp.MustCompile(`[\n\x09][\n\x09]*$`).ReplaceAll([]byte(tableString.String()), []byte("")))
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
@@ -92,7 +93,7 @@ func fmtDbEngineListOutput(engines []squarescale.DataseEngine) string {
 
 	table.Render()
 
-	return tableString.String()
+	return string(regexp.MustCompile(`[\n\x09][\n\x09]*$`).ReplaceAll([]byte(tableString.String()), []byte("")))
 }
 
 func fmtDbSizeListOutput(sizes []squarescale.DataseSize) string {
@@ -111,5 +112,5 @@ func fmtDbSizeListOutput(sizes []squarescale.DataseSize) string {
 
 	table.Render()
 
-	return tableString.String()
+	return string(regexp.MustCompile(`[\n\x09][\n\x09]*$`).ReplaceAll([]byte(tableString.String()), []byte("")))
 }
