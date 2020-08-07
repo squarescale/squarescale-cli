@@ -240,5 +240,10 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"network-rule list": func() (cli.Command, error) {
+			return &command.NetworkRuleListCommand{
+				Meta: *meta,
+			}, nil
+		},
 	}
 }
