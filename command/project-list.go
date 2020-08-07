@@ -3,6 +3,7 @@ package command
 import (
 	"flag"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
@@ -85,6 +86,6 @@ func fmtProjectListOutput(projects []squarescale.Project) string {
 	ui.FormatTable(table)
 
 	table.Render()
-
-	return tableString.String()
+	// Remove trailing \n and HT
+	return string(regexp.MustCompile(`[\n\x09][\n\x09]*$`).ReplaceAll([]byte(tableString.String()), []byte("")))
 }
