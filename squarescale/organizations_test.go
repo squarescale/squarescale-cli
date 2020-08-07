@@ -152,7 +152,7 @@ func nominalCaseOnAddOrganization(t *testing.T) {
 	client := squarescale.NewClient(server.URL, token)
 
 	//when
-	err := client.AddOrganization("Sqsc")
+	err := client.AddOrganization("Sqsc", "org_admin@squarescale.com")
 
 	//then
 	if err != nil {
@@ -179,7 +179,7 @@ func DuplicateOrganizationErrorCaseOnAddOrganization(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	err := cli.AddOrganization("Sqsc")
+	err := cli.AddOrganization("Sqsc", "org_admin@squarescale.com")
 
 	// then
 	expectedError := "Organization already exist: Sqsc"
@@ -417,7 +417,7 @@ func ClientHTTPErrorOnOrganizationMethods(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	errOnAdd := cli.AddOrganization("Sqsc")
+	errOnAdd := cli.AddOrganization("Sqsc", "org_admin@squarescale.com")
 	errOnDelete := cli.DeleteOrganization("Sqsc")
 	_, errOnGet := cli.GetOrganizationInfo("Sqsc")
 	_, errOnList := cli.ListOrganizations()
@@ -453,7 +453,7 @@ func InternalServerErrorOnOrganizationMethods(t *testing.T) {
 	client := squarescale.NewClient(server.URL, token)
 
 	// when
-	errOnAddOrganization := client.AddOrganization("Sqsc")
+	errOnAddOrganization := client.AddOrganization("Sqsc", "org_admin@squarescale.com")
 	errOnDeleteOrganization := client.DeleteOrganization("Sqsc")
 	_, errOnGetOrganization := client.GetOrganizationInfo("Sqsc")
 	_, errOnListOrganizations := client.ListOrganizations()
