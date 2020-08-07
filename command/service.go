@@ -6,7 +6,7 @@ import (
 	"github.com/mitchellh/cli"
 )
 
-// ServiceCommand is a cli.Command implementation for top level `sqsc servic` command.
+// ServiceCommand is a cli.Command implementation for top level `sqsc service` command.
 type ServiceCommand struct {
 }
 
@@ -17,7 +17,7 @@ func (c *ServiceCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ServiceCommand) Synopsis() string {
-	return "Commands to interact with a project"
+	return "Commands to interact with services in a project"
 }
 
 // Help is part of cli.Command implementation.

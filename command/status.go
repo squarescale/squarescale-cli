@@ -34,7 +34,7 @@ func (c *StatusCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *StatusCommand) Synopsis() string {
-	return "Check Squarescale authorization"
+	return "authorization check to Squarescale platform"
 }
 
 // Help is part of cli.Command implementation.

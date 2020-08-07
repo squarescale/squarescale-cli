@@ -17,7 +17,7 @@ func (c *ClusterCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ClusterCommand) Synopsis() string {
-	return "Commands related to a cluster"
+	return "Commands to interact with cluster instances in a project"
 }
 
 // Help is part of cli.Command implementation.

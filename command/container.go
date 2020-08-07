@@ -17,7 +17,7 @@ func (c *ContainerCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ContainerCommand) Synopsis() string {
-	return "Commands related to a container"
+	return "Commands to interact with containers in a project"
 }
 
 // Help is part of cli.Command implementation.

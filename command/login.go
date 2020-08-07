@@ -59,7 +59,7 @@ func (c *LoginCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *LoginCommand) Synopsis() string {
-	return "Login to Squarescale"
+	return "login to Squarescale platform"
 }
 
 // Help is part of cli.Command implementation.

@@ -17,7 +17,7 @@ func (c *DBCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *DBCommand) Synopsis() string {
-	return "Commands to interact with project databases"
+	return "Commands to interact with databases in a project"
 }
 
 // Help is part of cli.Command implementation.

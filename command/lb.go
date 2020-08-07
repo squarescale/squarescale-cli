@@ -17,13 +17,13 @@ func (c *LBCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *LBCommand) Synopsis() string {
-	return "Commands to interact with project load balancer"
+	return "Commands to interact with load balancer in a project"
 }
 
 // Help is part of cli.Command implementation.
 func (c *LBCommand) Help() string {
 	helpText := `
-usage: sqsc db <subcommand>
+usage: sqsc lb <subcommand>
 
   Run a project load balancer related command.
   List of supported subcommands is available below.

@@ -17,7 +17,7 @@ func (c *EnvCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *EnvCommand) Synopsis() string {
-	return "Commands to set or list the project environment variables"
+	return "Commands to interact with environment variables in a project"
 }
 
 // Help is part of cli.Command implementation.

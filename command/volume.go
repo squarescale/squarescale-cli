@@ -17,7 +17,7 @@ func (c *VolumeCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *VolumeCommand) Synopsis() string {
-	return "Commands related to a volume"
+	return "Commands to interact with volumes in a project"
 }
 
 // Help is part of cli.Command implementation.

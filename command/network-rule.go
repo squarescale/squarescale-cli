@@ -17,7 +17,7 @@ func (c *NetworkRuleCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *NetworkRuleCommand) Synopsis() string {
-	return "Commands to interact with network rule"
+	return "Commands to interact with network rules in a project"
 }
 
 // Help is part of cli.Command implementation.

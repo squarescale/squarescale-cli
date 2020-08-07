@@ -17,7 +17,7 @@ func (c *OrganizationCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *OrganizationCommand) Synopsis() string {
-	return "Commands related to a organization"
+	return "Commands to interact with organizations"
 }
 
 // Help is part of cli.Command implementation.

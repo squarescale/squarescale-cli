@@ -17,7 +17,7 @@ func (c *BatchCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *BatchCommand) Synopsis() string {
-	return "Commands related to a batch"
+	return "Commands to interact with batch jobs in a project"
 }
 
 // Help is part of cli.Command implementation.

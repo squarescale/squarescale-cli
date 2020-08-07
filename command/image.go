@@ -17,7 +17,7 @@ func (c *ImageCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ImageCommand) Synopsis() string {
-	return "Commands to interact with the docker image of a project"
+	return "Commands to interact with docker images in a project"
 }
 
 // Help is part of cli.Command implementation.
