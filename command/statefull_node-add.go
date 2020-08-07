@@ -67,7 +67,7 @@ func (c *StatefulNodeAddCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *StatefulNodeAddCommand) Synopsis() string {
-	return "Add a stateful node from the project."
+	return "Add stateful node to project."
 }
 
 // Help is part of cli.Command implementation.
@@ -75,8 +75,7 @@ func (c *StatefulNodeAddCommand) Help() string {
 	helpText := `
 usage: sqsc stateful node add [options] <stateful_node_name>
 
-  Add a stateful node on the project.
-
+  Add stateful node to project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

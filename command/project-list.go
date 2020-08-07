@@ -11,7 +11,7 @@ import (
 	"github.com/squarescale/squarescale-cli/ui"
 )
 
-// ProjectListCommand is a cli.Command implementation for listing all Squarescale projects.
+// ProjectListCommand is a cli.Command implementation for listing all projects.
 type ProjectListCommand struct {
 	Meta
 	flagSet *flag.FlagSet
@@ -49,7 +49,7 @@ func (c *ProjectListCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ProjectListCommand) Synopsis() string {
-	return "Lists the Squarescale projects"
+	return "List projects"
 }
 
 // Help is part of cli.Command implementation.
@@ -57,8 +57,7 @@ func (c *ProjectListCommand) Help() string {
 	helpText := `
 usage: sqsc project list [options]
 
-  Lists all Squarescale projects attached to the authenticated account.
-
+  List projects attached to the authenticated account.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

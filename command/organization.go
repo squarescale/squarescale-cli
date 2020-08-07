@@ -25,7 +25,7 @@ func (c *OrganizationCommand) Help() string {
 	helpText := `
 usage: sqsc organization <subcommand>
 
-  Run a project volume related command.
+  Run a organization related command.
   List of supported subcommands is available below.
 `
 	return strings.TrimSpace(helpText)

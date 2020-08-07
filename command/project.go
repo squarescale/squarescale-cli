@@ -25,7 +25,7 @@ func (c *ProjectCommand) Help() string {
 	helpText := `
 usage: sqsc project <subcommand>
 
-  Run a Squarescale project related command.
+  Run a project related command.
   List of supported subcommands is available below.
 `
 	return strings.TrimSpace(helpText)

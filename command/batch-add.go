@@ -153,7 +153,7 @@ func (b *BatchAddCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (b *BatchAddCommand) Synopsis() string {
-	return "Add a new Batch in Squarescale project"
+	return "Add batch to project"
 }
 
 // Help is part of cli.Command implementation.
@@ -161,8 +161,7 @@ func (b *BatchAddCommand) Help() string {
 	helpText := `
 usage: sqsc batch add [options] <batch_name>
 
-  Add a new batch using the provided batch name (name is mandatory).
-
+  Add batch to project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(b.flagSet))
 }

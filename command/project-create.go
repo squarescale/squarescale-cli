@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ProjectCreateCommand is a cli.Command implementation for creating a Squarescale project.
+// ProjectCreateCommand is a cli.Command implementation for creating project.
 type ProjectCreateCommand struct {
 	Meta
 	flagSet *flag.FlagSet
@@ -169,7 +169,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ProjectCreateCommand) Synopsis() string {
-	return "Create Project in Squarescale"
+	return "Create Project"
 }
 
 // Help is part of cli.Command implementation.

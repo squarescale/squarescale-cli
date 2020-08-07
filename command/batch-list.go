@@ -56,7 +56,7 @@ func (b *BatchListCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (b *BatchListCommand) Synopsis() string {
-	return "Lists the batches of a Squarescale projects"
+	return "List batches of project"
 }
 
 // Help is part of cli.Command implementation.
@@ -64,8 +64,7 @@ func (b *BatchListCommand) Help() string {
 	helpText := `
 usage: sqsc batch list [options]
 
-  List all batches of a given Squarescale project.
-
+  List batches of project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(b.flagSet))
 }

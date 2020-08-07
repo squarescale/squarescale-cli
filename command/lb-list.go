@@ -58,7 +58,6 @@ usage: sqsc lb list [options]
   Display load balancer state (enabled, disabled). In case the load
   balancer is enabled, all the project containers are displayed together
   with their ports.
-
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

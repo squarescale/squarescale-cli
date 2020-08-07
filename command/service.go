@@ -25,7 +25,7 @@ func (c *ServiceCommand) Help() string {
 	helpText := `
 usage: sqsc service <subcommand>
 
-  Run a Squarescale service related command.
+  Run a project service related command.
   List of supported subcommands is available below.
 `
 	return strings.TrimSpace(helpText)

@@ -79,7 +79,7 @@ func (c *StatefulNodeDeleteCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *StatefulNodeDeleteCommand) Synopsis() string {
-	return "Delete a statefull node from the project."
+	return "Delete stateful node from project."
 }
 
 // Help is part of cli.Command implementation.
@@ -87,8 +87,7 @@ func (c *StatefulNodeDeleteCommand) Help() string {
 	helpText := `
 usage: sqsc stateful node delete [options] <stateful_node_name>
 
-  Delete the stateful node from the project.
-
+  Delete stateful node from project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

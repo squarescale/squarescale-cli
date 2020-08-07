@@ -45,7 +45,7 @@ func (c *ProjectProvisionCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ProjectProvisionCommand) Synopsis() string {
-	return "Provision one project"
+	return "Provision infrastrucutre of project"
 }
 
 // Help is part of cli.Command implementation.
@@ -53,8 +53,7 @@ func (c *ProjectProvisionCommand) Help() string {
 	helpText := `
 usage: sqsc project provision [options]
 
-  Provision the infrasctructure of the project.
-
+  Provision infrasctructure of project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

@@ -64,7 +64,7 @@ func (c *VolumeAddCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *VolumeAddCommand) Synopsis() string {
-	return "Add a volume from the project."
+	return "Add volume to project."
 }
 
 // Help is part of cli.Command implementation.
@@ -72,8 +72,7 @@ func (c *VolumeAddCommand) Help() string {
 	helpText := `
 usage: sqsc volume add [options] <volume_name>
 
-  Add a volume on the project.
-
+  Add volume to project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

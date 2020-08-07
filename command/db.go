@@ -25,7 +25,7 @@ func (c *DBCommand) Help() string {
 	helpText := `
 usage: sqsc db <subcommand>
 
-  Run a Squarescale project database related command.
+  Run a project database related command.
   List of supported subcommands is available below.
 `
 	return strings.TrimSpace(helpText)

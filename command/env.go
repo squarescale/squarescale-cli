@@ -25,7 +25,7 @@ func (c *EnvCommand) Help() string {
 	helpText := `
 usage: sqsc env <subcommand>
 
-  Run a Squarescale environment variables related command.
+  Run a project environment variables related command.
   List of supported subcommands is available below.
 `
 	return strings.TrimSpace(helpText)

@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ContainerAddCommand is a cli.Command implementation for adding a docker container to a Squarescale project.
+// ContainerAddCommand is a cli.Command implementation for adding a docker container to project.
 type ContainerAddCommand struct {
 	Meta
 	flagSet *flag.FlagSet
@@ -55,7 +55,7 @@ func (c *ContainerAddCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ContainerAddCommand) Synopsis() string {
-	return "Add a docker container to a Squarescale project"
+	return "Add docker container to project"
 }
 
 // Help is part of cli.Command implementation.
@@ -63,8 +63,7 @@ func (c *ContainerAddCommand) Help() string {
 	helpText := `
 usage: sqsc container add [options]
 
-  Adds docker container to the specified Squarescale project.
-
+  Add docker container to project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

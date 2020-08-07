@@ -96,7 +96,7 @@ func (c *DBSetCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *DBSetCommand) Synopsis() string {
-	return "Set and scale up/down the database engine attached to a Squarescale project"
+	return "Set and scale up/down the database engine attached to project"
 }
 
 // Help is part of cli.Command implementation.
@@ -104,10 +104,9 @@ func (c *DBSetCommand) Help() string {
 	helpText := `
 usage: sqsc db set [options]
 
-  Set and scale up/down the database engine attached to a Squarescale project.
+  Set and scale up/down the database engine attached to project.
   The list of database engines and instances available for use can be accessed
   using the 'db list' command.
-
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

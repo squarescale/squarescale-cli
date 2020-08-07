@@ -68,7 +68,7 @@ func (c *OrganizationListCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *OrganizationListCommand) Synopsis() string {
-	return "List all organizations"
+	return "List organizations"
 }
 
 // Help is part of cli.Command implementation.
@@ -76,8 +76,7 @@ func (c *OrganizationListCommand) Help() string {
 	helpText := `
 usage: sqsc organization list [options]
 
-  List al organizations.
-
+  List organizations.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

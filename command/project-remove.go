@@ -10,7 +10,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ProjectRemoveCommand is a cli.Command implementation for creating a Squarescale project.
+// ProjectRemoveCommand is a cli.Command implementation for creating project.
 type ProjectRemoveCommand struct {
 	Meta
 	flagSet *flag.FlagSet
@@ -86,7 +86,7 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ProjectRemoveCommand) Synopsis() string {
-	return "Remove Project in Squarescale"
+	return "Remove project"
 }
 
 // Help is part of cli.Command implementation.
@@ -95,7 +95,6 @@ func (c *ProjectRemoveCommand) Help() string {
 usage: sqsc project remove [options] <project_name>
 
   Destroy infrastructure and remove project completely.
-
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

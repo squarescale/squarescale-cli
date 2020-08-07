@@ -126,7 +126,7 @@ func (c *ContainerSetCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ContainerSetCommand) Synopsis() string {
-	return "Set container runtime parameters for a Squarescale project"
+	return "Set container runtime parameters for project"
 }
 
 // Help is part of cli.Command implementation.
@@ -134,7 +134,7 @@ func (c *ContainerSetCommand) Help() string {
 	helpText := `
 usage: sqsc container set [options]
 
-  Set container runtime parameters for a Squarescale project.
+  Set container runtime parameters for project.
   Containers are specified using their given name.
 
 Example:
@@ -143,7 +143,6 @@ Example:
       -container="my-name/my-repo"  \
       -instances=42                 \
       -e env.json
-
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

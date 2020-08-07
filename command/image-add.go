@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ImageAddCommand is a cli.Command implementation for adding a docker image to a Squarescale project.
+// ImageAddCommand is a cli.Command implementation for adding a docker image to project.
 type ImageAddCommand struct {
 	Meta
 	flagSet *flag.FlagSet
@@ -51,7 +51,7 @@ func (c *ImageAddCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ImageAddCommand) Synopsis() string {
-	return "Add a docker image to a Squarescale project"
+	return "Add docker image to project"
 }
 
 // Help is part of cli.Command implementation.
@@ -59,8 +59,7 @@ func (c *ImageAddCommand) Help() string {
 	helpText := `
 usage: sqsc image add [options]
 
-  Adds docker image to the specified Squarescale project.
-
+  Add docker image to project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

@@ -89,7 +89,7 @@ func (c *ClusterSetCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ClusterSetCommand) Synopsis() string {
-	return "Set and scale up/down the cluster attached to a Squarescale project"
+	return "Set and scale up/down cluster attached to project"
 }
 
 // Help is part of cli.Command implementation.
@@ -97,8 +97,7 @@ func (c *ClusterSetCommand) Help() string {
 	helpText := `
 usage: sqsc cluster set [options]
 
-  Set and scale up/down the cluster attached to a Squarescale project.
-
+  Set and scale up/down cluster attached to project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

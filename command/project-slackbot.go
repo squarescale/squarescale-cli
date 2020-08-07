@@ -58,7 +58,6 @@ func (c *ProjectSlackbotCommand) Help() string {
 usage: sqsc project slackbot [options] <project_name> [<url>]
 
   Set the slack URL integration, if an URL is provided, or show the current URL.
-
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

@@ -90,7 +90,7 @@ func (c *EnvSetCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *EnvSetCommand) Synopsis() string {
-	return "Set an environment variable for a project"
+	return "Set environment variable for project"
 }
 
 // Help is part of cli.Command implementation.
@@ -98,11 +98,10 @@ func (c *EnvSetCommand) Help() string {
 	helpText := `
 usage: sqsc env set [options] <key> <value>
 
-  Set an environment variable for a project. The variable
+  Set environment variable for project. The variable
   must be of the form "<key> <value>" where <key> and <value>
   are both strings. When "--remove" is specified, only the
   key to remove is required.
-
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

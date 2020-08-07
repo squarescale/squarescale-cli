@@ -62,7 +62,7 @@ func (c *DBListCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *DBListCommand) Synopsis() string {
-	return "Lists all available database engines and sizes"
+	return "List available database engines and sizes"
 }
 
 // Help is part of cli.Command implementation.
@@ -70,9 +70,8 @@ func (c *DBListCommand) Help() string {
 	helpText := `
 usage: sqsc db list
 
-  Lists all database engines and sizes available for use
-  in the Squarescale services.
-
+  List database engines and sizes available for use
+  on the Squarescale platform.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

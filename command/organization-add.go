@@ -52,7 +52,7 @@ func (c *OrganizationAddCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *OrganizationAddCommand) Synopsis() string {
-	return "Add a organization"
+	return "Add organization"
 }
 
 // Help is part of cli.Command implementation.
@@ -60,8 +60,7 @@ func (c *OrganizationAddCommand) Help() string {
 	helpText := `
 usage: sqsc organization add [options] <organization_name>
 
-  Add a organization.
-
+  Add organization.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

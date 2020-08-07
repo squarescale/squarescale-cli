@@ -1,16 +1,16 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
-	"errors"
 
 	"github.com/kballard/go-shellquote"
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ContainerShowCommand is a cli.Command implementation for listing all Squarescale projects.
+// ContainerShowCommand is a cli.Command implementation for listing all projects.
 type ContainerShowCommand struct {
 	Meta
 	flagSet *flag.FlagSet
@@ -77,7 +77,7 @@ func (c *ContainerShowCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ContainerShowCommand) Synopsis() string {
-	return "Lists the containers of a Squarescale projects"
+	return "List containers of project"
 }
 
 // Help is part of cli.Command implementation.
@@ -85,8 +85,7 @@ func (c *ContainerShowCommand) Help() string {
 	helpText := `
 usage: sqsc container show [options]
 
-  List all containers of a given Squarescale project.
-
+  List containers of project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

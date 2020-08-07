@@ -59,7 +59,7 @@ func (c *EnvGetCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *EnvGetCommand) Synopsis() string {
-	return "Display project's environment variables"
+	return "Display environment variables of project"
 }
 
 // Help is part of cli.Command implementation.
@@ -67,8 +67,7 @@ func (c *EnvGetCommand) Help() string {
 	helpText := `
 usage: sqsc env get [options] [VARNAME]
 
-  Display project environment variables.
-
+  Display environment variables of project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

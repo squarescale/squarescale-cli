@@ -66,7 +66,7 @@ func (c *BatchDeleteCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *BatchDeleteCommand) Synopsis() string {
-	return "Delete a batch from the project."
+	return "Delete batch from project."
 }
 
 // Help is part of cli.Command implementation.
@@ -74,8 +74,7 @@ func (c *BatchDeleteCommand) Help() string {
 	helpText := `
 usage: sqsc batch delete [options] <batch_name>
 
-  Delete the batch from the project.
-
+  Delete batch from project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

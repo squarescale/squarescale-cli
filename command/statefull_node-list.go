@@ -39,7 +39,7 @@ func (b *StatefulNodeListCommand) Run(args []string) int {
 			return "", err
 		}
 
-		//msg doit retourner la list des statefull_nodes valides : vérifier si on reçoit une liste des statefull_nodes ou des ID
+		//msg doit retourner la list des statefull_nodes valides : verifier si on recoit une liste des statefull_nodes ou des ID
 		//msg := fmt.Sprintf("list of availables statefull_nodes: %v", statefull_node)
 
 		var msg string
@@ -58,7 +58,7 @@ func (b *StatefulNodeListCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (b *StatefulNodeListCommand) Synopsis() string {
-	return "Lists the statefull nodes of a Squarescale projects"
+	return "List stateful nodes of project"
 }
 
 // Help is part of cli.Command implementation.
@@ -66,8 +66,7 @@ func (b *StatefulNodeListCommand) Help() string {
 	helpText := `
 usage: sqsc stateful node list [options]
 
-  List all stateful nodes of a given Squarescale project.
-
+  List stateful nodes of project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(b.flagSet))
 }

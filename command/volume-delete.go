@@ -77,7 +77,7 @@ func (c *VolumeDeleteCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *VolumeDeleteCommand) Synopsis() string {
-	return "Delete a volume from the project."
+	return "Delete volume from project."
 }
 
 // Help is part of cli.Command implementation.
@@ -85,8 +85,7 @@ func (c *VolumeDeleteCommand) Help() string {
 	helpText := `
 usage: sqsc volume delete [options] <volume_name>
 
-  Delete the volume from the project.
-
+  Delete volume from project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

@@ -63,7 +63,7 @@ func (c *ContainerDeleteCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ContainerDeleteCommand) Synopsis() string {
-	return "Delete a container from the project."
+	return "Delete container from project."
 }
 
 // Help is part of cli.Command implementation.
@@ -71,8 +71,7 @@ func (c *ContainerDeleteCommand) Help() string {
 	helpText := `
 usage: sqsc container delete [options] <container_name>
 
-  Delete the container from the project.
-
+  Delete container from project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

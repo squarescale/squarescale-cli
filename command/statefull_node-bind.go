@@ -57,7 +57,7 @@ func (c *StatefulNodeBindCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *StatefulNodeBindCommand) Synopsis() string {
-	return "Bind a statefull_node from the project."
+	return "Bind stateful node to project."
 }
 
 // Help is part of cli.Command implementation.
@@ -65,8 +65,7 @@ func (c *StatefulNodeBindCommand) Help() string {
 	helpText := `
 usage: sqsc stateful node bind [options] <stateful_node_name>
 
-  Bind a stateful node on the project.
-
+  Bind stateful node to project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

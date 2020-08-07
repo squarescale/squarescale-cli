@@ -25,7 +25,7 @@ func (c *NetworkRuleCommand) Help() string {
 	helpText := `
 usage: sqsc network-rule <subcommand>
 
-  Run a Squarescale network rule related command.
+  Run a network rule related command.
   List of supported subcommands is available below.
 `
 	return strings.TrimSpace(helpText)

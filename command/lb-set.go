@@ -83,7 +83,7 @@ func (c *LBSetCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *LBSetCommand) Synopsis() string {
-	return "Configure the load balancer associated to a project"
+	return "Configure load balancer associated to project"
 }
 
 // Help is part of cli.Command implementation.
@@ -91,7 +91,7 @@ func (c *LBSetCommand) Help() string {
 	helpText := `
 usage: sqsc lb set [options]
 
-  Configure the load balancer associated to a Squarescale project.
+  Configure load balancer associated to project.
 
 	Used to define a TLS certificate
 `

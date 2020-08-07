@@ -61,7 +61,7 @@ func (c *OrganizationDeleteCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *OrganizationDeleteCommand) Synopsis() string {
-	return "Remove a organization"
+	return "Remove organization"
 }
 
 // Help is part of cli.Command implementation.
@@ -69,8 +69,7 @@ func (c *OrganizationDeleteCommand) Help() string {
 	helpText := `
 usage: sqsc organization remove [options] <organization_name>
 
-  Remove a organization.
-
+  Remove organization.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

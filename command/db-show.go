@@ -44,7 +44,7 @@ func (c *DBShowCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *DBShowCommand) Synopsis() string {
-	return "Show the database engine options attached to a Squarescale project"
+	return "Show database engine attached to project"
 }
 
 // Help is part of cli.Command implementation.
@@ -52,8 +52,7 @@ func (c *DBShowCommand) Help() string {
 	helpText := `
 usage: sqsc db show [options]
 
-  Show options for the database engine attached to a Squarescale project.
-
+  Show database engine attached to project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

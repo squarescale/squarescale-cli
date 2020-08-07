@@ -39,7 +39,7 @@ func (b *VolumeListCommand) Run(args []string) int {
 			return "", err
 		}
 
-		//msg doit retourner la list des volumes valides : vérifier si on reçoit une liste des volumes ou des ID
+		//msg doit retourner la list des volumes valides : verifier si on recoit une liste des volumes ou des ID
 		//msg := fmt.Sprintf("list of availables volumes: %v", volume)
 
 		var msg string = "Name\tSize\tType\tZone\t\tNode\tStatus\n"
@@ -59,7 +59,7 @@ func (b *VolumeListCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (b *VolumeListCommand) Synopsis() string {
-	return "Lists the volumes of a Squarescale projects"
+	return "List volumes of project"
 }
 
 // Help is part of cli.Command implementation.
@@ -67,8 +67,7 @@ func (b *VolumeListCommand) Help() string {
 	helpText := `
 usage: sqsc volume list [options]
 
-  List all volumes of a given Squarescale project.
-
+  List volumes of project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(b.flagSet))
 }
