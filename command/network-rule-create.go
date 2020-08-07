@@ -21,8 +21,8 @@ func (c *NetworkRuleCreateCommand) Run(args []string) int {
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	ruleName := c.flagSet.String("name", "", "name of the rule")
 	serviceName := c.flagSet.String("service-name", "", "name of the service the rule will be attached")
-	externalProtocol := c.flagSet.String("external-protocol", "", "name of the exposed protocol")
-	internalProtocol := c.flagSet.String("internal-protocol", "", "name of the internal protocol")
+	externalProtocol := c.flagSet.String("external-protocol", "", "name of the externally exposed protocol")
+	internalProtocol := c.flagSet.String("internal-protocol", "", "name of the internally mapped protocol")
 	internalPort := c.flagSet.Int("internal-port", 0, "value of the internal port")
 	domainExpression := c.flagSet.String("domain-expression", "", "custom domain the service is accessed")
 	externalPort := 0
@@ -31,8 +31,16 @@ func (c *NetworkRuleCreateCommand) Run(args []string) int {
 		return 1
 	}
 
+	if c.flagSet.NArg() > 0 {
+		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	}
+
 	if *projectUUID == "" {
 		return c.errorWithUsage(fmt.Errorf(("Project uuid is mandatory.")))
+	}
+
+	if *serviceName == "" {
+		return c.errorWithUsage(fmt.Errorf(("Service name is mandatory.")))
 	}
 
 	if *ruleName == "" {
@@ -87,5 +95,5 @@ usage: sqsc network-rule create [options]
 
   Create a network rule.
 `
-	return strings.TrimSpace(helpText)
+	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
