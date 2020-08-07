@@ -95,14 +95,16 @@ func (c *Client) UNProvisionProject(projectUUID string) (err error) {
 }
 
 type Project struct {
-	Name            string `json:"name"`
-	UUID            string `json:"uuid"`
-	Provider        string `json:"provider"`
-	Region          string `json:"region"`
-	Organization    string `string:"organization"`
-	InfraStatus     string `json:"infra_status"`
-	ClusterSize     int    `json:"cluster_size"`
-	NomadNodesReady int    `json:"nomad_nodes_ready"`
+	Name              string `json:"name"`
+	UUID              string `json:"uuid"`
+	Provider          string `json:"provider"`
+	Region            string `json:"region"`
+	Organization      string `string:"organization"`
+	InfraStatus       string `json:"infra_status"`
+	ClusterSize       int    `json:"cluster_size"`
+	NomadNodesReady   int    `json:"nomad_nodes_ready"`
+	MonitoringEnabled bool   `json:"monitoring_enabled"`
+	MonitoringEngine  string `json:"monitoring_engine"`
 }
 
 /*

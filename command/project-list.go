@@ -66,13 +66,18 @@ usage: sqsc project list [options]
 func fmtProjectListOutput(projects []squarescale.Project) string {
 	tableString := &strings.Builder{}
 	table := tablewriter.NewWriter(tableString)
-	table.SetHeader([]string{"Name", "UUID", "Provider", "Region", "Organization", "Status", "Size"})
+	table.SetHeader([]string{"Name", "UUID", "Monitoring", "Provider", "Region", "Organization", "Status", "Size"})
 	data := make([][]string, len(projects), len(projects))
 
 	for i, project := range projects {
+		monitoring := ""
+		if project.MonitoringEnabled && len(project.MonitoringEngine) > 0 {
+			monitoring = project.MonitoringEngine
+		}
 		data[i] = []string{
 			project.Name,
 			project.UUID,
+			monitoring,
 			project.Provider,
 			project.Region,
 			project.Organization,
