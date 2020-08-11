@@ -35,7 +35,7 @@ func (c *ProjectSlackbotCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[2:]))
 	}
 
-	url := c.flagSet.Arg(1)
+	url := c.flagSet.Arg(0)
 	if url == "" {
 		return c.runWithSpinner("retrieve slack settings", endpoint.String(), func(client *squarescale.Client) (string, error) {
 			return client.ProjectSlackURL(*projectUUID)
