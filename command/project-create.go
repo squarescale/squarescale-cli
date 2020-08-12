@@ -30,6 +30,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	infraType := c.flagSet.String("infra-type", "high-availability", "Set the infrastructure configuration")
 	monitoringEngine := c.flagSet.String("monitoring", "", "Set the monitoring configuration")
 	nodeSize := c.flagSet.String("node-size", "", "Set the cluster node size")
+	slackURL := c.flagSet.String("slackbot", "", "Set the Slack webhook URL")
 
 	dbEngine := c.flagSet.String("db-engine", "", "Select database engine")
 	dbSize := c.flagSet.String("db-size", "", "Select database size")
@@ -111,6 +112,10 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		payload["databases"] = []map[string]string{{"engine": *dbEngine, "size": *dbSize, "version": *dbVersion}}
 	}
 
+	if *slackURL != "" {
+		payload["slack_webhook"] = *slackURL
+	}
+
 	// ask confirmation
 	c.Ui.Warn("Project will be created with the following configuration :")
 	c.Ui.Warn(fmt.Sprintf("name : %s", *name))
@@ -126,6 +131,9 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	c.Ui.Warn(fmt.Sprintf("node size : %s", *nodeSize))
 	c.Ui.Warn(fmt.Sprintf("infra type : %s", *infraType))
 	c.Ui.Warn(fmt.Sprintf("monitoring engine : %s", *monitoringEngine))
+	if *slackURL != "" {
+		c.Ui.Warn(fmt.Sprintf("Slack webhook : %s", *slackURL))
+	}
 	if *dbEngine != "" && *dbSize != "" {
 		c.Ui.Warn(fmt.Sprintf("database engine : %s", *dbEngine))
 		c.Ui.Warn(fmt.Sprintf("database size : %s", *dbSize))
