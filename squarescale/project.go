@@ -105,6 +105,7 @@ type Project struct {
 	NomadNodesReady   int    `json:"nomad_nodes_ready"`
 	MonitoringEnabled bool   `json:"monitoring_enabled"`
 	MonitoringEngine  string `json:"monitoring_engine"`
+	SlackWebhook      string `json:"slack_webhook"`
 }
 
 /*

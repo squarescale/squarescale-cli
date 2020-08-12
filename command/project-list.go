@@ -65,7 +65,7 @@ usage: sqsc project list [options]
 func fmtProjectListOutput(projects []squarescale.Project) string {
 	tableString := &strings.Builder{}
 	table := tablewriter.NewWriter(tableString)
-	table.SetHeader([]string{"Name", "UUID", "Monitoring", "Provider", "Region", "Organization", "Status", "Size"})
+	table.SetHeader([]string{"Name", "UUID", "Monitoring", "Provider", "Region", "Organization", "Status", "Size", "Slack Webhook"})
 	data := make([][]string, len(projects), len(projects))
 
 	for i, project := range projects {
@@ -82,6 +82,7 @@ func fmtProjectListOutput(projects []squarescale.Project) string {
 			project.Organization,
 			project.InfraStatus,
 			fmt.Sprintf("%d/%d", project.NomadNodesReady, project.ClusterSize),
+			project.SlackWebhook,
 		}
 	}
 
