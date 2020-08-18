@@ -180,6 +180,24 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"redis": func() (cli.Command, error) {
+			return &command.RedisCommand{}, nil
+		},
+		"redis list": func() (cli.Command, error) {
+			return &command.RedisListCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"redis add": func() (cli.Command, error) {
+			return &command.RedisAddCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"redis delete": func() (cli.Command, error) {
+			return &command.RedisDeleteCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"lb": func() (cli.Command, error) {
 			return &command.LBCommand{}, nil
 		},

@@ -210,6 +210,15 @@ func projectNameArg(f *flag.FlagSet, arg int) (string, error) {
 	}
 }
 
+func redisNameArg(f *flag.FlagSet, arg int) (string, error) {
+	value := f.Arg(arg)
+	if value == "" {
+		return "", errors.New("Redis name must be specified")
+	} else {
+		return value, nil
+	}
+}
+
 func organizationNameArg(f *flag.FlagSet, arg int) (string, error) {
 	value := f.Arg(arg)
 	if value == "" {

@@ -53,7 +53,8 @@ func (c *ProjectProvisionCommand) Help() string {
 	helpText := `
 usage: sqsc project provision [options]
 
-  Provision infrasctructure of project.
+  Provision the infrastructure of the project.
+
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
