@@ -56,7 +56,7 @@ func (r *RedisListCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (r *RedisListCommand) Synopsis() string {
-	return "Lists of Redis for a Squarescale projects"
+	return "List Redis instances for a Squarescale projects"
 }
 
 // Help is part of cli.Command implementation.

@@ -53,7 +53,7 @@ func (c *RedisDeleteCommand) Run(args []string) int {
 	}
 
 	res := c.runWithSpinner("deleting redis", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		fmt.Printf("Delete on project `%s` the redis `%s`\n", *projectUUID, redisName)
+		fmt.Printf("Delete redis `%s` on project `%s`\n", redisName, *projectUUID)
 		err := client.DeleteRedis(*projectUUID, redisName) //insérer la fonction dans redis
 		return "", err
 	})
@@ -66,7 +66,7 @@ func (c *RedisDeleteCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *RedisDeleteCommand) Synopsis() string {
-	return "Delete a redis from the project."
+	return "Delete a redis on the project."
 }
 
 // Help is part of cli.Command implementation.

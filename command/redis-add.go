@@ -43,10 +43,10 @@ func (r *RedisAddCommand) Run(args []string) int {
 
 	//check rules
 	if *wantedRedisName == "" {
-		return r.errorWithUsage(fmt.Errorf(("Redis name is mandatory. Please, chose a batch redis.")))
+		return r.errorWithUsage(fmt.Errorf(("Redis name is mandatory. Please, choose a redis name.")))
 	}
 
-	res := r.runWithSpinner("add refdis", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := r.runWithSpinner("add redis", endpoint.String(), func(client *squarescale.Client) (string, error) {
 
 		var err error
 
