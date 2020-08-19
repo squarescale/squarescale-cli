@@ -64,7 +64,7 @@ clean-dist: ## Clean repository
 
 lint: ## Lint Docker
 	$(DOCKER_CMD) -v $$PWD:/root/ projectatomic/dockerfile-lint dockerfile_lint
-	$(DOCKER_CMD) -i sjourdan/hadolint < Dockerfile
+	$(DOCKER_CMD) -i hadolint/hadolint < Dockerfile
 
 tests: ## Run test suites in all packages
 	ginkgo -r
