@@ -1,7 +1,7 @@
 package main
 
 const Name string = "sqsc"
-const Version string = "1.0.1"
+const Version string = "1.0.2"
 
 // GitCommit describes latest commit hash.
 // This value is extracted by git command when building.
