@@ -4,32 +4,35 @@ go 1.14
 
 require (
 	github.com/armon/go-radix v1.0.0 // indirect
-	github.com/briandowns/spinner v1.11.1
-	github.com/fatih/color v1.9.0 // indirect
+	github.com/briandowns/spinner v1.12.0
+	github.com/fatih/color v1.10.0 // indirect
 	github.com/google/go-cmp v0.5.1 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.0
 	github.com/jpillora/backoff v1.0.0 // indirect
 	github.com/jpillora/go-mime v0.0.0-20150326152935-4e683937836d
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
+	github.com/konsorten/go-windows-terminal-sequences v1.0.3 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/mattn/go-isatty v0.0.12
 	github.com/mattn/go-runewidth v0.0.9 // indirect
-	github.com/mitchellh/cli v1.1.1
+	github.com/mitchellh/cli v1.1.2
+	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/olekukonko/tablewriter v0.0.4
 	github.com/onsi/ginkgo v1.14.0
 	github.com/onsi/gomega v1.10.1
 	github.com/posener/complete v1.2.3 // indirect
-	github.com/sirupsen/logrus v1.6.0
+	github.com/sirupsen/logrus v1.7.0
 	github.com/squarescale/actioncable-go v0.1.0
 	github.com/squarescale/go-netrc v0.1.0
 	github.com/squarescale/logger v0.1.0
 	github.com/stretchr/testify v1.6.1 // indirect
+	golang.org/x/crypto v0.0.0-20201124201722-c8d3bf9c5392 // indirect
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381 // indirect
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208 // indirect
-	golang.org/x/sys v0.0.0-20200806125547-5acd03effb82 // indirect
+	golang.org/x/sys v0.0.0-20201130072748-111129e158e2 // indirect
 	golang.org/x/text v0.3.3 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
