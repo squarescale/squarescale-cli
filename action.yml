@@ -1,0 +1,9 @@
+name: "Squarescale CLI"
+description: "Interact with Squarescale throw CLI"
+author: Squarescale
+runs:
+  using: docker
+  image: Dockerfile
+branding:
+  icon: refresh-cw
+  color: green

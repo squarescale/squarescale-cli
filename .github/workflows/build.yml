@@ -43,3 +43,20 @@ jobs:
           AWS_REGION: 'eu-west-1'
           SOURCE_DIR: 'dist'
           AWS_S3_BUCKET: 'cli-releases'
+
+      - name: Build binary for Docker
+        run: make docker-alpine-amd64
+
+      - name: Extract Github branch
+        id: get_branch
+        run: echo ::set-output name=GIT_BRANCH::${GITHUB_REF##*/}
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v1.1.0
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+          repository: squarescale/cli
+          tags: ${{ steps.get_branch.outputs.GIT_BRANCH }}
+          tag_with_ref: true
+          tag_with_sha: true
