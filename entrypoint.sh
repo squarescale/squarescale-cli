@@ -8,4 +8,6 @@ if [ -z "$SQSC_TOKEN" ]; then
 fi
 
 /sqsc login
-/sqsc "$@"
+CMD="/sqsc $@"
+echo $CMD
+eval $CMD
