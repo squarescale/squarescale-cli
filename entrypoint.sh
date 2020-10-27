@@ -7,7 +7,6 @@ if [ -z "$SQSC_TOKEN" ]; then
   exit 1
 fi
 
-/sqsc login
 CMD="/sqsc $@"
 echo $CMD
 eval $CMD

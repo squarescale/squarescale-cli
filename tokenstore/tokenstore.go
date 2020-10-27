@@ -27,6 +27,12 @@ func initNetrcFileIfNotExist() {
 
 // GetToken retrieves the Squarescale token in the token store.
 func GetToken(host string) (string, error) {
+	var apiKey string
+	apiKey = os.Getenv("SQSC_TOKEN")
+	if apiKey != "" {
+		return apiKey, nil
+	}
+
 	host = normalizeHost(host)
 	initNetrcFileIfNotExist()
 	n, err := netrc.ParseFile(netrcFile())
