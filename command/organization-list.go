@@ -40,10 +40,10 @@ func (c *OrganizationListCommand) Run(args []string) int {
 			msg += fmt.Sprintf("[%s]\n", o.Name)
 
 			msg += fmt.Sprintf("  Projects:\n")
-			msg += fmt.Sprintf("    Name\tStatus\tSize\n")
-			msg += fmt.Sprintf("    ----\t------\t----\n")
+			msg += fmt.Sprintf("    UUID\tName\tStatus\tSize\n")
+			msg += fmt.Sprintf("    ----\t----\t------\t----\n")
 			for _, p := range o.Projects {
-				msg += fmt.Sprintf("    %s\t%s\t%d/%d\n", p.Name, p.InfraStatus, p.NomadNodesReady, p.ClusterSize)
+				msg += fmt.Sprintf("    %s\t%s\t%s\t%d/%d\n", p.UUID, p.Name, p.InfraStatus, p.NomadNodesReady, p.ClusterSize)
 			}
 
 			msg += fmt.Sprintf("\n")

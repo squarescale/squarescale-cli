@@ -281,12 +281,14 @@ func nominalCaseOnListOrganizations(t *testing.T) {
 				"projects": [
 					{
 						"id": 2,
+						"uuid": "5fb75c1d-90a4-4b34-891f-a7481fa04afe",
 						"name": "sub-mariner-aerified",
 						"created_at": "2020-05-12T13:09:44.625Z",
 						"infra_status": "no_infra"
 					},
 					{
 						"id": 3,
+						"uuid": "14c4d8fe-af3e-4746-955d-560034eff187",
 						"name": "toto",
 						"created_at": "2020-05-13T13:09:44.625Z",
 						"infra_status": "no_infra"
@@ -315,8 +317,8 @@ func nominalCaseOnListOrganizations(t *testing.T) {
 		{Email: "user2@sqsc.fr", Name: "User 2"},
 	}
 	expectedProjects := []squarescale.Project{
-		{Name: "sub-mariner-aerified", InfraStatus: "no_infra"},
-		{Name: "toto", InfraStatus: "no_infra"},
+		{Name: "sub-mariner-aerified", InfraStatus: "no_infra", UUID: "5fb75c1d-90a4-4b34-891f-a7481fa04afe"},
+		{Name: "toto", InfraStatus: "no_infra", UUID: "14c4d8fe-af3e-4746-955d-560034eff187"},
 	}
 
 	if err != nil {
