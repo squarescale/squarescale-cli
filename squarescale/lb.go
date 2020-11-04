@@ -6,29 +6,54 @@ import (
 	"net/http"
 )
 
-// DisableLB asks the Squarescale service to deactivate the load balancer.
-func (c *Client) DisableLB(projectUUID string) error {
-	payload := &JSONObject{
-		"active": false,
-	}
-
-	return c.updateLBConfig(projectUUID, payload)
+// LoadBalancer describes a load balancer as returned by the Squarescale API
+type LoadBalancer struct {
+	ID               int64  `json:"id"`
+	Active           bool   `json:"active"`
+	CertificateBody  string `json:"certificate_body"`
+	CertificateChain string `json:"certificate_chain"`
+	HTTPS            bool   `json:"https"`
+	PublicURL        string `json:"public_url"`
 }
 
-// ConfigLB sets the load balancer configuration for a given project.
-func (c *Client) ConfigLB(projectUUID string, cert string, cert_chain string, secret_key string) error {
+// LoadBalancerGet get details for load balancer
+func (c *Client) LoadBalancerGet(projectUUID string) ([]LoadBalancer, error) {
+	code, body, err := c.get("/projects/" + projectUUID + "/load_balancers")
+
+	if err != nil {
+		return []LoadBalancer{}, err
+	}
+
+	switch code {
+	case http.StatusOK:
+	case http.StatusNotFound:
+		return []LoadBalancer{}, fmt.Errorf("Project '%s' not found", projectUUID)
+	default:
+		return []LoadBalancer{}, unexpectedHTTPError(code, body)
+	}
+
+	var loadBalancers []LoadBalancer
+
+	err = json.Unmarshal(body, &loadBalancers)
+	if err != nil {
+		return []LoadBalancer{}, err
+	}
+
+	return loadBalancers, nil
+}
+
+// LoadBalancerEnable sets the load balancer configuration for a given project.
+func (c *Client) LoadBalancerEnable(projectUUID string, loadBalancerID int64, cert string, certChain string, secretKey string) error {
 	payload := &JSONObject{
 		"active":            true,
 		"certificate_body":  cert,
-		"certificate_chain": cert_chain,
-		"secret_key":        secret_key,
+		"certificate_chain": certChain,
+		"secret_key":        secretKey,
 		"https":             len(cert) > 0,
 	}
-	return c.updateLBConfig(projectUUID, payload)
-}
 
-func (c *Client) updateLBConfig(projectUUID string, payload *JSONObject) error {
-	code, body, err := c.put("/projects/"+projectUUID+"/load_balancers/1", payload) //TODO change it when support more many LB.
+	URL := fmt.Sprintf("/projects/%s/load_balancers/%d", projectUUID, loadBalancerID)
+	code, body, err := c.put(URL, payload)
 	if err != nil {
 		return err
 	}
@@ -43,57 +68,25 @@ func (c *Client) updateLBConfig(projectUUID string, payload *JSONObject) error {
 	}
 }
 
-// LoadBalancerEnabled asks if the project load balancer is enabled.
-func (c *Client) LoadBalancerEnabled(projectUUID string) (bool, error) {
-	code, body, err := c.get("/projects/" + projectUUID)
+// LoadBalancerDisable sets the load balancer configuration for a given project.
+func (c *Client) LoadBalancerDisable(projectUUID string, loadBalancerID int64) error {
+	payload := &JSONObject{
+		"active": true,
+		"https":  false,
+	}
+
+	URL := fmt.Sprintf("/projects/%s/load_balancers/%d", projectUUID, loadBalancerID)
+	code, body, err := c.put(URL, payload)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	switch code {
 	case http.StatusOK:
+		return nil
 	case http.StatusNotFound:
-		return false, fmt.Errorf("Project '%s' not found", projectUUID)
+		return fmt.Errorf("Project '%s' not found", projectUUID)
 	default:
-		return false, unexpectedHTTPError(code, body)
+		return unexpectedHTTPError(code, body)
 	}
-
-	var response struct {
-		Enabled bool `json:"load_balancer"`
-	}
-
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		return false, err
-	}
-
-	return response.Enabled, nil
-}
-
-type LoadBalancer struct {
-	PublicUrl string `json:"public_url"`
-}
-
-func (c *Client) LoadBalancerList(projectUUID string) ([]LoadBalancer, error) {
-	code, body, err := c.get("/projects/" + projectUUID + "/load_balancers")
-	if err != nil {
-		return nil, err
-	}
-
-	switch code {
-	case http.StatusOK:
-	case http.StatusNotFound:
-		return nil, fmt.Errorf("Project '%s' not found", projectUUID)
-	default:
-		return nil, unexpectedHTTPError(code, body)
-	}
-
-	var response []LoadBalancer
-
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		return nil, err
-	}
-
-	return response, nil
 }

@@ -4,22 +4,25 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// LBListCommand gets the URL of the load balancer associated to a projects and prints it on the standard output.
-type LBListCommand struct {
+// LBGetCommand gets the URL of the load balancer associated to a projects and prints it on the standard output.
+type LBGetCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (c *LBListCommand) Run(args []string) int {
+func (c *LBGetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "uuid of the targeted project")
+	lbIDFlag := c.flagSet.String("lb-id", "", "id of the targeted load balancer inside project")
+	var lbID int64
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -32,6 +35,13 @@ func (c *LBListCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
 	}
 
+	if *lbIDFlag == "" {
+		return c.errorWithUsage(errors.New("Load balancer ID is mandatory"))
+	} else {
+		lbIDint, _ := strconv.Atoi(*lbIDFlag)
+		lbID = int64(lbIDint)
+	}
+
 	return c.runWithSpinner("load balancer config", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		loadBalancers, err := client.LoadBalancerGet(*projectUUID)
 		if err != nil {
@@ -39,40 +49,38 @@ func (c *LBListCommand) Run(args []string) int {
 		}
 
 		var msg string
-		var activeIcon string
-		var certBodyIcon string
-		var httpsIcon string
-		msg += fmt.Sprintf("ID\tActive\tCertificateBody\tHTTPS\tPublicURL\n")
-		msg += fmt.Sprintf("--\t------\t---------------\t-----\t---------\n")
 		for _, lb := range loadBalancers {
-			if lb.Active {
-				activeIcon = "✅"
-			} else {
-				activeIcon = "❌"
+			if lb.ID == lbID {
+				msg += fmt.Sprintf("Public URL: %s\n", lb.PublicURL)
+				if lb.Active {
+					msg += fmt.Sprintf("Active: ✅\n")
+				} else {
+					msg += fmt.Sprintf("Active: ❌\n")
+				}
+				if lb.HTTPS {
+					msg += fmt.Sprintf("HTTPS: ✅\n")
+				} else {
+					msg += fmt.Sprintf("HTTPS: ❌\n")
+				}
+				if lb.CertificateBody != "" {
+					msg += fmt.Sprintf("Certificate body:\n%s\n", lb.CertificateBody)
+				} else {
+					msg += fmt.Sprintf("Certificate body: ❌\n")
+				}
+				return msg, nil
 			}
-			if lb.CertificateBody != "" {
-				certBodyIcon = "✅"
-			} else {
-				certBodyIcon = "❌"
-			}
-			if lb.HTTPS {
-				httpsIcon = "✅"
-			} else {
-				httpsIcon = "❌"
-			}
-			msg += fmt.Sprintf("%d\t%s\t%s\t\t%s\t%s\n", lb.ID, activeIcon, certBodyIcon, httpsIcon, lb.PublicURL)
 		}
-		return msg, nil
+		return "", errors.New(fmt.Sprintf("Load balancer with ID %d not found in project %s", lbID, *projectUUID))
 	})
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *LBListCommand) Synopsis() string {
+func (c *LBGetCommand) Synopsis() string {
 	return "Display project's public URL if available"
 }
 
 // Help is part of cli.Command implementation.
-func (c *LBListCommand) Help() string {
+func (c *LBGetCommand) Help() string {
 	helpText := `
 usage: sqsc lb get [options]
 

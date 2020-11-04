@@ -21,7 +21,8 @@ func (c *LBSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "uuid of the targeted project")
-	disabledArg := disabledFlag(c.flagSet, "Disable load balancer")
+	loadBalancerID := c.flagSet.Int64("load-balancer-id", 0, "id of the load balancer id in project")
+	disableArg := c.flagSet.Bool("disable", false, "Disable load balancer")
 	certArg := certFlag(c.flagSet)
 	certChainArg := certChainFlag(c.flagSet)
 	secretKeyArg := secretKeyFlag(c.flagSet)
@@ -35,6 +36,10 @@ func (c *LBSetCommand) Run(args []string) int {
 
 	if *projectUUID == "" {
 		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	}
+
+	if *loadBalancerID == 0 {
+		return c.errorWithUsage(errors.New("Load balancer ID is mandatory"))
 	}
 
 	var cert, secretKey string
@@ -68,13 +73,12 @@ func (c *LBSetCommand) Run(args []string) int {
 
 	res := c.runWithSpinner("configure load balancer", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
-		if *disabledArg {
-			err = client.DisableLB(*projectUUID)
-			return fmt.Sprintf("Successfully disabled load balancer for project '%s'", *projectUUID), err
+		if *disableArg {
+			err = client.LoadBalancerDisable(*projectUUID, *loadBalancerID)
+			return fmt.Sprintf("Successfully disable load balancer for project '%s'", *projectUUID), err
 		}
 
-		err = client.ConfigLB(*projectUUID, cert, certChain, secretKey)
-
+		err = client.LoadBalancerEnable(*projectUUID, *loadBalancerID, cert, certChain, secretKey)
 		return fmt.Sprintf("Successfully update load balancer for project '%s'", *projectUUID), err
 	})
 
