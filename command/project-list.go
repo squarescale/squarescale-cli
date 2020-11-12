@@ -35,12 +35,18 @@ func (c *ProjectListCommand) Run(args []string) int {
 			return "", err
 		}
 
+		organizations, err := client.ListOrganizations()
+
+		if err != nil {
+			return "", err
+		}
+
 		var msg string
 
 		if len(projects) == 0 {
 			msg = "No projects found"
 		} else {
-			msg = fmtProjectListOutput(projects)
+			msg = fmtProjectListOutput(projects, organizations)
 		}
 
 		return msg, nil
@@ -62,7 +68,7 @@ usage: sqsc project list [options]
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
 
-func fmtProjectListOutput(projects []squarescale.Project) string {
+func fmtProjectListOutput(projects []squarescale.Project, organizations []squarescale.Organization) string {
 	tableString := &strings.Builder{}
 	table := tablewriter.NewWriter(tableString)
 	table.SetHeader([]string{"Name", "UUID", "Monitoring", "Provider", "Region", "Organization", "Status", "Size", "Slack Webhook"})
@@ -87,6 +93,26 @@ func fmtProjectListOutput(projects []squarescale.Project) string {
 	}
 
 	table.AppendBulk(data)
+
+	for _, o := range organizations {
+		for _, project := range o.Projects {
+			monitoring := ""
+			if project.MonitoringEnabled && len(project.MonitoringEngine) > 0 {
+				monitoring = project.MonitoringEngine
+			}
+			table.Append([]string{
+				fmt.Sprintf("%s/%s", o.Name, project.Name),
+				project.UUID,
+				monitoring,
+				project.Provider,
+				project.Region,
+				project.Organization,
+				project.InfraStatus,
+				fmt.Sprintf("%d/%d", project.NomadNodesReady, project.ClusterSize),
+				project.SlackWebhook,
+			})
+		}
+	}
 
 	ui.FormatTable(table)
 
