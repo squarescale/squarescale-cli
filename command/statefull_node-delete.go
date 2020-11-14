@@ -65,7 +65,7 @@ func (c *StatefulNodeDeleteCommand) Run(args []string) int {
 
 	if !*nowait {
 		c.runWithSpinner("wait for statefull node delete", endpoint.String(), func(client *squarescale.Client) (string, error) {
-			_, err := client.WaitProject(*projectUUID)
+			_, err := client.WaitProject(*projectUUID, 5)
 			if err != nil {
 				return "", err
 			} else {

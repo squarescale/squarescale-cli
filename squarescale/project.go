@@ -11,6 +11,23 @@ import (
 	"github.com/squarescale/logger"
 )
 
+type Project struct {
+	Name              string `json:"name"`
+	UUID              string `json:"uuid"`
+	Provider          string `json:"provider"`
+	Region            string `json:"region"`
+	Organization      string `string:"organization"`
+	InfraStatus       string `json:"infra_status"`
+	ClusterSize       int    `json:"cluster_size"`
+	NomadNodesReady   int    `json:"nomad_nodes_ready"`
+	MonitoringEnabled bool   `json:"monitoring_enabled"`
+	MonitoringEngine  string `json:"monitoring_engine"`
+}
+
+/*
+  json.organization p.organization&.name
+*/
+
 type ProjectStatus struct {
 	InfraStatus string `json:"infra_status"`
 }
@@ -94,24 +111,6 @@ func (c *Client) UNProvisionProject(projectUUID string) (err error) {
 	return nil
 }
 
-type Project struct {
-	Name              string `json:"name"`
-	UUID              string `json:"uuid"`
-	Provider          string `json:"provider"`
-	Region            string `json:"region"`
-	Organization      string `string:"organization"`
-	InfraStatus       string `json:"infra_status"`
-	ClusterSize       int    `json:"cluster_size"`
-	NomadNodesReady   int    `json:"nomad_nodes_ready"`
-	MonitoringEnabled bool   `json:"monitoring_enabled"`
-	MonitoringEngine  string `json:"monitoring_engine"`
-	SlackWebhook      string `json:"slack_webhook"`
-}
-
-/*
-  json.organization p.organization&.name
-*/
-
 // ListProjects asks the Squarescale service for available projects.
 func (c *Client) ListProjects() ([]Project, error) {
 	code, body, err := c.get("/projects")
@@ -132,93 +131,8 @@ func (c *Client) ListProjects() ([]Project, error) {
 	return projectsJSON, nil
 }
 
-// ProjectURL asks the Squarescale service the url of the project if available, using the provided token.
-func (c *Client) ProjectSlackURL(project string) (string, error) {
-	code, body, err := c.get("/projects/" + project + "/slack")
-	if err != nil {
-		return "", err
-	}
-
-	switch code {
-	case http.StatusOK:
-	case http.StatusPreconditionFailed:
-		return "", fmt.Errorf("Project '%s' not found", project)
-	case http.StatusNotFound:
-		return "", fmt.Errorf("Project '%s' is not available on the web", project)
-	default:
-		return "", unexpectedHTTPError(code, body)
-	}
-
-	var response struct {
-		URL string `json:"slack_webhook"`
-	}
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		return "", err
-	}
-
-	return response.URL, nil
-}
-
-// ProjectURL asks the Squarescale service the url of the project if available, using the provided token.
-func (c *Client) SetProjectSlackURL(project, url string) error {
-	code, body, err := c.post("/projects/"+project+"/slack", &JSONObject{"project": &JSONObject{"slack_webhook": url}})
-	if err != nil {
-		return err
-	}
-
-	switch code {
-	case http.StatusCreated:
-		break
-	default:
-		err = unexpectedHTTPError(code, body)
-		return err
-	}
-
-	var resBody struct {
-		Valid bool   `json:"valid"`
-		Same  bool   `json:"same"`
-		Name  string `json:"name"`
-	}
-
-	err = json.Unmarshal(body, &resBody)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// ProjectURL asks the Squarescale service the url of the project if available, using the provided token.
-func (c *Client) ProjectURL(project string) (string, error) {
-	code, body, err := c.get("/projects/" + project + "/url")
-	if err != nil {
-		return "", err
-	}
-
-	switch code {
-	case http.StatusOK:
-	case http.StatusPreconditionFailed:
-		return "", fmt.Errorf("Project '%s' not found", project)
-	case http.StatusNotFound:
-		return "", fmt.Errorf("Project '%s' is not available on the web", project)
-	default:
-		return "", unexpectedHTTPError(code, body)
-	}
-
-	var response struct {
-		URL string `json:"url"`
-	}
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		return "", err
-	}
-
-	return response.URL, nil
-}
-
-// ProjectStatus return the status of the project
-func (c *Client) ProjectStatus(project string) (*ProjectStatus, error) {
+// GetProject return the status of the project
+func (c *Client) GetProject(project string) (*Project, error) {
 	code, body, err := c.get("/projects/" + project)
 	if err != nil {
 		return nil, err
@@ -232,7 +146,7 @@ func (c *Client) ProjectStatus(project string) (*ProjectStatus, error) {
 		return nil, unexpectedHTTPError(code, body)
 	}
 
-	var status ProjectStatus
+	var status Project
 	err = json.Unmarshal(body, &status)
 	if err != nil {
 		return nil, err
@@ -242,21 +156,21 @@ func (c *Client) ProjectStatus(project string) (*ProjectStatus, error) {
 }
 
 // WaitProject wait project provisioning
-func (c *Client) WaitProject(projectUUID string) (*ProjectStatus, error) {
-	projectStatus, err := c.ProjectStatus(projectUUID)
+func (c *Client) WaitProject(projectUUID string, timeToWait int64) (string, error) {
+	project, err := c.GetProject(projectUUID)
 	if err != nil {
-		return projectStatus, err
+		return "", err
 	}
 
 	logger.Info.Println("wait for project : ", projectUUID)
 
-	for projectStatus.InfraStatus != "ok" && err == nil {
-		time.Sleep(5 * time.Second)
-		projectStatus, err = c.ProjectStatus(projectUUID)
+	for project.InfraStatus != "ok" && err == nil {
+		time.Sleep(time.Duration(timeToWait) * time.Second)
+		project, err = c.GetProject(projectUUID)
 		logger.Debug.Println("project status update: ", projectUUID)
 	}
 
-	return projectStatus, err
+	return project.InfraStatus, err
 }
 
 // ProjectUnprovision unprovisions a project

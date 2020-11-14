@@ -152,13 +152,13 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
-		"project remove": func() (cli.Command, error) {
-			return &command.ProjectRemoveCommand{
+		"project get": func() (cli.Command, error) {
+			return &command.ProjectGetCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"project slackbot": func() (cli.Command, error) {
-			return &command.ProjectSlackbotCommand{
+		"project remove": func() (cli.Command, error) {
+			return &command.ProjectRemoveCommand{
 				Meta: *meta,
 			}, nil
 		},

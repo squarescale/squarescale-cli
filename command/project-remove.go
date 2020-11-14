@@ -53,7 +53,7 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 
 	loop:
 		for {
-			status, err := client.ProjectStatus(*projectUUID)
+			status, err := client.GetProject(*projectUUID)
 			if err != nil {
 				return "", err
 			}
