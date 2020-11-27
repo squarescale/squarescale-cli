@@ -172,6 +172,22 @@ func (c *Client) FullListProjects() ([]Project, error) {
 	return allProjects, nil
 }
 
+// ProjectByName get UUID for a project name
+func (c *Client) ProjectByName(projectName string) (string, error) {
+	projects, err := c.FullListProjects()
+	if err != nil {
+		return "", err
+	}
+
+	for _, project := range projects {
+		if project.Name == projectName {
+			return project.UUID, nil
+		}
+	}
+
+	return "", fmt.Errorf("Project '%s' not found", projectName)
+}
+
 // GetProject return the status of the project
 func (c *Client) GetProject(project string) (*Project, error) {
 	code, body, err := c.get("/projects/" + project)

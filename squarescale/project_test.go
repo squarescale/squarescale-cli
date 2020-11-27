@@ -675,6 +675,53 @@ func nominalCaseFullListProjects(t *testing.T) {
 	if projectsList[4].Name != expectedString {
 		t.Fatalf("Expect projectsList[4].Name `%s`, got `%s`", expectedString, projectsList[4].Name)
 	}
+
+	// Test ProjectByName()
+	var projectName string
+
+	projectName, _ = cli.ProjectByName("tera-project")
+	expectedString = "8cfe8f68-cad5-4157-b8a6-d9efa12caf0e"
+	if projectName != expectedString {
+		t.Fatalf("Expect projectName `%s`, got `%s`", expectedString, projectName)
+	}
+
+	projectName, _ = cli.ProjectByName("nova-project")
+	expectedString = "ba90e5fe-f520-4275-897b-49a95c1157a3"
+	if projectName != expectedString {
+		t.Fatalf("Expect projectName `%s`, got `%s`", expectedString, projectName)
+	}
+
+	projectName, _ = cli.ProjectByName("Sqsc/sub-mariner-aerified")
+	expectedString = "5fb75c1d-90a4-4b34-891f-a7481fa04afe"
+	if projectName != expectedString {
+		t.Fatalf("Expect projectName `%s`, got `%s`", expectedString, projectName)
+	}
+
+	projectName, _ = cli.ProjectByName("Sqsc/toto")
+	expectedString = "14c4d8fe-af3e-4746-955d-560034eff187"
+	if projectName != expectedString {
+		t.Fatalf("Expect projectName `%s`, got `%s`", expectedString, projectName)
+	}
+
+	projectName, _ = cli.ProjectByName("Sqsc/micro-raptor")
+	expectedString = "b52b9fd6-7718-4cd9-9497-e7fcf95b57f6"
+	if projectName != expectedString {
+		t.Fatalf("Expect projectName `%s`, got `%s`", expectedString, projectName)
+	}
+
+	projectName, err = cli.ProjectByName("missing_project")
+	expectedError := "Project 'missing_project' not found"
+	if err == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", err) != expectedError {
+		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
+	}
+
+	if projectName != "" {
+		t.Fatalf("UUID is not empty")
+	}
 }
 
 func nominalCaseGetProject(t *testing.T) {
@@ -1085,6 +1132,7 @@ func ClientHTTPErrorOnProjectMethods(t *testing.T) {
 	_, errOnWait := cli.WaitProject(projectUUID, 0)
 	errOnUnprovision := cli.ProjectUnprovision(projectUUID)
 	errOnDelete := cli.ProjectDelete(projectUUID)
+	_, errOnProjectByName := cli.ProjectByName("project_in_error")
 
 	// then
 	if errOnCreate == nil {
@@ -1117,6 +1165,10 @@ func ClientHTTPErrorOnProjectMethods(t *testing.T) {
 
 	if errOnDelete == nil {
 		t.Errorf("Error is not raised on ProjectDelete")
+	}
+
+	if errOnProjectByName == nil {
+		t.Errorf("Error is not raised on ProjectByName")
 	}
 }
 
