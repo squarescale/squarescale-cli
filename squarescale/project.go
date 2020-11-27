@@ -11,6 +11,7 @@ import (
 	"github.com/squarescale/logger"
 )
 
+// Project defined how project could see
 type Project struct {
 	Name              string `json:"name"`
 	UUID              string `json:"uuid"`
@@ -28,10 +29,12 @@ type Project struct {
   json.organization p.organization&.name
 */
 
+// ProjectStatus define how see project status
 type ProjectStatus struct {
 	InfraStatus string `json:"infra_status"`
 }
 
+// UnprovisionError defined how export provision errors
 type UnprovisionError struct {
 	Errors struct {
 		Unprovision []string `json:unprovision`
@@ -129,6 +132,44 @@ func (c *Client) ListProjects() ([]Project, error) {
 	}
 
 	return projectsJSON, nil
+}
+
+// FullListProjects asks the Squarescale service for available projects.
+func (c *Client) FullListProjects() ([]Project, error) {
+	projects, err := c.ListProjects()
+	if err != nil {
+		return nil, err
+	}
+
+	organizations, err := c.ListOrganizations()
+	if err != nil {
+		return nil, err
+	}
+
+	projectCount := len(projects)
+
+	for _, organization := range organizations {
+		projectCount += len(organization.Projects)
+	}
+
+	allProjects := make([]Project, projectCount)
+	projectCount = 0
+
+	for _, project := range projects {
+		allProjects[projectCount].Name = project.Name
+		allProjects[projectCount].UUID = project.UUID
+		projectCount++
+	}
+
+	for _, organization := range organizations {
+		for _, project := range organization.Projects {
+			allProjects[projectCount].Name = organization.Name + "/" + project.Name
+			allProjects[projectCount].UUID = project.UUID
+			projectCount++
+		}
+	}
+
+	return allProjects, nil
 }
 
 // GetProject return the status of the project

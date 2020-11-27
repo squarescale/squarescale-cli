@@ -29,6 +29,9 @@ func TestProject(t *testing.T) {
 	t.Run("Nominal case on ListProjects", nominalCaseListProjects)
 	t.Run("Badly http error code case on ListProjects", badHttpErrrorCoreCaseListProjects)
 
+	// FullListProjects
+	t.Run("Nominal case on FullListProjects", nominalCaseFullListProjects)
+
 	// GetProject
 	t.Run("Nominal case on GetProject", nominalCaseGetProject)
 
@@ -508,6 +511,169 @@ func badHttpErrrorCoreCaseListProjects(t *testing.T) {
 
 	if projectsList != nil {
 		t.Fatalf("Expected projectsList nil, but got another result")
+	}
+}
+
+func nominalCaseFullListProjects(t *testing.T) {
+	// given
+	token := "some-token"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var resBody string
+		if r.URL.Path == "/projects" {
+			resBody = `
+			[
+				{
+					"id": 11,
+					"uuid": "8cfe8f68-cad5-4157-b8a6-d9efa12caf0e",
+					"name": "tera-project",
+					"user": {
+						"id": 1,
+						"email": "john.doe@example.com",
+						"uid": "eb3e2663-6438-4e7f-9e5d-b486d6c37083",
+						"name": "John Doe"
+					},
+					"provider_label": "Amazon Web Service",
+					"region_label": "Europe (Paris)",
+					"credentials_name": "aws-dev",
+					"created_at": "2020-11-13T14:55:07.880Z",
+					"infra_status": "ok"
+				},
+				{
+					"id": 10,
+					"uuid": "ba90e5fe-f520-4275-897b-49a95c1157a3",
+					"name": "nova-project",
+					"user": {
+						"id": 1,
+						"email": "john.doe@example.com",
+						"uid": "eb3e2663-6438-4e7f-9e5d-b486d6c37083",
+						"name": "John Doe"
+					},
+					"provider_label": "Amazon Web Service",
+					"region_label": "Europe (Irlande)",
+					"credentials_name": "aws-prod",
+					"created_at": "2020-11-12T15:01:41.310Z",
+					"infra_status": "provisionning"
+				}
+			]`
+		} else if r.URL.Path == "/organizations" {
+			resBody = `
+			[
+				{
+					"id": 6,
+					"name": "Sqsc",
+					"collaborators": [
+						{
+							"id": 1,
+							"email": "user1@sqsc.fr",
+							"name": "User 1"
+						},
+						{
+							"id": 2,
+							"email": "user2@sqsc.fr",
+							"name": "User 2"
+						}
+					],
+					"projects": [
+						{
+							"id": 2,
+							"uuid": "5fb75c1d-90a4-4b34-891f-a7481fa04afe",
+							"name": "sub-mariner-aerified",
+							"created_at": "2020-05-12T13:09:44.625Z",
+							"infra_status": "no_infra"
+						},
+						{
+							"id": 3,
+							"uuid": "14c4d8fe-af3e-4746-955d-560034eff187",
+							"name": "toto",
+							"created_at": "2020-05-13T13:09:44.625Z",
+							"infra_status": "no_infra"
+						},
+						{
+							"id": 4,
+							"uuid": "b52b9fd6-7718-4cd9-9497-e7fcf95b57f6",
+							"name": "micro-raptor",
+							"created_at": "2020-05-13T13:09:44.625Z",
+							"infra_status": "no_infra"
+						}
+					]
+				}
+			]
+			`
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	projectsList, err := cli.FullListProjects()
+
+	// then
+	var expectedInt int
+	var expectedString string
+
+	if err != nil {
+		t.Fatalf("Expect no error, got `%s`", err)
+	}
+
+	expectedInt = 5
+	if len(projectsList) != expectedInt {
+		t.Fatalf("Expect projectsList to contain one element `%d`, but got actually `%d`", expectedInt, len(projectsList))
+	}
+
+	expectedString = "8cfe8f68-cad5-4157-b8a6-d9efa12caf0e"
+	if projectsList[0].UUID != expectedString {
+		t.Fatalf("Expect projectsList[0].UUID `%s`, got `%s`", expectedString, projectsList[0].UUID)
+	}
+
+	expectedString = "ba90e5fe-f520-4275-897b-49a95c1157a3"
+	if projectsList[1].UUID != expectedString {
+		t.Fatalf("Expect projectsList[1].UUID `%s`, got `%s`", expectedString, projectsList[1].UUID)
+	}
+
+	expectedString = "5fb75c1d-90a4-4b34-891f-a7481fa04afe"
+	if projectsList[2].UUID != expectedString {
+		t.Fatalf("Expect projectsList[2].UUID `%s`, got `%s`", expectedString, projectsList[2].UUID)
+	}
+
+	expectedString = "14c4d8fe-af3e-4746-955d-560034eff187"
+	if projectsList[3].UUID != expectedString {
+		t.Fatalf("Expect projectsList[3].UUID `%s`, got `%s`", expectedString, projectsList[3].UUID)
+	}
+
+	expectedString = "b52b9fd6-7718-4cd9-9497-e7fcf95b57f6"
+	if projectsList[4].UUID != expectedString {
+		t.Fatalf("Expect projectsList[4].UUID `%s`, got `%s`", expectedString, projectsList[4].UUID)
+	}
+
+	expectedString = "tera-project"
+	if projectsList[0].Name != expectedString {
+		t.Fatalf("Expect projectsList[0].Name `%s`, got `%s`", expectedString, projectsList[0].Name)
+	}
+
+	expectedString = "nova-project"
+	if projectsList[1].Name != expectedString {
+		t.Fatalf("Expect projectsList[1].Name `%s`, got `%s`", expectedString, projectsList[1].Name)
+	}
+
+	expectedString = "Sqsc/sub-mariner-aerified"
+	if projectsList[2].Name != expectedString {
+		t.Fatalf("Expect projectsList[2].Name `%s`, got `%s`", expectedString, projectsList[2].Name)
+	}
+
+	expectedString = "Sqsc/toto"
+	if projectsList[3].Name != expectedString {
+		t.Fatalf("Expect projectsList[3].Name `%s`, got `%s`", expectedString, projectsList[3].Name)
+	}
+
+	expectedString = "Sqsc/micro-raptor"
+	if projectsList[4].Name != expectedString {
+		t.Fatalf("Expect projectsList[4].Name `%s`, got `%s`", expectedString, projectsList[4].Name)
 	}
 }
 
