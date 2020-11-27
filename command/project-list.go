@@ -36,7 +36,6 @@ func (c *ProjectListCommand) Run(args []string) int {
 		}
 
 		organizations, err := client.ListOrganizations()
-
 		if err != nil {
 			return "", err
 		}
