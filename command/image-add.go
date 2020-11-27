@@ -20,6 +20,7 @@ func (c *ImageAddCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 	runCommand := c.flagSet.String("run-command", "", "command / arguments that are used for execution")
 	entrypoint := c.flagSet.String("entrypoint", "", "This is the script / program that will be executed")
 	serviceName := c.flagSet.String("servicename", "", "service name")
@@ -37,15 +38,29 @@ func (c *ImageAddCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	volumesToBind := parseVolumesToBind(*volumes)
 
 	return c.runWithSpinner("add docker image", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		msg := fmt.Sprintf("Successfully added docker image '%s' to project '%s' (%v instance(s))", *image, *projectUUID, *instances)
-		return msg, client.AddImage(*projectUUID, *image, *username, *password, *entrypoint, *runCommand, *instances, *serviceName, volumesToBind)
+		var UUID string
+		var err error
+		var projectToShow string
+		if *projectUUID == "" {
+			projectToShow = *projectName
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			projectToShow = *projectUUID
+			UUID = *projectUUID
+		}
+
+		msg := fmt.Sprintf("Successfully added docker image '%s' to project '%s' (%v instance(s))", *image, projectToShow, *instances)
+		return msg, client.AddImage(UUID, *image, *username, *password, *entrypoint, *runCommand, *instances, *serviceName, volumesToBind)
 	})
 }
 

@@ -22,13 +22,14 @@ func (c *BatchDeleteCommand) Run(args []string) int {
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	batchName, err := batchNameArg(c.flagSet, 0)
@@ -53,8 +54,22 @@ func (c *BatchDeleteCommand) Run(args []string) int {
 	}
 
 	res := c.runWithSpinner("deleting batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		fmt.Printf("Delete on project `%s` the batch `%s`\n", *projectUUID, batchName)
-		err := client.DeleteBatch(*projectUUID, batchName) //insérer la fonction dans batches
+		var UUID string
+		var err error
+		var projectToShow string
+		if *projectUUID == "" {
+			projectToShow = *projectName
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			projectToShow = *projectUUID
+			UUID = *projectUUID
+		}
+
+		fmt.Printf("Delete on project `%s` the batch `%s`\n", projectToShow, batchName)
+		err = client.DeleteBatch(UUID, batchName) //insérer la fonction dans batches
 		return "", err
 	})
 	if res != 0 {

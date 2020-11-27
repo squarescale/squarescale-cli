@@ -25,6 +25,7 @@ func (b *BatchAddCommand) Run(args []string) int {
 	b.flagSet = newFlagSet(b, b.Ui)
 	endpoint := endpointFlag(b.flagSet)
 	projectUUID := b.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := b.flagSet.String("project-name", "", "set the name of the project")
 
 	wantedBatchName := b.flagSet.String("name", "", "Batch name")
 	runCommand := b.flagSet.String("run-command", "", "command / arguments that are used for execution")
@@ -46,8 +47,8 @@ func (b *BatchAddCommand) Run(args []string) int {
 		return 1
 	}
 
-	if *projectUUID == "" {
-		return b.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return b.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *wantedBatchName == "" && b.flagSet.Arg(0) != "" {
@@ -135,10 +136,20 @@ func (b *BatchAddCommand) Run(args []string) int {
 
 	res := b.runWithSpinner("add batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
 
+		var UUID string
 		var err error
 
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
+
 		//create function
-		_, err = client.CreateBatch(*projectUUID, batchOrderContent)
+		_, err = client.CreateBatch(UUID, batchOrderContent)
 
 		return fmt.Sprintf("Successfully added batch '%s'", *wantedBatchName), err
 	})

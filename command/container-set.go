@@ -21,6 +21,7 @@ func (c *ContainerSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 	serviceArg := c.flagSet.String("service", "", "select the service")
 	nInstancesArg := containerInstancesFlag(c.flagSet)
 	runCmdArg := containerRunCmdFlag(c.flagSet)
@@ -38,8 +39,8 @@ func (c *ContainerSetCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *serviceArg == "" {
@@ -62,7 +63,18 @@ func (c *ContainerSetCommand) Run(args []string) int {
 	}
 
 	return c.runWithSpinner("configure service", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		container, err := client.GetServicesInfo(*projectUUID, *serviceArg)
+		var UUID string
+		var err error
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
+
+		container, err := client.GetServicesInfo(UUID, *serviceArg)
 		if err != nil {
 			return "", err
 		}

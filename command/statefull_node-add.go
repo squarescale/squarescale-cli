@@ -20,6 +20,7 @@ func (c *StatefulNodeAddCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 
 	nodeType := c.flagSet.String("node-type", "dev", "Statefull node type")
 	zone := c.flagSet.String("zone", "eu-west-1a", "Statefull node zone")
@@ -29,8 +30,8 @@ func (c *StatefulNodeAddCommand) Run(args []string) int {
 		return 1
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	statefullNodeName, err := statefullNodeNameArg(c.flagSet, 0)
@@ -41,10 +42,24 @@ func (c *StatefulNodeAddCommand) Run(args []string) int {
 	if c.flagSet.NArg() > 1 {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
+	var UUID string
 
 	res := c.runWithSpinner("add statefull_node", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		msg := fmt.Sprintf("Successfully added statefull_node '%s' to project '%s'", statefullNodeName, *projectUUID)
-		_, err := client.AddStatefullNode(*projectUUID, statefullNodeName, *nodeType, *zone)
+		var err error
+		var projectToShow string
+		if *projectUUID == "" {
+			projectToShow = *projectName
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			projectToShow = *projectUUID
+			UUID = *projectUUID
+		}
+
+		msg := fmt.Sprintf("Successfully added statefull_node '%s' to project '%s'", statefullNodeName, projectToShow)
+		_, err = client.AddStatefullNode(UUID, statefullNodeName, *nodeType, *zone)
 		return msg, err
 	})
 	if res != 0 {
@@ -53,7 +68,7 @@ func (c *StatefulNodeAddCommand) Run(args []string) int {
 
 	if !*nowait {
 		c.runWithSpinner("wait for statefull_node add", endpoint.String(), func(client *squarescale.Client) (string, error) {
-			statefullNode, err := client.WaitStatefullNode(*projectUUID, statefullNodeName, 5)
+			statefullNode, err := client.WaitStatefullNode(UUID, statefullNodeName, 5)
 			if err != nil {
 				return "", err
 			} else {

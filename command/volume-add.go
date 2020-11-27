@@ -20,6 +20,7 @@ func (c *VolumeAddCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 
 	name := c.flagSet.String("name", "", "Volume name")
 	size := c.flagSet.Int("size", 1, "Volume size (in Gb)")
@@ -35,13 +36,28 @@ func (c *VolumeAddCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
+	var UUID string
+
 	res := c.runWithSpinner("add volume", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		msg := fmt.Sprintf("Successfully added volume '%s' to project '%s'", *name, *projectUUID)
-		err := client.AddVolume(*projectUUID, *name, *size, *volumeType, *zone)
+		var err error
+		var projectToShow string
+		if *projectUUID == "" {
+			projectToShow = *projectName
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			projectToShow = *projectUUID
+			UUID = *projectUUID
+		}
+
+		msg := fmt.Sprintf("Successfully added volume '%s' to project '%s'", *name, projectToShow)
+		err = client.AddVolume(UUID, *name, *size, *volumeType, *zone)
 		return msg, err
 	})
 	if res != 0 {
@@ -50,7 +66,7 @@ func (c *VolumeAddCommand) Run(args []string) int {
 
 	if !*nowait {
 		c.runWithSpinner("wait for volume add", endpoint.String(), func(client *squarescale.Client) (string, error) {
-			volume, err := client.WaitVolume(*projectUUID, *name, 5)
+			volume, err := client.WaitVolume(UUID, *name, 5)
 			if err != nil {
 				return "", err
 			} else {

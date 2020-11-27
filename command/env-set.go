@@ -20,6 +20,7 @@ func (c *EnvSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 	container := containerFlag(c.flagSet)
 	remove := c.flagSet.Bool("remove", false, "Remove the key from environment variables")
 
@@ -27,8 +28,8 @@ func (c *EnvSetCommand) Run(args []string) int {
 		return 1
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	var key, value string
@@ -49,7 +50,18 @@ func (c *EnvSetCommand) Run(args []string) int {
 	}
 
 	return c.runWithSpinner("set environment variable", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		env, err := squarescale.NewEnvironment(client, *projectUUID)
+		var UUID string
+		var err error
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
+
+		env, err := squarescale.NewEnvironment(client, UUID)
 		if err != nil {
 			return "", err
 		}
@@ -84,7 +96,7 @@ func (c *EnvSetCommand) Run(args []string) int {
 			msg = fmt.Sprintf("Successfully set global variable '%s' to value '%s'", key, value)
 		}
 
-		return msg, env.CommitEnvironment(client, *projectUUID)
+		return msg, env.CommitEnvironment(client, UUID)
 	})
 }
 

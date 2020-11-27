@@ -22,6 +22,7 @@ func (c *StatefulNodeDeleteCommand) Run(args []string) int {
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 	nowait := nowaitFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
@@ -37,8 +38,8 @@ func (c *StatefulNodeDeleteCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	c.Ui.Info("Are you sure you want to delete " + statefullNodeName + "?")
@@ -53,10 +54,24 @@ func (c *StatefulNodeDeleteCommand) Run(args []string) int {
 		}
 	}
 
+	var UUID string
+
 	res := c.runWithSpinner("deleting statefull node", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		uuid := *projectUUID
-		fmt.Printf("Delete on project `%s` the statefull node `%s`\n", uuid, statefullNodeName)
-		err := client.DeleteStatefullNode(uuid, statefullNodeName)
+		var err error
+		var projectToShow string
+		if *projectUUID == "" {
+			projectToShow = *projectName
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			projectToShow = *projectUUID
+			UUID = *projectUUID
+		}
+
+		fmt.Printf("Delete on project `%s` the statefull node `%s`\n", projectToShow, statefullNodeName)
+		err = client.DeleteStatefullNode(UUID, statefullNodeName)
 		return "", err
 	})
 	if res != 0 {
@@ -65,7 +80,7 @@ func (c *StatefulNodeDeleteCommand) Run(args []string) int {
 
 	if !*nowait {
 		c.runWithSpinner("wait for statefull node delete", endpoint.String(), func(client *squarescale.Client) (string, error) {
-			_, err := client.WaitProject(*projectUUID, 5)
+			_, err := client.WaitProject(UUID, 5)
 			if err != nil {
 				return "", err
 			} else {

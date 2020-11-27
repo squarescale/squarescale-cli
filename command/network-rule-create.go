@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -19,6 +20,7 @@ func (c *NetworkRuleCreateCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 	ruleName := c.flagSet.String("name", "", "name of the rule")
 	serviceName := c.flagSet.String("service-name", "", "name of the service the rule will be attached")
 	externalProtocol := c.flagSet.String("external-protocol", "", "name of the externally exposed protocol")
@@ -35,8 +37,8 @@ func (c *NetworkRuleCreateCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(fmt.Errorf(("Project uuid is mandatory.")))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *serviceName == "" {
@@ -68,6 +70,16 @@ func (c *NetworkRuleCreateCommand) Run(args []string) int {
 	}
 
 	return c.runWithSpinner("create network rule", endpoint.String(), func(client *squarescale.Client) (string, error) {
+		var UUID string
+		var err error
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
 
 		newRule := squarescale.NetworkRule{
 			Name:             *ruleName,
@@ -77,7 +89,7 @@ func (c *NetworkRuleCreateCommand) Run(args []string) int {
 			ExternalProtocol: *externalProtocol,
 			DomainExpression: *domainExpression,
 		}
-		err := client.CreateNetworkRule(*projectUUID, *serviceName, newRule)
+		err = client.CreateNetworkRule(UUID, *serviceName, newRule)
 		return "", err
 	})
 

@@ -20,13 +20,14 @@ func (c *ProjectUNProvisionCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if err := c.flagSet.Parse(args); err != nil {
@@ -38,7 +39,18 @@ func (c *ProjectUNProvisionCommand) Run(args []string) int {
 	}
 
 	return c.runWithSpinner("unprovision project", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		err := client.UNProvisionProject(*projectUUID)
+		var UUID string
+		var err error
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
+
+		err = client.UNProvisionProject(UUID)
 		return "", err
 	})
 }

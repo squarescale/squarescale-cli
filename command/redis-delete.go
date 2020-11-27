@@ -22,13 +22,14 @@ func (c *RedisDeleteCommand) Run(args []string) int {
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	redisName, err := redisNameArg(c.flagSet, 0)
@@ -53,8 +54,20 @@ func (c *RedisDeleteCommand) Run(args []string) int {
 	}
 
 	res := c.runWithSpinner("deleting redis", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		fmt.Printf("Delete redis `%s` on project `%s`\n", redisName, *projectUUID)
-		err := client.DeleteRedis(*projectUUID, redisName) //insérer la fonction dans redis
+		var UUID string
+		var err error
+		var projectToShow string
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
+
+		fmt.Printf("Delete redis `%s` on project `%s`\n", redisName, projectToShow)
+		err = client.DeleteRedis(UUID, redisName) //insérer la fonction dans redis
 		return "", err
 	})
 	if res != 0 {

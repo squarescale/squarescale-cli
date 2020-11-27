@@ -20,14 +20,15 @@ func (c *StatefulNodeBindCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 	volumeName := c.flagSet.String("volume-name", "", "Volume name to bind")
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *volumeName == "" {
@@ -44,8 +45,19 @@ func (c *StatefulNodeBindCommand) Run(args []string) int {
 	}
 
 	res := c.runWithSpinner("bind statefull node", endpoint.String(), func(client *squarescale.Client) (string, error) {
+		var UUID string
+		var err error
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
+
 		msg := fmt.Sprintf("Successfully binded volume '%s' to statefull_node '%s'", *volumeName, statefullNodeName)
-		err := client.BindVolumeOnStatefullNode(*projectUUID, statefullNodeName, *volumeName)
+		err = client.BindVolumeOnStatefullNode(UUID, statefullNodeName, *volumeName)
 		return msg, err
 	})
 	if res != 0 {

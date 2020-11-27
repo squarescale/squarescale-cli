@@ -21,6 +21,7 @@ func (c *LBGetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "uuid of the targeted project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 	lbIDFlag := c.flagSet.String("lb-id", "", "id of the targeted load balancer inside project")
 	var lbID int64
 	if err := c.flagSet.Parse(args); err != nil {
@@ -31,8 +32,8 @@ func (c *LBGetCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *lbIDFlag == "" {
@@ -43,7 +44,21 @@ func (c *LBGetCommand) Run(args []string) int {
 	}
 
 	return c.runWithSpinner("load balancer config", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		loadBalancers, err := client.LoadBalancerGet(*projectUUID)
+		var UUID string
+		var err error
+		var projectToShow string
+		if *projectUUID == "" {
+			projectToShow = *projectName
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			projectToShow = *projectUUID
+			UUID = *projectUUID
+		}
+
+		loadBalancers, err := client.LoadBalancerGet(UUID)
 		if err != nil {
 			return "", err
 		}
@@ -70,7 +85,7 @@ func (c *LBGetCommand) Run(args []string) int {
 				return msg, nil
 			}
 		}
-		return "", errors.New(fmt.Sprintf("Load balancer with ID %d not found in project %s", lbID, *projectUUID))
+		return "", errors.New(fmt.Sprintf("Load balancer with ID %d not found in project %s", lbID, projectToShow))
 	})
 }
 

@@ -23,19 +23,29 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if c.flagSet.NArg() > 1 {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
 	}
 
-	c.Ui.Info("Destroy infrastructure and configuration for project " + *projectUUID + "?")
+	var UUID string
+	var err error
+	var projectToShow string
+	if *projectUUID == "" {
+		projectToShow = *projectName
+	} else {
+		projectToShow = *projectUUID
+	}
+
+	c.Ui.Info("Destroy infrastructure and configuration for project " + projectToShow + "?")
 	ok, err := AskYesNo(c.Ui, alwaysYes, "Proceed ?", true)
 	if err != nil {
 		return c.error(err)
@@ -44,7 +54,17 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 	}
 
 	res := c.runWithSpinner("unprovision project", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		err := client.ProjectUnprovision(*projectUUID)
+		var err error
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
+
+		err = client.ProjectUnprovision(UUID)
 		if err != nil {
 			return "", err
 		}
@@ -53,7 +73,7 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 
 	loop:
 		for {
-			status, err := client.GetProject(*projectUUID)
+			status, err := client.GetProject(UUID)
 			if err != nil {
 				return "", err
 			}
@@ -76,7 +96,7 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 	}
 
 	return c.runWithSpinner("delete project", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		err := client.ProjectDelete(*projectUUID)
+		err := client.ProjectDelete(UUID)
 		if err != nil {
 			return "", err
 		}

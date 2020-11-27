@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -19,6 +20,7 @@ func (c *NetworkRuleListCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 	serviceName := c.flagSet.String("service-name", "", "name of the service the rule will be attached")
 
 	if err := c.flagSet.Parse(args); err != nil {
@@ -29,8 +31,8 @@ func (c *NetworkRuleListCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(fmt.Errorf(("Project uuid is mandatory.")))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *serviceName == "" {
@@ -38,7 +40,18 @@ func (c *NetworkRuleListCommand) Run(args []string) int {
 	}
 
 	return c.runWithSpinner("list service container network rules", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		rules, err := client.ListNetworkRules(*projectUUID, *serviceName)
+		var UUID string
+		var err error
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
+
+		rules, err := client.ListNetworkRules(UUID, *serviceName)
 		if err != nil {
 			return "", err
 		}

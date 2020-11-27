@@ -21,6 +21,7 @@ func (r *RedisAddCommand) Run(args []string) int {
 	r.flagSet = newFlagSet(r, r.Ui)
 	endpoint := endpointFlag(r.flagSet)
 	projectUUID := r.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := r.flagSet.String("project-name", "", "set the name of the project")
 
 	wantedRedisName := r.flagSet.String("name", "", "Redis name")
 
@@ -28,8 +29,8 @@ func (r *RedisAddCommand) Run(args []string) int {
 		return 1
 	}
 
-	if *projectUUID == "" {
-		return r.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return r.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *wantedRedisName == "" && r.flagSet.Arg(0) != "" {
@@ -47,11 +48,19 @@ func (r *RedisAddCommand) Run(args []string) int {
 	}
 
 	res := r.runWithSpinner("add redis", endpoint.String(), func(client *squarescale.Client) (string, error) {
-
+		var UUID string
 		var err error
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
 
 		//add function
-		err = client.AddRedis(*projectUUID, *wantedRedisName)
+		err = client.AddRedis(UUID, *wantedRedisName)
 
 		return fmt.Sprintf("Successfully added redis '%s'", *wantedRedisName), err
 	})

@@ -22,14 +22,15 @@ func (c *VolumeDeleteCommand) Run(args []string) int {
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 	nowait := nowaitFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	volumeName, err := volumeNameArg(c.flagSet, 0)
@@ -53,8 +54,20 @@ func (c *VolumeDeleteCommand) Run(args []string) int {
 		}
 	}
 
+	var UUID string
+
 	res := c.runWithSpinner("deleting volume", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		err := client.DeleteVolume(*projectUUID, volumeName)
+		var err error
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
+
+		err = client.DeleteVolume(UUID, volumeName)
 		return "", err
 	})
 	if res != 0 {
@@ -63,7 +76,7 @@ func (c *VolumeDeleteCommand) Run(args []string) int {
 
 	if !*nowait {
 		c.runWithSpinner("wait for volume delete", endpoint.String(), func(client *squarescale.Client) (string, error) {
-			_, err := client.WaitProject(*projectUUID, 5)
+			_, err := client.WaitProject(UUID, 5)
 			if err != nil {
 				return "", err
 			} else {

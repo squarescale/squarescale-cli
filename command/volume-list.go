@@ -20,6 +20,7 @@ func (b *VolumeListCommand) Run(args []string) int {
 	b.flagSet = newFlagSet(b, b.Ui)
 	endpoint := endpointFlag(b.flagSet)
 	projectUUID := b.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := b.flagSet.String("project-name", "", "set the name of the project")
 
 	if err := b.flagSet.Parse(args); err != nil {
 		return 1
@@ -29,12 +30,23 @@ func (b *VolumeListCommand) Run(args []string) int {
 		return b.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", b.flagSet.Args()))
 	}
 
-	if *projectUUID == "" {
-		return b.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return b.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	return b.runWithSpinner("list volume", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		volumes, err := client.GetVolumes(*projectUUID)
+		var UUID string
+		var err error
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
+
+		volumes, err := client.GetVolumes(UUID)
 		if err != nil {
 			return "", err
 		}

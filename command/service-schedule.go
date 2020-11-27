@@ -1,6 +1,7 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
@@ -19,6 +20,7 @@ func (c *ServiceScheduleCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -29,13 +31,27 @@ func (c *ServiceScheduleCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+	}
+
 	if c.flagSet.NArg() > 4 {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
 	}
 
 	return c.runWithSpinner("scheduling service", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		uuid := *projectUUID
-		err := client.ScheduleService(uuid, serviceName)
+		var UUID string
+		var err error
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
+
+		err = client.ScheduleService(UUID, serviceName)
 		return "", err
 	})
 
@@ -53,5 +69,5 @@ usage: sqsc service schedule [options] <service_name>
 
   Schedule a service.
 `
-	return strings.TrimSpace(helpText)
+	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

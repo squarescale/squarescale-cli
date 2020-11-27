@@ -21,6 +21,7 @@ func (c *LBSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "uuid of the targeted project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 	loadBalancerID := c.flagSet.Int64("load-balancer-id", 0, "id of the load balancer id in project")
 	disableArg := c.flagSet.Bool("disable", false, "Disable load balancer")
 	certArg := certFlag(c.flagSet)
@@ -34,8 +35,8 @@ func (c *LBSetCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *loadBalancerID == 0 {
@@ -72,14 +73,27 @@ func (c *LBSetCommand) Run(args []string) int {
 	}
 
 	res := c.runWithSpinner("configure load balancer", endpoint.String(), func(client *squarescale.Client) (string, error) {
+		var UUID string
 		var err error
-		if *disableArg {
-			err = client.LoadBalancerDisable(*projectUUID, *loadBalancerID)
-			return fmt.Sprintf("Successfully disable load balancer for project '%s'", *projectUUID), err
+		var projectToShow string
+		if *projectUUID == "" {
+			projectToShow = *projectName
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			projectToShow = *projectUUID
+			UUID = *projectUUID
 		}
 
-		err = client.LoadBalancerEnable(*projectUUID, *loadBalancerID, cert, certChain, secretKey)
-		return fmt.Sprintf("Successfully update load balancer for project '%s'", *projectUUID), err
+		if *disableArg {
+			err = client.LoadBalancerDisable(UUID, *loadBalancerID)
+			return fmt.Sprintf("Successfully disable load balancer for project '%s'", projectToShow), err
+		}
+
+		err = client.LoadBalancerEnable(UUID, *loadBalancerID, cert, certChain, secretKey)
+		return fmt.Sprintf("Successfully update load balancer for project '%s'", projectToShow), err
 	})
 
 	return res

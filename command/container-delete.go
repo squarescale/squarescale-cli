@@ -1,10 +1,10 @@
 package command
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
-	"errors"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
@@ -22,6 +22,8 @@ func (c *ContainerDeleteCommand) Run(args []string) int {
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
+
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -35,8 +37,8 @@ func (c *ContainerDeleteCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	c.Ui.Info("Are you sure you want to delete " + containerName + "?")
@@ -52,7 +54,18 @@ func (c *ContainerDeleteCommand) Run(args []string) int {
 	}
 
 	return c.runWithSpinner("deleting container", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		container, err := client.GetServicesInfo(*projectUUID, containerName)
+		var UUID string
+		var err error
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
+
+		container, err := client.GetServicesInfo(UUID, containerName)
 		if err != nil {
 			return "", err
 		}

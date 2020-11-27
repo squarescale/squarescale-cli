@@ -20,13 +20,14 @@ func (b *StatefulNodeListCommand) Run(args []string) int {
 	b.flagSet = newFlagSet(b, b.Ui)
 	endpoint := endpointFlag(b.flagSet)
 	projectUUID := b.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := b.flagSet.String("project-name", "", "set the name of the project")
 
 	if err := b.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if *projectUUID == "" {
-		return b.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return b.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if b.flagSet.NArg() > 0 {
@@ -34,7 +35,18 @@ func (b *StatefulNodeListCommand) Run(args []string) int {
 	}
 
 	return b.runWithSpinner("list statefull_node", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		statefullNodes, err := client.GetStatefullNodes(*projectUUID)
+		var UUID string
+		var err error
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
+
+		statefullNodes, err := client.GetStatefullNodes(UUID)
 		if err != nil {
 			return "", err
 		}

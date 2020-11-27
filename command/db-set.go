@@ -20,6 +20,7 @@ func (c *DBSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "uuid of the targeted project")
+	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 	dbEngine := c.flagSet.String("engine", "", "Database engine")
 	dbSize := c.flagSet.String("size", "", "Database size")
 	dbVersion := c.flagSet.String("engine-version", "", "Database version")
@@ -33,8 +34,8 @@ func (c *DBSetCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if *projectUUID == "" {
-		return c.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *dbDisabled && (*dbEngine != "" || *dbSize != "" || *dbVersion != "") {
@@ -45,7 +46,14 @@ func (c *DBSetCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Size, engine and version are mandatory."))
 	}
 
-	c.Ui.Warn(fmt.Sprintf("Changing cluster settings for project '%s' will cause a downtime.", *projectUUID))
+	var projectToShow string
+	if *projectUUID == "" {
+		projectToShow = *projectName
+	} else {
+		projectToShow = *projectUUID
+	}
+
+	c.Ui.Warn(fmt.Sprintf("Changing cluster settings for project '%s' will cause a downtime.", projectToShow))
 	ok, err := AskYesNo(c.Ui, alwaysYes, "Is this ok?", false)
 	if err != nil {
 		return c.error(err)
@@ -56,33 +64,43 @@ func (c *DBSetCommand) Run(args []string) int {
 	var taskId int
 
 	res := c.runWithSpinner("scale project database", endpoint.String(), func(client *squarescale.Client) (string, error) {
+		var UUID string
 		var err error
-		db, e := client.GetDBConfig(*projectUUID)
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
+
+		db, e := client.GetDBConfig(UUID)
 		if e != nil {
 			return "", e
 		}
 
 		if *dbDisabled && !db.Enabled {
-			return fmt.Sprintf("Database for project '%s' is already disabled", *projectUUID), nil
+			return fmt.Sprintf("Database for project '%s' is already disabled", projectToShow), nil
 		}
 
 		if *dbEngine == db.Engine && *dbSize == db.Size && *dbVersion == db.Version && !*dbDisabled == db.Enabled {
-			return fmt.Sprintf("Database for project '%s' is already configured with these parameters", *projectUUID), nil
+			return fmt.Sprintf("Database for project '%s' is already configured with these parameters", projectToShow), nil
 		}
 
 		payload := squarescale.JSONObject{
 			"database": map[string]interface{}{"enabled": !*dbDisabled, "engine": *dbEngine, "size": *dbSize, "version": *dbVersion},
 		}
 
-		taskId, err = client.ConfigDB(*projectUUID, &payload)
+		taskId, err = client.ConfigDB(UUID, &payload)
 
 		var msg string
 		if *dbDisabled {
-			msg = fmt.Sprintf("[#%d] Successfully disabled database for project '%s'", taskId, *projectUUID)
+			msg = fmt.Sprintf("[#%d] Successfully disabled database for project '%s'", taskId, projectToShow)
 		} else {
 			msg = fmt.Sprintf(
 				"[#%d] Successfully set database for project '%s': %s",
-				taskId, *projectUUID, db.String())
+				taskId, projectToShow, db.String())
 		}
 
 		return msg, err

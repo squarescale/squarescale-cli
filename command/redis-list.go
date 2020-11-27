@@ -20,6 +20,7 @@ func (r *RedisListCommand) Run(args []string) int {
 	r.flagSet = newFlagSet(r, r.Ui)
 	endpoint := endpointFlag(r.flagSet)
 	projectUUID := r.flagSet.String("project-uuid", "", "set the uuid of the project")
+	projectName := r.flagSet.String("project-name", "", "set the name of the project")
 
 	if err := r.flagSet.Parse(args); err != nil {
 		return 1
@@ -29,12 +30,24 @@ func (r *RedisListCommand) Run(args []string) int {
 		return r.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", r.flagSet.Args()))
 	}
 
-	if *projectUUID == "" {
-		return r.errorWithUsage(errors.New("Project uuid is mandatory"))
+	if *projectUUID == "" && *projectName == "" {
+		return r.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	return r.runWithSpinner("list redis", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		redisList, err := client.GetRedis(*projectUUID)
+		var UUID string
+		var err error
+		var redisList []squarescale.RedisDbConfig
+		if *projectUUID == "" {
+			UUID, err = client.ProjectByName(*projectName)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			UUID = *projectUUID
+		}
+
+		redisList, err = client.GetRedis(UUID)
 		if err != nil {
 			return "", err
 		}
