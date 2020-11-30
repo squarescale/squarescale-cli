@@ -143,7 +143,7 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 			}, nil
 		},
 		"project unprovision": func() (cli.Command, error) {
-			return &command.ProjectUNProvisionCommand{
+			return &command.ProjectUnprovisionCommand{
 				Meta: *meta,
 			}, nil
 		},

@@ -10,13 +10,13 @@ import (
 )
 
 // ProjectProvisionCommand is a cli.Command implementation for provision one project.
-type ProjectUNProvisionCommand struct {
+type ProjectUnprovisionCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (c *ProjectUNProvisionCommand) Run(args []string) int {
+func (c *ProjectUnprovisionCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
@@ -56,12 +56,12 @@ func (c *ProjectUNProvisionCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ProjectUNProvisionCommand) Synopsis() string {
+func (c *ProjectUnprovisionCommand) Synopsis() string {
 	return "Unprovision infrastructure of project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ProjectUNProvisionCommand) Help() string {
+func (c *ProjectUnprovisionCommand) Help() string {
 	helpText := `
 usage: sqsc project unprovision [options]
 
