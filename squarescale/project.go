@@ -23,16 +23,12 @@ type Project struct {
 	NomadNodesReady   int    `json:"nomad_nodes_ready"`
 	MonitoringEnabled bool   `json:"monitoring_enabled"`
 	MonitoringEngine  string `json:"monitoring_engine"`
+	SlackWebHook      string `json:"slack_webhook"`
 }
 
 /*
   json.organization p.organization&.name
 */
-
-// ProjectStatus define how see project status
-type ProjectStatus struct {
-	InfraStatus string `json:"infra_status"`
-}
 
 // UnprovisionError defined how export provision errors
 type UnprovisionError struct {

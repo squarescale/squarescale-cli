@@ -58,7 +58,7 @@ func (c *ProjectGetCommand) Run(args []string) int {
 			monitoring = project.MonitoringEngine
 		}
 
-		msg = fmt.Sprintf("Name: %s\nUUID: %s\nMonitoring: %s\nProvider: %s\nRegion: %s\nOrganization: %s\nStatus: %s\nSize: %d/%d\n",
+		msg = fmt.Sprintf("Name: %s\nUUID: %s\nMonitoring: %s\nProvider: %s\nRegion: %s\nOrganization: %s\nStatus: %s\nSize: %d/%d\nSlack Webhook: %s\n",
 			project.Name,
 			project.UUID,
 			monitoring,
@@ -68,6 +68,7 @@ func (c *ProjectGetCommand) Run(args []string) int {
 			project.InfraStatus,
 			project.NomadNodesReady,
 			project.ClusterSize,
+			project.SlackWebHook,
 		)
 
 		return msg, nil
