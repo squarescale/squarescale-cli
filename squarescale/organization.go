@@ -17,6 +17,9 @@ type Organization struct {
 	Name          string         `json:"name"`
 	Collaborators []Collaborator `json:"collaborators"`
 	Projects      []Project      `json:"projects"`
+	RootUser struct {
+		Email string `json:"email"`
+    } `json:"root_user"`
 }
 
 // AddOrganization add organization

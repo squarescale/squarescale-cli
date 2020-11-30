@@ -38,7 +38,7 @@ func (c *OrganizationListCommand) Run(args []string) int {
 
 		for _, o := range organizations {
 			msg += fmt.Sprintf("[%s]\n", o.Name)
-
+			msg += fmt.Sprintf("  Root user email: %s\n\n", o.RootUser.Email)
 			msg += fmt.Sprintf("  Projects:\n")
 			msg += fmt.Sprintf("    UUID\tName\tStatus\tSize\n")
 			msg += fmt.Sprintf("    ----\t----\t------\t----\n")
