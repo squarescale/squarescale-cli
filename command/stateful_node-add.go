@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// StatefullNodeAddCommand is a cli.Command implementation for creating a Squarescale project.
+// StatefulNodeAddCommand is a cli.Command implementation for creating a stateful-node.
 type StatefulNodeAddCommand struct {
 	Meta
 	flagSet *flag.FlagSet
@@ -22,8 +22,8 @@ func (c *StatefulNodeAddCommand) Run(args []string) int {
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 
-	nodeType := c.flagSet.String("node-type", "dev", "Statefull node type")
-	zone := c.flagSet.String("zone", "eu-west-1a", "Statefull node zone")
+	nodeType := c.flagSet.String("node-type", "dev", "Stateful node type")
+	zone := c.flagSet.String("zone", "eu-west-1a", "Stateful node zone")
 	nowait := nowaitFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
@@ -34,7 +34,7 @@ func (c *StatefulNodeAddCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	statefullNodeName, err := statefullNodeNameArg(c.flagSet, 0)
+	statefulNodeName, err := statefulNodeNameArg(c.flagSet, 0)
 	if err != nil {
 		return c.errorWithUsage(err)
 	}
@@ -44,7 +44,7 @@ func (c *StatefulNodeAddCommand) Run(args []string) int {
 	}
 	var UUID string
 
-	res := c.runWithSpinner("add statefull_node", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := c.runWithSpinner("add stateful-node", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
 		var projectToShow string
 		if *projectUUID == "" {
@@ -58,8 +58,8 @@ func (c *StatefulNodeAddCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
-		msg := fmt.Sprintf("Successfully added statefull_node '%s' to project '%s'", statefullNodeName, projectToShow)
-		_, err = client.AddStatefullNode(UUID, statefullNodeName, *nodeType, *zone)
+		msg := fmt.Sprintf("Successfully added stateful-node '%s' to project '%s'", statefulNodeName, projectToShow)
+		_, err = client.AddStatefulNode(UUID, statefulNodeName, *nodeType, *zone)
 		return msg, err
 	})
 	if res != 0 {
@@ -67,12 +67,12 @@ func (c *StatefulNodeAddCommand) Run(args []string) int {
 	}
 
 	if !*nowait {
-		c.runWithSpinner("wait for statefull_node add", endpoint.String(), func(client *squarescale.Client) (string, error) {
-			statefullNode, err := client.WaitStatefullNode(UUID, statefullNodeName, 5)
+		c.runWithSpinner("wait for stateful-node add", endpoint.String(), func(client *squarescale.Client) (string, error) {
+			statefulNode, err := client.WaitStatefulNode(UUID, statefulNodeName, 5)
 			if err != nil {
 				return "", err
 			} else {
-				return statefullNode.Name, nil
+				return statefulNode.Name, nil
 			}
 		})
 	}
@@ -88,7 +88,7 @@ func (c *StatefulNodeAddCommand) Synopsis() string {
 // Help is part of cli.Command implementation.
 func (c *StatefulNodeAddCommand) Help() string {
 	helpText := `
-usage: sqsc stateful node add [options] <stateful_node_name>
+usage: sqsc stateful-node add [options] <stateful_node_name>
 
   Add stateful node to project.
 `

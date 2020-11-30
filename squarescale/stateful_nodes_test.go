@@ -9,49 +9,49 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-func TestStatefullNodes(t *testing.T) {
+func TestStatefulNodes(t *testing.T) {
 
-	// GetStatefullNodes
-	t.Run("Nominal case on GetStatefullNodes", nominalCaseOnGetStatefullNodes)
+	// GetStatefulNodes
+	t.Run("Nominal case on GetStatefulNodes", nominalCaseOnGetStatefulNodes)
 
-	t.Run("Test project not found on GetStatefullNodes", UnknownProjectOnGetStatefullNodes)
+	t.Run("Test project not found on GetStatefulNodes", UnknownProjectOnGetStatefulNodes)
 
-	// GetStatefullNodeInfo
-	t.Run("Nominal case on GetStatefullNodeInfo", nominalCaseOnGetStatefullNodeInfo)
+	// GetStatefulNodeInfo
+	t.Run("Nominal case on GetStatefulNodeInfo", nominalCaseOnGetStatefulNodeInfo)
 
-	t.Run("Test statefull node not found on GetStatefullNodeInfo", UnknownStatefullNodeOnGetStatefullNodeInfo)
-	t.Run("Test project not found on GetStatefullNodeInfo", UnknownProjectOnGetStatefullNodeInfo)
+	t.Run("Test stateful-node not found on GetStatefulNodeInfo", UnknownStatefulNodeOnGetStatefulNodeInfo)
+	t.Run("Test project not found on GetStatefulNodeInfo", UnknownProjectOnGetStatefulNodeInfo)
 
-	// AddStatefullNode
-	t.Run("Nominal case on AddStatefullNode", nominalCaseOnAddStatefullNode)
+	// AddStatefulNode
+	t.Run("Nominal case on AddStatefulNode", nominalCaseOnAddStatefulNode)
 
-	t.Run("Test project not found on AddStatefullNode", UnknownProjectOnAddStatefullNode)
-	t.Run("Test to create a duplicate on AddStatefullNode", DuplicateNodeOnAddStatefullNode)
+	t.Run("Test project not found on AddStatefulNode", UnknownProjectOnAddStatefulNode)
+	t.Run("Test to create a duplicate on AddStatefulNode", DuplicateNodeOnAddStatefulNode)
 
-	// DeleteStatefullNode
-	t.Run("Nominal case on DeleteStatefullNode", nominalCaseOnDeleteStatefullNode)
+	// DeleteStatefulNode
+	t.Run("Nominal case on DeleteStatefulNode", nominalCaseOnDeleteStatefulNode)
 
-	t.Run("Test project not found on DeleteStatefullNode", UnknownProjectOnDeleteStatefullNode)
-	t.Run("Test to delete a missing statefull node on DeleteStatefullNode", UnknownStatefullNodeOnDeleteStatefullNode)
-	t.Run("Test to delete a volume when deploy is in progress on DeleteStatefullNode", DeployInProgressOnDeleteStatefullNode)
+	t.Run("Test project not found on DeleteStatefulNode", UnknownProjectOnDeleteStatefulNode)
+	t.Run("Test to delete a missing stateful-node on DeleteStatefulNode", UnknownStatefulNodeOnDeleteStatefulNode)
+	t.Run("Test to delete a volume when deploy is in progress on DeleteStatefulNode", DeployInProgressOnDeleteStatefulNode)
 
-	// WaitStatefullNode
-	t.Run("Nominal case on WaitStatefullNode", nominalCaseOnWaitStatefullNode)
+	// WaitStatefulNode
+	t.Run("Nominal case on WaitStatefulNode", nominalCaseOnWaitStatefulNode)
 
-	// BindVolumeOnStatefullNode
-	t.Run("Nominal case on BindVolumeOnStatefullNode", nominalCaseOnBindVolumeOnStatefullNode)
+	// BindVolumeOnStatefulNode
+	t.Run("Nominal case on BindVolumeOnStatefulNode", nominalCaseOnBindVolumeOnStatefulNode)
 
-	t.Run("Test project not found on BindVolumeOnStatefullNode", UnknownProjectOnBindVolumeOnStatefullNode)
-	t.Run("Test volume not found on BindVolumeOnStatefullNode", UnknownVolumeOnBindVolumeOnStatefullNode)
-	t.Run("Test rebind volume already is on BindVolumeOnStatefullNode", RebindVolumeOnBindVolumeOnStatefullNode)
+	t.Run("Test project not found on BindVolumeOnStatefulNode", UnknownProjectOnBindVolumeOnStatefulNode)
+	t.Run("Test volume not found on BindVolumeOnStatefulNode", UnknownVolumeOnBindVolumeOnStatefulNode)
+	t.Run("Test rebind volume already is on BindVolumeOnStatefulNode", RebindVolumeOnBindVolumeOnStatefulNode)
 
 	// Error cases
-	t.Run("Test HTTP client error on statefull nodes methods (get, add, delete)", ClientHTTPErrorOnStatefullNodeMethods)
-	t.Run("Test internal server error on statefull nodes methods (get, add, delete)", InternalServerErrorOnStatefullNodeMethods)
-	t.Run("Test badly JSON on statefull nodes methods (get, add)", CantUnmarshalOnStatefullNodeMethods)
+	t.Run("Test HTTP client error on stateful-nodes methods (get, add, delete)", ClientHTTPErrorOnStatefulNodeMethods)
+	t.Run("Test internal server error on stateful-nodes methods (get, add, delete)", InternalServerErrorOnStatefulNodeMethods)
+	t.Run("Test badly JSON on stateful-nodes methods (get, add)", CantUnmarshalOnStatefulNodeMethods)
 }
 
-func nominalCaseOnGetStatefullNodes(t *testing.T) {
+func nominalCaseOnGetStatefulNodes(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -88,7 +88,7 @@ func nominalCaseOnGetStatefullNodes(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	statefullNodes, err := cli.GetStatefullNodes(projectName)
+	statefulNodes, err := cli.GetStatefulNodes(projectName)
 
 	// then
 	var expectedInt int
@@ -99,62 +99,62 @@ func nominalCaseOnGetStatefullNodes(t *testing.T) {
 	}
 
 	expectedInt = 2
-	if len(statefullNodes) != expectedInt {
-		t.Fatalf("Expect statefull_nodes to contain %d elements, but got actually %d", expectedInt, len(statefullNodes))
+	if len(statefulNodes) != expectedInt {
+		t.Fatalf("Expect stateful-nodes to contain %d elements, but got actually %d", expectedInt, len(statefulNodes))
 	}
 
 	expectedInt = 23
-	if statefullNodes[0].ID != expectedInt {
-		t.Errorf("Expect statefullNode.ID `%d`, got `%d`", expectedInt, statefullNodes[0].ID)
+	if statefulNodes[0].ID != expectedInt {
+		t.Errorf("Expect statefulNode.ID `%d`, got `%d`", expectedInt, statefulNodes[0].ID)
 	}
 
 	expectedString = "nodeb"
-	if statefullNodes[0].Name != expectedString {
-		t.Errorf("Expect statefullNode.Name `%s`, got `%s`", expectedString, statefullNodes[0].Name)
+	if statefulNodes[0].Name != expectedString {
+		t.Errorf("Expect statefulNode.Name `%s`, got `%s`", expectedString, statefulNodes[0].Name)
 	}
 
 	expectedString = "t2.micro"
-	if statefullNodes[0].NodeType != expectedString {
-		t.Errorf("Expect statefullNode.NodeType `%s`, got `%s`", expectedString, statefullNodes[0].NodeType)
+	if statefulNodes[0].NodeType != expectedString {
+		t.Errorf("Expect statefulNode.NodeType `%s`, got `%s`", expectedString, statefulNodes[0].NodeType)
 	}
 
 	expectedString = "eu-west-1b"
-	if statefullNodes[0].Zone != expectedString {
-		t.Errorf("Expect statefullNode.Zone `%s`, got `%s`", expectedString, statefullNodes[0].Zone)
+	if statefulNodes[0].Zone != expectedString {
+		t.Errorf("Expect statefulNode.Zone `%s`, got `%s`", expectedString, statefulNodes[0].Zone)
 	}
 
 	expectedString = "provisionned"
-	if statefullNodes[0].Status != expectedString {
-		t.Errorf("Expect statefullNode.Status `%s`, got `%s`", expectedString, statefullNodes[0].Status)
+	if statefulNodes[0].Status != expectedString {
+		t.Errorf("Expect statefulNode.Status `%s`, got `%s`", expectedString, statefulNodes[0].Status)
 	}
 
 	expectedInt = 22
-	if statefullNodes[1].ID != expectedInt {
-		t.Errorf("Expect statefullNode.ID `%d`, got `%d`", expectedInt, statefullNodes[1].ID)
+	if statefulNodes[1].ID != expectedInt {
+		t.Errorf("Expect statefulNode.ID `%d`, got `%d`", expectedInt, statefulNodes[1].ID)
 	}
 
 	expectedString = "test1"
-	if statefullNodes[1].Name != expectedString {
-		t.Errorf("Expect statefullNode.Name `%s`, got `%s`", expectedString, statefullNodes[1].Name)
+	if statefulNodes[1].Name != expectedString {
+		t.Errorf("Expect statefulNode.Name `%s`, got `%s`", expectedString, statefulNodes[1].Name)
 	}
 
 	expectedString = "t2.micro"
-	if statefullNodes[1].NodeType != expectedString {
-		t.Errorf("Expect statefullNode.NodeType `%s`, got `%s`", expectedString, statefullNodes[1].NodeType)
+	if statefulNodes[1].NodeType != expectedString {
+		t.Errorf("Expect statefulNode.NodeType `%s`, got `%s`", expectedString, statefulNodes[1].NodeType)
 	}
 
 	expectedString = "eu-west-1a"
-	if statefullNodes[1].Zone != expectedString {
-		t.Errorf("Expect statefullNode.Zone `%s`, got `%s`", expectedString, statefullNodes[1].Zone)
+	if statefulNodes[1].Zone != expectedString {
+		t.Errorf("Expect statefulNode.Zone `%s`, got `%s`", expectedString, statefulNodes[1].Zone)
 	}
 
 	expectedString = "not_provisionned"
-	if statefullNodes[1].Status != expectedString {
-		t.Errorf("Expect statefullNode.Status `%s`, got `%s`", expectedString, statefullNodes[1].Status)
+	if statefulNodes[1].Status != expectedString {
+		t.Errorf("Expect statefulNode.Status `%s`, got `%s`", expectedString, statefulNodes[1].Status)
 	}
 }
 
-func UnknownProjectOnGetStatefullNodes(t *testing.T) {
+func UnknownProjectOnGetStatefulNodes(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "unknown-project"
@@ -172,7 +172,7 @@ func UnknownProjectOnGetStatefullNodes(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.GetStatefullNodes(projectName)
+	_, err := cli.GetStatefulNodes(projectName)
 
 	expectedError := "Project 'unknown-project' does not exist"
 	if err == nil {
@@ -184,7 +184,7 @@ func UnknownProjectOnGetStatefullNodes(t *testing.T) {
 	}
 }
 
-func nominalCaseOnGetStatefullNodeInfo(t *testing.T) {
+func nominalCaseOnGetStatefulNodeInfo(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -222,7 +222,7 @@ func nominalCaseOnGetStatefullNodeInfo(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	theStatefullNode, err := cli.GetStatefullNodeInfo(projectName, nodeName)
+	theStatefulNode, err := cli.GetStatefulNodeInfo(projectName, nodeName)
 
 	// then
 	var expectedInt int
@@ -233,32 +233,32 @@ func nominalCaseOnGetStatefullNodeInfo(t *testing.T) {
 	}
 
 	expectedInt = 23
-	if theStatefullNode.ID != expectedInt {
-		t.Errorf("Expect statefullNode.ID `%d`, got `%d`", expectedInt, theStatefullNode.ID)
+	if theStatefulNode.ID != expectedInt {
+		t.Errorf("Expect statefulNode.ID `%d`, got `%d`", expectedInt, theStatefulNode.ID)
 	}
 
 	expectedString = "node1a"
-	if theStatefullNode.Name != expectedString {
-		t.Errorf("Expect statefullNode.Name `%s`, got `%s`", expectedString, theStatefullNode.Name)
+	if theStatefulNode.Name != expectedString {
+		t.Errorf("Expect statefulNode.Name `%s`, got `%s`", expectedString, theStatefulNode.Name)
 	}
 
 	expectedString = "t2.micro"
-	if theStatefullNode.NodeType != expectedString {
-		t.Errorf("Expect statefullNode.NodeType `%s`, got `%s`", expectedString, theStatefullNode.NodeType)
+	if theStatefulNode.NodeType != expectedString {
+		t.Errorf("Expect statefulNode.NodeType `%s`, got `%s`", expectedString, theStatefulNode.NodeType)
 	}
 
 	expectedString = "eu-west-1c"
-	if theStatefullNode.Zone != expectedString {
-		t.Errorf("Expect statefullNode.Zone `%s`, got `%s`", expectedString, theStatefullNode.Zone)
+	if theStatefulNode.Zone != expectedString {
+		t.Errorf("Expect statefulNode.Zone `%s`, got `%s`", expectedString, theStatefulNode.Zone)
 	}
 
 	expectedString = "not_provisionned"
-	if theStatefullNode.Status != expectedString {
-		t.Errorf("Expect statefullNode.Status `%s`, got `%s`", expectedString, theStatefullNode.Status)
+	if theStatefulNode.Status != expectedString {
+		t.Errorf("Expect statefulNode.Status `%s`, got `%s`", expectedString, theStatefulNode.Status)
 	}
 }
 
-func UnknownStatefullNodeOnGetStatefullNodeInfo(t *testing.T) {
+func UnknownStatefulNodeOnGetStatefulNodeInfo(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -292,10 +292,10 @@ func UnknownStatefullNodeOnGetStatefullNodeInfo(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.GetStatefullNodeInfo(projectName, "missing-statefull-node")
+	_, err := cli.GetStatefulNodeInfo(projectName, "missing-stateful-node")
 
 	// then
-	expectedError := "Statefull node 'missing-statefull-node' not found for project 'my-project'"
+	expectedError := "Stateful-node 'missing-stateful-node' not found for project 'my-project'"
 	if err == nil {
 		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
@@ -305,7 +305,7 @@ func UnknownStatefullNodeOnGetStatefullNodeInfo(t *testing.T) {
 	}
 }
 
-func UnknownProjectOnGetStatefullNodeInfo(t *testing.T) {
+func UnknownProjectOnGetStatefulNodeInfo(t *testing.T) {
 	// given
 	token := "some-token"
 
@@ -322,7 +322,7 @@ func UnknownProjectOnGetStatefullNodeInfo(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.GetStatefullNodeInfo("unknown-project", "missing-statefull-node")
+	_, err := cli.GetStatefulNodeInfo("unknown-project", "missing-stateful-node")
 
 	// then
 	expectedError := "Project 'unknown-project' does not exist"
@@ -335,7 +335,7 @@ func UnknownProjectOnGetStatefullNodeInfo(t *testing.T) {
 	}
 }
 
-func nominalCaseOnAddStatefullNode(t *testing.T) {
+func nominalCaseOnAddStatefulNode(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -365,7 +365,7 @@ func nominalCaseOnAddStatefullNode(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	newStatefullNode, err := cli.AddStatefullNode(projectName, nodeName, "t2.micro", "eu-west-1a")
+	newStatefulNode, err := cli.AddStatefulNode(projectName, nodeName, "t2.micro", "eu-west-1a")
 
 	// then
 	var expectedInt int
@@ -376,32 +376,32 @@ func nominalCaseOnAddStatefullNode(t *testing.T) {
 	}
 
 	expectedInt = 23
-	if newStatefullNode.ID != expectedInt {
-		t.Errorf("Expect statefullNode.ID `%d`, got `%d`", expectedInt, newStatefullNode.ID)
+	if newStatefulNode.ID != expectedInt {
+		t.Errorf("Expect statefulNode.ID `%d`, got `%d`", expectedInt, newStatefulNode.ID)
 	}
 
 	expectedString = "node1a"
-	if newStatefullNode.Name != expectedString {
-		t.Errorf("Expect statefullNode.Name `%s`, got `%s`", expectedString, newStatefullNode.Name)
+	if newStatefulNode.Name != expectedString {
+		t.Errorf("Expect statefulNode.Name `%s`, got `%s`", expectedString, newStatefulNode.Name)
 	}
 
 	expectedString = "t2.micro"
-	if newStatefullNode.NodeType != expectedString {
-		t.Errorf("Expect statefullNode.NodeType `%s`, got `%s`", expectedString, newStatefullNode.NodeType)
+	if newStatefulNode.NodeType != expectedString {
+		t.Errorf("Expect statefulNode.NodeType `%s`, got `%s`", expectedString, newStatefulNode.NodeType)
 	}
 
 	expectedString = "eu-west-1c"
-	if newStatefullNode.Zone != expectedString {
-		t.Errorf("Expect statefullNode.Zone `%s`, got `%s`", expectedString, newStatefullNode.Zone)
+	if newStatefulNode.Zone != expectedString {
+		t.Errorf("Expect statefulNode.Zone `%s`, got `%s`", expectedString, newStatefulNode.Zone)
 	}
 
 	expectedString = "not_provisionned"
-	if newStatefullNode.Status != expectedString {
-		t.Errorf("Expect statefullNode.Status `%s`, got `%s`", expectedString, newStatefullNode.Status)
+	if newStatefulNode.Status != expectedString {
+		t.Errorf("Expect statefulNode.Status `%s`, got `%s`", expectedString, newStatefulNode.Status)
 	}
 }
 
-func UnknownProjectOnAddStatefullNode(t *testing.T) {
+func UnknownProjectOnAddStatefulNode(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "unknown-project"
@@ -420,7 +420,7 @@ func UnknownProjectOnAddStatefullNode(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.AddStatefullNode(projectName, nodeName, "t2.micro", "eu-west-1a")
+	_, err := cli.AddStatefulNode(projectName, nodeName, "t2.micro", "eu-west-1a")
 
 	// then
 	expectedError := "Project 'unknown-project' does not exist"
@@ -433,7 +433,7 @@ func UnknownProjectOnAddStatefullNode(t *testing.T) {
 	}
 }
 
-func DuplicateNodeOnAddStatefullNode(t *testing.T) {
+func DuplicateNodeOnAddStatefulNode(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -452,10 +452,10 @@ func DuplicateNodeOnAddStatefullNode(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.AddStatefullNode(projectName, nodeName, "t2.micro", "eu-west-1a")
+	_, err := cli.AddStatefulNode(projectName, nodeName, "t2.micro", "eu-west-1a")
 
 	// then
-	expectedError := "Statefull node already exist on project 'my-project': node1a"
+	expectedError := "Stateful-node already exist on project 'my-project': node1a"
 	if err == nil {
 		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
@@ -465,7 +465,7 @@ func DuplicateNodeOnAddStatefullNode(t *testing.T) {
 	}
 }
 
-func nominalCaseOnDeleteStatefullNode(t *testing.T) {
+func nominalCaseOnDeleteStatefulNode(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -486,7 +486,7 @@ func nominalCaseOnDeleteStatefullNode(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	err := cli.DeleteStatefullNode(projectName, nodeName)
+	err := cli.DeleteStatefulNode(projectName, nodeName)
 
 	// then
 	if err != nil {
@@ -494,7 +494,7 @@ func nominalCaseOnDeleteStatefullNode(t *testing.T) {
 	}
 }
 
-func UnknownProjectOnDeleteStatefullNode(t *testing.T) {
+func UnknownProjectOnDeleteStatefulNode(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "not-a-project"
@@ -513,7 +513,7 @@ func UnknownProjectOnDeleteStatefullNode(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	err := cli.DeleteStatefullNode(projectName, nodeName)
+	err := cli.DeleteStatefulNode(projectName, nodeName)
 
 	// then
 	expectedError := "Project 'not-a-project' does not exist"
@@ -526,14 +526,14 @@ func UnknownProjectOnDeleteStatefullNode(t *testing.T) {
 	}
 }
 
-func UnknownStatefullNodeOnDeleteStatefullNode(t *testing.T) {
+func UnknownStatefulNodeOnDeleteStatefulNode(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
 	nodeName := "missing-node"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		resBody := `{"error":"Couldn't find StatefullNode with [WHERE \"statefull_nodes\".\"cluster_id\" = $1 AND \"statefull_nodes\".\"name\" = $2]"}`
+		resBody := `{"error":"Couldn't find StatefulNode with [WHERE \"statefull_nodes\".\"cluster_id\" = $1 AND \"statefull_nodes\".\"name\" = $2]"}`
 
 		w.Header().Set("Content-Type", "application/json")
 
@@ -545,10 +545,10 @@ func UnknownStatefullNodeOnDeleteStatefullNode(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	err := cli.DeleteStatefullNode(projectName, nodeName)
+	err := cli.DeleteStatefulNode(projectName, nodeName)
 
 	// then
-	expectedError := "Statefull node 'missing-node' does not exist"
+	expectedError := "Stateful-node 'missing-node' does not exist"
 	if err == nil {
 		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
@@ -558,7 +558,7 @@ func UnknownStatefullNodeOnDeleteStatefullNode(t *testing.T) {
 	}
 }
 
-func DeployInProgressOnDeleteStatefullNode(t *testing.T) {
+func DeployInProgressOnDeleteStatefulNode(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -574,7 +574,7 @@ func DeployInProgressOnDeleteStatefullNode(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	err := cli.DeleteStatefullNode(projectName, nodeName)
+	err := cli.DeleteStatefulNode(projectName, nodeName)
 
 	// then
 	expectedError := "Deploy probably in progress"
@@ -587,7 +587,7 @@ func DeployInProgressOnDeleteStatefullNode(t *testing.T) {
 	}
 }
 
-func nominalCaseOnWaitStatefullNode(t *testing.T) {
+func nominalCaseOnWaitStatefulNode(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -598,14 +598,14 @@ func nominalCaseOnWaitStatefullNode(t *testing.T) {
 		checkPath(t, "/projects/"+projectName+"/statefull_nodes", r.URL.Path)
 		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
-		var statefullNodeStatus string
+		var statefulNodeStatus string
 
 		httptestCount++
 
 		if httptestCount < 2 {
-			statefullNodeStatus = "not_provisionned"
+			statefulNodeStatus = "not_provisionned"
 		} else {
-			statefullNodeStatus = "provisionned"
+			statefulNodeStatus = "provisionned"
 		}
 		resBody := fmt.Sprintf(`
 		[
@@ -617,7 +617,7 @@ func nominalCaseOnWaitStatefullNode(t *testing.T) {
 				"status": "%s"
 				}
 		]
-		`, statefullNodeStatus)
+		`, statefulNodeStatus)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)
@@ -630,7 +630,7 @@ func nominalCaseOnWaitStatefullNode(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.WaitStatefullNode(projectName, nodeName, 0)
+	_, err := cli.WaitStatefulNode(projectName, nodeName, 0)
 
 	// then
 	if err != nil {
@@ -638,7 +638,7 @@ func nominalCaseOnWaitStatefullNode(t *testing.T) {
 	}
 }
 
-func nominalCaseOnBindVolumeOnStatefullNode(t *testing.T) {
+func nominalCaseOnBindVolumeOnStatefulNode(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -662,7 +662,7 @@ func nominalCaseOnBindVolumeOnStatefullNode(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	err := cli.BindVolumeOnStatefullNode(projectName, nodeName, volumeName)
+	err := cli.BindVolumeOnStatefulNode(projectName, nodeName, volumeName)
 
 	// then
 	if err != nil {
@@ -670,7 +670,7 @@ func nominalCaseOnBindVolumeOnStatefullNode(t *testing.T) {
 	}
 }
 
-func UnknownProjectOnBindVolumeOnStatefullNode(t *testing.T) {
+func UnknownProjectOnBindVolumeOnStatefulNode(t *testing.T) {
 	// given
 	token := "some-token"
 	nodeName := "my-node"
@@ -690,7 +690,7 @@ func UnknownProjectOnBindVolumeOnStatefullNode(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	err := cli.BindVolumeOnStatefullNode("unknown-project", nodeName, volumeName)
+	err := cli.BindVolumeOnStatefulNode("unknown-project", nodeName, volumeName)
 
 	// then
 	expectedError := "Project 'unknown-project' does not exist"
@@ -703,7 +703,7 @@ func UnknownProjectOnBindVolumeOnStatefullNode(t *testing.T) {
 	}
 }
 
-func UnknownVolumeOnBindVolumeOnStatefullNode(t *testing.T) {
+func UnknownVolumeOnBindVolumeOnStatefulNode(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -723,7 +723,7 @@ func UnknownVolumeOnBindVolumeOnStatefullNode(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	err := cli.BindVolumeOnStatefullNode(projectName, nodeName, "unknown-volume")
+	err := cli.BindVolumeOnStatefulNode(projectName, nodeName, "unknown-volume")
 
 	// then
 	expectedError := "Volume 'unknown-volume' does not exist"
@@ -736,7 +736,7 @@ func UnknownVolumeOnBindVolumeOnStatefullNode(t *testing.T) {
 	}
 }
 
-func RebindVolumeOnBindVolumeOnStatefullNode(t *testing.T) {
+func RebindVolumeOnBindVolumeOnStatefulNode(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -757,7 +757,7 @@ func RebindVolumeOnBindVolumeOnStatefullNode(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	err := cli.BindVolumeOnStatefullNode(projectName, nodeName, volumeName)
+	err := cli.BindVolumeOnStatefulNode(projectName, nodeName, volumeName)
 
 	// then
 	expectedError := "Volume vol1c already bound with my-node"
@@ -770,7 +770,7 @@ func RebindVolumeOnBindVolumeOnStatefullNode(t *testing.T) {
 	}
 }
 
-func ClientHTTPErrorOnStatefullNodeMethods(t *testing.T) {
+func ClientHTTPErrorOnStatefulNodeMethods(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -784,40 +784,40 @@ func ClientHTTPErrorOnStatefullNodeMethods(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, errOnGet := cli.GetStatefullNodes(projectName)
-	_, errOnAdd := cli.AddStatefullNode(projectName, nodeName, "t2.micro", "eu-west-1a")
-	errOnDelete := cli.DeleteStatefullNode(projectName, nodeName)
-	_, errOnGetInfo := cli.GetStatefullNodeInfo(projectName, nodeName)
-	_, errOnWait := cli.WaitStatefullNode(projectName, nodeName, 0)
-	errOnBindVolume := cli.BindVolumeOnStatefullNode(projectName, nodeName, volumeName)
+	_, errOnGet := cli.GetStatefulNodes(projectName)
+	_, errOnAdd := cli.AddStatefulNode(projectName, nodeName, "t2.micro", "eu-west-1a")
+	errOnDelete := cli.DeleteStatefulNode(projectName, nodeName)
+	_, errOnGetInfo := cli.GetStatefulNodeInfo(projectName, nodeName)
+	_, errOnWait := cli.WaitStatefulNode(projectName, nodeName, 0)
+	errOnBindVolume := cli.BindVolumeOnStatefulNode(projectName, nodeName, volumeName)
 
 	// then
 	if errOnGet == nil {
-		t.Errorf("Error is not raised on GetStatefullNodes")
+		t.Errorf("Error is not raised on GetStatefulNodes")
 	}
 
 	if errOnAdd == nil {
-		t.Errorf("Error is not raised on AddStatefullNodes")
+		t.Errorf("Error is not raised on AddStatefulNodes")
 	}
 
 	if errOnDelete == nil {
-		t.Errorf("Error is not raised on DeleteStatefullNodes")
+		t.Errorf("Error is not raised on DeleteStatefulNodes")
 	}
 
 	if errOnGetInfo == nil {
-		t.Errorf("Error is not raised on GetStatefullNodeInfo")
+		t.Errorf("Error is not raised on GetStatefulNodeInfo")
 	}
 
 	if errOnWait == nil {
-		t.Errorf("Error is not raised on WaitStatefullNode")
+		t.Errorf("Error is not raised on WaitStatefulNode")
 	}
 
 	if errOnBindVolume == nil {
-		t.Errorf("Error is not raised on BindVolumeOnStatefullNode")
+		t.Errorf("Error is not raised on BindVolumeOnStatefulNode")
 	}
 }
 
-func InternalServerErrorOnStatefullNodeMethods(t *testing.T) {
+func InternalServerErrorOnStatefulNodeMethods(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -833,12 +833,12 @@ func InternalServerErrorOnStatefullNodeMethods(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, errOnGet := cli.GetStatefullNodes(projectName)
-	_, errOnAdd := cli.AddStatefullNode(projectName, nodeName, "t2.micro", "eu-west-1a")
-	errOnDelete := cli.DeleteStatefullNode(projectName, nodeName)
-	_, errOnGetInfo := cli.GetStatefullNodeInfo(projectName, nodeName)
-	_, errOnWait := cli.WaitStatefullNode(projectName, nodeName, 0)
-	errOnBindVolume := cli.BindVolumeOnStatefullNode(projectName, nodeName, volumeName)
+	_, errOnGet := cli.GetStatefulNodes(projectName)
+	_, errOnAdd := cli.AddStatefulNode(projectName, nodeName, "t2.micro", "eu-west-1a")
+	errOnDelete := cli.DeleteStatefulNode(projectName, nodeName)
+	_, errOnGetInfo := cli.GetStatefulNodeInfo(projectName, nodeName)
+	_, errOnWait := cli.WaitStatefulNode(projectName, nodeName, 0)
+	errOnBindVolume := cli.BindVolumeOnStatefulNode(projectName, nodeName, volumeName)
 
 	// then
 	expectedError := "An unexpected error occurred (code: 500)"
@@ -891,7 +891,7 @@ func InternalServerErrorOnStatefullNodeMethods(t *testing.T) {
 	}
 }
 
-func CantUnmarshalOnStatefullNodeMethods(t *testing.T) {
+func CantUnmarshalOnStatefulNodeMethods(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -914,8 +914,8 @@ func CantUnmarshalOnStatefullNodeMethods(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, errOnGet := cli.GetStatefullNodes(projectName)
-	_, errOnAdd := cli.AddStatefullNode(projectName, "node-in-error", "t2.micro", "eu-west-1a")
+	_, errOnGet := cli.GetStatefulNodes(projectName)
+	_, errOnAdd := cli.AddStatefulNode(projectName, "node-in-error", "t2.micro", "eu-west-1a")
 
 	// then
 	expectedError := "invalid character ']' looking for beginning of object key string"

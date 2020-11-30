@@ -6,7 +6,7 @@ import (
 	"github.com/mitchellh/cli"
 )
 
-// StatefullNodeCommand is a cli.Command implementation for top level `sqsc statefull_node` command.
+// StatefulNodeCommand is a cli.Command implementation for top level `sqsc stateful-node` command.
 type StatefulNodeCommand struct {
 }
 
@@ -17,13 +17,13 @@ func (c *StatefulNodeCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *StatefulNodeCommand) Synopsis() string {
-	return "Commands related to a statefull_node"
+	return "Commands related to a stateful-node"
 }
 
 // Help is part of cli.Command implementation.
 func (c *StatefulNodeCommand) Help() string {
 	helpText := `
-usage: sqsc stateful node <subcommand>
+usage: sqsc stateful-node <subcommand>
 
   Run a project stateful node related command.
 

@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// StatefullNodeBindCommand is a cli.Command implementation for creating a Squarescale project.
+// StatefulNodeBindCommand is a cli.Command implementation for binding a stateful-node.
 type StatefulNodeBindCommand struct {
 	Meta
 	flagSet *flag.FlagSet
@@ -35,7 +35,7 @@ func (c *StatefulNodeBindCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Volume name cannot be empty"))
 	}
 
-	statefullNodeName, err := statefullNodeNameArg(c.flagSet, 0)
+	statefulNodeName, err := statefulNodeNameArg(c.flagSet, 0)
 	if err != nil {
 		return c.errorWithUsage(err)
 	}
@@ -44,7 +44,7 @@ func (c *StatefulNodeBindCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	res := c.runWithSpinner("bind statefull node", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := c.runWithSpinner("bind stateful-node", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -56,8 +56,8 @@ func (c *StatefulNodeBindCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
-		msg := fmt.Sprintf("Successfully binded volume '%s' to statefull_node '%s'", *volumeName, statefullNodeName)
-		err = client.BindVolumeOnStatefullNode(UUID, statefullNodeName, *volumeName)
+		msg := fmt.Sprintf("Successfully binded volume '%s' to stateful-node '%s'", *volumeName, statefulNodeName)
+		err = client.BindVolumeOnStatefulNode(UUID, statefulNodeName, *volumeName)
 		return msg, err
 	})
 	if res != 0 {
@@ -75,7 +75,7 @@ func (c *StatefulNodeBindCommand) Synopsis() string {
 // Help is part of cli.Command implementation.
 func (c *StatefulNodeBindCommand) Help() string {
 	helpText := `
-usage: sqsc stateful node bind [options] <stateful_node_name>
+usage: sqsc stateful-node bind [options] <stateful_node_name>
 
   Bind stateful node to project.
 `

@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// StatefullNodeListCommand is a cli.Command implementation for listing all statefull_nodes.
+// StatefulNodeListCommand is a cli.Command implementation for listing stateful-nodes.
 type StatefulNodeListCommand struct {
 	Meta
 	flagSet *flag.FlagSet
@@ -34,7 +34,7 @@ func (b *StatefulNodeListCommand) Run(args []string) int {
 		return b.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", b.flagSet.Args()))
 	}
 
-	return b.runWithSpinner("list statefull_node", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return b.runWithSpinner("list stateful-node", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -46,22 +46,22 @@ func (b *StatefulNodeListCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
-		statefullNodes, err := client.GetStatefullNodes(UUID)
+		statefulNodes, err := client.GetStatefulNodes(UUID)
 		if err != nil {
 			return "", err
 		}
 
-		//msg doit retourner la list des statefull_nodes valides : verifier si on recoit une liste des statefull_nodes ou des ID
-		//msg := fmt.Sprintf("list of availables statefull_nodes: %v", statefull_node)
+		//msg doit retourner la list des stateful-nodes valides : verifier si on recoit une liste des stateful-nodes ou des ID
+		//msg := fmt.Sprintf("list of availables stateful-nodes: %v", stateful-node)
 
 		var msg string
 		msg = "Name\tNode type\tZone\t\tStatus\n"
-		for _, n := range statefullNodes {
+		for _, n := range statefulNodes {
 			msg += fmt.Sprintf("%s\t%s\t%s\t%s\n", n.Name, n.NodeType, n.Zone, n.Status)
 		}
 
-		if len(statefullNodes) == 0 {
-			msg = "No statefull nodes found"
+		if len(statefulNodes) == 0 {
+			msg = "No stateful-node found"
 		}
 
 		return msg, nil

@@ -11,13 +11,13 @@ import (
 
 // Volume describes a project container as returned by the Squarescale API
 type Volume struct {
-	ID                int    `json:"id"`
-	Name              string `json:"name"`
-	Size              int    `json:"size"`
-	Type              string `json:"type"`
-	Zone              string `json:"zone"`
-	StatefullNodeName string `json:"statefull_node_name"`
-	Status            string `json:"status"`
+	ID               int    `json:"id"`
+	Name             string `json:"name"`
+	Size             int    `json:"size"`
+	Type             string `json:"type"`
+	Zone             string `json:"zone"`
+	StatefulNodeName string `json:"statefull_node_name"`
+	Status           string `json:"status"`
 }
 
 // VolumeToBind describe a volume bind to a container
