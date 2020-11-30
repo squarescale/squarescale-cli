@@ -19,22 +19,21 @@ func (c *OrganizationDeleteCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
+	name := c.flagSet.String("name", "", "name")
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	organizationName, err := organizationNameArg(c.flagSet, 0)
-
-	if err != nil {
-		return c.errorWithUsage(err)
+	if c.flagSet.NArg() > 0 {
+		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	if c.flagSet.NArg() > 1 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
+	if *name == "" {
+		return c.errorWithUsage(fmt.Errorf("Name must not be empty, use -name option"))
 	}
 
-	c.Ui.Info("Are you sure you want to delete " + organizationName + "?")
+	c.Ui.Info("Are you sure you want to delete " + *name + "?")
 	if *alwaysYes {
 		c.Ui.Info("(approved from command line)")
 	} else {
@@ -48,7 +47,7 @@ func (c *OrganizationDeleteCommand) Run(args []string) int {
 	}
 
 	res := c.runWithSpinner("deleting organization", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		err := client.DeleteOrganization(organizationName)
+		err := client.DeleteOrganization(*name)
 		return "", err
 	})
 
@@ -67,9 +66,9 @@ func (c *OrganizationDeleteCommand) Synopsis() string {
 // Help is part of cli.Command implementation.
 func (c *OrganizationDeleteCommand) Help() string {
 	helpText := `
-usage: sqsc organization remove [options] <organization_name>
+usage: sqsc organization delete [options]
 
-  Remove organization.
+  Delete organization.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
