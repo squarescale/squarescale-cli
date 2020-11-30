@@ -47,7 +47,7 @@ func projectSettings(name string, cluster ClusterConfig) JSONObject {
 	return projectSettings
 }
 
-// CreateProject asks the Squarescale platform to create a new project
+// CreateProject asks the SquareScale platform to create a new project
 func (c *Client) CreateProject(payload *JSONObject) (taskId int, err error) {
 
 	_, ok := (*payload)["credential_name"]
@@ -80,7 +80,7 @@ func (c *Client) CreateProject(payload *JSONObject) (taskId int, err error) {
 	return response.Task, err
 }
 
-// ProvisionProject asks the Squarescale platform to provision the project
+// ProvisionProject asks the SquareScale platform to provision the project
 func (c *Client) ProvisionProject(projectUUID string) (err error) {
 
 	code, body, err := c.post(fmt.Sprintf("/projects/%s/provision", projectUUID), nil)
@@ -95,7 +95,7 @@ func (c *Client) ProvisionProject(projectUUID string) (err error) {
 	return nil
 }
 
-// UNProvisionProject asks the Squarescale platform to provision the project
+// UNProvisionProject asks the SquareScale platform to provision the project
 func (c *Client) UNProvisionProject(projectUUID string) (err error) {
 
 	code, body, err := c.post(fmt.Sprintf("/projects/%s/unprovision", projectUUID), nil)
@@ -110,7 +110,7 @@ func (c *Client) UNProvisionProject(projectUUID string) (err error) {
 	return nil
 }
 
-// ListProjects asks the Squarescale service for available projects.
+// ListProjects asks the SquareScale service for available projects.
 func (c *Client) ListProjects() ([]Project, error) {
 	code, body, err := c.get("/projects")
 	if err != nil {
@@ -130,7 +130,7 @@ func (c *Client) ListProjects() ([]Project, error) {
 	return projectsJSON, nil
 }
 
-// FullListProjects asks the Squarescale service for available projects.
+// FullListProjects asks the SquareScale service for available projects.
 func (c *Client) FullListProjects() ([]Project, error) {
 	projects, err := c.ListProjects()
 	if err != nil {

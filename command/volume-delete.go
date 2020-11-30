@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// VolumeDeleteCommand is a cli.Command implementation for creating a Squarescale project.
+// VolumeDeleteCommand is a cli.Command implementation for creating a SquareScale project.
 type VolumeDeleteCommand struct {
 	Meta
 	flagSet *flag.FlagSet

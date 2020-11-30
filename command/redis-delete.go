@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// RedisDeleteCommand is a cli.Command implementation for creating a Squarescale project.
+// RedisDeleteCommand is a cli.Command implementation for creating a SquareScale project.
 type RedisDeleteCommand struct {
 	Meta
 	flagSet *flag.FlagSet

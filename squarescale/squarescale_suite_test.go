@@ -7,9 +7,9 @@ import (
 	"github.com/onsi/gomega"
 )
 
-func TestSquarescale(t *testing.T) {
+func TestSquareScale(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Squarescale Suite")
+	RunSpecs(t, "SquareScale Suite")
 }
 
 // Declarations for Ginkgo DSL

@@ -76,7 +76,7 @@ func (c *Client) GetAvailableDBEngines(provider, region string) ([]DataseEngine,
 	return enginesList, nil
 }
 
-// GetDBConfig asks the Squarescale API for the database config of a project.
+// GetDBConfig asks the SquareScale API for the database config of a project.
 // Returns, in this order:
 // - if the db is enabled
 // - the db engine in use (string)
@@ -100,7 +100,7 @@ func (c *Client) GetDBConfig(uuid string) (*DbConfig, error) {
 	return &db, nil
 }
 
-// ConfigDB calls the Squarescale API to update database options for a given project.
+// ConfigDB calls the SquareScale API to update database options for a given project.
 func (c *Client) ConfigDB(uuid string, payload *JSONObject) (taskId int, err error) {
 
 	code, body, err := c.put("/projects/"+uuid+"/database", payload)

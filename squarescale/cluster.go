@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// GetClusterSize asks the Squarescale API for the cluster size of a project.
+// GetClusterSize asks the SquareScale API for the cluster size of a project.
 func (c *Client) GetClusterConfig(projectUUID string) (*ClusterConfig, error) {
 	code, body, err := c.get("/projects/" + projectUUID)
 	if err != nil {
@@ -27,7 +27,7 @@ func (c *Client) GetClusterConfig(projectUUID string) (*ClusterConfig, error) {
 	return &cluster, nil
 }
 
-// ConfigCluster calls the Squarescale API to update the cluster size for a given project.
+// ConfigCluster calls the SquareScale API to update the cluster size for a given project.
 func (c *Client) ConfigCluster(projectUUID string, cluster *ClusterConfig) (taskid int, err error) {
 	payload := &JSONObject{
 		"cluster": cluster.ConfigSettings(),

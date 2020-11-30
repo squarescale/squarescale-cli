@@ -8,7 +8,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// OrganizationDeleteCommand is a cli.Command implementation for remove a Squarescale organization.
+// OrganizationDeleteCommand is a cli.Command implementation for remove a SquareScale organization.
 type OrganizationDeleteCommand struct {
 	Meta
 	flagSet *flag.FlagSet

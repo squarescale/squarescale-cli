@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/logger"
 )
 
-// Volume describes a project container as returned by the Squarescale API
+// Volume describes a project container as returned by the SquareScale API
 type Volume struct {
 	ID               int    `json:"id"`
 	Name             string `json:"name"`

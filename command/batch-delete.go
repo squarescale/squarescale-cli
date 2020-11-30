@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// BatchDeleteCommand is a cli.Command implementation for creating a Squarescale project.
+// BatchDeleteCommand is a cli.Command implementation for creating a SquareScale project.
 type BatchDeleteCommand struct {
 	Meta
 	flagSet *flag.FlagSet

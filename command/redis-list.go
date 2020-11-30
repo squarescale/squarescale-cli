@@ -69,7 +69,7 @@ func (r *RedisListCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (r *RedisListCommand) Synopsis() string {
-	return "List Redis instances for a Squarescale projects"
+	return "List Redis instances for a SquareScale projects"
 }
 
 // Help is part of cli.Command implementation.
@@ -77,7 +77,7 @@ func (r *RedisListCommand) Help() string {
 	helpText := `
 usage: sqsc redis list [options]
 
-  List all Redis instances for a given Squarescale project.
+  List all Redis instances for a given SquareScale project.
 
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(r.flagSet))

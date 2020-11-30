@@ -8,7 +8,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// OrganizationAddCommand is a cli.Command implementation for creating a Squarescale organization.
+// OrganizationAddCommand is a cli.Command implementation for creating a SquareScale organization.
 type OrganizationAddCommand struct {
 	Meta
 	flagSet *flag.FlagSet

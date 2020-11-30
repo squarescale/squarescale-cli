@@ -49,7 +49,7 @@ func endpointFlag(f *flag.FlagSet) *endpoint {
 }
 
 func projectFlag(f *flag.FlagSet) *string {
-	return f.String("project", "", "Squarescale project")
+	return f.String("project", "", "SquareScale project")
 }
 
 func providerFlag(f *flag.FlagSet) *string {

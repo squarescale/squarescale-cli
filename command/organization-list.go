@@ -8,7 +8,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// OrganizationListCommand is a cli.Command implementation for listing all Squarescale organizations.
+// OrganizationListCommand is a cli.Command implementation for listing all SquareScale organizations.
 type OrganizationListCommand struct {
 	Meta
 	flagSet *flag.FlagSet

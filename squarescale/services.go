@@ -14,7 +14,7 @@ type ServiceEnv struct {
 	Predefined bool   `json:"predefined"`
 }
 
-// Service describes a project container as returned by the Squarescale API
+// Service describes a project container as returned by the SquareScale API
 type Service struct {
 	ID               int           `json:"container_id"`
 	Name             string        `json:"name"`

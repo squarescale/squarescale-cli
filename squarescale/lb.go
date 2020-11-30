@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// LoadBalancer describes a load balancer as returned by the Squarescale API
+// LoadBalancer describes a load balancer as returned by the SquareScale API
 type LoadBalancer struct {
 	ID               int64  `json:"id"`
 	Active           bool   `json:"active"`

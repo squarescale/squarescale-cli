@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// VolumeAddCommand is a cli.Command implementation for creating a Squarescale project.
+// VolumeAddCommand is a cli.Command implementation for creating a SquareScale project.
 type VolumeAddCommand struct {
 	Meta
 	flagSet *flag.FlagSet

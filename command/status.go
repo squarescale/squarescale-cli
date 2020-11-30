@@ -26,7 +26,7 @@ func (c *StatusCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	fmt.Printf("Squarescale endpoint: %s\n", endpoint.String())
+	fmt.Printf("SquareScale endpoint: %s\n", endpoint.String())
 	return c.runWithSpinner("check authorization", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		return "You're currently logged in", nil // do nothing as we are already authenticated here.
 	})
@@ -34,7 +34,7 @@ func (c *StatusCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *StatusCommand) Synopsis() string {
-	return "authorization check to Squarescale platform"
+	return "authorization check to SquareScale platform"
 }
 
 // Help is part of cli.Command implementation.
@@ -42,7 +42,7 @@ func (c *StatusCommand) Help() string {
 	helpText := `
 usage: sqsc status [options]
 
-  Asks the Squarescale platform to check whether the current user is
+  Asks the SquareScale platform to check whether the current user is
   authenticated. This command checks the validity of the credentials
   stored in the $HOME/.netrc file.
 

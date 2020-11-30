@@ -6,13 +6,13 @@ import (
 	"net/http"
 )
 
-// Collaborator describes a collaborator as returned by the Squarescale API
+// Collaborator describes a collaborator as returned by the SquareScale API
 type Collaborator struct {
 	Email string `json:"email"`
 	Name  string `json:"name"`
 }
 
-// Organization describes a organization as returned by the Squarescale API
+// Organization describes a organization as returned by the SquareScale API
 type Organization struct {
 	Name          string         `json:"name"`
 	Collaborators []Collaborator `json:"collaborators"`
@@ -72,7 +72,7 @@ func (c *Client) GetOrganizationInfo(name string) (Organization, error) {
 	return organizationByName, nil
 }
 
-// ListOrganizations asks the Squarescale service for available organizations.
+// ListOrganizations asks the SquareScale service for available organizations.
 func (c *Client) ListOrganizations() ([]Organization, error) {
 	code, body, err := c.get("/organizations")
 

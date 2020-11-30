@@ -20,7 +20,7 @@ const supportedAPI string = "1"
 // JSONObject is a simple struct matching a JSON object with any kind of values
 type JSONObject map[string]interface{}
 
-// Client is the basic structure to make API calls to Squarescale services
+// Client is the basic structure to make API calls to SquareScale services
 type Client struct {
 	httpClient        http.Client // http.client is concurrently safe and should be reused across multiple connections
 	cachedCableClient *actioncable.Client
@@ -29,7 +29,7 @@ type Client struct {
 	user              User
 }
 
-// NewClient creates a new Squarescale client
+// NewClient creates a new SquareScale client
 func NewClient(endpoint, token string) *Client {
 	c := &Client{
 		endpoint: endpoint,

@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/logger"
 )
 
-// StatefulNode describes a project container as returned by the Squarescale API
+// StatefulNode describes a project container as returned by the SquareScale API
 type StatefulNode struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name"`

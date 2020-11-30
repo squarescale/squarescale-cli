@@ -15,7 +15,7 @@ type User struct {
 	IsAdmin         bool   `json:"is_admin"`
 }
 
-// ValidateToken asks Squarescale service for token validity. Returns nil if user is authorized.
+// ValidateToken asks SquareScale service for token validity. Returns nil if user is authorized.
 func (c *Client) ValidateToken() (*User, error) {
 	code, body, err := c.get("/me")
 	if err != nil {

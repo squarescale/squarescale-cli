@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// Redis describes a project container as returned by the Squarescale API
+// Redis describes a project container as returned by the SquareScale API
 type Redis struct {
 	RedisDatabaseConfigs []struct {
 		Name string `json:"name"`

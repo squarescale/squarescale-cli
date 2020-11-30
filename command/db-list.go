@@ -71,7 +71,7 @@ func (c *DBListCommand) Help() string {
 usage: sqsc db list
 
   List database engines and sizes available for use
-  on the Squarescale platform.
+  on the SquareScale platform.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

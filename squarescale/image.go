@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-// AddImage asks the Squarescale service to attach an image to the project.
+// AddImage asks the SquareScale service to attach an image to the project.
 func (c *Client) AddImage(projectUUID, name, username, password, entrypoint, runCommand string, instances int, serviceName string, volumeToBind []VolumeToBind) error {
 	payload := JSONObject{
 		"docker_image": c.dockerImage(

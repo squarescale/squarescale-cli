@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ContainerDeleteCommand is a cli.Command implementation for creating a Squarescale project.
+// ContainerDeleteCommand is a cli.Command implementation for creating a SquareScale project.
 type ContainerDeleteCommand struct {
 	Meta
 	flagSet *flag.FlagSet
