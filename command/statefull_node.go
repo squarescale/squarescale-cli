@@ -26,7 +26,9 @@ func (c *StatefulNodeCommand) Help() string {
 usage: sqsc stateful node <subcommand>
 
   Run a project stateful node related command.
+
   List of supported subcommands is available below.
+
 `
 	return strings.TrimSpace(helpText)
 }

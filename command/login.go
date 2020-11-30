@@ -68,6 +68,7 @@ func (c *LoginCommand) Help() string {
 usage: sqsc login [options]
 
   Logs the user in Squarescale platform.
+
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

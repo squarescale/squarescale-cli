@@ -26,7 +26,9 @@ func (c *VolumeCommand) Help() string {
 usage: sqsc volume <subcommand>
 
   Run a project volume related command.
+
   List of supported subcommands is available below.
+
 `
 	return strings.TrimSpace(helpText)
 }

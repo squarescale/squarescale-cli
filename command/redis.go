@@ -25,7 +25,9 @@ func (c *RedisCommand) Help() string {
 	helpText := `
 usage: sqsc Redis <subcommand>
   Run a project Redis related command.
+
   List of supported subcommands is available below.
+
 `
 	return strings.TrimSpace(helpText)
 }

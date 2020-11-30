@@ -8,7 +8,6 @@ import (
 // VersionCommand is a cli.Command implementation for displaying the cli version.
 type VersionCommand struct {
 	Meta
-
 	Name     string
 	Version  string
 	Revision string

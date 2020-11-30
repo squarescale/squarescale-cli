@@ -26,7 +26,9 @@ func (c *ImageCommand) Help() string {
 usage: sqsc image <subcommand>
 
   Run a project docker image related command.
+
   List of supported subcommands is available below.
+
 `
 	return strings.TrimSpace(helpText)
 }

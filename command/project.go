@@ -26,7 +26,9 @@ func (c *ProjectCommand) Help() string {
 usage: sqsc project <subcommand>
 
   Run a project related command.
+
   List of supported subcommands is available below.
+
 `
 	return strings.TrimSpace(helpText)
 }

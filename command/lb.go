@@ -26,7 +26,9 @@ func (c *LBCommand) Help() string {
 usage: sqsc lb <subcommand>
 
   Run a project load balancer related command.
+
   List of supported subcommands is available below.
+
 `
 	return strings.TrimSpace(helpText)
 }

@@ -26,7 +26,9 @@ func (c *DBCommand) Help() string {
 usage: sqsc db <subcommand>
 
   Run a project database related command.
+
   List of supported subcommands is available below.
+
 `
 	return strings.TrimSpace(helpText)
 }

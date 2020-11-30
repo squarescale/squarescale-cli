@@ -45,6 +45,7 @@ usage: sqsc status [options]
   Asks the Squarescale platform to check whether the current user is
   authenticated. This command checks the validity of the credentials
   stored in the $HOME/.netrc file.
+
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

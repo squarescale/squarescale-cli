@@ -24,8 +24,11 @@ func (c *BatchCommand) Synopsis() string {
 func (c *BatchCommand) Help() string {
 	helpText := `
 usage: sqsc batch <subcommand>
+
   Run a project batch related command.
+
   List of supported subcommands is available below.
+
 `
 	return strings.TrimSpace(helpText)
 }

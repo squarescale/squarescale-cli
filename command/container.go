@@ -26,7 +26,9 @@ func (c *ContainerCommand) Help() string {
 usage: sqsc container <subcommand>
 
   Run a project container related command.
+
   List of supported subcommands is available below.
+
 `
 	return strings.TrimSpace(helpText)
 }

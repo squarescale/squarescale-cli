@@ -26,7 +26,9 @@ func (c *ClusterCommand) Help() string {
 usage: sqsc cluster <subcommand>
 
   Run a project cluster related command.
+
   List of supported subcommands is available below.
+
 `
 	return strings.TrimSpace(helpText)
 }

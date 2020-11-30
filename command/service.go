@@ -26,7 +26,9 @@ func (c *ServiceCommand) Help() string {
 usage: sqsc service <subcommand>
 
   Run a project service related command.
+
   List of supported subcommands is available below.
+
 `
 	return strings.TrimSpace(helpText)
 }
