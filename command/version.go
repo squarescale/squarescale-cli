@@ -12,6 +12,8 @@ type VersionCommand struct {
 	Name     string
 	Version  string
 	Revision string
+	Branch   string
+	Date     string
 }
 
 // Run is part of cli.Command implementation.
@@ -19,8 +21,14 @@ func (c *VersionCommand) Run(args []string) int {
 	var versionString bytes.Buffer
 
 	fmt.Fprintf(&versionString, "%s version %s", c.Name, c.Version)
+	if c.Branch != "" {
+		fmt.Fprintf(&versionString, " %s", c.Branch)
+	}
 	if c.Revision != "" {
-		fmt.Fprintf(&versionString, " (%s)", c.Revision)
+		fmt.Fprintf(&versionString, " %s", c.Revision)
+	}
+	if c.Date != "" {
+		fmt.Fprintf(&versionString, " %s", c.Date)
 	}
 
 	c.Ui.Output(versionString.String())

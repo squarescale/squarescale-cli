@@ -1,6 +1,13 @@
-VERSION     = $(shell git describe --always --dirty)
-GO_LD_FLAGS = -ldflags '-X main.GitCommit="$(VERSION)"'
+GIT_BRANCH   := $(shell git rev-parse --abbrev-ref HEAD || echo 'n/a')
+GIT_REVISION := $(shell git describe --always --tags --dirty || echo 'n/a')
+GO_BUILD_DATE ?= $(shell date -u +%FT%T)
+
+GO_LD_FLAGS ?= -ldflags "-X main.GitCommit=$(GIT_REVISION) \
+                         -X main.GitBranch=$(GIT_BRANCH)   \
+                         -X main.BuildDate=$(GO_BUILD_DATE)"
+
 GO_CMD      = go build -v $(GO_LD_FLAGS)
+
 DOCKER_CMD  = docker run --rm
 
 .PHONY: all

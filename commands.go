@@ -226,6 +226,8 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta:     *meta,
 				Version:  Version,
 				Revision: GitCommit,
+				Branch:   GitBranch,
+				Date:     BuildDate,
 				Name:     Name,
 			}, nil
 		},
