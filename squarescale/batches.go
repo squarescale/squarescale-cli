@@ -54,6 +54,8 @@ func (c *Client) CreateBatch(uuid string, batchOrderContent BatchOrder) (Created
 		"time_zone_name":  batchOrderContent.BatchCommon.TimeZoneName,
 		"limits":          batchOrderContent.BatchCommon.Limits,
 		"volumes_to_bind": batchOrderContent.Volumes,
+		"run_command":     batchOrderContent.RunCommand,
+		"entrypoint":      batchOrderContent.BatchCommon.Entrypoint,
 	}
 
 	code, body, err := c.post("/projects/"+uuid+"/batches", payload)
