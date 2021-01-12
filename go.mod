@@ -28,7 +28,7 @@ require (
 	github.com/sirupsen/logrus v1.7.0
 	github.com/squarescale/actioncable-go v0.1.0
 	github.com/squarescale/go-netrc v0.1.0
-	github.com/squarescale/logger v0.1.0
+	github.com/squarescale/logger v0.1.1
 	github.com/stretchr/testify v1.6.1 // indirect
 	golang.org/x/crypto v0.0.0-20201124201722-c8d3bf9c5392 // indirect
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381 // indirect

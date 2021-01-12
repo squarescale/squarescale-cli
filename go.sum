@@ -147,6 +147,8 @@ github.com/squarescale/go-netrc v0.1.0 h1:NvFsg74UT+mpzK+xTVD82Nqrt6M3/WtZWoVp8F
 github.com/squarescale/go-netrc v0.1.0/go.mod h1:lcpQ1RwHpMQPzlPGeBsJTyedOvIUY36K/thqOv1MyRE=
 github.com/squarescale/logger v0.1.0 h1:t/cD0ivQcFZ9+4wfN2D29qQZfTBDHm8nCd4RAt1joSU=
 github.com/squarescale/logger v0.1.0/go.mod h1:battSqTnP00zFYdM2mRCZqAgczNeVemJzNTw6k9pg4k=
+github.com/squarescale/logger v0.1.1 h1:s0EHM+J1YPcp7/kuQrEj44wdYg0KovaEGq6qSKh8+k0=
+github.com/squarescale/logger v0.1.1/go.mod h1:battSqTnP00zFYdM2mRCZqAgczNeVemJzNTw6k9pg4k=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=

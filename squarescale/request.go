@@ -13,6 +13,7 @@ import (
 	multierr "github.com/hashicorp/go-multierror"
 	mime "github.com/jpillora/go-mime"
 	actioncable "github.com/squarescale/actioncable-go"
+	"github.com/squarescale/logger"
 )
 
 const supportedAPI string = "1"
@@ -58,23 +59,48 @@ func (c *Client) cableHeaders() (*http.Header, error) {
 }
 
 func (c *Client) get(path string) (int, []byte, error) {
-	return c.request("GET", path, nil)
+	logger.Trace.Println("GET on:", path)
+	code, response, err := c.request("GET", path, nil)
+	logger.Trace.Println("HTTP Code:", code)
+	logger.Trace.Printf("HTTP Response: %s\n", response)
+	logger.Trace.Println("Err:", err)
+	return code, response, err
 }
 
 func (c *Client) post(path string, payload interface{}) (int, []byte, error) {
-	return c.request("POST", path, payload)
+	logger.Trace.Println("POST on:", path)
+	code, response, err := c.request("POST", path, payload)
+	logger.Trace.Println("HTTP Code:", code)
+	logger.Trace.Printf("HTTP Response: %s\n", response)
+	logger.Trace.Println("Err:", err)
+	return code, response, err
 }
 
 func (c *Client) patch(path string, payload interface{}) (int, []byte, error) {
-	return c.request("PATCH", path, payload)
+	logger.Trace.Println("PATCH on:", path)
+	code, response, err := c.request("PATCH", path, payload)
+	logger.Trace.Println("HTTP Code:", code)
+	logger.Trace.Printf("HTTP Response: %s\n", response)
+	logger.Trace.Println("Err:", err)
+	return code, response, err
 }
 
 func (c *Client) delete(path string) (int, []byte, error) {
-	return c.request("DELETE", path, nil)
+	logger.Trace.Println("DELETE on:", path)
+	code, response, err := c.request("DELETE", path, nil)
+	logger.Trace.Println("HTTP Code:", code)
+	logger.Trace.Printf("HTTP Response: %s\n", response)
+	logger.Trace.Println("Err:", err)
+	return code, response, err
 }
 
 func (c *Client) put(path string, payload interface{}) (int, []byte, error) {
-	return c.request("PUT", path, payload)
+	logger.Trace.Println("PUT on:", path)
+	code, response, err := c.request("PUT", path, payload)
+	logger.Trace.Println("HTTP Code:", code)
+	logger.Trace.Printf("HTTP Response: %s\n", response)
+	logger.Trace.Println("Err:", err)
+	return code, response, err
 }
 
 func (c *Client) request(method, path string, payload interface{}) (int, []byte, error) {
