@@ -19,6 +19,7 @@ type DBSetCommand struct {
 func (c *DBSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
+	nowait := nowaitFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "uuid of the targeted project")
 	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 	dbEngine := c.flagSet.String("engine", "", "Database engine")
@@ -61,10 +62,9 @@ func (c *DBSetCommand) Run(args []string) int {
 		return c.cancelled()
 	}
 
-	var taskId int
+	var UUID string
 
 	res := c.runWithSpinner("scale project database", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		var UUID string
 		var err error
 		if *projectUUID == "" {
 			UUID, err = client.ProjectByName(*projectName)
@@ -92,21 +92,32 @@ func (c *DBSetCommand) Run(args []string) int {
 			"database": map[string]interface{}{"enabled": !*dbDisabled, "engine": *dbEngine, "size": *dbSize, "version": *dbVersion},
 		}
 
-		taskId, err = client.ConfigDB(UUID, &payload)
+		_, err = client.ConfigDB(UUID, &payload)
 
 		var msg string
 		if *dbDisabled {
-			msg = fmt.Sprintf("[#%d] Successfully disabled database for project '%s'", taskId, projectToShow)
+			msg = fmt.Sprintf("Successfully disabled database for project '%s'", projectToShow)
 		} else {
 			msg = fmt.Sprintf(
-				"[#%d] Successfully set database for project '%s': %s",
-				taskId, projectToShow, db.String())
+				"Successfully set database for project '%s': %s",
+				projectToShow, db.String())
 		}
 
 		return msg, err
 	})
 	if res != 0 {
 		return res
+	}
+
+	if !*nowait {
+		res = c.runWithSpinner("wait for database change", endpoint.String(), func(client *squarescale.Client) (string, error) {
+			projectStatus, err := client.WaitProject(UUID, 5)
+			if err != nil {
+				return projectStatus, err
+			} else {
+				return projectStatus, nil
+			}
+		})
 	}
 
 	return res
