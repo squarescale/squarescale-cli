@@ -22,6 +22,7 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
+	nowait := nowaitFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 	if err := c.flagSet.Parse(args); err != nil {
@@ -95,13 +96,27 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 		return res
 	}
 
-	return c.runWithSpinner("delete project", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res = c.runWithSpinner("delete project", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		err := client.ProjectDelete(UUID)
-		if err != nil {
-			return "", err
-		}
-		return "", nil
+		return fmt.Sprintf("Remove project '%s'", UUID), err
 	})
+
+	if res != 0 {
+		return res
+	}
+
+	if !*nowait {
+		res = c.runWithSpinner("wait for project remove", endpoint.String(), func(client *squarescale.Client) (string, error) {
+			projectStatus, err := client.WaitProject(UUID, 5)
+			if err != nil {
+				return projectStatus, err
+			} else {
+				return projectStatus, nil
+			}
+		})
+	}
+
+	return res
 }
 
 // Synopsis is part of cli.Command implementation.
