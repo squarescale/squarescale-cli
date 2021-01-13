@@ -53,10 +53,9 @@ func (c *ClusterSetCommand) Run(args []string) int {
 		return c.cancelled()
 	}
 
-	var taskId int
+	var UUID string
 
 	res := c.runWithSpinner("scale project cluster", endpoint.String(), func(client *squarescale.Client) (string, error) {
-		var UUID string
 		var err error
 		if *projectUUID == "" {
 			UUID, err = client.ProjectByName(*projectName)
@@ -79,11 +78,11 @@ func (c *ClusterSetCommand) Run(args []string) int {
 
 		cluster.Update(c.Cluster)
 
-		taskId, err = client.ConfigCluster(UUID, cluster)
+		_, err = client.ConfigCluster(UUID, cluster)
 
 		msg := fmt.Sprintf(
-			"[#%d] Successfully set cluster for project '%s': %s",
-			taskId, projectToShow, cluster.String())
+			"Successfully set cluster for project '%s': %s",
+			projectToShow, cluster.String())
 
 		return msg, err
 	})
@@ -93,11 +92,11 @@ func (c *ClusterSetCommand) Run(args []string) int {
 
 	if !*nowait {
 		res = c.runWithSpinner("wait for cluster change", endpoint.String(), func(client *squarescale.Client) (string, error) {
-			task, err := client.WaitTask(taskId)
+			projectStatus, err := client.WaitProject(UUID, 5)
 			if err != nil {
-				return "", err
+				return projectStatus, err
 			} else {
-				return task.Status, nil
+				return projectStatus, nil
 			}
 		})
 	}
