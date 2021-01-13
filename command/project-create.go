@@ -149,12 +149,12 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		return c.error(CancelledError)
 	}
 
-	var taskId int
+	var project squarescale.Project
 
 	res := c.runWithSpinner("create project", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
-		taskId, err = client.CreateProject(&payload)
-		return fmt.Sprintf("[#%d] Created project '%s'", taskId, *name), err
+		project, err = client.CreateProject(&payload)
+		return fmt.Sprintf("Created project '%s' with UUID '%s'", project.Name, project.UUID), err
 	})
 
 	if res != 0 {
@@ -163,11 +163,11 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 
 	if !*nowait {
 		res = c.runWithSpinner("wait for project creation", endpoint.String(), func(client *squarescale.Client) (string, error) {
-			task, err := client.WaitTask(taskId)
+			projectStatus, err := client.WaitProject(project.UUID, 5)
 			if err != nil {
-				return "", err
+				return projectStatus, err
 			} else {
-				return task.Status, nil
+				return projectStatus, nil
 			}
 		})
 	}

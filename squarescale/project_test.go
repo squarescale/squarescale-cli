@@ -108,16 +108,17 @@ func nominalCaseCreateProject(t *testing.T) {
 	payload["node_size"] = "dev"
 	payload["slack_webhook"] = ""
 	payload["databases"] = "[]"
-	taskID, err := cli.CreateProject(&payload)
+	_, err := cli.CreateProject(&payload)
+	project, err := cli.CreateProject(&payload)
 
 	// then
 	if err != nil {
 		t.Fatalf("Expect no error, got `%s`", err)
 	}
 
-	expectedTaskID := 12
-	if taskID != expectedTaskID {
-		t.Errorf("Expect volume.ID `%d`, got `%d`", expectedTaskID, taskID)
+	expectedProjectUUID := "ba90e5fe-f520-4275-897b-49a95c1157a3"
+	if project.UUID != expectedProjectUUID {
+		t.Errorf("Expect project.UUID `%s`, got `%s`", expectedProjectUUID, project.UUID)
 	}
 }
 
@@ -149,7 +150,7 @@ func credentialMandatoryCaseCreateProject(t *testing.T) {
 	payload["node_size"] = "dev"
 	payload["slack_webhook"] = ""
 	payload["databases"] = "[]"
-	taskID, err := cli.CreateProject(&payload)
+	project, err := cli.CreateProject(&payload)
 
 	// then
 	expectedError := "Credential is mandatory"
@@ -157,9 +158,9 @@ func credentialMandatoryCaseCreateProject(t *testing.T) {
 		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
 
-	expectedTaskID := 0
-	if taskID != expectedTaskID {
-		t.Errorf("Expect volume.ID `%d`, got `%d`", expectedTaskID, taskID)
+	expectedProjectUUID := ""
+	if project.UUID != expectedProjectUUID {
+		t.Errorf("Expect project.UUID `%s`, got `%s`", expectedProjectUUID, project.UUID)
 	}
 }
 
@@ -192,7 +193,7 @@ func badHttpErrrorCoreCaseCreateProject(t *testing.T) {
 	payload["node_size"] = "dev"
 	payload["slack_webhook"] = ""
 	payload["databases"] = "[]"
-	taskID, err := cli.CreateProject(&payload)
+	project, err := cli.CreateProject(&payload)
 
 	// then
 	expectedError := "An unexpected error occurred (code: 500)"
@@ -200,9 +201,9 @@ func badHttpErrrorCoreCaseCreateProject(t *testing.T) {
 		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
 
-	expectedTaskID := 0
-	if taskID != expectedTaskID {
-		t.Errorf("Expect volume.ID `%d`, got `%d`", expectedTaskID, taskID)
+	expectedProjectUUID := ""
+	if project.UUID != expectedProjectUUID {
+		t.Errorf("Expect project.UUID `%s`, got `%s`", expectedProjectUUID, project.UUID)
 	}
 }
 
@@ -256,7 +257,7 @@ func errorInTaskCaseCreateProject(t *testing.T) {
 	payload["node_size"] = "dev"
 	payload["slack_webhook"] = ""
 	payload["databases"] = "[]"
-	taskID, err := cli.CreateProject(&payload)
+	project, err := cli.CreateProject(&payload)
 
 	// then
 	expectedError := "Error in creation"
@@ -268,9 +269,9 @@ func errorInTaskCaseCreateProject(t *testing.T) {
 		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
 	}
 
-	expectedTaskID := 12
-	if taskID != expectedTaskID {
-		t.Errorf("Expect volume.ID `%d`, got `%d`", expectedTaskID, taskID)
+	expectedProjectUUID := "ba90e5fe-f520-4275-897b-49a95c1157a3"
+	if project.UUID != expectedProjectUUID {
+		t.Errorf("Expect Project.UUID `%s`, got `%s`", expectedProjectUUID, project.UUID)
 	}
 }
 
@@ -1224,7 +1225,6 @@ func CantUnmarshalOnProjectMethods(t *testing.T) {
 	}
 }
 
-// WaitProject(projectUUID string) (*ProjectStatus, error) {
 // ProjectUnprovision(project string) error {
 // ProjectDelete(project string) error {
 // ProjectLogs(project string, container string, after string) ([]string, string, error) {

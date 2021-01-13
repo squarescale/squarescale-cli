@@ -24,6 +24,7 @@ type Project struct {
 	MonitoringEnabled bool   `json:"monitoring_enabled"`
 	MonitoringEngine  string `json:"monitoring_engine"`
 	SlackWebHook      string `json:"slack_webhook"`
+	Error             string `json:"error"`
 }
 
 /*
@@ -48,36 +49,31 @@ func projectSettings(name string, cluster ClusterConfig) JSONObject {
 }
 
 // CreateProject asks the SquareScale platform to create a new project
-func (c *Client) CreateProject(payload *JSONObject) (taskId int, err error) {
-
+func (c *Client) CreateProject(payload *JSONObject) (newProject Project, err error) {
 	_, ok := (*payload)["credential_name"]
 	if !c.user.IsAdmin && !ok {
-		return 0, errors.New("Credential is mandatory")
+		return newProject, errors.New("Credential is mandatory")
 	}
 
 	code, body, err := c.post("/projects", payload)
 	if err != nil {
-		return 0, err
+		return newProject, err
 	}
 
 	if code != http.StatusCreated {
-		return 0, unexpectedHTTPError(code, body)
+		return newProject, unexpectedHTTPError(code, body)
 	}
 
-	var response struct {
-		Error string `json:"error"`
-		Task  int    `json:"task"`
-	}
-	err = json.Unmarshal(body, &response)
+	err = json.Unmarshal(body, &newProject)
 	if err != nil {
-		return 0, err
+		return newProject, err
 	}
 
-	if response.Error != "" {
-		err = errors.New(response.Error)
+	if newProject.Error != "" {
+		err = errors.New(newProject.Error)
 	}
 
-	return response.Task, err
+	return newProject, err
 }
 
 // ProvisionProject asks the SquareScale platform to provision the project
