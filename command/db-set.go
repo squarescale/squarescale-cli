@@ -24,7 +24,7 @@ func (c *DBSetCommand) Run(args []string) int {
 	dbEngine := c.flagSet.String("engine", "", "Database engine")
 	dbSize := c.flagSet.String("size", "", "Database size")
 	dbVersion := c.flagSet.String("engine-version", "", "Database version")
-	dbDisabled := c.flagSet.Bool("disabled", false, "Disable database")
+	dbDisabled := c.flagSet.Bool("disable", false, "Disable database")
 	alwaysYes := yesFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
