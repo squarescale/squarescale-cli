@@ -35,14 +35,22 @@ func (c *ProjectListCommand) Run(args []string) int {
 			return "", err
 		}
 
+		projectCount := len(projects)
+
 		organizations, err := client.ListOrganizations()
 		if err != nil {
 			return "", err
 		}
 
+		for _, o := range organizations {
+			for range o.Projects {
+				projectCount++
+			}
+		}
+
 		var msg string
 
-		if len(projects) == 0 {
+		if projectCount == 0 {
 			msg = "No projects found"
 		} else {
 			msg = fmtProjectListOutput(projects, organizations)
