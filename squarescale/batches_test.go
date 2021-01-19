@@ -33,8 +33,8 @@ func TestBatches(t *testing.T) {
 	t.Run("Test to delete a volume when deploy is in progress on DeleteBatch", DeployInProgressOnDeleteBatch)
 
 	//Error Cases
-	t.Run("Test HTTP client error on batch methods (get, create, delete)", ClientHTTPErrorOnBatchMethods)
-	t.Run("Test internal server error on batch methods (get, create, delete)", InternalServerErrorOnBatchMethods)
+	t.Run("Test HTTP client error on batch methods (get, create, delete, execute)", ClientHTTPErrorOnBatchMethods)
+	t.Run("Test internal server error on batch methods (get, create, delete, execute)", InternalServerErrorOnBatchMethods)
 	t.Run("Test badly JSON on batch methods (get, create, delete)", CantUnmarshalOnBatchMethods)
 }
 
@@ -776,6 +776,7 @@ func ClientHTTPErrorOnBatchMethods(t *testing.T) {
 	_, errOnGet := cli.GetBatches(projectUuid)
 	_, errOnCreate := cli.CreateBatch(projectUuid, batchOrderContent)
 	errOnDelete := cli.DeleteBatch(projectUuid, batchName)
+	errOnExecute := cli.ExecuteBatch(projectUuid, batchName)
 
 	// then
 	if errOnGet == nil {
@@ -790,6 +791,9 @@ func ClientHTTPErrorOnBatchMethods(t *testing.T) {
 		t.Errorf("Error is not raised on DeleteBatch")
 	}
 
+	if errOnExecute == nil {
+		t.Errorf("Error is not raised on ExecuteBatch")
+	}
 }
 
 func InternalServerErrorOnBatchMethods(t *testing.T) {
@@ -831,6 +835,7 @@ func InternalServerErrorOnBatchMethods(t *testing.T) {
 	_, errOnGet := cli.GetBatches(projectUuid)
 	_, errOnCreate := cli.CreateBatch(projectUuid, batchOrderContent)
 	errOnDelete := cli.DeleteBatch(projectUuid, batchName)
+	errOnExecute := cli.ExecuteBatch(projectUuid, batchName)
 
 	// then
 	expectedError := "An unexpected error occurred (code: 500)"
@@ -856,6 +861,14 @@ func InternalServerErrorOnBatchMethods(t *testing.T) {
 
 	if fmt.Sprintf("%s", errOnDelete) != expectedError {
 		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnDelete)
+	}
+
+	if errOnExecute == nil {
+		t.Errorf("Error is not raised with `%s`", expectedError)
+	}
+
+	if fmt.Sprintf("%s", errOnExecute) != expectedError {
+		t.Errorf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnExecute)
 	}
 }
 
