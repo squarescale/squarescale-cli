@@ -42,15 +42,19 @@ func (c *BatchExecuteCommand) Run(args []string) int {
 	return c.runWithSpinner("executing batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
+		var projectToShow string
 		if *projectUUID == "" {
+			projectToShow = *projectName
 			UUID, err = client.ProjectByName(*projectName)
 			if err != nil {
 				return "", err
 			}
 		} else {
+			projectToShow = *projectUUID
 			UUID = *projectUUID
 		}
 
+		fmt.Printf("Execute on project `%s` the batch `%s`\n", projectToShow, batchName)
 		err = client.ExecuteBatch(UUID, batchName)
 		return "", err
 	})
