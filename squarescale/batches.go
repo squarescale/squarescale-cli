@@ -167,7 +167,8 @@ func (c *Client) DeleteBatch(uuid string, name string) error {
 
 // ExecuteBatch execute an existing batch
 func (c *Client) ExecuteBatch(projectUUID, name string) error {
-	code, body, err := c.post(fmt.Sprintf("/projects/%s/batches/%s/execute", projectUUID, name), nil)
+	url := fmt.Sprintf("/projects/%s/batches/%s/execute", projectUUID, name)
+	code, body, err := c.post(url, nil)
 	if err != nil {
 		return err
 	}
