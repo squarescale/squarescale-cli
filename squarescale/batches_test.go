@@ -22,6 +22,9 @@ func TestBatches(t *testing.T) {
 	t.Run("Test project not found on createBatches", ProjectNotFoundOnCreateBatches)
 	t.Run("Test to create a duplicate on CreateBatches", DuplicateBatchOnCreateBatches)
 
+	// executeBatches
+	t.Run("Nominal case on executeBatches", nominalCaseOnExecuteBatches)
+
 	//DeleteBatch
 	t.Run("Nominal case on DeleteBatch", nominalCaseOnDeleteBatch)
 
@@ -262,6 +265,37 @@ func ProjectNotFoundOnGetBatches(t *testing.T) {
 
 	if fmt.Sprintf("%s", errOnGet) == expectedError {
 		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, errOnGet)
+	}
+
+}
+
+func nominalCaseOnExecuteBatches(t *testing.T) {
+
+	// Given
+	token := "some-token"
+	batchName := "my-little-batch"
+	projectUuid := "d5dde1ad-64ce-4e7c-ade9-43cfd16596d5"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		checkPath(t, "/projects/"+projectUuid+"/batches/"+batchName+"/execute", r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
+
+		resBody := `null`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.ExecuteBatch(projectUuid, batchName)
+
+	// then
+	if err != nil {
+		t.Fatalf("Expect no error, got `%s`", err)
 	}
 
 }
