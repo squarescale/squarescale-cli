@@ -56,9 +56,9 @@ func (c *NetworkRuleListCommand) Run(args []string) int {
 			return "", err
 		}
 
-		var msg string = "Name\tInt. Proto/Port\tExt. Proto/Port\tDomain\n"
+		var msg string = "Name\tInt. Proto/Port\tExt. Proto/Port\tDomain\tPath. Prefix\n"
 		for _, c := range rules {
-			msg += fmt.Sprintf("%s\t%s/%d\t%s/%d\t%s\n", c.Name, c.InternalProtocol, c.InternalPort, c.ExternalProtocol, c.ExternalPort, c.DomainExpression)
+			msg += fmt.Sprintf("%s\t%s/%d\t%s/%d\t%s\t%s\n", c.Name, c.InternalProtocol, c.InternalPort, c.ExternalProtocol, c.ExternalPort, c.DomainExpression, c.PathPrefix)
 		}
 
 		if len(rules) == 0 {

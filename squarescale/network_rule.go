@@ -13,6 +13,7 @@ type NetworkRule struct {
 	ExternalPort     int    `json:"external_port"`
 	ExternalProtocol string `json:"external_protocol"`
 	DomainExpression string `json:"domain_expression,omitempty"`
+	PathPrefix       string `json:"path_prefix,omitempty"`
 }
 
 func (c *Client) ListNetworkRules(projectUUID, serviceName string) ([]NetworkRule, error) {
