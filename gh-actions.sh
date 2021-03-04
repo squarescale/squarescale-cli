@@ -2,6 +2,11 @@
 
 set -e
 
+if [ -z "$SQSC_TOKEN" ]; then
+  echo "SQSC_TOKEN is not set. Quitting."
+  exit 1
+fi
+
 if [ -z "$ORGANIZATION_NAME" ]; then
   echo "ORGANIZATION_NAME is not set. Quitting."
   exit 1

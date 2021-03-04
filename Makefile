@@ -55,6 +55,9 @@ dist-windows-amd64: ## Compile for windows-amd64
 	test -d dist || mkdir dist
 	GOOS=windows GOARCH=amd64 $(GO_CMD) -o dist/sqsc-windows-amd64$(DIST_SUFFIX).exe
 
+dist-gh-actions: ## Compile for gh-actions
+	DIST_SUFFIX='-gh-actions' make dist
+
 dist: dist-darwin-amd64 dist-freebsd-amd64 dist-linux-amd64 docker-alpine-amd64 dist-linux-arm dist-linux-arm64 dist-openbsd-amd64 dist-windows-amd64
 
 dist-master:
