@@ -13,7 +13,7 @@ LABEL repository="https://github.com/squarescale/squarescale-cli"
 RUN apt-get update && apt-get install -y ca-certificates && apt-get clean
 
 COPY ./dist/sqsc-alpine-amd64 /sqsc
-COPY ./entrypoint.sh /entrypoint.sh
+COPY ./gh-actions.sh /gh-actions.sh
 
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/gh-actions.sh"]
 CMD ["--help"]
