@@ -7,30 +7,50 @@ import (
 	"os/exec"
 )
 
+const (
+	sqscToken           = "SQSC_TOKEN"
+	organizationName    = "ORGANIZATION_NAME"
+	projectName         = "PROJECT_NAME"
+	webServiceName      = "WEB_SERVICE_NAME"
+	dockerUser          = "DOCKER_USER"
+	dockerToken         = "DOCKER_TOKEN"
+	dockerRepository    = "DOCKER_REPOSITORY"
+	dockerRepositoryTag = "DOCKER_REPOSITORY_TAG"
+	iaasCred            = "IAAS_CRED"
+	iaasProvider        = "IAAS_PROVIDER"
+	iaasRegion          = "IAAS_REGION"
+	nodeType            = "NODE_TYPE"
+	dbEngine            = "DB_ENGINE"
+	dbEngineVersion     = "DB_ENGINE_VERSION"
+	dbSize              = "DB_SIZE"
+)
+
 func main() {
 	checkEnvironmentVariablesExists()
 
-	createDatabase()
 	createProject()
+	createDatabase()
 	createWebService()
 	openHTTPPort()
 	scheduleWebService()
 }
 
 func checkEnvironmentVariablesExists() {
+	fmt.Println("Checking environment variables...")
+
 	envVars := []string{
-		"SQSC_TOKEN",
-		"ORGANIZATION_NAME",
-		"PROJECT_NAME",
-		"WEB_SERVICE_NAME",
-		"DOCKER_USER",
-		"DOCKER_TOKEN",
-		"DOCKER_REPOSITORY",
-		"DOCKER_REPOSITORY_TAG",
-		"IAAS_CRED",
-		"IAAS_PROVIDER",
-		"IAAS_REGION",
-		"NODE_TYPE",
+		sqscToken,
+		organizationName,
+		projectName,
+		webServiceName,
+		dockerUser,
+		dockerToken,
+		dockerRepository,
+		dockerRepositoryTag,
+		iaasCred,
+		iaasProvider,
+		iaasRegion,
+		nodeType,
 	}
 
 	for _, envVar := range envVars {
@@ -42,86 +62,86 @@ func checkEnvironmentVariablesExists() {
 	}
 }
 
-func createDatabase() {
-	_, dbEngineExists := os.LookupEnv("DB_ENGINE")
-	_, dbEngineVersionExists := os.LookupEnv("DB_ENGINE_VERSION")
-	_, dbEngineSizeExists := os.LookupEnv("DB_SIZE")
-
-	if !dbEngineExists && !dbEngineVersionExists && !dbEngineSizeExists {
-		_, databaseNotExists := exec.Command("/bin/bash", "-c", fmt.Sprintf(
-			"/sqsc db show -project-name %s/%s | grep \"DB enabled\" | grep true",
-			os.Getenv("ORGANIZATION_NAME"),
-			os.Getenv("PROJECT_NAME"),
-		)).Output()
-
-		if databaseNotExists != nil {
-			fmt.Println("Creating database...")
-
-			_, err := exec.Command("/bin/bash", "-c", fmt.Sprintf(
-				"/sqsc db set -project-name %s -engine %s -engine-version %s -size %s -yes",
-				os.Getenv("PROJECT_NAME"),
-				os.Getenv("DB_ENGINE"),
-				os.Getenv("DB_ENGINE_VERSION"),
-				os.Getenv("DB_SIZE"),
-			)).Output()
-
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-	}
-}
-
 func createProject() {
-	_, projectNotExists := exec.Command("/bin/bash", "-c", fmt.Sprintf(
+	_, projectNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
 		"/sqsc project get -project-name %s/%s",
-		os.Getenv("ORGANIZATION_NAME"),
-		os.Getenv("PROJECT_NAME"),
+		os.Getenv(organizationName),
+		os.Getenv(projectName),
 	)).Output()
 
 	if projectNotExists != nil {
 		fmt.Println("Creating project...")
 
-		_, err := exec.Command("/bin/bash", "-c", fmt.Sprintf(
+		_, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
 			"/sqsc project create -credential %s -monitoring netdata -name %s -node-size %s -infra-type high-availability -organization %s -provider %s -region %s -yes",
-			os.Getenv("IAAS_CRED"),
-			os.Getenv("PROJECT_NAME"),
-			os.Getenv("NODE_TYPE"),
-			os.Getenv("ORGANIZATION_NAME"),
-			os.Getenv("IAAS_PROVIDER"),
-			os.Getenv("IAAS_REGION"),
+			os.Getenv(iaasCred),
+			os.Getenv(projectName),
+			os.Getenv(nodeType),
+			os.Getenv(organizationName),
+			os.Getenv(iaasProvider),
+			os.Getenv(iaasRegion),
 		)).Output()
 
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(fmt.Sprintf("Creating project fails with error:\n %s", err))
+		}
+	}
+}
+
+func createDatabase() {
+	_, dbEngineExists := os.LookupEnv(dbEngine)
+	_, dbEngineVersionExists := os.LookupEnv(dbEngineVersion)
+	_, dbEngineSizeExists := os.LookupEnv(dbSize)
+
+	if !dbEngineExists && !dbEngineVersionExists && !dbEngineSizeExists {
+		_, databaseNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
+			"/sqsc db show -project-name %s/%s | grep \"DB enabled\" | grep true",
+			os.Getenv(organizationName),
+			os.Getenv(projectName),
+		)).Output()
+
+		if databaseNotExists != nil {
+			fmt.Println("Creating database...")
+
+			_, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
+				"/sqsc db set -project-name %s -engine %s -engine-version %s -size %s -yes",
+				os.Getenv(projectName),
+				os.Getenv(dbEngine),
+				os.Getenv(dbEngineVersion),
+				os.Getenv(dbSize),
+			)).Output()
+
+			if err != nil {
+				log.Fatal(fmt.Sprintf("Creating database fails with error:\n %s", err))
+			}
 		}
 	}
 }
 
 func createWebService() {
-	_, webServiceNotExists := exec.Command("/bin/bash", "-c", fmt.Sprintf(
+	_, webServiceNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
 		"/sqsc container list --project-name %s/%s | grep %s",
-		os.Getenv("ORGANIZATION_NAME"),
-		os.Getenv("PROJECT_NAME"),
-		os.Getenv("WEB_SERVICE_NAME"),
+		os.Getenv(organizationName),
+		os.Getenv(projectName),
+		os.Getenv(webServiceName),
 	)).Output()
 
 	if webServiceNotExists != nil {
 		fmt.Println("Creating web service...")
 
-		_, err := exec.Command("/bin/bash", "-c", fmt.Sprintf(
+		_, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
 			"/sqsc container add -project-name %s/%s -servicename %s -name %s:%s -username %s -password %s",
-			os.Getenv("ORGANIZATION_NAME"),
-			os.Getenv("PROJECT_NAME"),
-			os.Getenv("WEB_SERVICE_NAME"),
-			os.Getenv("DOCKER_REPOSITORY"),
-			os.Getenv("DOCKER_REPOSITORY_TAG"),
-			os.Getenv("DOCKER_USER"),
-			os.Getenv("DOCKER_TOKEN"),
+			os.Getenv(organizationName),
+			os.Getenv(projectName),
+			os.Getenv(webServiceName),
+			os.Getenv(dockerRepository),
+			os.Getenv(dockerRepositoryTag),
+			os.Getenv(dockerUser),
+			os.Getenv(dockerToken),
 		)).Output()
 
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(fmt.Sprintf("Creating web service fails with error:\n %s", err))
 		}
 	}
 }
@@ -129,40 +149,42 @@ func createWebService() {
 func openHTTPPort() {
 	networkRuleName := "http"
 
-	_, webServiceNotExists := exec.Command("/bin/bash", "-c", fmt.Sprintf(
+	_, webServiceNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
 		"/sqsc network-rule list -project-name %s/%s -service-name %s | grep %s",
-		os.Getenv("ORGANIZATION_NAME"),
-		os.Getenv("PROJECT_NAME"),
-		os.Getenv("WEB_SERVICE_NAME"),
+		os.Getenv(organizationName),
+		os.Getenv(projectName),
+		os.Getenv(webServiceName),
 		networkRuleName,
 	)).Output()
 
 	if webServiceNotExists != nil {
 		fmt.Println("Opening http port...")
 
-		_, err := exec.Command("/bin/bash", "-c", fmt.Sprintf(
+		_, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
 			"/sqsc network-rule create -project-name %s/%s -external-protocol http -internal-port 80 -internal-protocol http -name %s -service-name %s",
-			os.Getenv("ORGANIZATION_NAME"),
-			os.Getenv("PROJECT_NAME"),
+			os.Getenv(organizationName),
+			os.Getenv(projectName),
 			networkRuleName,
-			os.Getenv("WEB_SERVICE_NAME"),
+			os.Getenv(webServiceName),
 		)).Output()
 
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(fmt.Sprintf("Opening http port fails with error:\n%s", err))
 		}
 	}
 }
 
 func scheduleWebService() {
-	_, err := exec.Command("/bin/bash", "-c", fmt.Sprintf(
+	fmt.Println("Scheduling web service...")
+
+	_, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
 		"/sqsc service schedule --project-name %s/%s %s",
-		os.Getenv("ORGANIZATION_NAME"),
-		os.Getenv("PROJECT_NAME"),
-		os.Getenv("WEB_SERVICE_NAME"),
+		os.Getenv(organizationName),
+		os.Getenv(projectName),
+		os.Getenv(webServiceName),
 	)).Output()
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Sprintf("Scheduling web service fails with error:\n%s", err))
 	}
 }
