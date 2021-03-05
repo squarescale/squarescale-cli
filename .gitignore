@@ -3,6 +3,7 @@
 .idea
 sqsc*
 squarescale-cli
+gh-actions/gh-actions
 .envrc
 coverage.out
 coverage.html

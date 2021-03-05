@@ -35,6 +35,9 @@ jobs:
       - name: Build
         run: make dist-${GITHUB_REF##*/}
 
+      - name: Build gh-actions
+        run: make build-gh-actions
+
       - uses: jakejarvis/s3-sync-action@master
         with:
           args: --acl public-read

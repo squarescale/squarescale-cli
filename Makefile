@@ -66,6 +66,9 @@ dist-master:
 dist-production:
 	DIST_SUFFIX='-latest' make dist
 
+build-gh-actions:
+	cd ./gh-actions && go build
+
 clean: ## Clean repository
 	go clean && rm -rf sqsc sqsc-* dist/
 
