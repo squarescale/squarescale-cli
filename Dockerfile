@@ -1,4 +1,4 @@
-FROM debian:10-slim
+FROM golang:1.16-alpine3.13
 
 LABEL "com.github.actions.name"="squarescale-cli"
 LABEL "com.github.actions.description"="Squarescale CLI"
@@ -10,9 +10,7 @@ LABEL version="0.1.0"
 LABEL maintainer="SquareScale Engineering <engineering@squarescale.com>"
 LABEL repository="https://github.com/squarescale/squarescale-cli"
 
-RUN apt-get update && apt-get install -y ca-certificates && apt-get clean
-
 COPY ./dist/sqsc-alpine-amd64 /sqsc
-COPY ./gh-actions.sh /gh-actions.sh
+COPY ./gh-actions/gh-actions /gh-actions
 
-ENTRYPOINT ["/gh-actions.sh"]
+ENTRYPOINT ["/gh-actions"]
