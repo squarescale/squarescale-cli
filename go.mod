@@ -10,6 +10,7 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.0
+	github.com/hoisie/mustache v0.0.0-20160804235033-6375acf62c69 // indirect
 	github.com/jpillora/backoff v1.0.0 // indirect
 	github.com/jpillora/go-mime v0.0.0-20150326152935-4e683937836d
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
