@@ -106,7 +106,8 @@ func createDatabase() {
 			fmt.Println("Creating database...")
 
 			cmd := fmt.Sprintf(
-				"/sqsc db set -project-name %s -engine %s -engine-version %s -size %s -yes",
+				"/sqsc db set -project-name %s/%s -engine \"%s\" -engine-version \"%s\" -size \"%s\" -yes",
+				os.Getenv(organizationName),
 				os.Getenv(projectName),
 				os.Getenv(dbEngine),
 				os.Getenv(dbEngineVersion),
