@@ -72,7 +72,7 @@ func createProject() {
 	if projectNotExists != nil {
 		fmt.Println("Creating project...")
 
-		_, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
+		cmd := fmt.Sprintf(
 			"/sqsc project create -credential %s -monitoring netdata -name %s -node-size %s -infra-type high-availability -organization %s -provider %s -region %s -yes",
 			os.Getenv(iaasCred),
 			os.Getenv(projectName),
@@ -80,9 +80,11 @@ func createProject() {
 			os.Getenv(organizationName),
 			os.Getenv(iaasProvider),
 			os.Getenv(iaasRegion),
-		)).Output()
+		)
+		_, err := exec.Command("/bin/sh", "-c", cmd).Output()
 
 		if err != nil {
+			fmt.Println(cmd)
 			log.Fatal(fmt.Sprintf("Creating project fails with error:\n %s", err))
 		}
 	}
@@ -103,15 +105,17 @@ func createDatabase() {
 		if databaseNotExists != nil {
 			fmt.Println("Creating database...")
 
-			_, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
+			cmd := fmt.Sprintf(
 				"/sqsc db set -project-name %s -engine %s -engine-version %s -size %s -yes",
 				os.Getenv(projectName),
 				os.Getenv(dbEngine),
 				os.Getenv(dbEngineVersion),
 				os.Getenv(dbSize),
-			)).Output()
+			)
+			_, err := exec.Command("/bin/sh", "-c", cmd).Output()
 
 			if err != nil {
+				fmt.Println(cmd)
 				log.Fatal(fmt.Sprintf("Creating database fails with error:\n %s", err))
 			}
 		}
@@ -131,7 +135,7 @@ func createWebService() {
 	if webServiceNotExists != nil {
 		fmt.Println("Creating web service...")
 
-		_, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
+		cmd := fmt.Sprintf(
 			"/sqsc container add -project-name %s/%s -servicename %s -name %s:%s -username %s -password %s",
 			os.Getenv(organizationName),
 			os.Getenv(projectName),
@@ -140,9 +144,11 @@ func createWebService() {
 			os.Getenv(dockerRepositoryTag),
 			os.Getenv(dockerUser),
 			os.Getenv(dockerToken),
-		)).Output()
+		)
+		_, err := exec.Command("/bin/sh", "-c", cmd).Output()
 
 		if err != nil {
+			fmt.Println(cmd)
 			log.Fatal(fmt.Sprintf("Creating web service fails with error:\n %s", err))
 		}
 	}
@@ -162,15 +168,17 @@ func openHTTPPort() {
 	if webServiceNotExists != nil {
 		fmt.Println("Opening http port...")
 
-		_, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
+		cmd := fmt.Sprintf(
 			"/sqsc network-rule create -project-name %s/%s -external-protocol http -internal-port 80 -internal-protocol http -name %s -service-name %s",
 			os.Getenv(organizationName),
 			os.Getenv(projectName),
 			networkRuleName,
 			os.Getenv(webServiceName),
-		)).Output()
+		)
+		_, err := exec.Command("/bin/sh", "-c", cmd).Output()
 
 		if err != nil {
+			fmt.Println(cmd)
 			log.Fatal(fmt.Sprintf("Opening http port fails with error:\n%s", err))
 		}
 	}
@@ -179,14 +187,16 @@ func openHTTPPort() {
 func scheduleWebService() {
 	fmt.Println("Scheduling web service...")
 
-	_, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
+	cmd := fmt.Sprintf(
 		"/sqsc service schedule --project-name %s/%s %s",
 		os.Getenv(organizationName),
 		os.Getenv(projectName),
 		os.Getenv(webServiceName),
-	)).Output()
+	)
+	_, err := exec.Command("/bin/sh", "-c", cmd).Output()
 
 	if err != nil {
+		fmt.Println(cmd)
 		log.Fatal(fmt.Sprintf("Scheduling web service fails with error:\n%s", err))
 	}
 }
