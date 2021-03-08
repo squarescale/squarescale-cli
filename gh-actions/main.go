@@ -25,15 +25,24 @@ const (
 	dbSize              = "DB_SIZE"
 	cmdEnv              = "CMD"
 	internalPortEnv     = "INTERNAL_PORT"
+	mapEnvVar           = "MAP_ENV_VAR"
 )
 
 func main() {
 	checkEnvironmentVariablesExists()
 
-	createProject()
-	createDatabase()
-	createWebService()
-	openHTTPPort()
+	project := Project{}
+	project.create()
+
+	database := Database{}
+	database.create()
+
+	webservice := Webservice{}
+	webservice.create()
+
+	networkRule := NetworkRule{}
+	networkRule.create()
+
 	scheduleWebService()
 }
 
@@ -61,147 +70,6 @@ func checkEnvironmentVariablesExists() {
 			fmt.Println(fmt.Sprintf("%s is not set. Quitting.", envVar))
 			os.Exit(1)
 		}
-	}
-}
-
-func createProject() {
-	_, projectNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc project get -project-name %s/%s",
-		os.Getenv(organizationName),
-		os.Getenv(projectName),
-	)).Output()
-
-	if projectNotExists != nil {
-		fmt.Println("Creating project...")
-
-		cmd := fmt.Sprintf(
-			"/sqsc project create -credential %s -monitoring netdata -name %s -node-size %s -infra-type high-availability -organization %s -provider %s -region %s -yes",
-			os.Getenv(iaasCred),
-			os.Getenv(projectName),
-			os.Getenv(nodeType),
-			os.Getenv(organizationName),
-			os.Getenv(iaasProvider),
-			os.Getenv(iaasRegion),
-		)
-		_, err := exec.Command("/bin/sh", "-c", cmd).Output()
-
-		if err != nil {
-			fmt.Println(cmd)
-			log.Fatal(fmt.Sprintf("Creating project fails with error:\n %s", err))
-		}
-	} else {
-		fmt.Println("Project already exists.")
-	}
-}
-
-func createDatabase() {
-	_, dbEngineExists := os.LookupEnv(dbEngine)
-	_, dbEngineVersionExists := os.LookupEnv(dbEngineVersion)
-	_, dbEngineSizeExists := os.LookupEnv(dbSize)
-
-	if dbEngineExists && dbEngineVersionExists && dbEngineSizeExists {
-		_, databaseNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-			"/sqsc db show -project-name %s/%s | grep \"DB enabled\" | grep true",
-			os.Getenv(organizationName),
-			os.Getenv(projectName),
-		)).Output()
-
-		if databaseNotExists != nil {
-			fmt.Println("Creating database...")
-
-			cmd := fmt.Sprintf(
-				"/sqsc db set -project-name %s/%s -engine \"%s\" -engine-version \"%s\" -size \"%s\" -yes",
-				os.Getenv(organizationName),
-				os.Getenv(projectName),
-				os.Getenv(dbEngine),
-				os.Getenv(dbEngineVersion),
-				os.Getenv(dbSize),
-			)
-			_, err := exec.Command("/bin/sh", "-c", cmd).Output()
-
-			if err != nil {
-				fmt.Println(cmd)
-				log.Fatal(fmt.Sprintf("Creating database fails with error:\n %s", err))
-			}
-		}
-	} else {
-		fmt.Println(fmt.Sprintf("%s, %s, %s are not set. No database will be created.", dbEngine, dbEngineVersion, dbSize))
-	}
-}
-
-func createWebService() {
-	_, webServiceNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc container list --project-name %s/%s | grep %s",
-		os.Getenv(organizationName),
-		os.Getenv(projectName),
-		os.Getenv(webServiceName),
-	)).Output()
-
-	if webServiceNotExists != nil {
-		fmt.Println("Creating web service...")
-
-		cmdEnvValue := ""
-		if _, cmdExists := os.LookupEnv(cmdEnv); cmdExists {
-			cmdEnvValue = os.Getenv(cmdEnv)
-		}
-
-		cmd := fmt.Sprintf(
-			"/sqsc container add -project-name %s/%s -servicename %s -name %s:%s -username %s -password %s -run-command \"%s\"",
-			os.Getenv(organizationName),
-			os.Getenv(projectName),
-			os.Getenv(webServiceName),
-			os.Getenv(dockerRepository),
-			os.Getenv(dockerRepositoryTag),
-			os.Getenv(dockerUser),
-			os.Getenv(dockerToken),
-			cmdEnvValue,
-		)
-		_, err := exec.Command("/bin/sh", "-c", cmd).Output()
-
-		if err != nil {
-			fmt.Println(cmd)
-			log.Fatal(fmt.Sprintf("Creating web service fails with error:\n %s", err))
-		}
-	} else {
-		fmt.Println("Service already exists.")
-	}
-}
-
-func openHTTPPort() {
-	networkRuleName := "http"
-
-	_, networkRuleNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc network-rule list -project-name %s/%s -service-name %s | grep %s",
-		os.Getenv(organizationName),
-		os.Getenv(projectName),
-		os.Getenv(webServiceName),
-		networkRuleName,
-	)).Output()
-
-	if networkRuleNotExists != nil {
-		fmt.Println("Opening http port...")
-
-		internalPort := "80"
-		if _, internalPortEnvExists := os.LookupEnv(internalPortEnv); internalPortEnvExists {
-			internalPort = os.Getenv(internalPortEnv)
-		}
-
-		cmd := fmt.Sprintf(
-			"/sqsc network-rule create -project-name %s/%s -external-protocol http -internal-port %s -internal-protocol http -name %s -service-name %s",
-			os.Getenv(organizationName),
-			os.Getenv(projectName),
-			internalPort,
-			networkRuleName,
-			os.Getenv(webServiceName),
-		)
-		_, err := exec.Command("/bin/sh", "-c", cmd).Output()
-
-		if err != nil {
-			fmt.Println(cmd)
-			log.Fatal(fmt.Sprintf("Opening http port fails with error:\n%s", err))
-		}
-	} else {
-		fmt.Println("Network rule already exists.")
 	}
 }
 
