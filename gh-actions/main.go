@@ -88,6 +88,8 @@ func createProject() {
 			fmt.Println(cmd)
 			log.Fatal(fmt.Sprintf("Creating project fails with error:\n %s", err))
 		}
+	} else {
+		fmt.Println("Project already exists.")
 	}
 }
 
@@ -159,13 +161,15 @@ func createWebService() {
 			fmt.Println(cmd)
 			log.Fatal(fmt.Sprintf("Creating web service fails with error:\n %s", err))
 		}
+	} else {
+		fmt.Println("Service already exists.")
 	}
 }
 
 func openHTTPPort() {
 	networkRuleName := "http"
 
-	_, webServiceNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
+	_, networkRuleNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
 		"/sqsc network-rule list -project-name %s/%s -service-name %s | grep %s",
 		os.Getenv(organizationName),
 		os.Getenv(projectName),
@@ -173,7 +177,7 @@ func openHTTPPort() {
 		networkRuleName,
 	)).Output()
 
-	if webServiceNotExists != nil {
+	if networkRuleNotExists != nil {
 		fmt.Println("Opening http port...")
 
 		cmd := fmt.Sprintf(
@@ -189,6 +193,8 @@ func openHTTPPort() {
 			fmt.Println(cmd)
 			log.Fatal(fmt.Sprintf("Opening http port fails with error:\n%s", err))
 		}
+	} else {
+		fmt.Println("Network rule already exists.")
 	}
 }
 
