@@ -93,7 +93,7 @@ func createDatabase() {
 	_, dbEngineVersionExists := os.LookupEnv(dbEngineVersion)
 	_, dbEngineSizeExists := os.LookupEnv(dbSize)
 
-	if !dbEngineExists && !dbEngineVersionExists && !dbEngineSizeExists {
+	if dbEngineExists && dbEngineVersionExists && dbEngineSizeExists {
 		_, databaseNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
 			"/sqsc db show -project-name %s/%s | grep \"DB enabled\" | grep true",
 			os.Getenv(organizationName),
@@ -115,6 +115,8 @@ func createDatabase() {
 				log.Fatal(fmt.Sprintf("Creating database fails with error:\n %s", err))
 			}
 		}
+	} else {
+		fmt.Println(fmt.Sprintf("%s, %s, %s are not set. No database will be created.", dbEngine, dbEngineVersion, dbSize))
 	}
 }
 
