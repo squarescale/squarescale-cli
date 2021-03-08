@@ -23,6 +23,7 @@ const (
 	dbEngine            = "DB_ENGINE"
 	dbEngineVersion     = "DB_ENGINE_VERSION"
 	dbSize              = "DB_SIZE"
+	cmdEnv              = "CMD"
 )
 
 func main() {
@@ -136,8 +137,13 @@ func createWebService() {
 	if webServiceNotExists != nil {
 		fmt.Println("Creating web service...")
 
+		cmdEnvValue := ""
+		if _, cmdExists := os.LookupEnv(cmdEnv); cmdExists {
+			cmdEnvValue = os.Getenv(cmdEnv)
+		}
+
 		cmd := fmt.Sprintf(
-			"/sqsc container add -project-name %s/%s -servicename %s -name %s:%s -username %s -password %s",
+			"/sqsc container add -project-name %s/%s -servicename %s -name %s:%s -username %s -password %s -run-command \"%s\"",
 			os.Getenv(organizationName),
 			os.Getenv(projectName),
 			os.Getenv(webServiceName),
@@ -145,6 +151,7 @@ func createWebService() {
 			os.Getenv(dockerRepositoryTag),
 			os.Getenv(dockerUser),
 			os.Getenv(dockerToken),
+			cmdEnvValue,
 		)
 		_, err := exec.Command("/bin/sh", "-c", cmd).Output()
 
