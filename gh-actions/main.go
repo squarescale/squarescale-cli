@@ -24,6 +24,7 @@ const (
 	dbEngineVersion     = "DB_ENGINE_VERSION"
 	dbSize              = "DB_SIZE"
 	cmdEnv              = "CMD"
+	internalPortEnv     = "INTERNAL_PORT"
 )
 
 func main() {
@@ -180,10 +181,16 @@ func openHTTPPort() {
 	if networkRuleNotExists != nil {
 		fmt.Println("Opening http port...")
 
+		internalPort := "80"
+		if _, internalPortEnvExists := os.LookupEnv(internalPortEnv); internalPortEnvExists {
+			internalPort = os.Getenv(internalPortEnv)
+		}
+
 		cmd := fmt.Sprintf(
-			"/sqsc network-rule create -project-name %s/%s -external-protocol http -internal-port 80 -internal-protocol http -name %s -service-name %s",
+			"/sqsc network-rule create -project-name %s/%s -external-protocol http -internal-port %s -internal-protocol http -name %s -service-name %s",
 			os.Getenv(organizationName),
 			os.Getenv(projectName),
+			internalPort,
 			networkRuleName,
 			os.Getenv(webServiceName),
 		)
