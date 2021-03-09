@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -60,22 +59,23 @@ func insertDatabaseEnvironement() {
 		})
 
 		jsonFileName := "mapEnvVar.json"
-
-		fileData, _ := json.Marshal(data)
-		jsonErr := ioutil.WriteFile(jsonFileName, fileData, os.ModePerm)
+		jsonErr := ioutil.WriteFile(jsonFileName, []byte(data), os.ModePerm)
 
 		if jsonErr != nil {
 			log.Fatal("Cannot write json file with map environment variables.")
 		}
 
-		_, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-			"./sqsc container set -project-name %s/%s -env %s",
+		cmd := fmt.Sprintf(
+			"/sqsc container set -project-name %s/%s -env %s -service %s -instances 1",
 			os.Getenv(organizationName),
 			os.Getenv(projectName),
 			jsonFileName,
-		)).Output()
+			os.Getenv(webServiceName),
+		)
+		_, cmdErr := exec.Command("/bin/sh", "-c", cmd).Output()
 
-		if err != nil {
+		if cmdErr != nil {
+			fmt.Println(cmd)
 			log.Fatal("Fail to import database environment variables.")
 		}
 	}
