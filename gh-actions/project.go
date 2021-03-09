@@ -10,7 +10,7 @@ import (
 type Project struct{}
 
 func (p *Project) create() {
-	if isProjectExists() {
+	if !isProjectExists() {
 		fmt.Println("Creating project...")
 		createProject()
 	} else {

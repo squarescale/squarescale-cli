@@ -15,7 +15,7 @@ const (
 )
 
 func (er *NetworkRule) create() {
-	if isNetworkRuleExists() {
+	if !isNetworkRuleExists() {
 		fmt.Println("Opening http port...")
 		openPort()
 	} else {
