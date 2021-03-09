@@ -10,7 +10,7 @@ import (
 type Webservice struct{}
 
 func (ws *Webservice) create() {
-	if isWebserviceExists() {
+	if !isWebserviceExists() {
 		fmt.Println("Creating web service...")
 		createWebservice()
 	} else {
