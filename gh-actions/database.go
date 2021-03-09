@@ -59,14 +59,25 @@ func insertDatabaseEnvironement() {
 			"DB_PASSWORD": getSQSCEnvValue("DB_PASSWORD"),
 		})
 
+		jsonFileName := "mapEnvVar.json"
+
 		fileData, _ := json.Marshal(data)
-		jsonErr := ioutil.WriteFile("mapEnvVar.json", fileData, os.ModePerm)
+		jsonErr := ioutil.WriteFile(jsonFileName, fileData, os.ModePerm)
 
 		if jsonErr != nil {
 			log.Fatal("Cannot write json file with map environment variables.")
 		}
 
-		//TODO: ./sqsc container set -project-name %s/%s -env mapEnvVar.json
+		_, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
+			"./sqsc container set -project-name %s/%s -env %s",
+			os.Getenv(organizationName),
+			os.Getenv(projectName),
+			jsonFileName,
+		)).Output()
+
+		if err != nil {
+			log.Fatal("Fail to import database environment variables.")
+		}
 	}
 }
 
