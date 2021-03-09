@@ -34,14 +34,14 @@ func main() {
 	project := Project{}
 	project.create()
 
-	database := Database{}
-	database.create()
-
 	webservice := Webservice{}
 	webservice.create()
 
 	networkRule := NetworkRule{}
 	networkRule.create()
+
+	database := Database{}
+	database.create()
 
 	scheduleWebService()
 }

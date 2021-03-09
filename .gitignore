@@ -4,6 +4,7 @@
 sqsc*
 squarescale-cli
 gh-actions/gh-actions
+gh-actions/mapEnvVar.json
 .envrc
 coverage.out
 coverage.html
