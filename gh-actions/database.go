@@ -75,7 +75,7 @@ func insertDatabaseEnvironement() {
 		)
 		output, cmdErr := exec.Command("/bin/sh", "-c", cmd).Output()
 
-		fmt.Println(output)
+		fmt.Println(string(output))
 
 		if cmdErr != nil {
 			fmt.Println(cmd)
