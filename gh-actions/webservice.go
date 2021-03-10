@@ -32,7 +32,8 @@ func createWebservice() {
 		os.Getenv(dockerToken),
 		cmdEnvValue,
 	)
-	_, err := exec.Command("/bin/sh", "-c", cmd).Output()
+	output, err := exec.Command("/bin/sh", "-c", cmd).Output()
+	fmt.Println(string(output))
 
 	if err != nil {
 		fmt.Println(cmd)

@@ -40,7 +40,8 @@ func createDatabase() {
 		os.Getenv(dbEngineVersion),
 		os.Getenv(dbSize),
 	)
-	_, err := exec.Command("/bin/sh", "-c", cmd).Output()
+	output, err := exec.Command("/bin/sh", "-c", cmd).Output()
+	fmt.Println(string(output))
 
 	if err != nil {
 		fmt.Println(cmd)
@@ -74,7 +75,6 @@ func insertDatabaseEnvironement() {
 			getCmdEnvValue(),
 		)
 		output, cmdErr := exec.Command("/bin/sh", "-c", cmd).Output()
-
 		fmt.Println(string(output))
 
 		if cmdErr != nil {
