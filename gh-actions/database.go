@@ -19,20 +19,20 @@ func (d *Database) create() {
 
 	if dbEngineExists && dbEngineVersionExists && dbEngineSizeExists {
 		if !isDabataseExists() {
-			fmt.Println("Creating database...")
-
 			createDatabase()
 		} else {
 			fmt.Println("Database already exists.")
 		}
+
+		insertDatabaseEnvironement()
 	} else {
 		fmt.Println(fmt.Sprintf("%s, %s, %s are not set. No database will be created.", dbEngine, dbEngineVersion, dbSize))
 	}
-
-	insertDatabaseEnvironement()
 }
 
 func createDatabase() {
+	fmt.Println("Creating database...")
+
 	cmd := fmt.Sprintf(
 		"/sqsc db set -project-name %s/%s -engine \"%s\" -engine-version \"%s\" -size \"%s\" -yes",
 		os.Getenv(organizationName),
@@ -68,15 +68,15 @@ func insertDatabaseEnvironement() {
 			log.Fatal("Cannot write json file with map environment variables.")
 		}
 
-		o, _ := exec.Command("/bin/sh", "-c", "ls -la && cat mapEnvVar.json").Output()
-		fmt.Println(string(o))
+		instancesNumber := "1"
 
 		cmd := fmt.Sprintf(
-			"/sqsc container set -project-name %s/%s -env %s -service %s -instances 1 -command \"%s\"",
+			"/sqsc container set -project-name %s/%s -env %s -service %s -instances %s -command \"%s\"",
 			os.Getenv(organizationName),
 			os.Getenv(projectName),
 			jsonFileName,
 			os.Getenv(webServiceName),
+			instancesNumber,
 			getCmdEnvValue(),
 		)
 		fmt.Println(cmd)

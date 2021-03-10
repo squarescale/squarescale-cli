@@ -11,7 +11,6 @@ type Project struct{}
 
 func (p *Project) create() {
 	if !isProjectExists() {
-		fmt.Println("Creating project...")
 		createProject()
 	} else {
 		fmt.Println("Project already exists.")
@@ -19,6 +18,8 @@ func (p *Project) create() {
 }
 
 func createProject() {
+	fmt.Println("Creating project...")
+
 	cmd := fmt.Sprintf(
 		"/sqsc project create -credential %s -monitoring netdata -name %s -node-size %s -infra-type high-availability -organization %s -provider %s -region %s -yes",
 		os.Getenv(iaasCred),
