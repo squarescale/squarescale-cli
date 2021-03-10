@@ -22,13 +22,14 @@ func (d *Database) create() {
 			fmt.Println("Creating database...")
 
 			createDatabase()
-			insertDatabaseEnvironement()
 		} else {
 			fmt.Println("Database already exists.")
 		}
 	} else {
 		fmt.Println(fmt.Sprintf("%s, %s, %s are not set. No database will be created.", dbEngine, dbEngineVersion, dbSize))
 	}
+
+	insertDatabaseEnvironement()
 }
 
 func createDatabase() {
@@ -74,6 +75,7 @@ func insertDatabaseEnvironement() {
 			os.Getenv(webServiceName),
 			getCmdEnvValue(),
 		)
+		fmt.Println(cmd)
 		output, cmdErr := exec.Command("/bin/sh", "-c", cmd).Output()
 		fmt.Println(string(output))
 
