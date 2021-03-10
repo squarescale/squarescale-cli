@@ -73,7 +73,9 @@ func insertDatabaseEnvironement() {
 			os.Getenv(webServiceName),
 			getCmdEnvValue(),
 		)
-		_, cmdErr := exec.Command("/bin/sh", "-c", cmd).Output()
+		output, cmdErr := exec.Command("/bin/sh", "-c", cmd).Output()
+
+		fmt.Println(output)
 
 		if cmdErr != nil {
 			fmt.Println(cmd)
