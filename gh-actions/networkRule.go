@@ -37,6 +37,7 @@ func openPort() {
 		networkRuleName,
 		os.Getenv(webServiceName),
 	)
+	fmt.Println(cmd)
 	output, err := exec.Command("/bin/sh", "-c", cmd).Output()
 	fmt.Println(string(output))
 

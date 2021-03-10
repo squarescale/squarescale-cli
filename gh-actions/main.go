@@ -82,7 +82,9 @@ func scheduleWebService() {
 		os.Getenv(projectName),
 		os.Getenv(webServiceName),
 	)
-	_, err := exec.Command("/bin/sh", "-c", cmd).Output()
+	fmt.Println(cmd)
+	output, err := exec.Command("/bin/sh", "-c", cmd).Output()
+	fmt.Println(string(output))
 
 	if err != nil {
 		fmt.Println(cmd)
