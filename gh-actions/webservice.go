@@ -19,10 +19,7 @@ func (ws *Webservice) create() {
 }
 
 func createWebservice() {
-	cmdEnvValue := ""
-	if _, cmdExists := os.LookupEnv(cmdEnv); cmdExists {
-		cmdEnvValue = os.Getenv(cmdEnv)
-	}
+	cmdEnvValue := getCmdEnvValue()
 
 	cmd := fmt.Sprintf(
 		"/sqsc container add -project-name %s/%s -servicename %s -name %s:%s -username %s -password %s -run-command \"%s\"",

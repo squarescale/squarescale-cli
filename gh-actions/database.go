@@ -66,11 +66,12 @@ func insertDatabaseEnvironement() {
 		}
 
 		cmd := fmt.Sprintf(
-			"/sqsc container set -project-name %s/%s -env %s -service %s -instances 1",
+			"/sqsc container set -project-name %s/%s -env %s -service %s -instances 1 -command %s",
 			os.Getenv(organizationName),
 			os.Getenv(projectName),
 			jsonFileName,
 			os.Getenv(webServiceName),
+			getCmdEnvValue(),
 		)
 		_, cmdErr := exec.Command("/bin/sh", "-c", cmd).Output()
 
