@@ -89,3 +89,11 @@ func scheduleWebService() {
 		log.Fatal(fmt.Sprintf("Scheduling web service fails with error:\n%s", err))
 	}
 }
+
+func getCmdEnvValue() string {
+	cmdEnvValue := ""
+	if _, cmdExists := os.LookupEnv(cmdEnv); cmdExists {
+		cmdEnvValue = os.Getenv(cmdEnv)
+	}
+	return cmdEnvValue
+}
