@@ -41,6 +41,7 @@ func createDatabase() {
 		os.Getenv(dbEngineVersion),
 		os.Getenv(dbSize),
 	)
+	fmt.Println(cmd)
 	output, err := exec.Command("/bin/sh", "-c", cmd).Output()
 	fmt.Println(string(output))
 
@@ -66,6 +67,9 @@ func insertDatabaseEnvironement() {
 		if jsonErr != nil {
 			log.Fatal("Cannot write json file with map environment variables.")
 		}
+
+		o, _ := exec.Command("/bin/sh", "-c", "ls -la && cat mapEnvVar.json").Output()
+		fmt.Println(string(o))
 
 		cmd := fmt.Sprintf(
 			"/sqsc container set -project-name %s/%s -env %s -service %s -instances 1 -command \"%s\"",
