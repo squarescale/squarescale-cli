@@ -102,7 +102,7 @@ func isDabataseExists() bool {
 
 func getSQSCEnvValue(key string) string {
 	value, _ := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc env get -project-name %s/%s \"%s\" | grep -v %s",
+		"/sqsc env get -project-name %s/%s \"%s\" | grep -v %s | tr -d '\n'",
 		os.Getenv(organizationName),
 		os.Getenv(projectName),
 		key,
