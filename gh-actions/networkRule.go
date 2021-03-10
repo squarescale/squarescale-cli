@@ -16,7 +16,6 @@ const (
 
 func (er *NetworkRule) create() {
 	if !isNetworkRuleExists() {
-		fmt.Println("Opening http port...")
 		openPort()
 	} else {
 		fmt.Println("Network rule already exists.")
@@ -28,6 +27,8 @@ func openPort() {
 	if _, internalPortEnvExists := os.LookupEnv(internalPortEnv); internalPortEnvExists {
 		internalPort = os.Getenv(internalPortEnv)
 	}
+
+	fmt.Println(fmt.Sprintf("Opening %s port (http)...", internalPort))
 
 	cmd := fmt.Sprintf(
 		"/sqsc network-rule create -project-name %s/%s -external-protocol http -internal-port %s -internal-protocol http -name %s -service-name %s",
