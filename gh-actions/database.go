@@ -18,7 +18,7 @@ func (d *Database) create() {
 
 	if dbEngineExists && dbEngineVersionExists && dbEngineSizeExists {
 		if !isDabataseExists() {
-			createDatabase()
+			d.createDatabase()
 		} else {
 			fmt.Println("Database already exists.")
 		}
@@ -27,7 +27,7 @@ func (d *Database) create() {
 	}
 }
 
-func createDatabase() {
+func (d *Database) createDatabase() {
 	fmt.Println("Creating database...")
 
 	cmd := fmt.Sprintf(
@@ -56,23 +56,6 @@ func isDabataseExists() bool {
 	)).Output()
 
 	return databaseNotExists == nil
-}
-
-func getSQSCEnvValue(key string) string {
-	value, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc env get -project-name %s/%s \"%s\" | grep -v %s | tr -d '\n'",
-		os.Getenv(organizationName),
-		os.Getenv(projectName),
-		key,
-		"...done",
-	)).Output()
-
-	if err != nil {
-		fmt.Println(fmt.Sprintf("Environment variable %q does not exists in this project.", key))
-		return ""
-	}
-
-	return string(value)
 }
 
 func mapDatabaseEnv(env string) string {
