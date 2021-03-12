@@ -26,6 +26,7 @@ const (
 	cmdEnv              = "CMD"
 	internalPortEnv     = "INTERNAL_PORT"
 	mapEnvVar           = "MAP_ENV_VAR"
+	batchesEnv          = "BATCHES"
 )
 
 func main() {
@@ -43,8 +44,11 @@ func main() {
 	database := Database{}
 	database.create()
 
-	envVar := EnvVar{}
-	envVar.create()
+	serviceEnv := ServiceEnv{}
+	serviceEnv.create()
+
+	batches := Batches{}
+	batches.create()
 
 	scheduleWebService()
 }

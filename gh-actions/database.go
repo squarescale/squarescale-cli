@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 	"os/exec"
+
+	"github.com/hoisie/mustache"
 )
 
 type Database struct{}
@@ -54,4 +56,29 @@ func isDabataseExists() bool {
 	)).Output()
 
 	return databaseNotExists == nil
+}
+
+func getSQSCEnvValue(key string) string {
+	value, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
+		"/sqsc env get -project-name %s/%s \"%s\" | grep -v %s | tr -d '\n'",
+		os.Getenv(organizationName),
+		os.Getenv(projectName),
+		key,
+		"...done",
+	)).Output()
+
+	if err != nil {
+		fmt.Println(fmt.Sprintf("Environment variable %q does not exists in this project.", key))
+		return ""
+	}
+
+	return string(value)
+}
+
+func mapDatabaseEnv(env string) string {
+	return mustache.Render(os.Getenv(mapEnvVar), map[string]string{
+		"DB_HOST":     getSQSCEnvValue("DB_HOST"),
+		"DB_USERNAME": getSQSCEnvValue("DB_USERNAME"),
+		"DB_PASSWORD": getSQSCEnvValue("DB_PASSWORD"),
+	})
 }
