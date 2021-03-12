@@ -29,6 +29,10 @@ func (ev *EnvVar) create() {
 			log.Fatal("Cannot write json file with map environment variables.")
 		}
 
+		fmt.Println("The json generated looks like:")
+		jsonOutput, _ := exec.Command("/bin/sh", "-c", fmt.Sprintf("cat %s", jsonFileName)).Output()
+		fmt.Println(string(jsonOutput))
+
 		instancesNumber := "1"
 
 		cmd := fmt.Sprintf(
