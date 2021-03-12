@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 )
@@ -33,14 +32,7 @@ func (ws *Webservice) createWebservice() {
 		os.Getenv(dockerToken),
 		cmdEnvValue,
 	)
-	fmt.Println(cmd)
-	output, err := exec.Command("/bin/sh", "-c", cmd).Output()
-	fmt.Println(string(output))
-
-	if err != nil {
-		fmt.Println(cmd)
-		log.Fatal(fmt.Sprintf("Creating web service fails with error:\n %s", err))
-	}
+	executeCommand(cmd, fmt.Sprintf("Fail to import service %q.", os.Getenv(webServiceName)))
 }
 
 func isWebserviceExists() bool {

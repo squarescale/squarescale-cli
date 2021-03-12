@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 )
 
 type Batches struct{}
@@ -40,13 +39,7 @@ func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 		batchName,
 		batchContent.Cmd,
 	)
-	output, err := exec.Command("/bin/sh", "-c", cmd).Output()
-
-	if err != nil {
-		log.Fatal(fmt.Sprintf("Fail to add batch %q", batchName))
-	}
-
-	fmt.Println(output)
+	executeCommand(cmd, fmt.Sprintf("Fail to add batch %q.", batchName))
 }
 
 func (b *Batches) insertBatchEnv(batchName string, env map[string]interface{}) {
@@ -55,7 +48,7 @@ func (b *Batches) insertBatchEnv(batchName string, env map[string]interface{}) {
 		jsonErr := ioutil.WriteFile(jsonFileName, []byte(mapDatabaseEnv(os.Getenv(batchesEnv))), os.ModePerm)
 
 		if jsonErr != nil {
-			log.Fatal(fmt.Sprintf("Cannot write json file with env for batch %q", batchName))
+			log.Fatal(fmt.Sprintf("Cannot write json file with env for batch %q.", batchName))
 		}
 
 		cmd := fmt.Sprintf(
@@ -65,13 +58,6 @@ func (b *Batches) insertBatchEnv(batchName string, env map[string]interface{}) {
 			batchName,
 			jsonFileName,
 		)
-		fmt.Println(cmd)
-		output, err := exec.Command("/bin/sh", "-c", cmd).Output()
-
-		if err != nil {
-			log.Fatal("Fail to insert batch env.")
-		}
-
-		fmt.Println(output)
+		executeCommand(cmd, "Fail to insert batch env.")
 	}
 }

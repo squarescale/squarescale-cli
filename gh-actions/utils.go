@@ -2,9 +2,21 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 )
+
+func executeCommand(cmd string, errorMsg string) {
+	fmt.Println(cmd)
+	output, err := exec.Command("/bin/sh", "-c", cmd).Output()
+
+	if err != nil {
+		log.Fatal(errorMsg)
+	}
+
+	fmt.Println(output)
+}
 
 func getSQSCEnvValue(key string) string {
 	value, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
