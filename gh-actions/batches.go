@@ -42,14 +42,19 @@ func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 	executeCommand(cmd, fmt.Sprintf("Fail to add batch %q.", batchName))
 }
 
-func (b *Batches) insertBatchEnv(batchName string, env map[string]interface{}) {
-	if len(env) != 0 {
+func (b *Batches) insertBatchEnv(batchName string, batchContentEnv map[string]interface{}) {
+	if len(batchContentEnv) != 0 {
 		jsonFileName := "batchEnvVar.json"
-		jsonErr := ioutil.WriteFile(jsonFileName, []byte(mapDatabaseEnv(os.Getenv(batchesEnv))), os.ModePerm)
+		d, _ := json.Marshal(batchContentEnv)
+		data := mapDatabaseEnv(string(d))
+		jsonErr := ioutil.WriteFile(jsonFileName, []byte(data), os.ModePerm)
 
 		if jsonErr != nil {
 			log.Fatal(fmt.Sprintf("Cannot write json file with env for batch %q.", batchName))
 		}
+
+		//TODO: remove next line juste below
+		executeCommand(fmt.Sprintf("cat %s", jsonFileName), fmt.Sprintf("Fail to cat %s", jsonFileName))
 
 		cmd := fmt.Sprintf(
 			"./sqsc batch set -project-name %s/%s -batch-name %s -env %s",
