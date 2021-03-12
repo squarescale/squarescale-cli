@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 
@@ -38,14 +37,7 @@ func (d *Database) createDatabase() {
 		os.Getenv(dbEngineVersion),
 		os.Getenv(dbSize),
 	)
-	fmt.Println(cmd)
-	output, err := exec.Command("/bin/sh", "-c", cmd).Output()
-	fmt.Println(string(output))
-
-	if err != nil {
-		fmt.Println(cmd)
-		log.Fatal(fmt.Sprintf("Creating database fails with error:\n %s", err))
-	}
+	executeCommand(cmd, "Fail to create database.")
 }
 
 func isDabataseExists() bool {

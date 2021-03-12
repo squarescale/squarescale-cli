@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 )
@@ -29,14 +28,7 @@ func (p *Project) createProject() {
 		os.Getenv(iaasProvider),
 		os.Getenv(iaasRegion),
 	)
-	fmt.Println(cmd)
-	output, err := exec.Command("/bin/sh", "-c", cmd).Output()
-	fmt.Println(string(output))
-
-	if err != nil {
-		fmt.Println(cmd)
-		log.Fatal(fmt.Sprintf("Creating project fails with error:\n %s", err))
-	}
+	executeCommand(cmd, fmt.Sprintf("Fail to create project %q.", os.Getenv(projectName)))
 }
 
 func isProjectExists() bool {

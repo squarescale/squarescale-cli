@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 )
 
 type ServiceEnv struct{}
@@ -32,13 +31,6 @@ func (ev *ServiceEnv) create() {
 			instancesNumber,
 			getCmdEnvValue(),
 		)
-		fmt.Println(cmd)
-		output, cmdErr := exec.Command("/bin/sh", "-c", cmd).Output()
-		fmt.Println(string(output))
-
-		if cmdErr != nil {
-			fmt.Println(cmd)
-			log.Fatal("Fail to import database environment variables.")
-		}
+		executeCommand(cmd, fmt.Sprintf("Fail to import service %q environment variables.", os.Getenv(webServiceName)))
 	}
 }
