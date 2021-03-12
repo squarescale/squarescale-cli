@@ -11,13 +11,13 @@ type Webservice struct{}
 
 func (ws *Webservice) create() {
 	if !isWebserviceExists() {
-		createWebservice()
+		ws.createWebservice()
 	} else {
 		fmt.Println("Service already exists.")
 	}
 }
 
-func createWebservice() {
+func (ws *Webservice) createWebservice() {
 	fmt.Println("Creating web service...")
 
 	cmdEnvValue := getCmdEnvValue()

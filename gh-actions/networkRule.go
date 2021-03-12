@@ -14,15 +14,15 @@ const (
 	defaultInternalPort = "80"
 )
 
-func (er *NetworkRule) create() {
+func (nr *NetworkRule) create() {
 	if !isNetworkRuleExists() {
-		openPort()
+		nr.openPort()
 	} else {
 		fmt.Println("Network rule already exists.")
 	}
 }
 
-func openPort() {
+func (nr *NetworkRule) openPort() {
 	internalPort := defaultInternalPort
 	if _, internalPortEnvExists := os.LookupEnv(internalPortEnv); internalPortEnvExists {
 		internalPort = os.Getenv(internalPortEnv)

@@ -11,13 +11,13 @@ type Project struct{}
 
 func (p *Project) create() {
 	if !isProjectExists() {
-		createProject()
+		p.createProject()
 	} else {
 		fmt.Println("Project already exists.")
 	}
 }
 
-func createProject() {
+func (p *Project) createProject() {
 	fmt.Println("Creating project...")
 
 	cmd := fmt.Sprintf(
