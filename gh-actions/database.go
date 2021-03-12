@@ -51,7 +51,7 @@ func isDabataseExists() bool {
 }
 
 func mapDatabaseEnv(env string) string {
-	return mustache.Render(os.Getenv(mapEnvVar), map[string]string{
+	return mustache.Render(env, map[string]string{
 		"DB_HOST":     getSQSCEnvValue("DB_HOST"),
 		"DB_USERNAME": getSQSCEnvValue("DB_USERNAME"),
 		"DB_PASSWORD": getSQSCEnvValue("DB_PASSWORD"),
