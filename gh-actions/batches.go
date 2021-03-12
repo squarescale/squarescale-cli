@@ -17,8 +17,6 @@ type BatchContent struct {
 }
 
 func (b *Batches) create() {
-	os.Setenv(batchesEnv, `{"database-setup": {"cmd": "bundle exec rails db:setup","env": {"a": "a", "b": "b"}}, "database-seed": {"cmd": "bundle exec rails db:sogilis:seed"}}`)
-
 	if _, exists := os.LookupEnv(batchesEnv); exists {
 		var batches map[string]BatchContent
 		json.Unmarshal([]byte(os.Getenv(batchesEnv)), &batches)
