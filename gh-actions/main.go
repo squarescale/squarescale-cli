@@ -43,6 +43,9 @@ func main() {
 	database := Database{}
 	database.create()
 
+	envVar := EnvVar{}
+	envVar.create()
+
 	scheduleWebService()
 }
 
