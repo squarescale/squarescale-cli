@@ -272,3 +272,23 @@ func optionsFromFlags(fs *flag.FlagSet) string {
 
 	return res
 }
+
+func batchRunCmdFlag(f *flag.FlagSet) *string {
+	return f.String("command", "", "Command to run when starting batch (override)")
+}
+
+func batchLimitMemoryFlag(f *flag.FlagSet) *int {
+	return f.Int("memory", -1, "This is the maximum amount of memory your batch will be able to use until it is killed and restarted automatically.")
+}
+
+func batchLimitCPUFlag(f *flag.FlagSet) *int {
+	return f.Int("cpu", -1, "This is an indicative limit of how much CPU your batch requires.")
+}
+
+func batchLimitNetFlag(f *flag.FlagSet) *int {
+	return f.Int("net", -1, "This is an indicative limit of how much network bandwidth your batch requires.")
+}
+
+func batchNoRunCmdFlag(f *flag.FlagSet) *bool {
+	return f.Bool("no-command", false, "Disable command override")
+}

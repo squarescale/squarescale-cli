@@ -36,6 +36,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"batch set": func() (cli.Command, error) {
+			return &command.BatchSetCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"cluster": func() (cli.Command, error) {
 			return &command.ClusterCommand{}, nil
 		},
@@ -104,7 +109,7 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 			}, nil
 		},
 		"container set": func() (cli.Command, error) {
-			return &command.ContainerSetCommand{
+			return &command.BatchSetCommand{
 				Meta: *meta,
 			}, nil
 		},

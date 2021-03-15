@@ -2,8 +2,12 @@ package squarescale
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"os"
+
+	"github.com/squarescale/logger"
 )
 
 // Common
@@ -85,23 +89,14 @@ func (c *Client) CreateBatch(uuid string, batchOrderContent BatchOrder) (Created
 // Get Batch part
 type RunningBatch struct {
 	BatchCommon
-	CustomEnvironment  BatchCustomEnvironment  `json:"custom_environment"`
-	DefaultEnvironment BatchDefaultEnvironment `json:"default_environment"`
-	RunCommand         string                  `json:"run_command"`
-	Status             BatchStatus             `json:"status"`
-	DockerImage        BatchDockerImage        `json:"docker_image"`
-	RefreshUrl         string                  `json:"refresh_url"`
-	Volumes            []VolumeToBind          `json:"volumes"`
+	CustomEnvironment  map[string]string `json:"custom_environment"`
+	DefaultEnvironment map[string]string `json:"default_environment"`
+	RunCommand         string            `json:"run_command"`
+	Status             BatchStatus       `json:"status"`
+	DockerImage        BatchDockerImage  `json:"docker_image"`
+	RefreshUrl         string            `json:"refresh_url"`
+	Volumes            []VolumeToBind    `json:"volumes"`
 }
-
-type BatchCustomEnvironment struct {
-	CustomEnvironmentValue string `json:"custom_environment"`
-}
-
-type BatchDefaultEnvironment struct {
-	DefaultEnvironmentValue string `json:"default_environment"`
-}
-
 type BatchStatus struct {
 	Infra    string        `json:"display_infra_status"`
 	Schedule BatchSchedule `json:"schedule"`
@@ -178,4 +173,81 @@ func (c *Client) ExecuteBatch(projectUUID, name string) error {
 	}
 
 	return nil
+}
+
+func (c *Client) GetBatchesInfo(projectUUID, name string) (RunningBatch, error) {
+	batches, err := c.GetBatches(projectUUID)
+	if err != nil {
+		return RunningBatch{}, err
+	}
+
+	for _, batch := range batches {
+		if batch.BatchCommon.Name == name {
+			return batch, nil
+		}
+	}
+
+	return RunningBatch{}, fmt.Errorf("Batch %q not found for project %q", name, projectUUID)
+}
+
+func (c *RunningBatch) SetEnv(path string) error {
+	var env map[string]string
+
+	file, err := os.Open(path)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Some error happened when reading env file : %s", err))
+	}
+
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&env)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Some error happened when unmarshall env file : %s", err))
+	}
+
+	for k, v := range env {
+		c.CustomEnvironment[k] = v
+	}
+	return nil
+}
+
+// ConfigBatch calls the API to update command.
+func (c *Client) ConfigBatch(batch RunningBatch, projectUUID string) error {
+	payload := JSONObject{}
+	if len(batch.RunCommand) != 0 {
+		payload["run_command"] = batch.RunCommand
+	}
+	limits := JSONObject{}
+	if batch.Limits.Memory >= 0 {
+		limits["mem"] = batch.Limits.Memory
+	}
+	if batch.Limits.CPU >= 0 {
+		limits["cpu"] = batch.Limits.CPU
+	}
+	if batch.Limits.IOPS >= 0 {
+		limits["iops"] = batch.Limits.IOPS
+	}
+	if batch.Limits.NET >= 0 {
+		limits["net"] = batch.Limits.NET
+	}
+	payload["limits"] = limits
+	if batch.CustomEnvironment != nil {
+		payload["custom_environment"] = batch.CustomEnvironment
+	}
+
+	logger.Debug.Println("Json payload : ", payload)
+	code, body, err := c.put(fmt.Sprintf("/projects/%s/batches/%s", projectUUID, batch.BatchCommon.Name), payload)
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusOK:
+		return nil
+	case http.StatusNotFound:
+		return errors.New("Batch does not exist")
+	default:
+		return unexpectedHTTPError(code, body)
+	}
 }

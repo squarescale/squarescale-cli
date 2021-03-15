@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// BatchSetCommand allows to configure a project batch.
+// BatchSetCommand allows to configure a project container.
 type BatchSetCommand struct {
 	Meta
 	flagSet *flag.FlagSet
@@ -61,20 +61,16 @@ func (c *BatchSetCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
-		batch, err := client.GetBatchInfo(UUID, *batchArg)
+		batch, err := client.GetBatchesInfo(UUID, *batchArg)
 		if err != nil {
 			return "", err
 		}
 
 		c.Meta.spin.Stop()
 		c.Meta.info("")
-
 		if *runCmdArg != "" {
 			c.info("Configure batch with run command: %s", *runCmdArg)
 			batch.RunCommand = *runCmdArg
-			if len(batch.RunCommand) == 0 {
-				batch.RunCommand = ""
-			}
 		}
 		if *noRunCmdArg {
 			c.info("Configure batch without run command")
@@ -98,6 +94,7 @@ func (c *BatchSetCommand) Run(args []string) int {
 			c.info("Configure batch with network bandwidth limit of %d Mbps", *limitNetArg)
 			batch.Limits.NET = *limitNetArg
 		}
+
 		if *envCmdArg != "" {
 			c.info("Configure batch with some env")
 			err := batch.SetEnv(*envCmdArg)
@@ -111,7 +108,7 @@ func (c *BatchSetCommand) Run(args []string) int {
 			*batchArg, *projectUUID)
 
 		c.Meta.spin.Start()
-		return msg, client.ConfigBatch(batch)
+		return msg, client.ConfigBatch(batch, UUID)
 	})
 }
 
@@ -126,12 +123,13 @@ func (c *BatchSetCommand) Help() string {
 usage: sqsc batch set [options]
 
   Set batch runtime parameters for project.
-  Batches are specified using their given name.
+  Batch are specified using their given name.
 
 Example:
-  sqsc batch set                \
-      -project="my-rails-project"   \
-      -batch-name="my-name/my-repo"  \
-      -e env.json`
+  sqsc batch set                       \
+      -project-name my-rails-project   \
+			-batch-name my-batch             \
+      -e env.json
+`
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

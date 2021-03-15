@@ -165,13 +165,13 @@ func nominalCaseOnGetBatches(t *testing.T) {
 	}
 
 	expectedString = "final-environment"
-	if batches[0].CustomEnvironment.CustomEnvironmentValue != expectedString {
-		t.Errorf("Expected batches.CustomEnvironment to be '%s', but got '%s' instead", expectedString, batches[0].CustomEnvironment.CustomEnvironmentValue)
+	if batches[0].CustomEnvironment["custom_environment"] != expectedString {
+		t.Errorf("Expected batches.CustomEnvironment to be '%s', but got '%s' instead", expectedString, batches[0].CustomEnvironment["custom_environment"])
 	}
 
 	expectedString = "basic-environment"
-	if batches[0].DefaultEnvironment.DefaultEnvironmentValue != expectedString {
-		t.Errorf("Expected batches.DefaultEnvironment to be '%s', but got '%s' instead", expectedString, batches[0].DefaultEnvironment.DefaultEnvironmentValue)
+	if batches[0].DefaultEnvironment["default_environment"] != expectedString {
+		t.Errorf("Expected batches.CustomEnvironment to be '%s', but got '%s' instead", expectedString, batches[0].CustomEnvironment["default_environment"])
 	}
 
 	expectedString = "command1"
