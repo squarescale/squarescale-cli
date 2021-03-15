@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+
+	"github.com/squarescale/logger"
 )
 
 type ServiceEnv struct {
@@ -119,7 +121,7 @@ func (c *Client) GetServicesInfo(projectUUID, name string) (Service, error) {
 // ConfigService calls the API to update the number of instances and update command.
 func (c *Client) ConfigService(service Service) error {
 	cont := JSONObject{}
-	if service.RunCommand != nil {
+	if len(service.RunCommand) != 0 {
 		cont["run_command"] = service.RunCommand
 	}
 	if service.Size > 0 {
@@ -144,6 +146,7 @@ func (c *Client) ConfigService(service Service) error {
 	}
 
 	payload := &JSONObject{"container": cont}
+	logger.Debug.Println("Json payload : ", payload)
 	code, body, err := c.put(fmt.Sprintf("/containers/%d", service.ID), payload)
 	if err != nil {
 		return err
