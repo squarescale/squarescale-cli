@@ -23,6 +23,7 @@ func (b *Batches) create() {
 		for batchName, batchContent := range batches {
 			b.createBatch(batchName, batchContent)
 			b.insertBatchEnv(batchName, batchContent.Env)
+			b.executeBatch(batchName)
 		}
 	}
 }
@@ -65,4 +66,16 @@ func (b *Batches) insertBatchEnv(batchName string, batchContentEnv map[string]in
 		)
 		executeCommand(cmd, "Fail to insert batch env.")
 	}
+}
+
+func (b *Batches) executeBatch(batchName string) {
+	fmt.Println(fmt.Sprintf("Executing batch %q ...", batchName))
+
+	cmd := fmt.Sprintf(
+		"/sqsc batch exec -project-name %s/%s %s",
+		os.Getenv(organizationName),
+		os.Getenv(projectName),
+		batchName,
+	)
+	executeCommand(cmd, fmt.Sprintf("Fail to execute batch %q", batchName))
 }
