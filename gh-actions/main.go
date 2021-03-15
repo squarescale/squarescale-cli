@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"os/exec"
 )
 
 const (
@@ -72,8 +70,7 @@ func checkEnvironmentVariablesExists() {
 	}
 
 	for _, envVar := range envVars {
-		_, exists := os.LookupEnv(envVar)
-		if !exists {
+		if _, exists := os.LookupEnv(envVar); !exists {
 			fmt.Println(fmt.Sprintf("%s is not set. Quitting.", envVar))
 			os.Exit(1)
 		}
@@ -89,12 +86,5 @@ func scheduleWebService() {
 		os.Getenv(projectName),
 		os.Getenv(webServiceName),
 	)
-	fmt.Println(cmd)
-	output, err := exec.Command("/bin/sh", "-c", cmd).Output()
-	fmt.Println(string(output))
-
-	if err != nil {
-		fmt.Println(cmd)
-		log.Fatal(fmt.Sprintf("Scheduling web service fails with error:\n%s", err))
-	}
+	executeCommand(cmd, "Fail to schedule web service")
 }

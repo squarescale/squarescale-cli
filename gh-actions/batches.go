@@ -12,7 +12,7 @@ type Batches struct{}
 
 type BatchContent struct {
 	Cmd string
-	Env map[string]interface{}
+	Env map[string]string
 }
 
 func (b *Batches) create() {
@@ -29,6 +29,8 @@ func (b *Batches) create() {
 }
 
 func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
+	fmt.Println(fmt.Sprintf("Creating batch %q", batchName))
+
 	cmd := fmt.Sprintf(
 		"/sqsc batch add -project-name %s/%s -imageName %s:%s -imagePrivate -imageUser %s -imagePwd %s -name %s -run-command %s",
 		os.Getenv(organizationName),
@@ -43,8 +45,10 @@ func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 	executeCommand(cmd, fmt.Sprintf("Fail to add batch %q.", batchName))
 }
 
-func (b *Batches) insertBatchEnv(batchName string, batchContentEnv map[string]interface{}) {
+func (b *Batches) insertBatchEnv(batchName string, batchContentEnv map[string]string) {
 	if len(batchContentEnv) != 0 {
+		fmt.Println(fmt.Sprintf("Inserting environment variable to batch %q", batchName))
+
 		jsonFileName := "batchEnvVar.json"
 		d, _ := json.Marshal(batchContentEnv)
 		data := mapDatabaseEnv(string(d))
