@@ -11,7 +11,7 @@ type ServiceEnv struct{}
 
 func (ev *ServiceEnv) create() {
 	if _, exists := os.LookupEnv(mapEnvVar); exists {
-		fmt.Println("Inserting database environment variables...")
+		fmt.Println("Inserting service environment variables...")
 
 		jsonFileName := "serviceEnvVar.json"
 		jsonErr := ioutil.WriteFile(jsonFileName, []byte(mapDatabaseEnv(os.Getenv(mapEnvVar))), os.ModePerm)
