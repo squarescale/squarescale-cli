@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kballard/go-shellquote"
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
@@ -63,7 +62,7 @@ func (c *ContainerShowCommand) Run(args []string) int {
 			tbl := ""
 			tbl += fmt.Sprintf("Name:\t%s\n", co.Name)
 			tbl += fmt.Sprintf("Size:\t%d/%d\n", co.Running, co.Size)
-			tbl += fmt.Sprintf("Run Command:\t%s\n", shellquote.Join(co.RunCommand...))
+			tbl += fmt.Sprintf("Run Command:\t%s\n", co.RunCommand)
 			tbl += fmt.Sprintf("Web Port:\t%d\n", co.WebPort)
 			tbl += fmt.Sprintf("Memory limit:\t%d MB\n", co.Limits.Memory)
 			tbl += fmt.Sprintf("CPU limit:\t%d MHz\n", co.Limits.CPU)

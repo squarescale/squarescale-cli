@@ -93,7 +93,7 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			if err != nil {
 				return "", err
 			}
-			if container.RunCommand == nil {
+			if len(container.RunCommand) == 0 {
 				container.RunCommand = []string{}
 			}
 		}
