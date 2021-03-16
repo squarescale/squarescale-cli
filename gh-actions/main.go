@@ -28,6 +28,7 @@ const (
 )
 
 func main() {
+	fmt.Println("gh-action version 0.0.1")
 	checkEnvironmentVariablesExists()
 
 	project := Project{}
