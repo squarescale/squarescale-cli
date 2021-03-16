@@ -55,5 +55,6 @@ func mapDatabaseEnv(env string) string {
 		"DB_HOST":     getSQSCEnvValue("DB_HOST"),
 		"DB_USERNAME": getSQSCEnvValue("DB_USERNAME"),
 		"DB_PASSWORD": getSQSCEnvValue("DB_PASSWORD"),
+		"DB_NAME":     getSQSCEnvValue("DB_NAME"),
 	})
 }

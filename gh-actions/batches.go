@@ -28,6 +28,8 @@ func (b *Batches) create() {
 		for batchName, batchContent := range batches {
 			if !isBatchExists(batchName) {
 				b.createBatch(batchName, batchContent)
+			} else {
+				fmt.Println(fmt.Sprintf("Batch %q already exists.", batchName))
 			}
 
 			b.insertBatchEnv(batchName, batchContent.Env)
