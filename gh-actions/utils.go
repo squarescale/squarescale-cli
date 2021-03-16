@@ -12,6 +12,7 @@ func executeCommand(cmd string, errorMsg string) {
 	output, err := exec.Command("/bin/sh", "-c", cmd).Output()
 
 	if err != nil {
+		fmt.Println(string(output))
 		log.Fatal(errorMsg)
 	}
 
