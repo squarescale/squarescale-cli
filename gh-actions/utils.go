@@ -15,7 +15,7 @@ func executeCommand(cmd string, errorMsg string) {
 		log.Fatal(errorMsg)
 	}
 
-	fmt.Println(output)
+	fmt.Println(string(output))
 }
 
 func getSQSCEnvValue(key string) string {
