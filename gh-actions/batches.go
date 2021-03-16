@@ -18,7 +18,11 @@ type BatchContent struct {
 func (b *Batches) create() {
 	if _, exists := os.LookupEnv(batchesEnv); exists {
 		var batches map[string]BatchContent
-		json.Unmarshal([]byte(os.Getenv(batchesEnv)), &batches)
+
+		err := json.Unmarshal([]byte(os.Getenv(batchesEnv)), &batches)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		for batchName, batchContent := range batches {
 			b.createBatch(batchName, batchContent)
