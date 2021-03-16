@@ -25,6 +25,8 @@ func (b *Batches) create() {
 			b.insertBatchEnv(batchName, batchContent.Env)
 			b.executeBatch(batchName)
 		}
+	} else {
+		fmt.Println(fmt.Sprintf("Env var %q no set.", batchesEnv))
 	}
 }
 
