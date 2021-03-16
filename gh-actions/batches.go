@@ -20,7 +20,6 @@ func (b *Batches) create() {
 		var batches map[string]BatchContent
 
 		err := json.Unmarshal([]byte(os.Getenv(batchesEnv)), &batches)
-		fmt.Println(os.Getenv(batchesEnv))
 		if err != nil {
 			log.Fatal(fmt.Sprintf("Error when Unmarshal: %s", err))
 		}
@@ -37,7 +36,7 @@ func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 	fmt.Println(fmt.Sprintf("Creating batch %q", batchName))
 
 	cmd := fmt.Sprintf(
-		"/sqsc batch add -project-name %s/%s -imageName %s:%s -imagePrivate -imageUser %s -imagePwd %s -name %s -run-command %s",
+		"/sqsc batch add -project-name %s/%s -imageName %s:%s -imagePrivate -imageUser %s -imagePwd %s -name %s -run-command \"%s\"",
 		os.Getenv(organizationName),
 		os.Getenv(projectName),
 		os.Getenv(dockerRepository),
