@@ -20,8 +20,9 @@ func (b *Batches) create() {
 		var batches map[string]BatchContent
 
 		err := json.Unmarshal([]byte(os.Getenv(batchesEnv)), &batches)
+		fmt.Println(os.Getenv(batchesEnv))
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(fmt.Sprintf("Error when Unmarshal: %s", err))
 		}
 
 		for batchName, batchContent := range batches {
