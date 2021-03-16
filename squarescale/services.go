@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/squarescale/logger"
 )
@@ -18,6 +19,19 @@ type ServiceEnv struct {
 
 // Service describes a project container as returned by the SquareScale API
 type Service struct {
+	ID               int           `json:"container_id"`
+	Name             string        `json:"name"`
+	RunCommand       string        `json:"run_command"`
+	Entrypoint       string        `json:"entrypoint"`
+	Running          int           `json:"running"`
+	Size             int           `json:"size"`
+	WebPort          int           `json:"web_port"`
+	RefreshCallbacks []string      `json:"refresh_callbacks"`
+	Limits           ServiceLimits `json:"limits"`
+	CustomEnv        []ServiceEnv  `json:"custom_environment"`
+}
+
+type ServiceBody struct {
 	ID               int           `json:"container_id"`
 	Name             string        `json:"name"`
 	RunCommand       []string      `json:"run_command"`
@@ -79,13 +93,31 @@ func (c *Client) GetServices(projectUUID string) ([]Service, error) {
 		return []Service{}, unexpectedHTTPError(code, body)
 	}
 
-	var containersByID []Service
+	var servicesBody []ServiceBody
 
-	if err := json.Unmarshal(body, &containersByID); err != nil {
+	if err := json.Unmarshal(body, &servicesBody); err != nil {
 		return []Service{}, err
 	}
 
-	return containersByID, nil
+	var services []Service
+
+	for _, c := range servicesBody {
+		service := &Service{
+			ID:               c.ID,
+			Name:             c.Name,
+			RunCommand:       strings.Join(c.RunCommand, " "),
+			Entrypoint:       c.Entrypoint,
+			Running:          c.Running,
+			Size:             c.Size,
+			WebPort:          c.WebPort,
+			RefreshCallbacks: c.RefreshCallbacks,
+			Limits:           c.Limits,
+			CustomEnv:        c.CustomEnv,
+		}
+		services = append(services, *service)
+	}
+
+	return services, nil
 }
 
 // GetServicesInfo get the service of a project based on its name.

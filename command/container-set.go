@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kballard/go-shellquote"
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
@@ -89,17 +88,14 @@ func (c *ContainerSetCommand) Run(args []string) int {
 
 		if *runCmdArg != "" {
 			c.info("Configure service with run command: %s", *runCmdArg)
-			container.RunCommand, err = shellquote.Split(*runCmdArg)
-			if err != nil {
-				return "", err
-			}
+			container.RunCommand = *runCmdArg
 			if len(container.RunCommand) == 0 {
-				container.RunCommand = []string{}
+				container.RunCommand = ""
 			}
 		}
 		if *noRunCmdArg {
 			c.info("Configure service without run command")
-			container.RunCommand = []string{}
+			container.RunCommand = ""
 		}
 
 		if *entrypoint != "" {

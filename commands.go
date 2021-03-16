@@ -109,7 +109,7 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 			}, nil
 		},
 		"container set": func() (cli.Command, error) {
-			return &command.BatchSetCommand{
+			return &command.ContainerSetCommand{
 				Meta: *meta,
 			}, nil
 		},
