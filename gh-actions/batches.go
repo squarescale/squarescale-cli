@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 )
 
 type Batches struct{}
@@ -25,7 +26,10 @@ func (b *Batches) create() {
 		}
 
 		for batchName, batchContent := range batches {
-			b.createBatch(batchName, batchContent)
+			if !isBatchExists(batchName) {
+				b.createBatch(batchName, batchContent)
+			}
+
 			b.insertBatchEnv(batchName, batchContent.Env)
 			b.executeBatch(batchName)
 		}
@@ -86,4 +90,15 @@ func (b *Batches) executeBatch(batchName string) {
 		batchName,
 	)
 	executeCommand(cmd, fmt.Sprintf("Fail to execute batch %q", batchName))
+}
+
+func isBatchExists(batchName string) bool {
+	_, batchNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
+		"/sqsc batch list -project-name %s/%s | grep %s",
+		os.Getenv(organizationName),
+		os.Getenv(projectName),
+		batchName,
+	)).Output()
+
+	return batchNotExists == nil
 }
