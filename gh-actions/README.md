@@ -19,8 +19,6 @@ This image is pushed to Squarescale docker hub through the tag name `gh-actions`
 | Name | Description | Type |
 | ---- | ----------- | ---- |
 | SQSC_TOKEN | The API key to access Squarescale via CLI  | string
-| DOCKER_USER | A docker hub username | string
-| DOCKER_TOKEN | A docker hub password | string
 | DOCKER_REPOSITORY | The docker hub repository image name of your application | string
 | DOCKER_REPOSITORY_TAG | The docker hub repository image name tag of your application | string
 | PROJECT_NAME | The name of the project you want to create. | string
@@ -33,6 +31,8 @@ This image is pushed to Squarescale docker hub through the tag name `gh-actions`
 
 | Name | Description | Type |
 | ---- | ----------- | ---- |
+| DOCKER_USER | A docker hub username | string
+| DOCKER_TOKEN | A docker hub password | string
 | ORGANIZATION_NAME | The organization name you belong to. | string
 
 #### Database

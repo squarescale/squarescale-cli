@@ -32,8 +32,6 @@ func checkEnvironmentVariablesExists() {
 
 	envVars := []string{
 		sqscToken,
-		dockerUser,
-		dockerToken,
 		dockerRepository,
 		dockerRepositoryTag,
 		projectName,
@@ -76,4 +74,10 @@ func isNetworkRuleExists(networkRuleName string, serviceName string) bool {
 	)).Output()
 
 	return networkRuleNotExists == nil
+}
+
+func isUsingPrivateRepository() bool {
+	_, dockerUserEnvExists := os.LookupEnv(dockerUser)
+	_, dockerTokenEnvExists := os.LookupEnv(dockerToken)
+	return dockerUserEnvExists && dockerTokenEnvExists
 }
