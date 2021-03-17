@@ -36,10 +36,14 @@ func getSQSCEnvValue(key string) string {
 	return string(value)
 }
 
-func getCmdEnvValue() string {
-	cmdEnvValue := ""
-	if _, cmdExists := os.LookupEnv(cmdEnv); cmdExists {
-		cmdEnvValue = os.Getenv(cmdEnv)
-	}
-	return cmdEnvValue
+func isNetworkRuleExists(networkRuleName string, serviceName string) bool {
+	_, networkRuleNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
+		"/sqsc network-rule list -project-name %s/%s -service-name %s | grep %s",
+		os.Getenv(organizationName),
+		os.Getenv(projectName),
+		serviceName,
+		networkRuleName,
+	)).Output()
+
+	return networkRuleNotExists == nil
 }
