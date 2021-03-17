@@ -42,15 +42,27 @@ func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 	fmt.Println(fmt.Sprintf("Creating %q batch...", batchName))
 
 	cmd := fmt.Sprintf(
-		"/sqsc batch add -project-name %s -imageName %s:%s -imagePrivate -imageUser %s -imagePwd %s -name %s -run-command \"%s\"",
+		"/sqsc batch add -project-name %s -imageName %s:%s -name %s -run-command \"%s\"",
 		getProjectName(),
 		os.Getenv(dockerRepository),
 		os.Getenv(dockerRepositoryTag),
-		os.Getenv(dockerUser),
-		os.Getenv(dockerToken),
 		batchName,
 		batchContent.RUN_CMD,
 	)
+
+	if isUsingPrivateRepository() {
+		cmd = fmt.Sprintf(
+			"/sqsc batch add -project-name %s -imageName %s:%s -imagePrivate -imageUser %s -imagePwd %s -name %s -run-command \"%s\"",
+			getProjectName(),
+			os.Getenv(dockerRepository),
+			os.Getenv(dockerRepositoryTag),
+			os.Getenv(dockerUser),
+			os.Getenv(dockerToken),
+			batchName,
+			batchContent.RUN_CMD,
+		)
+	}
+
 	executeCommand(cmd, fmt.Sprintf("Fail to add %q batch.", batchName))
 }
 
