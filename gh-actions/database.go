@@ -30,9 +30,8 @@ func (d *Database) createDatabase() {
 	fmt.Println("Creating database...")
 
 	cmd := fmt.Sprintf(
-		"/sqsc db set -project-name %s/%s -engine \"%s\" -engine-version \"%s\" -size \"%s\" -yes",
-		os.Getenv(organizationName),
-		os.Getenv(projectName),
+		"/sqsc db set -project-name %s -engine \"%s\" -engine-version \"%s\" -size \"%s\" -yes",
+		getProjectName(),
 		os.Getenv(dbEngine),
 		os.Getenv(dbEngineVersion),
 		os.Getenv(dbSize),
@@ -42,9 +41,8 @@ func (d *Database) createDatabase() {
 
 func isDabataseExists() bool {
 	_, databaseNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc db show -project-name %s/%s | grep \"DB enabled\" | grep true",
-		os.Getenv(organizationName),
-		os.Getenv(projectName),
+		"/sqsc db show -project-name %s | grep \"DB enabled\" | grep true",
+		getProjectName(),
 	)).Output()
 
 	return databaseNotExists == nil

@@ -23,7 +23,6 @@ This image is pushed to Squarescale docker hub through the tag name `gh-actions`
 | DOCKER_TOKEN | A docker hub password | string
 | DOCKER_REPOSITORY | The docker hub repository image name of your application | string
 | DOCKER_REPOSITORY_TAG | The docker hub repository image name tag of your application | string
-| ORGANIZATION_NAME | The organization name you belong to. | string
 | PROJECT_NAME | The name of the project you want to create. | string
 | IAAS_PROVIDER | The provider to the IAAS you want to deploy your infrastructure. | string
 | IAAS_REGION | The IAAS region. | string
@@ -32,7 +31,11 @@ This image is pushed to Squarescale docker hub through the tag name `gh-actions`
 
 ### Optional variables
 
-#### DB
+| Name | Description | Type |
+| ---- | ----------- | ---- |
+| ORGANIZATION_NAME | The organization name you belong to. | string
+
+#### Database
 
 If one of the variables below is absent, no database will be created.
 
