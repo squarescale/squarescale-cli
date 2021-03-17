@@ -33,9 +33,8 @@ func (p *Project) createProject() {
 
 func isProjectExists() bool {
 	_, projectNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc project get -project-name %s/%s",
-		os.Getenv(organizationName),
-		os.Getenv(projectName),
+		"/sqsc project get -project-name %s",
+		getProjectName(),
 	)).Output()
 
 	return projectNotExists == nil

@@ -19,6 +19,14 @@ func executeCommand(cmd string, errorMsg string) {
 	fmt.Println(string(output))
 }
 
+func getProjectName() string {
+	if _, exists := os.LookupEnv(organizationName); exists {
+		return fmt.Sprintf("%s/%s", os.Getenv(organizationName), os.Getenv(projectName))
+	}
+
+	return fmt.Sprintf("%s", os.Getenv(projectName))
+}
+
 func checkEnvironmentVariablesExists() {
 	fmt.Println("Checking environment variables...")
 
@@ -28,7 +36,6 @@ func checkEnvironmentVariablesExists() {
 		dockerToken,
 		dockerRepository,
 		dockerRepositoryTag,
-		organizationName,
 		projectName,
 		iaasProvider,
 		iaasRegion,
@@ -46,9 +53,8 @@ func checkEnvironmentVariablesExists() {
 
 func getSQSCEnvValue(key string) string {
 	value, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc env get -project-name %s/%s \"%s\" | grep -v %s | tr -d '\n'",
-		os.Getenv(organizationName),
-		os.Getenv(projectName),
+		"/sqsc env get -project-name %s \"%s\" | grep -v %s | tr -d '\n'",
+		getProjectName(),
 		key,
 		"...done",
 	)).Output()
@@ -63,9 +69,8 @@ func getSQSCEnvValue(key string) string {
 
 func isNetworkRuleExists(networkRuleName string, serviceName string) bool {
 	_, networkRuleNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc network-rule list -project-name %s/%s -service-name %s | grep %s",
-		os.Getenv(organizationName),
-		os.Getenv(projectName),
+		"/sqsc network-rule list -project-name %s -service-name %s | grep %s",
+		getProjectName(),
 		serviceName,
 		networkRuleName,
 	)).Output()

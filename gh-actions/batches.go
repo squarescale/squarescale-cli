@@ -42,9 +42,8 @@ func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 	fmt.Println(fmt.Sprintf("Creating %q batch...", batchName))
 
 	cmd := fmt.Sprintf(
-		"/sqsc batch add -project-name %s/%s -imageName %s:%s -imagePrivate -imageUser %s -imagePwd %s -name %s -run-command \"%s\"",
-		os.Getenv(organizationName),
-		os.Getenv(projectName),
+		"/sqsc batch add -project-name %s -imageName %s:%s -imagePrivate -imageUser %s -imagePwd %s -name %s -run-command \"%s\"",
+		getProjectName(),
 		os.Getenv(dockerRepository),
 		os.Getenv(dockerRepositoryTag),
 		os.Getenv(dockerUser),
@@ -68,9 +67,8 @@ func (b *Batches) insertBatchEnv(batchName string, batchContent BatchContent) {
 		}
 
 		cmd := fmt.Sprintf(
-			"/sqsc batch set -project-name %s/%s -batch-name %s -env %s",
-			os.Getenv(organizationName),
-			os.Getenv(projectName),
+			"/sqsc batch set -project-name %s -batch-name %s -env %s",
+			getProjectName(),
 			batchName,
 			jsonFileName,
 		)
@@ -82,9 +80,8 @@ func (b *Batches) executeBatch(batchName string) {
 	fmt.Println(fmt.Sprintf("Executing %q batch ...", batchName))
 
 	cmd := fmt.Sprintf(
-		"/sqsc batch exec -project-name %s/%s %s",
-		os.Getenv(organizationName),
-		os.Getenv(projectName),
+		"/sqsc batch exec -project-name %s %s",
+		getProjectName(),
 		batchName,
 	)
 	executeCommand(cmd, fmt.Sprintf("Fail to execute %q batch.", batchName))
@@ -92,9 +89,8 @@ func (b *Batches) executeBatch(batchName string) {
 
 func isBatchExists(batchName string) bool {
 	_, batchNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc batch list -project-name %s/%s | grep %s",
-		os.Getenv(organizationName),
-		os.Getenv(projectName),
+		"/sqsc batch list -project-name %s | grep %s",
+		getProjectName(),
 		batchName,
 	)).Output()
 

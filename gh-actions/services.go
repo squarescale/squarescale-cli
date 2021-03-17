@@ -49,9 +49,8 @@ func (s *Services) createService(serviceName string, serviceContent ServiceConte
 	fmt.Println(fmt.Sprintf("Creating %q service...", serviceName))
 
 	cmd := fmt.Sprintf(
-		"/sqsc container add -project-name %s/%s -servicename %s -name %s:%s -username %s -password %s -run-command \"%s\"",
-		os.Getenv(organizationName),
-		os.Getenv(projectName),
+		"/sqsc container add -project-name %s -servicename %s -name %s:%s -username %s -password %s -run-command \"%s\"",
+		getProjectName(),
 		serviceName,
 		os.Getenv(dockerRepository),
 		os.Getenv(dockerRepositoryTag),
@@ -77,9 +76,8 @@ func (s *Services) insertServiceEnv(serviceName string, serviceContent ServiceCo
 		instancesNumber := "1"
 
 		cmd := fmt.Sprintf(
-			"/sqsc container set -project-name %s/%s -env %s -service %s -instances %s -command \"%s\"",
-			os.Getenv(organizationName),
-			os.Getenv(projectName),
+			"/sqsc container set -project-name %s -env %s -service %s -instances %s -command \"%s\"",
+			getProjectName(),
 			jsonFileName,
 			serviceName,
 			instancesNumber,
@@ -107,9 +105,8 @@ func (s *Services) insertNetworkRules(serviceName string, serviceContent Service
 			fmt.Println(fmt.Sprintf("Opening %s port (http)...", internalPort))
 
 			cmd := fmt.Sprintf(
-				"/sqsc network-rule create -project-name %s/%s -external-protocol http -internal-port %s -internal-protocol http -name %s -service-name %s",
-				os.Getenv(organizationName),
-				os.Getenv(projectName),
+				"/sqsc network-rule create -project-name %s -external-protocol http -internal-port %s -internal-protocol http -name %s -service-name %s",
+				getProjectName(),
 				internalPort,
 				networkRuleName,
 				serviceName,
@@ -125,9 +122,8 @@ func (s *Services) schedule(serviceName string) {
 	fmt.Println(fmt.Sprintf("Scheduling %q service...", serviceName))
 
 	cmd := fmt.Sprintf(
-		"/sqsc service schedule --project-name %s/%s %s",
-		os.Getenv(organizationName),
-		os.Getenv(projectName),
+		"/sqsc service schedule --project-name %s %s",
+		getProjectName(),
 		serviceName,
 	)
 	executeCommand(cmd, fmt.Sprintf("Fail to schedule %q service.", serviceName))
@@ -135,9 +131,8 @@ func (s *Services) schedule(serviceName string) {
 
 func isServiceExists(serviceName string) bool {
 	_, webServiceNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc container list -project-name %s/%s | grep %s",
-		os.Getenv(organizationName),
-		os.Getenv(projectName),
+		"/sqsc container list -project-name %s | grep %s",
+		getProjectName(),
 		serviceName,
 	)).Output()
 
