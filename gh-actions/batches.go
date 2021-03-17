@@ -12,8 +12,8 @@ import (
 type Batches struct{}
 
 type BatchContent struct {
-	Cmd string
-	Env map[string]string
+	RUN_CMD string            `json:"run_cmd"`
+	ENV     map[string]string `json:"env"`
 }
 
 func (b *Batches) create() {
@@ -32,14 +32,14 @@ func (b *Batches) create() {
 				fmt.Println(fmt.Sprintf("Batch %q already exists.", batchName))
 			}
 
-			b.insertBatchEnv(batchName, batchContent.Env)
+			b.insertBatchEnv(batchName, batchContent)
 			b.executeBatch(batchName)
 		}
 	}
 }
 
 func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
-	fmt.Println(fmt.Sprintf("Creating batch %q", batchName))
+	fmt.Println(fmt.Sprintf("Creating %q batch...", batchName))
 
 	cmd := fmt.Sprintf(
 		"/sqsc batch add -project-name %s/%s -imageName %s:%s -imagePrivate -imageUser %s -imagePwd %s -name %s -run-command \"%s\"",
@@ -50,19 +50,18 @@ func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 		os.Getenv(dockerUser),
 		os.Getenv(dockerToken),
 		batchName,
-		batchContent.Cmd,
+		batchContent.RUN_CMD,
 	)
-	executeCommand(cmd, fmt.Sprintf("Fail to add batch %q.", batchName))
+	executeCommand(cmd, fmt.Sprintf("Fail to add %q batch.", batchName))
 }
 
-func (b *Batches) insertBatchEnv(batchName string, batchContentEnv map[string]string) {
-	if len(batchContentEnv) != 0 {
+func (b *Batches) insertBatchEnv(batchName string, batchContent BatchContent) {
+	if len(batchContent.ENV) != 0 {
 		fmt.Println(fmt.Sprintf("Inserting environment variable to batch %q", batchName))
 
 		jsonFileName := "batchEnvVar.json"
-		d, _ := json.Marshal(batchContentEnv)
-		data := mapDatabaseEnv(string(d))
-		jsonErr := ioutil.WriteFile(jsonFileName, []byte(data), os.ModePerm)
+		env, _ := json.Marshal(batchContent.ENV)
+		jsonErr := ioutil.WriteFile(jsonFileName, []byte(mapDatabaseEnv(string(env))), os.ModePerm)
 
 		if jsonErr != nil {
 			log.Fatal(fmt.Sprintf("Cannot write json file with env for batch %q.", batchName))
@@ -80,7 +79,7 @@ func (b *Batches) insertBatchEnv(batchName string, batchContentEnv map[string]st
 }
 
 func (b *Batches) executeBatch(batchName string) {
-	fmt.Println(fmt.Sprintf("Executing batch %q ...", batchName))
+	fmt.Println(fmt.Sprintf("Executing %q batch ...", batchName))
 
 	cmd := fmt.Sprintf(
 		"/sqsc batch exec -project-name %s/%s %s",
@@ -88,7 +87,7 @@ func (b *Batches) executeBatch(batchName string) {
 		os.Getenv(projectName),
 		batchName,
 	)
-	executeCommand(cmd, fmt.Sprintf("Fail to execute batch %q", batchName))
+	executeCommand(cmd, fmt.Sprintf("Fail to execute %q batch.", batchName))
 }
 
 func isBatchExists(batchName string) bool {

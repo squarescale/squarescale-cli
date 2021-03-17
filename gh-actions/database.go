@@ -22,7 +22,7 @@ func (d *Database) create() {
 			fmt.Println("Database already exists.")
 		}
 	} else {
-		fmt.Println(fmt.Sprintf("%s, %s, %s are not set. No database will be created.", dbEngine, dbEngineVersion, dbSize))
+		fmt.Println(fmt.Sprintf("%s, %s, %s are not set correctly. No database will be created.", dbEngine, dbEngineVersion, dbSize))
 	}
 }
 
