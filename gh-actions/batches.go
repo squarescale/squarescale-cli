@@ -72,7 +72,7 @@ func (b *Batches) insertBatchEnv(batchName string, batchContentEnv map[string]st
 		executeCommand(fmt.Sprintf("cat %s", jsonFileName), fmt.Sprintf("Fail to cat %s", jsonFileName))
 
 		cmd := fmt.Sprintf(
-			"./sqsc batch set -project-name %s/%s -batch-name %s -env %s",
+			"/sqsc batch set -project-name %s/%s -batch-name %s -env %s",
 			os.Getenv(organizationName),
 			os.Getenv(projectName),
 			batchName,
