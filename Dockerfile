@@ -14,3 +14,4 @@ COPY ./dist/sqsc-alpine-amd64-gh-actions /sqsc
 COPY ./gh-actions/gh-actions /gh-actions
 
 ENTRYPOINT ["/gh-actions"]
+CMD ["/sqsc version"]
