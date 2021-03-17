@@ -19,6 +19,31 @@ func executeCommand(cmd string, errorMsg string) {
 	fmt.Println(string(output))
 }
 
+func checkEnvironmentVariablesExists() {
+	fmt.Println("Checking environment variables...")
+
+	envVars := []string{
+		sqscToken,
+		dockerUser,
+		dockerToken,
+		dockerRepository,
+		dockerRepositoryTag,
+		organizationName,
+		projectName,
+		iaasProvider,
+		iaasRegion,
+		iaasCred,
+		nodeType,
+	}
+
+	for _, envVar := range envVars {
+		if _, exists := os.LookupEnv(envVar); !exists {
+			fmt.Println(fmt.Sprintf("%s is not set. Quitting.", envVar))
+			os.Exit(1)
+		}
+	}
+}
+
 func getSQSCEnvValue(key string) string {
 	value, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
 		"/sqsc env get -project-name %s/%s \"%s\" | grep -v %s | tr -d '\n'",

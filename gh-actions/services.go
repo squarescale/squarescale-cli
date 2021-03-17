@@ -22,10 +22,6 @@ type NetworkRulesContent struct {
 	INTERNAL_PORT string `json:"internal_port"`
 }
 
-const (
-	defaultInternalPort = "80"
-)
-
 func (s *Services) create() {
 	if _, exists := os.LookupEnv(servicesEnv); exists {
 		var services map[string]ServiceContent
@@ -87,7 +83,7 @@ func (s *Services) insertServiceEnv(serviceName string, serviceContent ServiceCo
 			jsonFileName,
 			serviceName,
 			instancesNumber,
-			serviceContent.ENV,
+			serviceContent.RUN_CMD,
 		)
 		executeCommand(cmd, fmt.Sprintf("Fail to import service %q environment variables.", serviceName))
 	}
@@ -139,10 +135,10 @@ func (s *Services) schedule(serviceName string) {
 
 func isServiceExists(serviceName string) bool {
 	_, webServiceNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc container list --project-name %s/%s | grep %s",
+		"/sqsc container list -project-name %s/%s | grep %s",
 		os.Getenv(organizationName),
 		os.Getenv(projectName),
-		os.Getenv(serviceName),
+		serviceName,
 	)).Output()
 
 	return webServiceNotExists == nil

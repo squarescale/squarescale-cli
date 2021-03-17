@@ -1,10 +1,5 @@
 package main
 
-import (
-	"fmt"
-	"os"
-)
-
 const (
 	sqscToken           = "SQSC_TOKEN"
 	dockerUser          = "DOCKER_USER"
@@ -38,29 +33,4 @@ func main() {
 
 	batches := Batches{}
 	batches.create()
-}
-
-func checkEnvironmentVariablesExists() {
-	fmt.Println("Checking environment variables...")
-
-	envVars := []string{
-		sqscToken,
-		dockerUser,
-		dockerToken,
-		dockerRepository,
-		dockerRepositoryTag,
-		organizationName,
-		projectName,
-		iaasProvider,
-		iaasRegion,
-		iaasCred,
-		nodeType,
-	}
-
-	for _, envVar := range envVars {
-		if _, exists := os.LookupEnv(envVar); !exists {
-			fmt.Println(fmt.Sprintf("%s is not set. Quitting.", envVar))
-			os.Exit(1)
-		}
-	}
 }
