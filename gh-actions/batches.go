@@ -68,9 +68,6 @@ func (b *Batches) insertBatchEnv(batchName string, batchContentEnv map[string]st
 			log.Fatal(fmt.Sprintf("Cannot write json file with env for batch %q.", batchName))
 		}
 
-		//TODO: remove next line juste below
-		executeCommand(fmt.Sprintf("cat %s", jsonFileName), fmt.Sprintf("Fail to cat %s", jsonFileName))
-
 		cmd := fmt.Sprintf(
 			"/sqsc batch set -project-name %s/%s -batch-name %s -env %s",
 			os.Getenv(organizationName),
