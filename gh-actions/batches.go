@@ -57,6 +57,7 @@ func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 	runCommand := string(rc)
 
 	cmd := "/sqsc batch add"
+	cmd += " -name " + batchName
 	cmd += " -project-name " + getProjectName()
 	cmd += " -imageName " + os.Getenv(dockerRepository) + ":" + os.Getenv(dockerRepositoryTag)
 	cmd += " -run-command " + runCommand
@@ -79,11 +80,9 @@ func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 		}
 
 		cmd += " -periodic"
-		cmd += " -periodicity \"" + periodicity + "\""
+		cmd += " -cron \"" + periodicity + "\""
 		cmd += " -time \"" + timezone + "\""
 	}
-
-	cmd += " -name " + batchName
 
 	executeCommand(cmd, fmt.Sprintf("Fail to add %q batch.", batchName))
 }
