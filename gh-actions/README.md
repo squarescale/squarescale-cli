@@ -98,7 +98,9 @@ A batch within this json has for key the name of the batch and for value a json 
 
 | Name | Description | Type |
 | ---- | ----------- | ---- |
+| execute | Either `true` or `false` if you want to execute or not the batch (default: `false`) | bool
 | run_cmd | The run command that will be executed when the batch is executed. | string
+| periodic | Enable a periodic batch. The json contains `periodicity` (default: `* * * * *`) and `timezone` (default: `Europe/Paris`) | json
 | env | The environment variables the application image needs to. (see above with `SERVICES`)  | json
 
 Example:
