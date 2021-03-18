@@ -12,8 +12,14 @@ import (
 type Batches struct{}
 
 type BatchContent struct {
-	RUN_CMD string            `json:"run_cmd"`
-	ENV     map[string]string `json:"env"`
+	RUN_CMD  string            `json:"run_cmd"`
+	PERIODIC BatchPeriodic     `json:"periodic"`
+	ENV      map[string]string `json:"env"`
+}
+
+type BatchPeriodic struct {
+	PERIODICITY string `json:"periodicity"`
+	TIMEZONE    string `json:"timezone"`
 }
 
 func (b *Batches) create() {
@@ -41,26 +47,27 @@ func (b *Batches) create() {
 func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 	fmt.Println(fmt.Sprintf("Creating %q batch...", batchName))
 
-	cmd := fmt.Sprintf(
-		"/sqsc batch add -project-name %s -imageName %s:%s -name %s -run-command \"%s\"",
-		getProjectName(),
-		os.Getenv(dockerRepository),
-		os.Getenv(dockerRepositoryTag),
-		batchName,
-		batchContent.RUN_CMD,
-	)
+	cmd := "/sqsc batch add"
+	cmd += " -project-name " + getProjectName()
+	cmd += " -imageName " + os.Getenv(dockerRepository) + ":" + os.Getenv(dockerRepositoryTag)
+	cmd += " -name " + batchName
+	cmd += " -run-command \"" + batchContent.RUN_CMD + "\""
 
 	if isUsingPrivateRepository() {
-		cmd = fmt.Sprintf(
-			"/sqsc batch add -project-name %s -imageName %s:%s -imagePrivate -imageUser %s -imagePwd %s -name %s -run-command \"%s\"",
-			getProjectName(),
-			os.Getenv(dockerRepository),
-			os.Getenv(dockerRepositoryTag),
-			os.Getenv(dockerUser),
-			os.Getenv(dockerToken),
-			batchName,
-			batchContent.RUN_CMD,
-		)
+		cmd += " -imagePrivate"
+		cmd += " -imageUser " + os.Getenv(dockerUser)
+		cmd += " -imagePwd " + os.Getenv(dockerToken)
+	}
+
+	if (BatchPeriodic{}) == batchContent.PERIODIC {
+		timezone := batchContent.PERIODIC.TIMEZONE
+		if timezone == "" {
+			timezone = "Europe/Paris"
+		}
+
+		cmd += " -periodic"
+		cmd += " -periodicity " + batchContent.PERIODIC.PERIODICITY
+		cmd += " -time " + batchContent.PERIODIC.TIMEZONE
 	}
 
 	executeCommand(cmd, fmt.Sprintf("Fail to add %q batch.", batchName))
