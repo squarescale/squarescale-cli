@@ -56,7 +56,7 @@ func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 	cmd += " -name " + batchName
 	cmd += " -project-name " + getProjectName()
 	cmd += " -imageName " + os.Getenv(dockerRepository) + ":" + os.Getenv(dockerRepositoryTag)
-	cmd += " -run-command " + shellescape.Quote(batchContent.RUN_CMD)
+	cmd += " -run-command '" + shellescape.Quote(batchContent.RUN_CMD) + "'"
 
 	if isUsingPrivateRepository() {
 		cmd += " -imagePrivate"
