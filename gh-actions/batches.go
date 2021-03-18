@@ -14,10 +14,11 @@ import (
 type Batches struct{}
 
 type BatchContent struct {
-	EXECUTE  bool              `json:"execute"`
-	RUN_CMD  string            `json:"run_cmd"`
-	PERIODIC BatchPeriodic     `json:"periodic"`
-	ENV      map[string]string `json:"env"`
+	EXECUTE    bool              `json:"execute"`
+	IMAGE_NAME string            `json:"image_name"`
+	RUN_CMD    string            `json:"run_cmd"`
+	PERIODIC   BatchPeriodic     `json:"periodic"`
+	ENV        map[string]string `json:"env"`
 }
 
 type BatchPeriodic struct {
@@ -52,10 +53,15 @@ func (b *Batches) create() {
 func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 	fmt.Println(fmt.Sprintf("Creating %q batch...", batchName))
 
+	imageName := batchContent.IMAGE_NAME
+	if imageName == "" {
+		imageName = getProjectName()
+	}
+
 	cmd := "/sqsc batch add"
 	cmd += " -name " + batchName
 	cmd += " -project-name " + getProjectName()
-	cmd += " -imageName " + os.Getenv(dockerRepository) + ":" + os.Getenv(dockerRepositoryTag)
+	cmd += " -imageName " + imageName
 	cmd += " -run-command " + shellescape.Quote(batchContent.RUN_CMD)
 
 	if isUsingPrivateRepository() {
