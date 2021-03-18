@@ -76,7 +76,7 @@ func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 		}
 
 		cmd += " -periodic"
-		cmd += " -cron \"" + periodicity + "\""
+		cmd += " -cron " + shellescape.Quote(periodicity)
 		cmd += " -time \"" + timezone + "\""
 	}
 
