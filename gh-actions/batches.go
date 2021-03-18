@@ -12,6 +12,7 @@ import (
 type Batches struct{}
 
 type BatchContent struct {
+	EXECUTE  bool              `json:"execute"`
 	RUN_CMD  string            `json:"run_cmd"`
 	PERIODIC BatchPeriodic     `json:"periodic"`
 	ENV      map[string]string `json:"env"`
@@ -34,12 +35,14 @@ func (b *Batches) create() {
 		for batchName, batchContent := range batches {
 			if !isBatchExists(batchName) {
 				b.createBatch(batchName, batchContent)
+				b.insertBatchEnv(batchName, batchContent)
 			} else {
 				fmt.Println(fmt.Sprintf("Batch %q already exists.", batchName))
 			}
 
-			b.insertBatchEnv(batchName, batchContent)
-			b.executeBatch(batchName)
+			if batchContent.EXECUTE {
+				b.executeBatch(batchName)
+			}
 		}
 	}
 }
@@ -59,15 +62,20 @@ func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 		cmd += " -imagePwd " + os.Getenv(dockerToken)
 	}
 
-	if (BatchPeriodic{}) == batchContent.PERIODIC {
+	if (BatchPeriodic{}) != batchContent.PERIODIC {
+		periodicity := batchContent.PERIODIC.PERIODICITY
+		if periodicity == "" {
+			periodicity = "* * * * *"
+		}
+
 		timezone := batchContent.PERIODIC.TIMEZONE
 		if timezone == "" {
 			timezone = "Europe/Paris"
 		}
 
 		cmd += " -periodic"
-		cmd += " -periodicity " + batchContent.PERIODIC.PERIODICITY
-		cmd += " -time " + batchContent.PERIODIC.TIMEZONE
+		cmd += " -periodicity " + periodicity
+		cmd += " -time " + timezone
 	}
 
 	executeCommand(cmd, fmt.Sprintf("Fail to add %q batch.", batchName))
