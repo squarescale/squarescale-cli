@@ -24,6 +24,8 @@ type ServiceContent struct {
 type NetworkRulesContent struct {
 	NAME          string `json:"name"`
 	INTERNAL_PORT string `json:"internal_port"`
+	DOMAIN        string `json:"domain"`
+	PATH_PREFIX   string `json:"path_prefix"`
 }
 
 func (s *Services) create() {
@@ -107,20 +109,32 @@ func (s *Services) insertNetworkRules(serviceName string, serviceContent Service
 
 		if !isNetworkRuleExists(networkRuleName, serviceName) {
 			internalPort := serviceContent.NETWORK_RULES.INTERNAL_PORT
-
 			if internalPort == "" {
 				internalPort = "80"
 			}
 
 			fmt.Println(fmt.Sprintf("Opening %s port (http)...", internalPort))
 
-			cmd := fmt.Sprintf(
-				"/sqsc network-rule create -project-name %s -external-protocol http -internal-port %s -internal-protocol http -name %s -service-name %s",
-				getProjectName(),
-				internalPort,
-				networkRuleName,
-				serviceName,
-			)
+			pathPrefix := serviceContent.NETWORK_RULES.PATH_PREFIX
+			if pathPrefix == "" {
+				pathPrefix = "/"
+			}
+
+			domain := serviceContent.NETWORK_RULES.DOMAIN
+
+			cmd := "/sqsc network-rule create"
+			cmd += " -project-name " + getProjectName()
+			cmd += " -external-protocol http"
+			cmd += " -internal-port " + internalPort
+			cmd += " -internal-protocol http"
+			cmd += " -name " + networkRuleName
+			cmd += " -service-name " + serviceName
+			cmd += " -path-prefix " + pathPrefix
+
+			if domain != "" {
+				cmd += " -domain-expression " + domain
+			}
+
 			executeCommand(cmd, fmt.Sprintf("Fail to insert %q network rule on %s port", networkRuleName, internalPort))
 		} else {
 			fmt.Println(fmt.Sprintf("Network rule %s already exists.", networkRuleName))

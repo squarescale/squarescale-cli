@@ -58,7 +58,7 @@ A service within this json has for key the name of the service and for value a j
 | image_user | The image user. Only needed with `is_private`. | string
 | image_password | The image password. Only needed with `is_private`. | string
 | run_cmd | The run command that will be executed when the service is scheduling. | string
-| network_rules | The network rules (only http for now).<br>With `name` (default "http") and `internal_port` (default "80"). | json
+| network_rules | The network rules (only http for now).<br>With `name` (default "http", `internal_port` (default "80"), `domain` (default: `""`), `path_prefix` (default: `/`). | json
 | env | The environment variables the application image needs to.  | json
 
 :information_source: For database environment variable in the json structure, as database will be created before the services, its environment variables can be recover with `{{ GLOBAL_DB_VARIABLE_FROM_INFRA }}` (see example below).
