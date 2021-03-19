@@ -113,6 +113,10 @@ Example:
 BATCHES: >-
   {
     "database-setup": {
+      "image_name": "${{ env.DOCKER_REPOSITORY }}:${{ env.DOCKER_REPOSITORY_TAG }}",
+      "is_private": true,
+      "image_user": "${{ env.DOCKER_USER }}",
+      "image_password": "${{ env.DOCKER_TOKEN }}",
       "run_cmd": "bundle exec rails db:setup",
       "env": {
         "RAILS_LOG_TO_STDOUT": "true",
@@ -123,6 +127,10 @@ BATCHES: >-
       }
     },
     "database-seed": {
+      "image_name": "${{ env.DOCKER_REPOSITORY }}:${{ env.DOCKER_REPOSITORY_TAG }}",
+      "is_private": true,
+      "image_user": "${{ env.DOCKER_USER }}",
+      "image_password": "${{ env.DOCKER_TOKEN }}",
       "run_cmd": "bundle exec rails db:sogilis:seed",
       "env": {
         "RAILS_LOG_TO_STDOUT": "true",
