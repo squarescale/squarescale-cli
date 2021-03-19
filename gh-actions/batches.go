@@ -14,11 +14,14 @@ import (
 type Batches struct{}
 
 type BatchContent struct {
-	EXECUTE    bool              `json:"execute"`
-	IMAGE_NAME string            `json:"image_name"`
-	RUN_CMD    string            `json:"run_cmd"`
-	PERIODIC   BatchPeriodic     `json:"periodic"`
-	ENV        map[string]string `json:"env"`
+	EXECUTE        bool              `json:"execute"`
+	IMAGE_NAME     string            `json:"image_name"`
+	IS_PRIVATE     bool              `json:"is_private"`
+	IMAGE_USER     string            `json:"image_user"`
+	IMAGE_PASSWORD string            `json:"image_password"`
+	RUN_CMD        string            `json:"run_cmd"`
+	PERIODIC       BatchPeriodic     `json:"periodic"`
+	ENV            map[string]string `json:"env"`
 }
 
 type BatchPeriodic struct {
@@ -53,21 +56,21 @@ func (b *Batches) create() {
 func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 	fmt.Println(fmt.Sprintf("Creating %q batch...", batchName))
 
-	imageName := batchContent.IMAGE_NAME
-	if imageName == "" {
-		imageName = getProjectName()
-	}
-
 	cmd := "/sqsc batch add"
 	cmd += " -name " + batchName
 	cmd += " -project-name " + getProjectName()
-	cmd += " -imageName " + imageName
 	cmd += " -run-command " + shellescape.Quote(batchContent.RUN_CMD)
 
-	if isUsingPrivateRepository() {
+	imageName := batchContent.IMAGE_NAME
+	if imageName == "" {
+		imageName = getDockerImage()
+	}
+	cmd += " -imageName " + imageName
+
+	if batchContent.IS_PRIVATE {
 		cmd += " -imagePrivate"
-		cmd += " -imageUser " + os.Getenv(dockerUser)
-		cmd += " -imagePwd " + os.Getenv(dockerToken)
+		cmd += " -imageUser " + batchContent.IMAGE_USER
+		cmd += " -imagePwd " + batchContent.IMAGE_PASSWORD
 	}
 
 	if (BatchPeriodic{}) != batchContent.PERIODIC {

@@ -7,6 +7,27 @@ import (
 	"os/exec"
 )
 
+func checkEnvironmentVariablesExists() {
+	fmt.Println("Checking environment variables...")
+
+	envVars := []string{
+		sqscToken,
+		dockerRepository,
+		projectName,
+		iaasProvider,
+		iaasRegion,
+		iaasCred,
+		nodeType,
+	}
+
+	for _, envVar := range envVars {
+		if _, exists := os.LookupEnv(envVar); !exists {
+			fmt.Println(fmt.Sprintf("%s is not set. Quitting.", envVar))
+			os.Exit(1)
+		}
+	}
+}
+
 func executeCommand(cmd string, errorMsg string) {
 	fmt.Println(cmd)
 	output, err := exec.Command("/bin/sh", "-c", cmd).Output()
@@ -27,26 +48,12 @@ func getProjectName() string {
 	return fmt.Sprintf("%s", os.Getenv(projectName))
 }
 
-func checkEnvironmentVariablesExists() {
-	fmt.Println("Checking environment variables...")
-
-	envVars := []string{
-		sqscToken,
-		dockerRepository,
-		dockerRepositoryTag,
-		projectName,
-		iaasProvider,
-		iaasRegion,
-		iaasCred,
-		nodeType,
+func getDockerImage() string {
+	if _, exists := os.LookupEnv(dockerRepositoryTag); exists {
+		return fmt.Sprintf("%s:%s", os.Getenv(dockerRepository), os.Getenv(dockerRepositoryTag))
 	}
 
-	for _, envVar := range envVars {
-		if _, exists := os.LookupEnv(envVar); !exists {
-			fmt.Println(fmt.Sprintf("%s is not set. Quitting.", envVar))
-			os.Exit(1)
-		}
-	}
+	return fmt.Sprintf("%s", os.Getenv(dockerRepository))
 }
 
 func getSQSCEnvValue(key string) string {

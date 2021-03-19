@@ -49,21 +49,19 @@ func (s *Services) createService(serviceName string, serviceContent ServiceConte
 	fmt.Println(fmt.Sprintf("Creating %q service...", serviceName))
 
 	cmd := fmt.Sprintf(
-		"/sqsc container add -project-name %s -servicename %s -name %s:%s -run-command \"%s\"",
+		"/sqsc container add -project-name %s -servicename %s -name %s -run-command \"%s\"",
 		getProjectName(),
 		serviceName,
-		os.Getenv(dockerRepository),
-		os.Getenv(dockerRepositoryTag),
+		getDockerImage(),
 		serviceContent.RUN_CMD,
 	)
 
 	if isUsingPrivateRepository() {
 		cmd = fmt.Sprintf(
-			"/sqsc container add -project-name %s -servicename %s -name %s:%s -username %s -password %s -run-command \"%s\"",
+			"/sqsc container add -project-name %s -servicename %s -name %s -username %s -password %s -run-command \"%s\"",
 			getProjectName(),
 			serviceName,
-			os.Getenv(dockerRepository),
-			os.Getenv(dockerRepositoryTag),
+			getDockerImage(),
 			os.Getenv(dockerUser),
 			os.Getenv(dockerToken),
 			serviceContent.RUN_CMD,
