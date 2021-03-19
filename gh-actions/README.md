@@ -69,6 +69,10 @@ Example:
 SERVICES: >-
   {
     "web": {
+      "image_name": "${{ env.DOCKER_REPOSITORY }}:${{ env.DOCKER_REPOSITORY_TAG }}",
+      "is_private": true,
+      "image_user": "${{ env.DOCKER_USER }}",
+      "image_password": "${{ env.DOCKER_TOKEN }}",
       "run_cmd": "bundle exec rails server -b 0.0.0.0",
       "network_rules": {
         "name": "http",
@@ -106,7 +110,7 @@ A batch within this json has for key the name of the batch and for value a json 
 | image_user | The image user. Only needed with `is_private`. | string
 | image_password | The image password. Only needed with `is_private`. | string
 | run_cmd | The run command that will be executed when the batch is executed. | string
-| periodic | Enable a periodic batch. The json contains `periodicity` (default: `* * * * *`) and `timezone` (default: `Europe/Paris`) | json
+| periodic | Enable a periodic batch.<br><ul><li>`periodicity` (default: `* * * * *`)</li><li>`timezone` (default: `Europe/Paris`)</li></ul> | json
 | env | The environment variables the application image needs to. (see above with `SERVICES`)  | json
 
 Example:
