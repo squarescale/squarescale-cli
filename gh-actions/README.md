@@ -20,7 +20,6 @@ This image is pushed to Squarescale docker hub through the tag name `gh-actions`
 | ---- | ----------- | ---- |
 | SQSC_TOKEN | The API key to access Squarescale via CLI  | string
 | DOCKER_REPOSITORY | The docker hub repository image name of your application | string
-| DOCKER_REPOSITORY_TAG | The docker hub repository image name tag of your application | string
 | PROJECT_NAME | The name of the project you want to create. | string
 | IAAS_PROVIDER | The provider to the IAAS you want to deploy your infrastructure. | string
 | IAAS_REGION | The IAAS region. | string
@@ -31,6 +30,7 @@ This image is pushed to Squarescale docker hub through the tag name `gh-actions`
 
 | Name | Description | Type |
 | ---- | ----------- | ---- |
+| DOCKER_REPOSITORY_TAG | The docker hub repository image name tag of your application | string
 | DOCKER_USER | A docker hub username | string
 | DOCKER_TOKEN | A docker hub password | string
 | ORGANIZATION_NAME | The organization name you belong to. | string
@@ -99,7 +99,10 @@ A batch within this json has for key the name of the batch and for value a json 
 | Name | Description | Type |
 | ---- | ----------- | ---- |
 | execute | Either `true` or `false` if you want to execute or not the batch (default: `false`) | bool
-| image_name | Image name (e.g: `bash`, default: `ORGANIZATION_NAME`/`PROJECT_NAME` or `PROJECT_NAME`) | string
+| image_name | Image name (e.g: `bash`, default: `DOCKER_REPOSITORY`:`DOCKER_REPOSITORY_TAG` or `DOCKER_REPOSITORY`) | string
+| is_private | Either `true` or `false` if you want to use a private image | string
+| image_user | The image user. Only needed with `is_private`. | string
+| image_password | The image password. Only needed with `is_private`. | string
 | run_cmd | The run command that will be executed when the batch is executed. | string
 | periodic | Enable a periodic batch. The json contains `periodicity` (default: `* * * * *`) and `timezone` (default: `Europe/Paris`) | json
 | env | The environment variables the application image needs to. (see above with `SERVICES`)  | json
