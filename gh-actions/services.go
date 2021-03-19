@@ -7,6 +7,8 @@ import (
 	"log"
 	"os"
 	"os/exec"
+
+	"gopkg.in/alessio/shellescape.v1"
 )
 
 type Services struct{}
@@ -57,7 +59,11 @@ func (s *Services) createService(serviceName string, serviceContent ServiceConte
 	cmd := "/sqsc container add"
 	cmd += " -project-name " + getProjectName()
 	cmd += " -servicename " + serviceName
-	cmd += " -run-command " + serviceContent.RUN_CMD
+
+	run_command := serviceContent.RUN_CMD
+	if run_command != "" {
+		cmd += " -run-command " + shellescape.Quote(serviceContent.RUN_CMD)
+	}
 
 	imageName := serviceContent.IMAGE_NAME
 	if imageName == "" {
