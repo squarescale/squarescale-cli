@@ -12,9 +12,13 @@ import (
 type Services struct{}
 
 type ServiceContent struct {
-	RUN_CMD       string              `json:"run_cmd"`
-	NETWORK_RULES NetworkRulesContent `json:"network_rules"`
-	ENV           map[string]string   `json:"env"`
+	IMAGE_NAME     string              `json:"image_name"`
+	IS_PRIVATE     bool                `json:"is_private"`
+	IMAGE_USER     string              `json:"image_user"`
+	IMAGE_PASSWORD string              `json:"image_password"`
+	RUN_CMD        string              `json:"run_cmd"`
+	NETWORK_RULES  NetworkRulesContent `json:"network_rules"`
+	ENV            map[string]string   `json:"env"`
 }
 
 type NetworkRulesContent struct {
@@ -48,24 +52,20 @@ func (s *Services) create() {
 func (s *Services) createService(serviceName string, serviceContent ServiceContent) {
 	fmt.Println(fmt.Sprintf("Creating %q service...", serviceName))
 
-	cmd := fmt.Sprintf(
-		"/sqsc container add -project-name %s -servicename %s -name %s -run-command \"%s\"",
-		getProjectName(),
-		serviceName,
-		getDockerImage(),
-		serviceContent.RUN_CMD,
-	)
+	cmd := "/sqsc container add"
+	cmd += " -project-name " + getProjectName()
+	cmd += " -servicename " + serviceName
+	cmd += " -run-command " + serviceContent.RUN_CMD
 
-	if isUsingPrivateRepository() {
-		cmd = fmt.Sprintf(
-			"/sqsc container add -project-name %s -servicename %s -name %s -username %s -password %s -run-command \"%s\"",
-			getProjectName(),
-			serviceName,
-			getDockerImage(),
-			os.Getenv(dockerUser),
-			os.Getenv(dockerToken),
-			serviceContent.RUN_CMD,
-		)
+	imageName := serviceContent.IMAGE_NAME
+	if imageName == "" {
+		imageName = getDockerImage()
+	}
+	cmd += " -name " + imageName
+
+	if serviceContent.IS_PRIVATE {
+		cmd += " -username " + serviceContent.IMAGE_USER
+		cmd += " -password " + serviceContent.IMAGE_PASSWORD
 	}
 
 	executeCommand(cmd, fmt.Sprintf("Fail to create service %q.", serviceName))

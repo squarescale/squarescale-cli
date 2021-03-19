@@ -2,8 +2,6 @@ package main
 
 const (
 	sqscToken           = "SQSC_TOKEN"
-	dockerUser          = "DOCKER_USER"
-	dockerToken         = "DOCKER_TOKEN"
 	dockerRepository    = "DOCKER_REPOSITORY"
 	dockerRepositoryTag = "DOCKER_REPOSITORY_TAG"
 	organizationName    = "ORGANIZATION_NAME"

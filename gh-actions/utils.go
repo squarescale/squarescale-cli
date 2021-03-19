@@ -82,9 +82,3 @@ func isNetworkRuleExists(networkRuleName string, serviceName string) bool {
 
 	return networkRuleNotExists == nil
 }
-
-func isUsingPrivateRepository() bool {
-	_, dockerUserEnvExists := os.LookupEnv(dockerUser)
-	_, dockerTokenEnvExists := os.LookupEnv(dockerToken)
-	return dockerUserEnvExists && dockerTokenEnvExists
-}
