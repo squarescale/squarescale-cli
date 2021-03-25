@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
@@ -25,6 +26,7 @@ func (c *DBSetCommand) Run(args []string) int {
 	dbEngine := c.flagSet.String("engine", "", "Database engine")
 	dbSize := c.flagSet.String("size", "", "Database size")
 	dbVersion := c.flagSet.String("engine-version", "", "Database version")
+	dbBackupEnabled := c.flagSet.String("backup-enabled", "", "Backup enabled")
 	dbDisabled := c.flagSet.Bool("disable", false, "Disable database")
 	alwaysYes := yesFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
@@ -43,7 +45,7 @@ func (c *DBSetCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Cannot specify engine or size or version when disabling database."))
 	}
 
-	if !*dbDisabled && (*dbEngine == "" && *dbSize == "" && *dbVersion == "") {
+	if !*dbDisabled && (*dbEngine == "" && *dbSize == "" && *dbVersion == "" && *dbBackupEnabled == "") {
 		return c.errorWithUsage(errors.New("Size, engine and version are mandatory."))
 	}
 
@@ -84,12 +86,23 @@ func (c *DBSetCommand) Run(args []string) int {
 			return fmt.Sprintf("Database for project '%s' is already disabled", projectToShow), nil
 		}
 
+		engine := checkFlag(db.Engine, dbEngine)
+		size := checkFlag(db.Size, dbSize)
+		version := checkFlag(db.Version, dbVersion)
+
+		var backupEnabled string
+		if *dbEngine == "" {
+			backupEnabled = strconv.FormatBool(db.BackupEnabled)
+		} else {
+			backupEnabled = *dbEngine
+		}
+
 		if *dbEngine == db.Engine && *dbSize == db.Size && *dbVersion == db.Version && !*dbDisabled == db.Enabled {
 			return fmt.Sprintf("Database for project '%s' is already configured with these parameters", projectToShow), nil
 		}
 
 		payload := squarescale.JSONObject{
-			"database": map[string]interface{}{"enabled": !*dbDisabled, "engine": *dbEngine, "size": *dbSize, "version": *dbVersion},
+			"database": map[string]interface{}{"enabled": !*dbDisabled, "engine": engine, "size": size, "version": version, "backup_enabled": backupEnabled},
 		}
 
 		_, err = client.ConfigDB(UUID, &payload)
@@ -146,4 +159,14 @@ usage: sqsc db set [options]
 func validateDBSetCommandArgs(projectUUID string, db squarescale.DbConfig) error {
 
 	return nil
+}
+
+func checkFlag(dbFlag string, flag *string) string {
+	var result string
+	if *flag == "" {
+		result = dbFlag
+	} else {
+		result = *flag
+	}
+	return result
 }

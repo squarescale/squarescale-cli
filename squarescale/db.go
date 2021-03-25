@@ -19,10 +19,11 @@ type DataseEngine struct {
 }
 
 type DbConfig struct {
-	Enabled bool   `json:"db_enabled"`
-	Engine  string `json:"db_engine"`
-	Size    string `json:"db_size"`
-	Version string `json:"db_version"`
+	Enabled       bool   `json:"db_enabled"`
+	Engine        string `json:"db_engine"`
+	Size          string `json:"db_size"`
+	Version       string `json:"db_version"`
+	BackupEnabled bool   `json:"backup_enabled"`
 }
 
 func (db *DbConfig) String() string {
