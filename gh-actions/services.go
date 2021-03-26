@@ -19,6 +19,7 @@ type ServiceContent struct {
 	IMAGE_USER     string              `json:"image_user"`
 	IMAGE_PASSWORD string              `json:"image_password"`
 	RUN_CMD        string              `json:"run_cmd"`
+	INSTANCES      string              `json:"instances"`
 	NETWORK_RULES  NetworkRulesContent `json:"network_rules"`
 	ENV            map[string]string   `json:"env"`
 }
@@ -60,16 +61,21 @@ func (s *Services) createService(serviceName string, serviceContent ServiceConte
 	cmd += " -project-name " + getProjectName()
 	cmd += " -servicename " + serviceName
 
-	run_command := serviceContent.RUN_CMD
-	if run_command != "" {
-		cmd += " -run-command " + shellescape.Quote(serviceContent.RUN_CMD)
-	}
-
 	imageName := serviceContent.IMAGE_NAME
 	if imageName == "" {
 		imageName = getDockerImage()
 	}
 	cmd += " -name " + imageName
+
+	run_command := serviceContent.RUN_CMD
+	if run_command != "" {
+		cmd += " -run-command " + shellescape.Quote(serviceContent.RUN_CMD)
+	}
+
+	instances := serviceContent.INSTANCES
+	if instances != "" {
+		cmd += " -instances " + serviceContent.INSTANCES
+	}
 
 	if serviceContent.IS_PRIVATE {
 		cmd += " -username " + serviceContent.IMAGE_USER
