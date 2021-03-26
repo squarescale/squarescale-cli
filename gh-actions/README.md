@@ -58,6 +58,7 @@ A service within this json has for key the name of the service and for value a j
 | image_user | The image user. Only needed with `is_private`. | string
 | image_password | The image password. Only needed with `is_private`. | string
 | run_cmd | The run command that will be executed when the service is scheduling. | string
+| instances | The number of instances you want to scale on this service. | string
 | network_rules | The network rules (only http for now).<br><ul><li>`name` (default `http`)</li><li>`internal_port` (default `80`)</li><li>`domain` (default: `""`)</li><li>`path_prefix` (default: `/`)</li></ul> | json
 | env | The environment variables the application image needs to.  | json
 
