@@ -91,10 +91,10 @@ func (c *DBSetCommand) Run(args []string) int {
 		version := checkFlag(db.Version, dbVersion)
 
 		var backupEnabled string
-		if *dbEngine == "" {
+		if *dbBackupEnabled == "" {
 			backupEnabled = strconv.FormatBool(db.BackupEnabled)
 		} else {
-			backupEnabled = *dbEngine
+			backupEnabled = *dbBackupEnabled
 		}
 
 		if *dbEngine == db.Engine && *dbSize == db.Size && *dbVersion == db.Version && !*dbDisabled == db.Enabled {
@@ -163,7 +163,7 @@ func validateDBSetCommandArgs(projectUUID string, db squarescale.DbConfig) error
 
 func checkFlag(dbFlag string, flag *string) string {
 	var result string
-	if *flag == "" {
+	if flag == nil {
 		result = dbFlag
 	} else {
 		result = *flag
