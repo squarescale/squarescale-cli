@@ -16,7 +16,7 @@ func (d *Database) create() {
 	_, dbEngineSizeExists := os.LookupEnv(dbSize)
 
 	if dbEngineExists && dbEngineVersionExists && dbEngineSizeExists {
-		if !isDabataseExists() {
+		if !isDatabaseExists() {
 			d.createDatabase()
 		} else {
 			fmt.Println("Database already exists.")
@@ -39,7 +39,7 @@ func (d *Database) createDatabase() {
 	executeCommand(cmd, "Fail to create database.")
 }
 
-func isDabataseExists() bool {
+func isDatabaseExists() bool {
 	_, databaseNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
 		"/sqsc db show -project-name %s | grep \"DB enabled\" | grep true",
 		getProjectName(),
