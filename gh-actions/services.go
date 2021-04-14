@@ -14,21 +14,23 @@ import (
 type Services struct{}
 
 type ServiceContent struct {
-	IMAGE_NAME     string              `json:"image_name"`
-	IS_PRIVATE     bool                `json:"is_private"`
-	IMAGE_USER     string              `json:"image_user"`
-	IMAGE_PASSWORD string              `json:"image_password"`
-	RUN_CMD        string              `json:"run_cmd"`
-	INSTANCES      string              `json:"instances"`
-	NETWORK_RULES  NetworkRulesContent `json:"network_rules"`
-	ENV            map[string]string   `json:"env"`
+	IMAGE_NAME     string                `json:"image_name"`
+	IS_PRIVATE     bool                  `json:"is_private"`
+	IMAGE_USER     string                `json:"image_user"`
+	IMAGE_PASSWORD string                `json:"image_password"`
+	RUN_CMD        string                `json:"run_cmd"`
+	INSTANCES      string                `json:"instances"`
+	NETWORK_RULES  []NetworkRulesContent `json:"network_rules"`
+	ENV            map[string]string     `json:"env"`
 }
 
 type NetworkRulesContent struct {
-	NAME          string `json:"name"`
-	INTERNAL_PORT string `json:"internal_port"`
-	DOMAIN        string `json:"domain"`
-	PATH_PREFIX   string `json:"path_prefix"`
+	NAME              string `json:"name"`
+	INTERNAL_PORT     string `json:"internal_port"`
+	DOMAIN            string `json:"domain"`
+	PATH_PREFIX       string `json:"path_prefix"`
+	INTERNAL_PROTOCOL string `json:"internal_protocol"`
+	EXTERNAL_PROTOCOL string `json:"external_protocol"`
 }
 
 func (s *Services) create() {
@@ -112,44 +114,56 @@ func (s *Services) insertServiceEnv(serviceName string, serviceContent ServiceCo
 }
 
 func (s *Services) insertNetworkRules(serviceName string, serviceContent ServiceContent) {
-	if (NetworkRulesContent{}) != serviceContent.NETWORK_RULES {
-		networkRuleName := serviceContent.NETWORK_RULES.NAME
+	for _, networkRules := range serviceContent.NETWORK_RULES {
+		if (NetworkRulesContent{}) != networkRules {
+			networkRuleName := networkRules.NAME
 
-		if networkRuleName == "" {
-			networkRuleName = "http"
-		}
-
-		if !isNetworkRuleExists(networkRuleName, serviceName) {
-			internalPort := serviceContent.NETWORK_RULES.INTERNAL_PORT
-			if internalPort == "" {
-				internalPort = "80"
+			if networkRuleName == "" {
+				networkRuleName = "http"
 			}
 
-			fmt.Println(fmt.Sprintf("Opening %s port (http)...", internalPort))
+			if !isNetworkRuleExists(networkRuleName, serviceName) {
+				internalPort := networkRules.INTERNAL_PORT
+				if internalPort == "" {
+					internalPort = "80"
+				}
 
-			pathPrefix := serviceContent.NETWORK_RULES.PATH_PREFIX
-			if pathPrefix == "" {
-				pathPrefix = "/"
+				fmt.Println(fmt.Sprintf("Opening %s port (http)...", internalPort))
+
+				pathPrefix := networkRules.PATH_PREFIX
+				if pathPrefix == "" {
+					pathPrefix = "/"
+				}
+
+				internalProtocol := networkRules.INTERNAL_PROTOCOL
+				if internalProtocol == "" {
+					internalProtocol = "http"
+				}
+
+				externalProtocol := networkRules.EXTERNAL_PROTOCOL
+				if externalProtocol == "" {
+					externalProtocol = "http"
+				}
+
+				domain := networkRules.DOMAIN
+
+				cmd := "/sqsc network-rule create"
+				cmd += " -project-name " + getProjectName()
+				cmd += " -external-protocol " + externalProtocol
+				cmd += " -internal-port " + internalPort
+				cmd += " -internal-protocol " + internalProtocol
+				cmd += " -name " + networkRuleName
+				cmd += " -service-name " + serviceName
+				cmd += " -path-prefix " + pathPrefix
+
+				if domain != "" {
+					cmd += " -domain-expression " + domain
+				}
+
+				executeCommand(cmd, fmt.Sprintf("Fail to insert %q network rule on %s port", networkRuleName, internalPort))
+			} else {
+				fmt.Println(fmt.Sprintf("Network rule %s already exists.", networkRuleName))
 			}
-
-			domain := serviceContent.NETWORK_RULES.DOMAIN
-
-			cmd := "/sqsc network-rule create"
-			cmd += " -project-name " + getProjectName()
-			cmd += " -external-protocol http"
-			cmd += " -internal-port " + internalPort
-			cmd += " -internal-protocol http"
-			cmd += " -name " + networkRuleName
-			cmd += " -service-name " + serviceName
-			cmd += " -path-prefix " + pathPrefix
-
-			if domain != "" {
-				cmd += " -domain-expression " + domain
-			}
-
-			executeCommand(cmd, fmt.Sprintf("Fail to insert %q network rule on %s port", networkRuleName, internalPort))
-		} else {
-			fmt.Println(fmt.Sprintf("Network rule %s already exists.", networkRuleName))
 		}
 	}
 }
