@@ -39,9 +39,9 @@ If one of the variables below is absent, no database will be created.
 
 | Name | Description | Type |
 | ---- | ----------- | ---- |
-| DB_ENGINE | The database engine (e.g: "postgresql")<br><ul><li>mariadb</li><li>postgresql</li><li>mysql</li></ul> | string
-| DB_ENGINE_VERSION | The database engine version (e.g: "12")<br><ul><li>mariadb : 10.4 / 10.3/ 10.2 / 10.1 / 10.0</li><li>postgresql: 12 / 11 / 10 / 9.6 / 9.5 / 9.4 / 9.3</li><li>mysql: 8.0 / 5.7 / 5.6 / 5.5</li></ul> | string
-| DB_SIZE | The database size (e.g: "small")<br><ul><li>small</li><li>medium</li><li>large</li><li>dev</li></ul> | string
+| DB_ENGINE | The database engine (e.g: "postgres") | string
+| DB_ENGINE_VERSION | The database engine version (e.g: "12") | string
+| DB_SIZE | The database size (e.g: "small") | string
 
 #### Services
 
@@ -59,7 +59,7 @@ A service within this json has for key the name of the service and for value a j
 | image_password | The image password. Only needed with `is_private`. | string
 | run_cmd | The run command that will be executed when the service is scheduling. | string
 | instances | The number of instances you want to scale on this service. | string
-| network_rules | The network rules.<br><ul><li>`name` (default `http`)</li><li>`internal_port` (default `80`)</li><li>`domain` (default: `""`)</li><li>`path_prefix` (default: `/`)</li><li>`internal_protocol` (default: `http`)</li><li>`external_protocol` (default: `http`)</li></ul> | json
+| network_rules | The network rules (only http for now).<br><ul><li>`name` (default `http`)</li><li>`internal_port` (default `80`)</li><li>`domain` (default: `""`)</li><li>`path_prefix` (default: `/`)</li></ul> | json
 | env | The environment variables the application image needs to.  | json
 
 :information_source: For database environment variable in the json structure, as database will be created before the services, its environment variables can be recover with `{{ GLOBAL_DB_VARIABLE_FROM_INFRA }}` (see example below).
