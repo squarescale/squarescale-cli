@@ -18,6 +18,8 @@ func checkEnvironmentVariablesExists() {
 		iaasRegion,
 		iaasCred,
 		nodeType,
+		monitoring,
+		infraType,
 	}
 
 	for _, envVar := range envVars {

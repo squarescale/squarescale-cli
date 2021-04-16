@@ -20,10 +20,12 @@ func (p *Project) createProject() {
 	fmt.Println("Creating project...")
 
 	cmd := fmt.Sprintf(
-		"/sqsc project create -credential %s -monitoring netdata -name %s -node-size %s -infra-type high-availability -organization %s -provider %s -region %s -yes",
+		"/sqsc project create -credential %s -monitoring  %s -name %s -node-size %s -infra-type  %s -organization %s -provider %s -region %s -yes",
 		os.Getenv(iaasCred),
+		os.Getenv(monitoring),
 		os.Getenv(projectName),
 		os.Getenv(nodeType),
+		os.Getenv(infraType),
 		os.Getenv(organizationName),
 		os.Getenv(iaasProvider),
 		os.Getenv(iaasRegion),

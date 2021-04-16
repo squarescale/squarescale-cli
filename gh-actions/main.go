@@ -9,6 +9,8 @@ const (
 	iaasProvider        = "IAAS_PROVIDER"
 	iaasRegion          = "IAAS_REGION"
 	iaasCred            = "IAAS_CRED"
+	monitoring          = "MONITORING"
+	infraType           = "INFRA_TYPE"
 	nodeType            = "NODE_TYPE"
 	dbEngine            = "DB_ENGINE"
 	dbEngineVersion     = "DB_ENGINE_VERSION"
