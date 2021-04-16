@@ -132,6 +132,9 @@ A batch within this json has for key the name of the batch and for value a json 
 | image_password | The image password. Only needed with `is_private`. | string
 | run_cmd | The run command that will be executed when the batch is executed. | string
 | periodic | Enable a periodic batch.<br><ul><li>`periodicity` (default: `* * * * *`)</li><li>`timezone` (default: `Europe/Paris`)</li></ul> | json
+| limit_memory | Maximum amount of memory your batch will be able to use until it is killed and restarted automatically. (MB) | string
+| limit_cpu | This is an indicative limit of how much CPU your batch requires. (MHz) | string
+| limit_net | This is an indicative limit of how much network bandwidth your batch requires. It is only used to optimize the placement on the cluster. (Mbps) | string
 | env | The environment variables the application image needs to. (see above with `SERVICES`)  | json
 
 Example:
@@ -142,6 +145,9 @@ BATCHES: >-
     "database-setup": {
       "image_name": "${{ env.DOCKER_REPOSITORY }}:${{ env.DOCKER_REPOSITORY_TAG }}",
       "is_private": true,
+      "limit_memory": "256",
+      "limit_cpu": "100",
+      "limit_net": "1",
       "image_user": "${{ env.DOCKER_USER }}",
       "image_password": "${{ env.DOCKER_TOKEN }}",
       "run_cmd": "bundle exec rails db:setup",
