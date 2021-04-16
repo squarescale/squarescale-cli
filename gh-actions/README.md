@@ -24,7 +24,9 @@ This image is pushed to Squarescale docker hub through the tag name `gh-actions`
 | IAAS_PROVIDER | The provider to the IAAS you want to deploy your infrastructure. | string
 | IAAS_REGION | The IAAS region. | string
 | IAAS_CRED | The IAAS credential. | string
-| NODE_TYPE | The node size. | string
+| NODE_TYPE | The node size. Available values: <br><ul><li>dev</li><li>large</li><li>medium</li><li>small</li><li>xsmall</li></ul> | string
+| MONITORING | Monitoring tool. Available values: <br><ul><li>netdata</li><li>none</li></ul> | string
+| INFRA_TYPE | Clustering configuration. Available values: <br><ul><li>high-availability</li><li>single-node</li></ul> | string
 
 ### Optional variables
 
@@ -39,9 +41,9 @@ If one of the variables below is absent, no database will be created.
 
 | Name | Description | Type |
 | ---- | ----------- | ---- |
-| DB_ENGINE | The database engine (e.g: "postgres")<br><ul><li>mariadb</li><li>postgres</li><li>mysql</li></ul> | string
-| DB_ENGINE_VERSION | The database engine version (e.g: "12")<br><ul><li>mariadb : 10.4 / 10.3/ 10.2 / 10.1 / 10.0</li><li>postgres: 12 / 11 / 10 / 9.6 / 9.5 / 9.4 / 9.3</li><li>mysql: 8.0 / 5.7 / 5.6 / 5.5</li></ul> | string
-| DB_SIZE | The database size (e.g: "small")<br><ul><li>small</li><li>medium</li><li>large</li><li>dev</li></ul> | string
+| DB_ENGINE | The database engine (e.g: "postgres") Available values:<br><ul><li>mariadb</li><li>postgres</li><li>mysql</li></ul> | string
+| DB_ENGINE_VERSION | The database engine version (e.g: "12") Available values:<br><ul><li>mariadb : 10.4 / 10.3/ 10.2 / 10.1 / 10.0</li><li>postgres: 12 / 11 / 10 / 9.6 / 9.5 / 9.4 / 9.3</li><li>mysql: 8.0 / 5.7 / 5.6 / 5.5</li></ul> | string
+| DB_SIZE | The database size (e.g: "small") Available values:<br><ul><li>small</li><li>medium</li><li>large</li><li>dev</li></ul> | string
 
 #### Services
 
