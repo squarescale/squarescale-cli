@@ -19,17 +19,21 @@ func (p *Project) create() {
 func (p *Project) createProject() {
 	fmt.Println("Creating project...")
 
-	cmd := fmt.Sprintf(
-		"/sqsc project create -credential %s -monitoring  %s -name %s -node-size %s -infra-type  %s -organization %s -provider %s -region %s -yes",
-		os.Getenv(iaasCred),
-		os.Getenv(monitoring),
-		os.Getenv(projectName),
-		os.Getenv(nodeType),
-		os.Getenv(infraType),
-		os.Getenv(organizationName),
-		os.Getenv(iaasProvider),
-		os.Getenv(iaasRegion),
-	)
+	cmd := "/sqsc project create"
+	cmd += " -credential " + os.Getenv(iaasCred)
+	cmd += " -name " + os.Getenv(projectName)
+	cmd += " -node-size " + os.Getenv(nodeType)
+	cmd += " -infra-type " + os.Getenv(infraType)
+	cmd += " -organization " + os.Getenv(organizationName)
+	cmd += " -provider " + os.Getenv(iaasProvider)
+	cmd += " -region " + os.Getenv(iaasRegion)
+
+	if os.Getenv(monitoring) != "" {
+		cmd += " -monitoring " + os.Getenv(monitoring)
+	}
+
+	cmd += " -yes "
+
 	executeCommand(cmd, fmt.Sprintf("Fail to create project %q.", os.Getenv(projectName)))
 }
 
