@@ -25,13 +25,13 @@ This image is pushed to Squarescale docker hub through the tag name `gh-actions`
 | IAAS_REGION | The IAAS region. | string
 | IAAS_CRED | The IAAS credential. | string
 | NODE_TYPE | The node size. Available values: <br><ul><li>dev</li><li>large</li><li>medium</li><li>small</li><li>xsmall</li></ul> | string
-| MONITORING | Monitoring tool. Available values: <br><ul><li>netdata</li><li>none</li></ul> | string
 | INFRA_TYPE | Clustering configuration. Available values: <br><ul><li>high-availability</li><li>single-node</li></ul> | string
 
 ### Optional variables
 
 | Name | Description | Type |
 | ---- | ----------- | ---- |
+| MONITORING | Monitoring tool. Available value: <br><ul><li>netdata</li></ul> | string
 | DOCKER_REPOSITORY_TAG | The docker hub repository image name tag of your application | string
 | ORGANIZATION_NAME | The organization name you belong to. | string
 
