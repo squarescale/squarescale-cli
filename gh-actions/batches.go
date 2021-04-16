@@ -22,6 +22,9 @@ type BatchContent struct {
 	RUN_CMD        string            `json:"run_cmd"`
 	PERIODIC       BatchPeriodic     `json:"periodic"`
 	ENV            map[string]string `json:"env"`
+	LIMIT_MEMORY   string            `json:"limit_memory"`
+	LIMIT_CPU      string            `json:"limit_cpu"`
+	LIMIT_NET      string            `json:"limit_net"`
 }
 
 type BatchPeriodic struct {
@@ -41,7 +44,7 @@ func (b *Batches) create() {
 		for batchName, batchContent := range batches {
 			if !isBatchExists(batchName) {
 				b.createBatch(batchName, batchContent)
-				b.insertBatchEnv(batchName, batchContent)
+				b.insertBatchEnvAndLimits(batchName, batchContent)
 			} else {
 				fmt.Println(fmt.Sprintf("Batch %q already exists.", batchName))
 			}
@@ -92,24 +95,45 @@ func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 	executeCommand(cmd, fmt.Sprintf("Fail to add %q batch.", batchName))
 }
 
-func (b *Batches) insertBatchEnv(batchName string, batchContent BatchContent) {
-	if len(batchContent.ENV) != 0 {
-		fmt.Println(fmt.Sprintf("Inserting environment variable to batch %q", batchName))
+func (b *Batches) insertBatchEnvAndLimits(batchName string, batchContent BatchContent) {
 
-		jsonFileName := "batchEnvVar.json"
-		env, _ := json.Marshal(batchContent.ENV)
-		jsonErr := ioutil.WriteFile(jsonFileName, []byte(mapDatabaseEnv(string(env))), os.ModePerm)
+	limitMemory := batchContent.LIMIT_MEMORY
+	limitNet := batchContent.LIMIT_NET
+	limitCpu := batchContent.LIMIT_CPU
+	environment := batchContent.ENV
 
-		if jsonErr != nil {
-			log.Fatal(fmt.Sprintf("Cannot write json file with env for batch %q.", batchName))
+	if len(environment) != 0 || limitMemory != "" || limitNet != "" || limitCpu != "" {
+
+		cmd := "/sqsc batch set"
+		cmd += " -project-name " + getProjectName()
+		cmd += " -batch-name " + batchName
+
+		if len(environment) != 0 {
+			fmt.Println(fmt.Sprintf("Inserting environment variable to batch %q", batchName))
+
+			jsonFileName := "batchEnvVar.json"
+			env, _ := json.Marshal(environment)
+			jsonErr := ioutil.WriteFile(jsonFileName, []byte(mapDatabaseEnv(string(env))), os.ModePerm)
+
+			if jsonErr != nil {
+				log.Fatal(fmt.Sprintf("Cannot write json file with env for batch %q.", batchName))
+			}
+
+			cmd += " -env " + jsonFileName
 		}
 
-		cmd := fmt.Sprintf(
-			"/sqsc batch set -project-name %s -batch-name %s -env %s",
-			getProjectName(),
-			batchName,
-			jsonFileName,
-		)
+		if limitMemory != "" {
+			cmd += " -memory " + limitMemory
+		}
+
+		if limitCpu != "" {
+			cmd += " -cpu " + limitCpu
+		}
+
+		if limitNet != "" {
+			cmd += " -net " + limitNet
+		}
+
 		executeCommand(cmd, "Fail to insert batch env.")
 	}
 }
