@@ -22,6 +22,9 @@ type ServiceContent struct {
 	INSTANCES      string                `json:"instances"`
 	NETWORK_RULES  []NetworkRulesContent `json:"network_rules"`
 	ENV            map[string]string     `json:"env"`
+	LIMIT_MEMORY   string                `json:"limit_memory"`
+	LIMIT_CPU      string                `json:"limit_cpu"`
+	LIMIT_NET      string                `json:"limit_net"`
 }
 
 type NetworkRulesContent struct {
@@ -45,7 +48,7 @@ func (s *Services) create() {
 		for serviceName, serviceContent := range services {
 			if !isServiceExists(serviceName) {
 				s.createService(serviceName, serviceContent)
-				s.insertServiceEnv(serviceName, serviceContent)
+				s.insertServiceEnvAndLimits(serviceName, serviceContent)
 				s.insertNetworkRules(serviceName, serviceContent)
 			} else {
 				fmt.Println(fmt.Sprintf("Service %q already exists.", serviceName))
@@ -69,14 +72,14 @@ func (s *Services) createService(serviceName string, serviceContent ServiceConte
 	}
 	cmd += " -name " + imageName
 
-	run_command := serviceContent.RUN_CMD
-	if run_command != "" {
+	runCommand := serviceContent.RUN_CMD
+	if runCommand != "" {
 		cmd += " -run-command " + shellescape.Quote(serviceContent.RUN_CMD)
 	}
 
 	instances := serviceContent.INSTANCES
 	if instances != "" {
-		cmd += " -instances " + serviceContent.INSTANCES
+		cmd += " -instances " + instances
 	}
 
 	if serviceContent.IS_PRIVATE {
@@ -87,28 +90,55 @@ func (s *Services) createService(serviceName string, serviceContent ServiceConte
 	executeCommand(cmd, fmt.Sprintf("Fail to create service %q.", serviceName))
 }
 
-func (s *Services) insertServiceEnv(serviceName string, serviceContent ServiceContent) {
-	if len(serviceContent.ENV) != 0 {
-		fmt.Println(fmt.Sprintf("Inserting environment variable to service %q", serviceName))
+func (s *Services) insertServiceEnvAndLimits(serviceName string, serviceContent ServiceContent) {
 
-		jsonFileName := "serviceEnvVar.json"
-		env, _ := json.Marshal(serviceContent.ENV)
-		jsonErr := ioutil.WriteFile(jsonFileName, []byte(mapDatabaseEnv(string(env))), os.ModePerm)
+	limitMemory := serviceContent.LIMIT_MEMORY
+	limitNet := serviceContent.LIMIT_NET
+	limitCpu := serviceContent.LIMIT_CPU
+	instances := serviceContent.INSTANCES
+	command := serviceContent.RUN_CMD
+	environment := serviceContent.ENV
 
-		if jsonErr != nil {
-			log.Fatal("Cannot write json file with map environment variables.")
+	if len(environment) != 0 || limitMemory != "" || limitNet != "" || limitCpu != "" {
+
+		cmd := "/sqsc container set"
+		cmd += " -project-name " + getProjectName()
+		cmd += " -service " + serviceName
+
+		if len(environment) != 0 {
+			fmt.Println(fmt.Sprintf("Inserting environment variable to service %q", serviceName))
+
+			jsonFileName := "serviceEnvVar.json"
+			env, _ := json.Marshal(environment)
+			jsonErr := ioutil.WriteFile(jsonFileName, []byte(mapDatabaseEnv(string(env))), os.ModePerm)
+
+			if jsonErr != nil {
+				log.Fatal("Cannot write json file with map environment variables.")
+			}
+
+			cmd += " -env " + jsonFileName
 		}
 
-		instancesNumber := "1"
+		if limitMemory != "" {
+			cmd += " -memory " + limitMemory
+		}
 
-		cmd := fmt.Sprintf(
-			"/sqsc container set -project-name %s -env %s -service %s -instances %s -command \"%s\"",
-			getProjectName(),
-			jsonFileName,
-			serviceName,
-			instancesNumber,
-			serviceContent.RUN_CMD,
-		)
+		if limitCpu != "" {
+			cmd += " -cpu " + limitCpu
+		}
+
+		if limitNet != "" {
+			cmd += " -net " + limitNet
+		}
+
+		if instances != "" {
+			cmd += " -instances " + instances
+		}
+
+		if command != "" {
+			cmd += " -command " + command
+		}
+
 		executeCommand(cmd, fmt.Sprintf("Fail to import service %q environment variables.", serviceName))
 	}
 }

@@ -61,6 +61,9 @@ A service within this json has for key the name of the service and for value a j
 | image_password | The image password. Only needed with `is_private`. | string
 | run_cmd | The run command that will be executed when the service is scheduling. | string
 | instances | The number of instances you want to scale on this service. | string
+| limit_memory | Maximum amount of memory your service will be able to use until it is killed and restarted automatically. (MB) | string
+| limit_cpu | This is an indicative limit of how much CPU your service requires. (MHz) | string
+| limit_net | This is an indicative limit of how much network bandwidth your service requires. It is only used to optimize the placement on the cluster. (Mbps) | string
 | network_rules | The network rules.<br><ul><li>`name` (default `http`)</li><li>`internal_port` (default `80`)</li><li>`domain` (default: `""`)</li><li>`path_prefix` (default: `/`)</li><li>`internal_protocol` (default: `http`)</li><li>`external_protocol` (default: `http`)</li></ul> | json
 | env | The environment variables the application image needs to.  | json
 
@@ -77,10 +80,25 @@ SERVICES: >-
       "image_user": "${{ env.DOCKER_USER }}",
       "image_password": "${{ env.DOCKER_TOKEN }}",
       "run_cmd": "bundle exec rails server -b 0.0.0.0",
-      "network_rules": {
+      "limit_memory": "256",
+      "limit_cpu": "100",
+      "limit_net": "1",
+      "instances": "1",
+      "network_rules": [
+        {
         "name": "http",
-        "internal_port": "3000"
-      },
+        "internal_port": "80",
+        "internal_protocol": "http",
+        "external_protocol": "http"
+        },
+        {
+        "name": "https",
+        "internal_port": "80",
+        "internal_protocol": "http",
+        "external_protocol": "https",
+        "domain": "test-domain"
+        },
+      ],
       "env": {
         "RAILS_LOG_TO_STDOUT": "true",
         "DATABASE_HOST": "{{DB_HOST}}",
