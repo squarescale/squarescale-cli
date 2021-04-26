@@ -103,6 +103,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"scheduling-group list": func() (cli.Command, error) {
+			return &command.SchedulingGroupListCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"container": func() (cli.Command, error) {
 			return &command.ContainerCommand{}, nil
 		},
