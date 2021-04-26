@@ -90,6 +90,14 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"scheduling-group": func() (cli.Command, error) {
+			return &command.SchedulingGroupCommand{}, nil
+		},
+		"scheduling-group add": func() (cli.Command, error) {
+			return &command.SchedulingGroupAddCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"container": func() (cli.Command, error) {
 			return &command.ContainerCommand{}, nil
 		},

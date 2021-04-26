@@ -183,6 +183,15 @@ func statefulNodeNameArg(f *flag.FlagSet, arg int) (string, error) {
 	}
 }
 
+func schedulingGroupNameArg(f *flag.FlagSet, arg int) (string, error) {
+	value := f.Arg(arg)
+	if value == "" {
+		return "", errors.New("Scheduling group name must be specified")
+	} else {
+		return value, nil
+	}
+}
+
 func batchNameArg(f *flag.FlagSet, arg int) (string, error) {
 	value := f.Arg(arg)
 	if value == "" {
