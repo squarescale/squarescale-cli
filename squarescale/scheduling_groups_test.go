@@ -23,6 +23,9 @@ func TestSchedulingGroups(t *testing.T) {
 	t.Run("Nominal case on AddSchedulingGroup", nominalCaseOnAddSchedulingGroup)
 	t.Run("Test project not found on AddSchedulingGroup", UnknownProjectOnAddSchedulingGroup)
 	t.Run("Test to create a duplicate on AddSchedulingGroup", DuplicateNodeOnAddSchedulingGroup)
+
+	// DeleteSchedulingGroup
+	t.Run("Nominal case on DeleteSchedulingGroup", nominalCaseOnDeleteSchedulingGroup)
 }
 
 func nominalCaseOnGetSchedulingGroups(t *testing.T) {
@@ -354,5 +357,34 @@ func DuplicateNodeOnAddSchedulingGroup(t *testing.T) {
 
 	if fmt.Sprintf("%s", err) != expectedError {
 		t.Fatalf("Expected error message:\n`%s`\nGot:\n`%s`", expectedError, err)
+	}
+}
+
+func nominalCaseOnDeleteSchedulingGroup(t *testing.T) {
+	// given
+	token := "some-token"
+	projectName := "my-project"
+	schedulingGroupName := "group1"
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		checkPath(t, "/projects/"+projectName+"/scheduling_groups/"+schedulingGroupName, r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
+
+		resBody := `null`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.DeleteSchedulingGroup(projectName, schedulingGroupName)
+
+	// then
+	if err != nil {
+		t.Fatalf("Expect no error, got `%s`", err)
 	}
 }
