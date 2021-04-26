@@ -41,6 +41,29 @@ func (c *Client) AddSchedulingGroup(projectUUID string, name string) (Scheduling
 	return newSchedulingGroup, nil
 }
 
+// DeleteSchedulingGroup delete a existing scheduling group
+func (c *Client) DeleteSchedulingGroup(projectUUID string, name string) error {
+	code, body, err := c.delete("/projects/" + projectUUID + "/scheduling_groups/" + name)
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusOK:
+	case http.StatusNotFound:
+		if fmt.Sprintf("%s", body) == `{"error":"Couldn't find SchedulingGroup with [WHERE \"scheduling_groups\".\"cluster_id\" = $1 AND \"scheduling_groups\".\"name\" = $2]"}` {
+			return fmt.Errorf("Scheduling group '%s' does not exist", name)
+		}
+		return fmt.Errorf("Project '%s' does not exist", projectUUID)
+	case http.StatusBadRequest:
+		return fmt.Errorf("Deploy probably in progress")
+	default:
+		return unexpectedHTTPError(code, body)
+	}
+
+	return nil
+}
+
 // GetSchedulingGroups gets all the scheduling groups attached to a Project
 func (c *Client) GetSchedulingGroups(projectUUID string) ([]SchedulingGroup, error) {
 	code, body, err := c.get("/projects/" + projectUUID + "/scheduling_groups")
