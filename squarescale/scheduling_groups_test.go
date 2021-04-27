@@ -342,7 +342,7 @@ func DuplicateNodeOnAddSchedulingGroup(t *testing.T) {
 	schedulingGroupName := "group1"
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		resBody := `{"error":"PG::UniqueViolation: ERROR:  duplicate key value violates unique constraint \"index_scheduling_groups_on_cluster_id_and_name\"\nDETAIL:  Key (cluster_id, name)=(6163, nodeb) already exists.\n: INSERT INTO \"scheduling_groups\" (\"name\") VALUES ($1) RETURNING \"id\""}`
+		resBody := `{"error":"PG::UniqueViolation: ERROR:  duplicate key value violates unique constraint \"index_scheduling_groups_on_name\"\nDETAIL:  Key (cluster_id, name)=(6163, nodeb) already exists.\n: INSERT INTO \"scheduling_groups\" (\"name\") VALUES ($1) RETURNING \"id\""}`
 
 		w.Header().Set("Content-Type", "application/json")
 

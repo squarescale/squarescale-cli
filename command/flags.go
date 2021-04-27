@@ -192,6 +192,15 @@ func schedulingGroupNameArg(f *flag.FlagSet, arg int) (string, error) {
 	}
 }
 
+func externalNodeNameArg(f *flag.FlagSet, arg int) (string, error) {
+	value := f.Arg(arg)
+	if value == "" {
+		return "", errors.New("External node name must be specified")
+	} else {
+		return value, nil
+	}
+}
+
 func batchNameArg(f *flag.FlagSet, arg int) (string, error) {
 	value := f.Arg(arg)
 	if value == "" {

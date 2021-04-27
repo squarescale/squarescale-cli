@@ -113,6 +113,19 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"external-node": func() (cli.Command, error) {
+			return &command.ExternalNodeCommand{}, nil
+		},
+		"external-node list": func() (cli.Command, error) {
+			return &command.ExternalNodeListCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"external-node add": func() (cli.Command, error) {
+			return &command.ExternalNodeAddCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"container": func() (cli.Command, error) {
 			return &command.ContainerCommand{}, nil
 		},
