@@ -8,8 +8,22 @@ import (
 
 // SchedulingGroup describes a project scheduling group as returned by the SquareScale API
 type SchedulingGroup struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID             int             `json:"id"`
+	Name           string          `json:"name"`
+	ClusterMembers []ClusterMember `json:"cluster_members"`
+	Services       []Services      `json:"services"`
+}
+
+type ClusterMember struct {
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	PublicIP  string `json:"public_ip"`
+	PrivateIP string `json:"private_ip"`
+}
+
+type Services struct {
+	ContainerID int    `json:"container_id"`
+	Name        string `json:"name"`
 }
 
 // AddSchedulingGroup add a new scheduling group
