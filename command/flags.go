@@ -100,6 +100,10 @@ func containerNoRunCmdFlag(f *flag.FlagSet) *bool {
 	return f.Bool("no-command", false, "Disable command override")
 }
 
+func containerSchedulingGroupsFlag(f *flag.FlagSet) *string {
+	return f.String("scheduling-groups", "", "This is the scheduling groups of your service. Format: ${scheduling_group_name_1},${scheduling_group_name_2}")
+}
+
 func containerRunCmdFlag(f *flag.FlagSet) *string {
 	return f.String("command", "", "Command to run when starting container (override)")
 }

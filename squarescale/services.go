@@ -29,6 +29,7 @@ type Service struct {
 	RefreshCallbacks []string      `json:"refresh_callbacks"`
 	Limits           ServiceLimits `json:"limits"`
 	CustomEnv        []ServiceEnv  `json:"custom_environment"`
+	SchedulingGroups []int         `json:"scheduling_groups"`
 }
 
 type ServiceBody struct {
@@ -175,6 +176,9 @@ func (c *Client) ConfigService(service Service) error {
 	cont["limits"] = limits
 	if service.CustomEnv != nil {
 		cont["custom_environment"] = service.CustomEnv
+	}
+	if len(service.SchedulingGroups) != 0 {
+		cont["scheduling_groups"] = service.SchedulingGroups
 	}
 
 	payload := &JSONObject{"container": cont}

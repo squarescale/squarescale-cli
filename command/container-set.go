@@ -30,6 +30,8 @@ func (c *ContainerSetCommand) Run(args []string) int {
 	limitNetArg := containerLimitNetFlag(c.flagSet)
 	noRunCmdArg := containerNoRunCmdFlag(c.flagSet)
 	envCmdArg := envFileFlag(c.flagSet)
+	schedulingGroupsArg := containerSchedulingGroupsFlag(c.flagSet)
+
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -121,6 +123,12 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			if err != nil {
 				c.error(err)
 			}
+		}
+
+		schedulingGroupsToAdd := parseSchedulingGroupsToAdd(UUID, client, *schedulingGroupsArg)
+		if len(schedulingGroupsToAdd) != 0 {
+			c.info("Configure scheduling groups")
+			container.SchedulingGroups = schedulingGroupsToAdd
 		}
 
 		msg := fmt.Sprintf(
