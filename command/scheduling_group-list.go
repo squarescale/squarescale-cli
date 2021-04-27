@@ -46,18 +46,21 @@ func (b *SchedulingGroupListCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
-		schedulingGroup, err := client.GetSchedulingGroups(UUID)
+		schedulingGroups, err := client.GetSchedulingGroups(UUID)
 		if err != nil {
 			return "", err
 		}
 
 		var msg string
-		msg = "Name\n"
-		for _, n := range schedulingGroup {
-			msg += fmt.Sprintf("%s\n", n.Name)
+		for _, sg := range schedulingGroups {
+			msg += fmt.Sprintf("[%s]\n", sg.Name)
+			msg += fmt.Sprintf("  Nodes:\n")
+			msg += fmt.Sprintf("\t%s\n\n", client.GetSchedulingGroupNodes(sg, "\n\t"))
+			msg += fmt.Sprintf("  Services:\n")
+			msg += fmt.Sprintf("\t%s\n\n", client.GetSchedulingGroupServices(sg, "\n\t"))
 		}
 
-		if len(schedulingGroup) == 0 {
+		if len(schedulingGroups) == 0 {
 			msg = "No scheduling groups found"
 		}
 

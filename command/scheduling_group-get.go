@@ -68,8 +68,8 @@ func (b *SchedulingGroupGetCommand) Run(args []string) int {
 		var msg string
 		msg = ""
 		msg += fmt.Sprintf("Name:\t\t%s\n", schedulingGroup.Name)
-		msg += fmt.Sprintf("Nodes:\t\t%s\n", strings.Join(nodes[:], "\n\t\t"))
-		msg += fmt.Sprintf("Services:\t%s\n", strings.Join(services[:], "\n\t"))
+		msg += fmt.Sprintf("Nodes:\t\t%s\n", client.GetSchedulingGroupNodes(schedulingGroup, "\n\t\t"))
+		msg += fmt.Sprintf("Services:\t%s\n", client.GetSchedulingGroupServices(schedulingGroup, "\n\t\t"))
 
 		return msg, nil
 	})
