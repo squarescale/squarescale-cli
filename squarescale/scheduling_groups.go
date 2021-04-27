@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // SchedulingGroup describes a project scheduling group as returned by the SquareScale API
@@ -116,4 +117,20 @@ func (c *Client) GetSchedulingGroupInfo(projectUUID string, name string) (Schedu
 	}
 
 	return SchedulingGroup{}, fmt.Errorf("Scheduling group '%s' not found for project '%s'", name, projectUUID)
+}
+
+func (c *Client) GetSchedulingGroupServices(schedulingGroup SchedulingGroup, concatSep string) string {
+	var services []string
+	for _, s := range schedulingGroup.Services {
+		services = append(services, s.Name)
+	}
+	return strings.Join(services[:], concatSep)
+}
+
+func (c *Client) GetSchedulingGroupNodes(schedulingGroup SchedulingGroup, concatSep string) string {
+	var nodes []string
+	for _, n := range schedulingGroup.ClusterMembers {
+		nodes = append(nodes, n.Name)
+	}
+	return strings.Join(nodes[:], concatSep)
 }
