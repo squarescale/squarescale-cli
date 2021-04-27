@@ -55,9 +55,13 @@ func (b *SchedulingGroupListCommand) Run(args []string) int {
 		for _, sg := range schedulingGroups {
 			msg += fmt.Sprintf("[%s]\n", sg.Name)
 			msg += fmt.Sprintf("  Nodes:\n")
-			msg += fmt.Sprintf("\t%s\n\n", client.GetSchedulingGroupNodes(sg, "\n\t"))
+			if client.GetSchedulingGroupNodes(sg, "\n\t") != "" {
+				msg += fmt.Sprintf("\t%s\n\n", client.GetSchedulingGroupNodes(sg, "\n\t"))
+			}
 			msg += fmt.Sprintf("  Services:\n")
-			msg += fmt.Sprintf("\t%s\n\n", client.GetSchedulingGroupServices(sg, "\n\t"))
+			if client.GetSchedulingGroupServices(sg, "\n\t") != "" {
+				msg += fmt.Sprintf("\t%s\n\n", client.GetSchedulingGroupServices(sg, "\n\t"))
+			}
 		}
 
 		if len(schedulingGroups) == 0 {
