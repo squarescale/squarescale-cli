@@ -9,13 +9,13 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// SchedulingGroupGetCommand is a cli.Command implementation for get a scheduling group.
-type SchedulingGroupGetCommand struct {
+// ExternalNodeGetCommand is a cli.Command implementation for get a external node.
+type ExternalNodeGetCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
-func (b *SchedulingGroupGetCommand) Run(args []string) int {
+func (b *ExternalNodeGetCommand) Run(args []string) int {
 	b.flagSet = newFlagSet(b, b.Ui)
 	endpoint := endpointFlag(b.flagSet)
 	projectUUID := b.flagSet.String("project-uuid", "", "set the uuid of the project")
@@ -29,7 +29,7 @@ func (b *SchedulingGroupGetCommand) Run(args []string) int {
 		return b.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	schedulingGroupName, err := schedulingGroupNameArg(b.flagSet, 0)
+	externalNodeName, err := externalNodeNameArg(b.flagSet, 0)
 	if err != nil {
 		return b.errorWithUsage(err)
 	}
@@ -38,7 +38,7 @@ func (b *SchedulingGroupGetCommand) Run(args []string) int {
 		return b.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", b.flagSet.Args()))
 	}
 
-	return b.runWithSpinner("show scheduling group", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return b.runWithSpinner("show external nodes", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -50,32 +50,32 @@ func (b *SchedulingGroupGetCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
-		schedulingGroup, err := client.GetSchedulingGroupInfo(UUID, schedulingGroupName)
+		externalNode, err := client.GetExternalNodeInfo(UUID, externalNodeName)
 		if err != nil {
 			return "", err
 		}
 
 		var msg string
 		msg = ""
-		msg += fmt.Sprintf("Name:\t\t%s\n", schedulingGroup.Name)
-		msg += fmt.Sprintf("Nodes:\t\t%s\n", client.GetSchedulingGroupNodes(schedulingGroup, "\n\t\t"))
-		msg += fmt.Sprintf("Services:\t%s\n", client.GetSchedulingGroupServices(schedulingGroup, "\n\t\t"))
+		msg += fmt.Sprintf("Name:\t\t%s\n", externalNode.Name)
+		msg += fmt.Sprintf("Public IP:\t%s\n", externalNode.PublicIP)
+		msg += fmt.Sprintf("Status:\t\t%s\n", externalNode.Status)
 
 		return msg, nil
 	})
 }
 
 // Synopsis is part of cli.Command implementation.
-func (b *SchedulingGroupGetCommand) Synopsis() string {
-	return "Get a scheduling group of project"
+func (b *ExternalNodeGetCommand) Synopsis() string {
+	return "Get a external node of project"
 }
 
 // Help is part of cli.Command implementation.
-func (b *SchedulingGroupGetCommand) Help() string {
+func (b *ExternalNodeGetCommand) Help() string {
 	helpText := `
-usage: sqsc scheduling-group get [options] <scheduling_group_name>
+usage: sqsc external-node get [options] <external_node_name>
 
-  Get a scheduling group of project.
+  Get a external node of project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(b.flagSet))
 }
