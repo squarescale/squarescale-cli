@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// SchedulingGroupAddCommand is a cli.Command implementation for creating a stateful-node.
+// SchedulingGroupAddCommand is a cli.Command implementation for creating a scheduling group.
 type SchedulingGroupAddCommand struct {
 	Meta
 	flagSet *flag.FlagSet
