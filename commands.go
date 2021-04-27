@@ -126,6 +126,12 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+
+		"external-node get": func() (cli.Command, error) {
+			return &command.ExternalNodeGetCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"container": func() (cli.Command, error) {
 			return &command.ContainerCommand{}, nil
 		},
