@@ -7,18 +7,21 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-func parseSchedulingGroupsToAdd(UUID string, client *squarescale.Client, schedulingGroups string) []int {
+func getSchedulingGroupsArray(UUID string, client *squarescale.Client, schedulingGroups string) []squarescale.SchedulingGroup {
 	schedulingGroupsNameSplitted := strings.Split(schedulingGroups, ",")
 
-	var schedulingGroupsIds []int
+	var schedulingGroupsArray []squarescale.SchedulingGroup
 
 	for _, name := range schedulingGroupsNameSplitted {
 		schedulingGroup, err := client.GetSchedulingGroupInfo(UUID, name)
 		if err != nil {
 			fmt.Println(err)
 		}
-		schedulingGroupsIds = append(schedulingGroupsIds, schedulingGroup.ID)
+		schedulingGroupsArray = append(schedulingGroupsArray, squarescale.SchedulingGroup{
+			ID:   schedulingGroup.ID,
+			Name: name,
+		})
 	}
 
-	return schedulingGroupsIds
+	return schedulingGroupsArray
 }

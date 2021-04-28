@@ -125,7 +125,7 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			}
 		}
 
-		schedulingGroupsToAdd := parseSchedulingGroupsToAdd(UUID, client, *schedulingGroupsArg)
+		schedulingGroupsToAdd := getSchedulingGroupsArray(UUID, client, *schedulingGroupsArg)
 		if len(schedulingGroupsToAdd) != 0 {
 			c.info("Configure scheduling groups")
 			container.SchedulingGroups = schedulingGroupsToAdd

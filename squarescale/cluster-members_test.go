@@ -41,7 +41,9 @@ func nominalCaseOnGetClusterMembers(t *testing.T) {
 				"public_ip": "127.0.0.1",
 				"private_ip": "192.168.0.1",
 				"nomad_status": "ready",
-				"scheduling_group": "squarescale"
+				"scheduling_group": {
+					"name": "squarescale"
+				}
 			},
 			{
 				"id": 23,
@@ -49,7 +51,9 @@ func nominalCaseOnGetClusterMembers(t *testing.T) {
 				"public_ip": "127.0.0.2",
 				"private_ip": "192.168.0.2",
 				"nomad_status": "ready",
-				"scheduling_group": "sogilis"
+				"scheduling_group": {
+					"name": "sogilis"
+				}
 			}
 		]
 		`
@@ -128,13 +132,13 @@ func nominalCaseOnGetClusterMembers(t *testing.T) {
 	}
 
 	expectedString = "squarescale"
-	if clusterMembers[0].SchedulingGroup != expectedString {
-		t.Errorf("Expect clusterMember.SchedulingGroup `%s`, got `%s`", expectedString, clusterMembers[0].SchedulingGroup)
+	if clusterMembers[0].SchedulingGroup.Name != expectedString {
+		t.Errorf("Expect clusterMember.SchedulingGroup.Name `%s`, got `%s`", expectedString, clusterMembers[0].SchedulingGroup.Name)
 	}
 
 	expectedString = "sogilis"
-	if clusterMembers[1].SchedulingGroup != expectedString {
-		t.Errorf("Expect clusterMember.SchedulingGroup `%s`, got `%s`", expectedString, clusterMembers[1].SchedulingGroup)
+	if clusterMembers[1].SchedulingGroup.Name != expectedString {
+		t.Errorf("Expect clusterMember.SchedulingGroup.Name `%s`, got `%s`", expectedString, clusterMembers[1].SchedulingGroup.Name)
 	}
 }
 
@@ -186,7 +190,9 @@ func nominalCaseOnGetClusterMemberInfo(t *testing.T) {
 				"public_ip": "127.0.0.1",
 				"private_ip": "192.168.0.1",
 				"nomad_status": "ready",
-				"scheduling_group": "squarescale"
+				"scheduling_group": {
+					"name": "squarescale"
+				}
 			},
 			{
 				"id": 23,
@@ -194,7 +200,9 @@ func nominalCaseOnGetClusterMemberInfo(t *testing.T) {
 				"public_ip": "127.0.0.2",
 				"private_ip": "192.168.0.2",
 				"nomad_status": "ready",
-				"scheduling_group": "sogilis"
+				"scheduling_group": {
+					"name": "sogilis"
+				}
 			}
 		]
 		`
@@ -243,7 +251,9 @@ func UnknownClusterMemberOnGetClusterMemberInfo(t *testing.T) {
 				"public_ip": "127.0.0.1",
 				"private_ip": "192.168.0.1",
 				"nomad_status": "ready",
-				"scheduling_group": "squarescale"
+				"scheduling_group": {
+					"name": "squarescale"
+				}
 			},
 			{
 				"id": 23,
@@ -251,7 +261,9 @@ func UnknownClusterMemberOnGetClusterMemberInfo(t *testing.T) {
 				"public_ip": "127.0.0.2",
 				"private_ip": "192.168.0.2",
 				"nomad_status": "ready",
-				"scheduling_group": "sogilis"
+				"scheduling_group": {
+					"name": "sogilis"
+				}
 			}
 		]
 		`
@@ -314,14 +326,18 @@ func nominalCaseOnConfigClusterMember(t *testing.T) {
 	projectName := "my-project"
 
 	clusterMember := squarescale.ClusterMember{
-		ID:              1,
-		Name:            "cm1",
-		PublicIP:        "10.0.0.1",
-		PrivateIP:       "192.168.0.1",
-		SchedulingGroup: "squarescale",
+		ID:        1,
+		Name:      "cm1",
+		PublicIP:  "10.0.0.1",
+		PrivateIP: "192.168.0.1",
+		SchedulingGroup: squarescale.SchedulingGroup{
+			Name: "squarescale",
+		},
 	}
 	newClusterMember := squarescale.ClusterMember{
-		SchedulingGroup: "sogilis",
+		SchedulingGroup: squarescale.SchedulingGroup{
+			Name: "sogilis",
+		},
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -349,18 +365,22 @@ func UnknownProjectOnConfigClusterMember(t *testing.T) {
 	token := "some-token"
 
 	clusterMember := squarescale.ClusterMember{
-		ID:              1,
-		Name:            "cm1",
-		PublicIP:        "10.0.0.1",
-		PrivateIP:       "192.168.0.1",
-		SchedulingGroup: "squarescale",
+		ID:        1,
+		Name:      "cm1",
+		PublicIP:  "10.0.0.1",
+		PrivateIP: "192.168.0.1",
+		SchedulingGroup: squarescale.SchedulingGroup{
+			Name: "squarescale",
+		},
 	}
 	newClusterMember := squarescale.ClusterMember{
-		ID:              1,
-		Name:            "cm1",
-		PublicIP:        "10.0.0.1",
-		PrivateIP:       "192.168.0.1",
-		SchedulingGroup: "sogilis",
+		ID:        1,
+		Name:      "cm1",
+		PublicIP:  "10.0.0.1",
+		PrivateIP: "192.168.0.1",
+		SchedulingGroup: squarescale.SchedulingGroup{
+			Name: "sogilis",
+		},
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
