@@ -13,30 +13,31 @@ import (
 
 // Project defined how project could see
 type Project struct {
-	Name              string    `json:"name"`
-	UUID              string    `json:"uuid"`
-	Provider          string    `json:"provider"`
-	Region            string    `json:"region"`
-	Organization      string    `string:"organization"`
-	InfraStatus       string    `json:"infra_status"`
-	ClusterSize       int       `json:"cluster_size"`
-	NomadNodesReady   int       `json:"nomad_nodes_ready"`
-	MonitoringEnabled bool      `json:"monitoring_enabled"`
-	MonitoringEngine  string    `json:"monitoring_engine"`
-	SlackWebHook      string    `json:"slack_webhook"`
-	Error             string    `json:"error"`
-	ProviderLabel     string    `json:"provider_label"`
-	NodeSize          string    `json:"node_size"`
-	RegionLabel       string    `json:"region_label"`
-	Credentials       string    `json:"credentials_name"`
-	CreatedAt         time.Time `json:"created_at"`
-	UpdatedAt         time.Time `json:"updated_at"`
-	StatusBefore      string    `json:"status_before"`
-	DesiredStateless  int       `json:"desired_stateless"`
-	ActualStateless   int       `json:"actual_stateless"`
-	DesiredStateful   int       `json:"desired_stateful"`
-	ActualStateful    int       `json:"actual_stateful"`
-	TfCommand         string    `json:"tf_command"`
+	Name                 string    `json:"name"`
+	UUID                 string    `json:"uuid"`
+	Provider             string    `json:"provider"`
+	Region               string    `json:"region"`
+	Organization         string    `string:"organization"`
+	InfraStatus          string    `json:"infra_status"`
+	ClusterSize          int       `json:"cluster_size"`
+	NomadNodesReady      int       `json:"nomad_nodes_ready"`
+	MonitoringEnabled    bool      `json:"monitoring_enabled"`
+	MonitoringEngine     string    `json:"monitoring_engine"`
+	SlackWebHook         string    `json:"slack_webhook"`
+	Error                string    `json:"error"`
+	HybridClusterEnabled bool      `json:"hybrid_cluster_enabled"`
+	ProviderLabel        string    `json:"provider_label"`
+	NodeSize             string    `json:"node_size"`
+	RegionLabel          string    `json:"region_label"`
+	Credentials          string    `json:"credentials_name"`
+	CreatedAt            time.Time `json:"created_at"`
+	UpdatedAt            time.Time `json:"updated_at"`
+	StatusBefore         string    `json:"status_before"`
+	DesiredStateless     int       `json:"desired_stateless"`
+	ActualStateless      int       `json:"actual_stateless"`
+	DesiredStateful      int       `json:"desired_stateful"`
+	ActualStateful       int       `json:"actual_stateful"`
+	TfCommand            string    `json:"tf_command"`
 }
 
 /*
@@ -415,4 +416,23 @@ func (c *Client) ProjectLogs(project string, container string, after string) ([]
 	}
 
 	return messages, lastTimestamp, nil
+}
+
+// ConfigProjectSettings configure project settings
+func (c *Client) ConfigProjectSettings(projectUUID string, project Project) error {
+	payload := &JSONObject{"hybrid_cluster_enabled": project.HybridClusterEnabled}
+
+	code, body, err := c.put(fmt.Sprintf("/projects/%s", projectUUID), payload)
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusOK:
+		return nil
+	case http.StatusNotFound:
+		return fmt.Errorf("Project '%s' not found", projectUUID)
+	default:
+		return unexpectedHTTPError(code, body)
+	}
 }
