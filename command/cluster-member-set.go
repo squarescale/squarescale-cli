@@ -70,7 +70,7 @@ func (c *ClusterMemberSetCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ClusterMemberSetCommand) Synopsis() string {
-	return "Set cluster node settings attached to a project cluster."
+	return "Set node settings attached to a project cluster."
 }
 
 // Help is part of cli.Command implementation.
@@ -78,7 +78,7 @@ func (c *ClusterMemberSetCommand) Help() string {
 	helpText := `
 usage: sqsc cluster node set [options]
 
-  Set cluster node settings attached to a project cluster.
+  Set node settings attached to a project cluster.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
