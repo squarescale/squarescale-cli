@@ -15,13 +15,6 @@ type SchedulingGroup struct {
 	Services       []Services      `json:"services"`
 }
 
-type ClusterMember struct {
-	ID        int    `json:"id"`
-	Name      string `json:"name"`
-	PublicIP  string `json:"public_ip"`
-	PrivateIP string `json:"private_ip"`
-}
-
 type Services struct {
 	ContainerID int    `json:"container_id"`
 	Name        string `json:"name"`
