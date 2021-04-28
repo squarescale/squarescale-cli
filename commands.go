@@ -49,6 +49,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"cluster node list": func() (cli.Command, error) {
+			return &command.ClusterMemberListCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"cluster node set": func() (cli.Command, error) {
 			return &command.ClusterMemberSetCommand{
 				Meta: *meta,

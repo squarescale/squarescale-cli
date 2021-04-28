@@ -57,7 +57,7 @@ func (e *ExternalNodeListCommand) Run(args []string) int {
 		}
 
 		if len(externalNodes) == 0 {
-			msg = "No batch found"
+			msg = "No external nodes"
 		}
 
 		return msg, nil
