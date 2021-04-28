@@ -224,6 +224,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"project settings": func() (cli.Command, error) {
+			return &command.ProjectSettingsCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"db": func() (cli.Command, error) {
 			return &command.DBCommand{}, nil
 		},
