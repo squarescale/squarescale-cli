@@ -53,6 +53,10 @@ func TestProject(t *testing.T) {
 	t.Run("Project not found on ProjectDelete", UnknownProjectOnProjectDelete)
 	t.Run("Badly http error code case on ProjectDelete", badHttpErrrorCoreCaseOnProjectDelete)
 
+	// ConfigProjectSettings
+	t.Run("Nominal case on ConfigProjectSettings", nominalCaseConfigProjectSettings)
+	t.Run("Project not found on ConfigProjectSettings", UnknownProjectOnConfigProjectSettings)
+
 	// Error cases
 	t.Run("Test HTTP client error on project methods (create, provision, unprovision, get)", ClientHTTPErrorOnProjectMethods)
 	// t.Run("Test internal server error on project methods ()", InternalServerErrorOnProjectMethods)
@@ -1228,3 +1232,67 @@ func CantUnmarshalOnProjectMethods(t *testing.T) {
 // ProjectUnprovision(project string) error {
 // ProjectDelete(project string) error {
 // ProjectLogs(project string, container string, after string) ([]string, string, error) {
+
+func nominalCaseConfigProjectSettings(t *testing.T) {
+	// given
+	token := "some-token"
+	projectUUID := "8cfe8f68-cad5-4157-b8a6-d9efa12caf0e"
+
+	project := squarescale.Project{
+		HybridClusterEnabled: true,
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		checkPath(t, "/projects/"+projectUUID, r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
+		resBody := `null`
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(200)
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.ConfigProjectSettings(projectUUID, project)
+
+	// then
+	if err != nil {
+		t.Fatalf("Expect no error, got `%s`", err)
+	}
+}
+
+func UnknownProjectOnConfigProjectSettings(t *testing.T) {
+	// given
+	token := "some-token"
+	projectUUID := "00000000-0000-0000-0000-000000000000"
+
+	project := squarescale.Project{
+		HybridClusterEnabled: true,
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		checkPath(t, "/projects/"+projectUUID, r.URL.Path)
+		checkAuthorization(t, r.Header.Get("Authorization"), token)
+
+		resBody := `{"error":"Couldn't find Project with [WHERE \"projects\".\"uuid\" = $1]"}`
+
+		w.Header().Set("Content-Type", "application/json")
+
+		w.WriteHeader(404)
+		w.Write([]byte(resBody))
+	}))
+
+	defer server.Close()
+	cli := squarescale.NewClient(server.URL, token)
+
+	// when
+	err := cli.ConfigProjectSettings(projectUUID, project)
+
+	// then
+	expectedError := "Project '00000000-0000-0000-0000-000000000000' not found"
+	if err == nil {
+		t.Fatalf("Error is not raised with `%s`", expectedError)
+	}
+}

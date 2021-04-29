@@ -19,29 +19,31 @@ type ServiceEnv struct {
 
 // Service describes a project container as returned by the SquareScale API
 type Service struct {
-	ID               int           `json:"container_id"`
-	Name             string        `json:"name"`
-	RunCommand       string        `json:"run_command"`
-	Entrypoint       string        `json:"entrypoint"`
-	Running          int           `json:"running"`
-	Size             int           `json:"size"`
-	WebPort          int           `json:"web_port"`
-	RefreshCallbacks []string      `json:"refresh_callbacks"`
-	Limits           ServiceLimits `json:"limits"`
-	CustomEnv        []ServiceEnv  `json:"custom_environment"`
+	ID               int               `json:"container_id"`
+	Name             string            `json:"name"`
+	RunCommand       string            `json:"run_command"`
+	Entrypoint       string            `json:"entrypoint"`
+	Running          int               `json:"running"`
+	Size             int               `json:"size"`
+	WebPort          int               `json:"web_port"`
+	RefreshCallbacks []string          `json:"refresh_callbacks"`
+	Limits           ServiceLimits     `json:"limits"`
+	CustomEnv        []ServiceEnv      `json:"custom_environment"`
+	SchedulingGroups []SchedulingGroup `json:"scheduling_groups"`
 }
 
 type ServiceBody struct {
-	ID               int           `json:"container_id"`
-	Name             string        `json:"name"`
-	RunCommand       []string      `json:"run_command"`
-	Entrypoint       string        `json:"entrypoint"`
-	Running          int           `json:"running"`
-	Size             int           `json:"size"`
-	WebPort          int           `json:"web_port"`
-	RefreshCallbacks []string      `json:"refresh_callbacks"`
-	Limits           ServiceLimits `json:"limits"`
-	CustomEnv        []ServiceEnv  `json:"custom_environment"`
+	ID               int               `json:"container_id"`
+	Name             string            `json:"name"`
+	RunCommand       []string          `json:"run_command"`
+	Entrypoint       string            `json:"entrypoint"`
+	Running          int               `json:"running"`
+	Size             int               `json:"size"`
+	WebPort          int               `json:"web_port"`
+	RefreshCallbacks []string          `json:"refresh_callbacks"`
+	Limits           ServiceLimits     `json:"limits"`
+	CustomEnv        []ServiceEnv      `json:"custom_environment"`
+	SchedulingGroups []SchedulingGroup `json:"scheduling_groups"`
 }
 
 func (c *Service) SetEnv(path string) error {
@@ -113,6 +115,7 @@ func (c *Client) GetServices(projectUUID string) ([]Service, error) {
 			RefreshCallbacks: c.RefreshCallbacks,
 			Limits:           c.Limits,
 			CustomEnv:        c.CustomEnv,
+			SchedulingGroups: c.SchedulingGroups,
 		}
 		services = append(services, *service)
 	}
@@ -176,6 +179,9 @@ func (c *Client) ConfigService(service Service) error {
 	if service.CustomEnv != nil {
 		cont["custom_environment"] = service.CustomEnv
 	}
+	if len(service.SchedulingGroups) != 0 {
+		cont["scheduling_groups"] = getSchedulingGroupsIds(service.SchedulingGroups)
+	}
 
 	payload := &JSONObject{"container": cont}
 	logger.Debug.Println("Json payload : ", payload)
@@ -210,4 +216,14 @@ func (c *Client) DeleteService(service Service) error {
 	}
 
 	return nil
+}
+
+func getSchedulingGroupsIds(schedulingGroups []SchedulingGroup) []int {
+	var schedulingGroupsIds []int
+
+	for _, schedulingGroup := range schedulingGroups {
+		schedulingGroupsIds = append(schedulingGroupsIds, schedulingGroup.ID)
+	}
+
+	return schedulingGroupsIds
 }

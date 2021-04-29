@@ -49,6 +49,16 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"cluster node list": func() (cli.Command, error) {
+			return &command.ClusterMemberListCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"cluster node set": func() (cli.Command, error) {
+			return &command.ClusterMemberSetCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"volume": func() (cli.Command, error) {
 			return &command.VolumeCommand{}, nil
 		},
@@ -87,6 +97,48 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 		},
 		"stateful node bind": func() (cli.Command, error) {
 			return &command.StatefulNodeBindCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"scheduling-group": func() (cli.Command, error) {
+			return &command.SchedulingGroupCommand{}, nil
+		},
+		"scheduling-group add": func() (cli.Command, error) {
+			return &command.SchedulingGroupAddCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"scheduling-group delete": func() (cli.Command, error) {
+			return &command.SchedulingGroupDeleteCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"scheduling-group list": func() (cli.Command, error) {
+			return &command.SchedulingGroupListCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"scheduling-group get": func() (cli.Command, error) {
+			return &command.SchedulingGroupGetCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"external-node": func() (cli.Command, error) {
+			return &command.ExternalNodeCommand{}, nil
+		},
+		"external-node list": func() (cli.Command, error) {
+			return &command.ExternalNodeListCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"external-node add": func() (cli.Command, error) {
+			return &command.ExternalNodeAddCommand{
+				Meta: *meta,
+			}, nil
+		},
+
+		"external-node get": func() (cli.Command, error) {
+			return &command.ExternalNodeGetCommand{
 				Meta: *meta,
 			}, nil
 		},
@@ -169,6 +221,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 		},
 		"project remove": func() (cli.Command, error) {
 			return &command.ProjectRemoveCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"project settings": func() (cli.Command, error) {
+			return &command.ProjectSettingsCommand{
 				Meta: *meta,
 			}, nil
 		},

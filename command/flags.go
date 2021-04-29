@@ -100,6 +100,10 @@ func containerNoRunCmdFlag(f *flag.FlagSet) *bool {
 	return f.Bool("no-command", false, "Disable command override")
 }
 
+func containerSchedulingGroupsFlag(f *flag.FlagSet) *string {
+	return f.String("scheduling-groups", "", "This is the scheduling groups of your service. Format: ${scheduling_group_name_1},${scheduling_group_name_2}")
+}
+
 func containerRunCmdFlag(f *flag.FlagSet) *string {
 	return f.String("command", "", "Command to run when starting container (override)")
 }
@@ -178,6 +182,24 @@ func statefulNodeNameArg(f *flag.FlagSet, arg int) (string, error) {
 	value := f.Arg(arg)
 	if value == "" {
 		return "", errors.New("Stateful-node name must be specified")
+	} else {
+		return value, nil
+	}
+}
+
+func schedulingGroupNameArg(f *flag.FlagSet, arg int) (string, error) {
+	value := f.Arg(arg)
+	if value == "" {
+		return "", errors.New("Scheduling group name must be specified")
+	} else {
+		return value, nil
+	}
+}
+
+func externalNodeNameArg(f *flag.FlagSet, arg int) (string, error) {
+	value := f.Arg(arg)
+	if value == "" {
+		return "", errors.New("External node name must be specified")
 	} else {
 		return value, nil
 	}
