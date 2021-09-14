@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ContainerListCommand is a cli.Command implementation for listing all containers of project.
+// ContainerListCommand is a cli.Command implementation for listing all Docker containers of project.
 type ContainerListCommand struct {
 	Meta
 	flagSet *flag.FlagSet
@@ -34,7 +34,7 @@ func (c *ContainerListCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	return c.runWithSpinner("list containers", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("listing Docker containers", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -60,7 +60,7 @@ func (c *ContainerListCommand) Run(args []string) int {
 		}
 
 		if len(containers) == 0 {
-			msg = "No containers found"
+			msg = "No Docker containers found"
 		}
 
 		return c.FormatTable(msg, true), nil
@@ -69,7 +69,7 @@ func (c *ContainerListCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ContainerListCommand) Synopsis() string {
-	return "List containers of project"
+	return "List Docker containers of project"
 }
 
 // Help is part of cli.Command implementation.
@@ -77,7 +77,7 @@ func (c *ContainerListCommand) Help() string {
 	helpText := `
 usage: sqsc container list [options]
 
-  List containers of project.
+  List Docker containers of project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

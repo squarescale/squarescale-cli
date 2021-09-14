@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ContainerAddCommand is a cli.Command implementation for adding a docker container to project.
+// ContainerAddCommand is a cli.Command implementation for adding a Docker container to project.
 type ContainerAddCommand struct {
 	Meta
 	flagSet *flag.FlagSet
@@ -48,7 +48,7 @@ func (c *ContainerAddCommand) Run(args []string) int {
 
 	volumesToBind := parseVolumesToBind(*volumes)
 
-	return c.runWithSpinner("add docker image", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("adding Docker image", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		var projectToShow string
@@ -63,14 +63,14 @@ func (c *ContainerAddCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
-		msg := fmt.Sprintf("Successfully added docker image '%s' to project '%s' (%v instance(s))", *image, projectToShow, *instances)
+		msg := fmt.Sprintf("Successfully added Docker image '%s' to project '%s' (%v instance(s))", *image, projectToShow, *instances)
 		return msg, client.AddImage(UUID, *image, *username, *password, *entrypoint, *runCommand, *instances, *serviceName, volumesToBind)
 	})
 }
 
 // Synopsis is part of cli.Command implementation.
 func (c *ContainerAddCommand) Synopsis() string {
-	return "Add docker container to project"
+	return "Add Docker container to project"
 }
 
 // Help is part of cli.Command implementation.
@@ -78,7 +78,7 @@ func (c *ContainerAddCommand) Help() string {
 	helpText := `
 usage: sqsc container add [options]
 
-  Add docker container to project.
+  Add Docker container to project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ContainerDeleteCommand is a cli.Command implementation for creating a SquareScale project.
+// ContainerDeleteCommand is a cli.Command implementation for deleting a Docker container of a project.
 type ContainerDeleteCommand struct {
 	Meta
 	flagSet *flag.FlagSet
@@ -41,7 +41,7 @@ func (c *ContainerDeleteCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	c.Ui.Info("Are you sure you want to delete " + containerName + "?")
+	c.Ui.Info("Are you sure you want to delete Docker container " + containerName + "?")
 	if *alwaysYes {
 		c.Ui.Info("(approved from command line)")
 	} else {
@@ -53,7 +53,7 @@ func (c *ContainerDeleteCommand) Run(args []string) int {
 		}
 	}
 
-	return c.runWithSpinner("deleting container", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("deleting Docker container", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -76,7 +76,7 @@ func (c *ContainerDeleteCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ContainerDeleteCommand) Synopsis() string {
-	return "Delete container from project."
+	return "Delete Docker container from project."
 }
 
 // Help is part of cli.Command implementation.
@@ -84,7 +84,7 @@ func (c *ContainerDeleteCommand) Help() string {
 	helpText := `
 usage: sqsc container delete [options] <container_name>
 
-  Delete container from project.
+  Delete Docker container from project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

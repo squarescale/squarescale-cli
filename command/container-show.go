@@ -34,7 +34,7 @@ func (c *ContainerShowCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	return c.runWithSpinner("list containers", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("showing Docker container", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -88,7 +88,7 @@ func (c *ContainerShowCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ContainerShowCommand) Synopsis() string {
-	return "List containers of project"
+	return "Show Docker container of project"
 }
 
 // Help is part of cli.Command implementation.
@@ -96,7 +96,7 @@ func (c *ContainerShowCommand) Help() string {
 	helpText := `
 usage: sqsc container show [options]
 
-  List containers of project.
+  Show Docker container of project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
