@@ -1,4 +1,6 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
+github.com/BenJetson/humantime v0.0.0-20200514023344-f59ec2835a87 h1:UUvEtU5s6cajK5FypRJLVKmz7bGFvP1pixwG3L3K6tI=
+github.com/BenJetson/humantime v0.0.0-20200514023344-f59ec2835a87/go.mod h1:qp6zpJhsVh3L2Q1PKiL3CdDXnhBHd4LUE0idvgEEltU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Masterminds/goutils v1.1.0 h1:zukEsf/1JZwCMgHiK3GZftabmxiCw4apj3a28RPBiVg=
 github.com/Masterminds/goutils v1.1.0/go.mod h1:8cTjp+g8YejhMuvIA5y2vz3BpJxksy863GQaJW2MFNU=

@@ -3,6 +3,7 @@ module github.com/squarescale/squarescale-cli
 go 1.16
 
 require (
+	github.com/BenJetson/humantime v0.0.0-20200514023344-f59ec2835a87
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/briandowns/spinner v1.16.0

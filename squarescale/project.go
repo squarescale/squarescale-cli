@@ -13,18 +13,30 @@ import (
 
 // Project defined how project could see
 type Project struct {
-	Name              string `json:"name"`
-	UUID              string `json:"uuid"`
-	Provider          string `json:"provider"`
-	Region            string `json:"region"`
-	Organization      string `string:"organization"`
-	InfraStatus       string `json:"infra_status"`
-	ClusterSize       int    `json:"cluster_size"`
-	NomadNodesReady   int    `json:"nomad_nodes_ready"`
-	MonitoringEnabled bool   `json:"monitoring_enabled"`
-	MonitoringEngine  string `json:"monitoring_engine"`
-	SlackWebHook      string `json:"slack_webhook"`
-	Error             string `json:"error"`
+	Name              string    `json:"name"`
+	UUID              string    `json:"uuid"`
+	Provider          string    `json:"provider"`
+	Region            string    `json:"region"`
+	Organization      string    `string:"organization"`
+	InfraStatus       string    `json:"infra_status"`
+	ClusterSize       int       `json:"cluster_size"`
+	NomadNodesReady   int       `json:"nomad_nodes_ready"`
+	MonitoringEnabled bool      `json:"monitoring_enabled"`
+	MonitoringEngine  string    `json:"monitoring_engine"`
+	SlackWebHook      string    `json:"slack_webhook"`
+	Error             string    `json:"error"`
+	ProviderLabel     string    `json:"provider_label"`
+	NodeSize          string    `json:"node_size"`
+	RegionLabel       string    `json:"region_label"`
+	Credentials       string    `json:"credentials_name"`
+	CreatedAt         time.Time `json:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at"`
+	StatusBefore      string    `json:"status_before"`
+	DesiredStateless  int       `json:"desired_stateless"`
+	ActualStateless   int       `json:"actual_stateless"`
+	DesiredStateful   int       `json:"desired_stateful"`
+	ActualStateful    int       `json:"actual_stateful"`
+	TfCommand         string    `json:"tf_command"`
 }
 
 /*
@@ -36,6 +48,45 @@ type UnprovisionError struct {
 	Errors struct {
 		Unprovision []string `json:unprovision`
 	} `json:errors`
+}
+
+// See front/utils/infraAction
+func (p *Project) ProjectAction() string {
+	if (p.TfCommand == "destroy") {
+		return "destroying"
+	}
+	if (p.StatusBefore == "no_infra") {
+		return "building"
+	}
+	return "updating"
+}
+
+// See front/src/components/InfraStatusBadge
+func (p *Project) ProjectStatus() string {
+	if (p.InfraStatus == "provisionning") {
+		if (p.ProjectAction() == "destroying") {
+			return "unprovisionning"
+		}
+		return "provisionning"
+	}
+	return p.InfraStatus
+}
+
+// See front/src/components/ClusterStatusBadge
+func (p *Project) ProjectStateLessCount() string {
+	dsl := p.ClusterSize
+	if (p.DesiredStateless > dsl) {
+		dsl = p.DesiredStateless
+	}
+	asl := p.NomadNodesReady
+	if (p.ActualStateless > asl) {
+		asl = p.ActualStateless
+	}
+	return fmt.Sprintf("%d/%d", asl, dsl)
+}
+
+func (p *Project) ProjectStateFulCount() string {
+	return fmt.Sprintf("%d/%d", p.ActualStateful, p.DesiredStateful)
 }
 
 func projectSettings(name string, cluster ClusterConfig) JSONObject {

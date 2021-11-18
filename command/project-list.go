@@ -3,12 +3,13 @@ package command
 import (
 	"flag"
 	"fmt"
-	"regexp"
-	"strings"
-
+	"github.com/BenJetson/humantime"
 	"github.com/olekukonko/tablewriter"
 	"github.com/squarescale/squarescale-cli/squarescale"
 	"github.com/squarescale/squarescale-cli/ui"
+	"regexp"
+	"strings"
+	"time"
 )
 
 // ProjectListCommand is a cli.Command implementation for listing all projects.
@@ -78,8 +79,10 @@ usage: sqsc project list [options]
 func fmtProjectListOutput(projects []squarescale.Project, organizations []squarescale.Organization) string {
 	tableString := &strings.Builder{}
 	table := tablewriter.NewWriter(tableString)
-	table.SetHeader([]string{"Name", "UUID", "Monitoring", "Provider", "Region", "Organization", "Status", "Size", "Slack Webhook"})
+	table.SetHeader([]string{"Name", "UUID", "Monitoring", "Provider", "Credentials", "Region", "Organization", "Status", "Nodes", "Stateful", "Size", "Created", "Age", "Slack Webhook"})
 	data := make([][]string, len(projects), len(projects))
+
+	location, _ := time.LoadLocation(time.Now().Location().String())
 
 	for i, project := range projects {
 		monitoring := ""
@@ -90,11 +93,16 @@ func fmtProjectListOutput(projects []squarescale.Project, organizations []square
 			project.Name,
 			project.UUID,
 			monitoring,
-			project.Provider,
-			project.Region,
+			fmt.Sprintf("%s/%s", project.Provider, project.ProviderLabel),
+			project.Credentials,
+			fmt.Sprintf("%s/%s", project.Region, project.RegionLabel),
 			project.Organization,
-			project.InfraStatus,
-			fmt.Sprintf("%d/%d", project.NomadNodesReady, project.ClusterSize),
+			project.ProjectStatus(),
+			project.ProjectStateLessCount(),
+			project.ProjectStateFulCount(),
+			project.NodeSize,
+			project.CreatedAt.In(location).Format("2006-01-02 15:04"),
+			humantime.Since(project.CreatedAt),
 			project.SlackWebHook,
 		}
 	}
