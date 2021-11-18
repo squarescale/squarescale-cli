@@ -213,7 +213,7 @@ func (c *Client) WaitProject(projectUUID string, timeToWait int64) (string, erro
 
 	logger.Info.Println("wait for project : ", projectUUID)
 
-	for project.InfraStatus != "ok" && err == nil {
+	for !(project.InfraStatus == "ok" || project.InfraStatus == "error") && err == nil {
 		time.Sleep(time.Duration(timeToWait) * time.Second)
 		project, err = c.GetProject(projectUUID)
 		logger.Debug.Println("project status update: ", projectUUID)
