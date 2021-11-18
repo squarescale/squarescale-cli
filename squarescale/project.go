@@ -218,6 +218,17 @@ func (c *Client) WaitProject(projectUUID string, timeToWait int64) (string, erro
 		project, err = c.GetProject(projectUUID)
 		logger.Debug.Println("project status update: ", projectUUID)
 	}
+	if (project.InfraStatus == "error") {
+		actions, err := c.GetInfrastructureActions(project.UUID)
+		if err != nil {
+			return "", err
+		}
+		if (len(actions) == 0) {
+			return project.InfraStatus, errors.New("Unable to retrieve latest project deployment log")
+		} else {
+			return project.InfraStatus, errors.New(actions[0].Log)
+		}
+	}
 
 	return project.InfraStatus, err
 }
