@@ -156,20 +156,23 @@ func (c *Client) request(method, path string, payload interface{}) (int, []byte,
 	return res.StatusCode, rbytes, err
 }
 
+type RequestError struct {
+	Error string `json:"error"`
+	DetailedError []string `json:"detailed_error"`
+}
+
 func unexpectedHTTPError(code int, body []byte) error {
 	// try to decode the body with { "error": "<description>" }
-	var description struct {
-		Error string `json:"error"`
-	}
+	var description RequestError
 
-	json.Unmarshal(body, description)
-	if description.Error != "" {
+	err := json.Unmarshal(body, &description)
+	if err == nil && description.Error != "" {
 		return errors.New("Error: " + description.Error)
 	}
 
 	var data map[string]interface{}
 	json.Unmarshal(body, &data)
-	err := decodeAnyError(data, "error", "")
+	err = decodeAnyError(data, "error", "")
 
 	if err == nil {
 		err = fmt.Errorf("An unexpected error occurred (code: %d)", code)
