@@ -326,10 +326,7 @@ func UnknownProjectOnAddRedis(t *testing.T) {
 	err := cli.AddRedis("another-project", "cache1")
 
 	// then
-	expectedError := `1 error occurred:
-	* error: No project found for config name: another-project
-
-`
+	expectedError := `Error: No project found for config name: another-project`
 	if err == nil {
 		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}

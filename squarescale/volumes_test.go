@@ -512,10 +512,7 @@ func UnknownProjectOnAddVolume(t *testing.T) {
 	err := cli.AddVolume("another-project", "vol02c1", 1, "gp2", "eu-west-1c")
 
 	// then
-	expectedError := `1 error occurred:
-	* error: No project found for config name: another-project
-
-`
+	expectedError := `Error: No project found for config name: another-project`
 	if err == nil {
 		t.Fatalf("Error is not raised with `%s`", expectedError)
 	}
