@@ -43,9 +43,12 @@ func (c *ProjectListCommand) Run(args []string) int {
 			return "", err
 		}
 
-		for _, o := range organizations {
-			for range o.Projects {
+		for io, o := range organizations {
+			for ip, _ := range o.Projects {
 				projectCount++
+				if organizations[io].Projects[ip].Organization != o.Name {
+					organizations[io].Projects[ip].Organization = o.Name
+				}
 			}
 		}
 
@@ -116,15 +119,19 @@ func fmtProjectListOutput(projects []squarescale.Project, organizations []square
 				monitoring = project.MonitoringEngine
 			}
 			table.Append([]string{
-				fmt.Sprintf("%s/%s", o.Name, project.Name),
+				project.Name,
 				project.UUID,
 				monitoring,
-				project.Provider,
-				project.Region,
+				fmt.Sprintf("%s/%s", project.Provider, project.ProviderLabel),
+				project.Credentials,
+				fmt.Sprintf("%s/%s", project.Region, project.RegionLabel),
 				project.Organization,
-				project.InfraStatus,
-				fmt.Sprintf("%d/%d", project.NomadNodesReady, project.ClusterSize),
-				project.SlackWebHook,
+				project.ProjectStatus(),
+				project.ProjectStateLessCount(),
+				project.ProjectStateFulCount(),
+				project.NodeSize,
+				project.CreatedAt.In(location).Format("2006-01-02 15:04"),
+				humantime.Since(project.CreatedAt),
 			})
 		}
 	}
