@@ -1,7 +1,7 @@
 package main
 
 const Name string = "sqsc"
-const Version string = "1.0.7"
+const Version string = "1.0.8"
 
 var GitCommit string
 var GitBranch string
