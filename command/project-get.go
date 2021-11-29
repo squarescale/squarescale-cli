@@ -5,7 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/BenJetson/humantime"
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
@@ -58,16 +60,22 @@ func (c *ProjectGetCommand) Run(args []string) int {
 			monitoring = project.MonitoringEngine
 		}
 
-		msg = fmt.Sprintf("Name: %s\nUUID: %s\nMonitoring: %s\nProvider: %s\nRegion: %s\nOrganization: %s\nStatus: %s\nSize: %d/%d\nSlack Webhook: %s\n",
+		location, _ := time.LoadLocation(time.Now().Location().String())
+
+		msg = fmt.Sprintf("Name: %s\nUUID: %s\nMonitoring: %s\nProvider: %s\nCredentials: %s\nRegion: %s\nOrganization: %s\nStatus: %s\nNodes: %s\nStateful: %s\nSize: %s\nCreated: %s\nAge:%s\nSlack Webhook: %s\n",
 			project.Name,
 			project.UUID,
 			monitoring,
-			project.Provider,
-			project.Region,
+			fmt.Sprintf("%s/%s", project.Provider, project.ProviderLabel),
+			project.Credentials,
+			fmt.Sprintf("%s/%s", project.Region, project.RegionLabel),
 			project.Organization,
-			project.InfraStatus,
-			project.NomadNodesReady,
-			project.ClusterSize,
+			project.ProjectStatus(),
+			project.ProjectStateLessCount(),
+			project.ProjectStateFulCount(),
+			project.NodeSize,
+			project.CreatedAt.In(location).Format("2006-01-02 15:04"),
+			humantime.Since(project.CreatedAt),
 			project.SlackWebHook,
 		)
 

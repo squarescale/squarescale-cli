@@ -3,13 +3,14 @@ package command
 import (
 	"flag"
 	"fmt"
+	"regexp"
+	"strings"
+	"time"
+
 	"github.com/BenJetson/humantime"
 	"github.com/olekukonko/tablewriter"
 	"github.com/squarescale/squarescale-cli/squarescale"
 	"github.com/squarescale/squarescale-cli/ui"
-	"regexp"
-	"strings"
-	"time"
 )
 
 // ProjectListCommand is a cli.Command implementation for listing all projects.
