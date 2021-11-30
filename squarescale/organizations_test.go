@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
@@ -107,7 +108,8 @@ func nominalCaseOnGetOrganizationInfo(t *testing.T) {
 	//then
 	expectedName := "Sqsc"
 	expectedCollaborators := []squarescale.Collaborator{{Email: "no-reply@squarescale.com", Name: "User 1"}}
-	expectedProjects := []squarescale.Project{{Name: "sub-mariner-aerified", InfraStatus: "no_infra"}}
+	lt, _ := time.Parse("2006-01-02T15:04:05.000Z", "2020-05-12T13:09:44.625Z")
+	expectedProjects := []squarescale.Project{{Name: "sub-mariner-aerified", InfraStatus: "no_infra", CreatedAt: lt}}
 
 	if err != nil {
 		t.Fatalf("Expect no error, got `%s`", err)
@@ -316,9 +318,11 @@ func nominalCaseOnListOrganizations(t *testing.T) {
 		{Email: "user1@sqsc.fr", Name: "User 1"},
 		{Email: "user2@sqsc.fr", Name: "User 2"},
 	}
+	lt1, _ := time.Parse("2006-01-02T15:04:05.000Z", "2020-05-12T13:09:44.625Z")
+	lt2, _ := time.Parse("2006-01-02T15:04:05.000Z", "2020-05-13T13:09:44.625Z")
 	expectedProjects := []squarescale.Project{
-		{Name: "sub-mariner-aerified", InfraStatus: "no_infra", UUID: "5fb75c1d-90a4-4b34-891f-a7481fa04afe"},
-		{Name: "toto", InfraStatus: "no_infra", UUID: "14c4d8fe-af3e-4746-955d-560034eff187"},
+		{Name: "sub-mariner-aerified", InfraStatus: "no_infra", UUID: "5fb75c1d-90a4-4b34-891f-a7481fa04afe", CreatedAt: lt1},
+		{Name: "toto", InfraStatus: "no_infra", UUID: "14c4d8fe-af3e-4746-955d-560034eff187", CreatedAt: lt2},
 	}
 
 	if err != nil {
