@@ -62,7 +62,7 @@ func (c *ProjectGetCommand) Run(args []string) int {
 
 		location, _ := time.LoadLocation(time.Now().Location().String())
 
-		msg = fmt.Sprintf("Name: %s\nUUID: %s\nMonitoring: %s\nProvider: %s\nCredentials: %s\nRegion: %s\nOrganization: %s\nStatus: %s\nNodes: %s\nStateful: %s\nSize: %s\nCreated: %s\nAge:%s\nSlack Webhook: %s\n",
+		msg = fmt.Sprintf("Name: %s\nUUID: %s\nMonitoring: %s\nProvider: %s\nCredentials: %s\nRegion: %s\nOrganization: %s\nStatus: %s\nNodes: %s\nStateful: %s\nSize: %s\nCreated: %s\nAge: %s\nSlack Webhook: %s\n",
 			project.Name,
 			project.UUID,
 			monitoring,
