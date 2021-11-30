@@ -118,11 +118,11 @@ func nominalCaseOnGetOrganizationInfo(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(organization.Collaborators, expectedCollaborators) {
-		t.Errorf("Expect organization.Collaborators `%v`, got `%v`", expectedCollaborators, organization.Collaborators)
+		t.Errorf("Expect organization.Collaborators `%+v`, got `%+v`", expectedCollaborators, organization.Collaborators)
 	}
 
 	if !reflect.DeepEqual(organization.Projects, expectedProjects) {
-		t.Errorf("Expect organization.Projects `%v`, got `%v`", expectedProjects, organization.Projects)
+		t.Errorf("Expect organization.Projects `%+v`, got `%+v`", expectedProjects, organization.Projects)
 	}
 }
 
@@ -326,11 +326,11 @@ func nominalCaseOnListOrganizations(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(organizations[0].Collaborators, expectedCollaborators) {
-		t.Errorf("Expect organization.Collaborators `%v`, got `%v`", expectedCollaborators, organizations[0].Collaborators)
+		t.Errorf("Expect organization.Collaborators `%+v`, got `%+v`", expectedCollaborators, organizations[0].Collaborators)
 	}
 
 	if !reflect.DeepEqual(organizations[0].Projects, expectedProjects) {
-		t.Errorf("Expect organization.Projects `%v`, got `%v`", expectedProjects, organizations[0].Projects)
+		t.Errorf("Expect organization.Projects `%+v`, got `%+v`", expectedProjects, organizations[0].Projects)
 	}
 }
 
