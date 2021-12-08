@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/olekukonko/tablewriter"
+	"strings"
 )
 
 // QueryOptions holds environment variables filtering options to use with QueryVars
@@ -62,7 +63,7 @@ func (env *Environment) String() string {
 		prettyPrint(*vg, lines)
 	}
 
-	return lines.String()
+	return strings.Trim(lines.String(), "\n")
 }
 
 // String returns a string representation of the VariableGroup's variables in a
@@ -76,7 +77,7 @@ func (vg *VariableGroup) String() string {
 	for _, variable := range vg.Variables {
 		lines.WriteString(fmt.Sprintf("%s=%s\n", variable.Key, variable.Value))
 	}
-	return lines.String()
+	return strings.Trim(lines.String(), "\n")
 }
 
 // String returns a string representation of the Variable's value.
