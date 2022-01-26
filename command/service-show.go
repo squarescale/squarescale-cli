@@ -9,19 +9,19 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ContainerListCommand is a cli.Command implementation for listing all Docker containers of project.
-type ContainerListCommand struct {
+// ServiceShowCommand is a cli.Command implementation for listing all projects.
+type ServiceShowCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (c *ContainerListCommand) Run(args []string) int {
+func (c *ServiceShowCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	projectName := c.flagSet.String("project-name", "", "set the name of the project")
-	containerArg := containerFlag(c.flagSet)
+	containerArg := filterNameFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -34,7 +34,7 @@ func (c *ContainerListCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	return c.runWithSpinner("listing Docker containers", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("showing service", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -51,39 +51,45 @@ func (c *ContainerListCommand) Run(args []string) int {
 			return "", err
 		}
 
-		var msg string = "Name\tSize\tPort\tScheduling groups\n"
-		for _, c := range containers {
-			if *containerArg != "" && *containerArg != c.Name {
+		var msg string
+		for _, co := range containers {
+			if *containerArg != "" && *containerArg != co.Name {
 				continue
 			}
-
-			var schedulingGroups []string
-			for _, schedulingGroup := range c.SchedulingGroups {
-				schedulingGroups = append(schedulingGroups, schedulingGroup.Name)
+			if msg != "" {
+				msg += "\n-----------\n\n"
 			}
-
-			msg += fmt.Sprintf("%s\t%d/%d\t%d\t%s\n", c.Name, c.Running, c.Size, c.WebPort, strings.Join(schedulingGroups[:], "\n\t\t\t"))
+			tbl := ""
+			tbl += fmt.Sprintf("Name:\t%s\n", co.Name)
+			tbl += fmt.Sprintf("Size:\t%d/%d\n", co.Running, co.Size)
+			tbl += fmt.Sprintf("Run Command:\t%s\n", co.RunCommand)
+			tbl += fmt.Sprintf("Web Port:\t%d\n", co.WebPort)
+			tbl += fmt.Sprintf("Memory limit:\t%d MB\n", co.Limits.Memory)
+			tbl += fmt.Sprintf("CPU limit:\t%d MHz\n", co.Limits.CPU)
+			tbl += fmt.Sprintf("Network limit:\t%d Mbps\n", co.Limits.Net)
+			msg += c.FormatTable(tbl, false)
+			msg += "\n"
 		}
 
 		if len(containers) == 0 {
-			msg = "No Docker containers found"
+			msg = "No service found"
 		}
 
-		return c.FormatTable(msg, true), nil
+		return msg, nil
 	})
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ContainerListCommand) Synopsis() string {
-	return "List Docker containers of project"
+func (c *ServiceShowCommand) Synopsis() string {
+	return "Show service aka Docker container of project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ContainerListCommand) Help() string {
+func (c *ServiceShowCommand) Help() string {
 	helpText := `
-usage: sqsc container list [options]
+usage: sqsc service show [options]
 
-  List Docker containers of project.
+  Show service aka Docker container of project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

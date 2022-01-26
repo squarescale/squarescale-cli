@@ -9,14 +9,14 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ContainerSetCommand allows to configure a project container.
-type ContainerSetCommand struct {
+// ServiceSetCommand allows to configure a project service.
+type ServiceSetCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (c *ContainerSetCommand) Run(args []string) int {
+func (c *ServiceSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
@@ -132,7 +132,7 @@ func (c *ContainerSetCommand) Run(args []string) int {
 		}
 
 		msg := fmt.Sprintf(
-			"Successfully configured container '%s' for project '%s'",
+			"Successfully configured service '%s' for project '%s'",
 			*serviceArg, *projectUUID)
 
 		c.Meta.spin.Start()
@@ -141,22 +141,22 @@ func (c *ContainerSetCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ContainerSetCommand) Synopsis() string {
-	return "Set container runtime parameters for project"
+func (c *ServiceSetCommand) Synopsis() string {
+	return "Set service aka Docker container runtime parameters for project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ContainerSetCommand) Help() string {
+func (c *ServiceSetCommand) Help() string {
 	helpText := `
-usage: sqsc container set [options]
+usage: sqsc service set [options]
 
-  Set container runtime parameters for project.
-  Containers are specified using their given name.
+  Set service aka Docker container runtime parameters for project.
+  Services are specified using their given name.
 
 Example:
-  sqsc container set                \
+  sqsc service set                \
       -project="my-rails-project"   \
-      -container="my-name/my-repo"  \
+      -service="my-name/my-repo"  \
       -instances=42                 \
       -e env.json
 `

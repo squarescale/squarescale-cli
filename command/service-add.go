@@ -9,14 +9,14 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ContainerAddCommand is a cli.Command implementation for adding a Docker container to project.
-type ContainerAddCommand struct {
+// ServiceAddCommand is a cli.Command implementation for adding a service aka Docker container to project.
+type ServiceAddCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (c *ContainerAddCommand) Run(args []string) int {
+func (c *ServiceAddCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
@@ -69,21 +69,21 @@ func (c *ContainerAddCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ContainerAddCommand) Synopsis() string {
-	return "Add Docker container to project"
+func (c *ServiceAddCommand) Synopsis() string {
+	return "Add service aka Docker container to project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ContainerAddCommand) Help() string {
+func (c *ServiceAddCommand) Help() string {
 	helpText := `
-usage: sqsc container add [options]
+usage: sqsc service add [options]
 
-  Add Docker container to project.
+  Add service aka Docker container to project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
 
-func (c *ContainerAddCommand) validateArgs(image string, instances int) error {
+func (c *ServiceAddCommand) validateArgs(image string, instances int) error {
 	if image == "" {
 		return errors.New("Docker image name cannot be empty")
 	}

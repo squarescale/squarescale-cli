@@ -142,36 +142,36 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
-		"container": func() (cli.Command, error) {
-			return &command.ContainerCommand{}, nil
+		"service": func() (cli.Command, error) {
+			return &command.ServiceCommand{}, nil
 		},
-		"container add": func() (cli.Command, error) {
-			return &command.ContainerAddCommand{
+		"service add": func() (cli.Command, error) {
+			return &command.ServiceAddCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"container delete": func() (cli.Command, error) {
-			return &command.ContainerDeleteCommand{
+		"service delete": func() (cli.Command, error) {
+			return &command.ServiceDeleteCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"container list": func() (cli.Command, error) {
-			return &command.ContainerListCommand{
+		"service list": func() (cli.Command, error) {
+			return &command.ServiceListCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"container schedule": func() (cli.Command, error) {
-			return &command.ContainerScheduleCommand{
+		"service schedule": func() (cli.Command, error) {
+			return &command.ServiceScheduleCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"container set": func() (cli.Command, error) {
-			return &command.ContainerSetCommand{
+		"service set": func() (cli.Command, error) {
+			return &command.ServiceSetCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"container show": func() (cli.Command, error) {
-			return &command.ContainerShowCommand{
+		"service show": func() (cli.Command, error) {
+			return &command.ServiceShowCommand{
 				Meta: *meta,
 			}, nil
 		},
