@@ -53,10 +53,10 @@ type UnprovisionError struct {
 
 // See front/utils/infraAction
 func (p *Project) ProjectAction() string {
-	if (p.TfCommand == "destroy") {
+	if p.TfCommand == "destroy" {
 		return "destroying"
 	}
-	if (p.StatusBefore == "no_infra") {
+	if p.StatusBefore == "no_infra" {
 		return "building"
 	}
 	return "updating"
@@ -64,8 +64,8 @@ func (p *Project) ProjectAction() string {
 
 // See front/src/components/InfraStatusBadge
 func (p *Project) ProjectStatus() string {
-	if (p.InfraStatus == "provisionning") {
-		if (p.ProjectAction() == "destroying") {
+	if p.InfraStatus == "provisionning" {
+		if p.ProjectAction() == "destroying" {
 			return "unprovisionning"
 		}
 		return "provisionning"
@@ -76,11 +76,11 @@ func (p *Project) ProjectStatus() string {
 // See front/src/components/ClusterStatusBadge
 func (p *Project) ProjectStateLessCount() string {
 	dsl := p.ClusterSize
-	if (p.DesiredStateless > dsl) {
+	if p.DesiredStateless > dsl {
 		dsl = p.DesiredStateless
 	}
 	asl := p.NomadNodesReady
-	if (p.ActualStateless > asl) {
+	if p.ActualStateless > asl {
 		asl = p.ActualStateless
 	}
 	return fmt.Sprintf("%d/%d", asl, dsl)
@@ -270,12 +270,12 @@ func (c *Client) WaitProject(projectUUID string, timeToWait int64) (string, erro
 		project, err = c.GetProject(projectUUID)
 		logger.Debug.Println("project status update: ", projectUUID)
 	}
-	if (project.InfraStatus == "error") {
+	if project.InfraStatus == "error" {
 		actions, err := c.GetInfrastructureActions(project.UUID)
 		if err != nil {
 			return "", err
 		}
-		if (len(actions) == 0) {
+		if len(actions) == 0 {
 			return project.InfraStatus, errors.New("Unable to retrieve latest project deployment log")
 		} else {
 			return project.InfraStatus, errors.New(actions[0].Log)
