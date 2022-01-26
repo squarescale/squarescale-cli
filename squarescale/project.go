@@ -265,11 +265,19 @@ func (c *Client) WaitProject(projectUUID string, timeToWait int64) (string, erro
 
 	logger.Info.Println("wait for project : ", projectUUID)
 
-	for !(project.InfraStatus == "ok" || project.InfraStatus == "error") && err == nil {
+	for err == nil && project == nil && !(project.InfraStatus == "ok" || project.InfraStatus == "error") {
 		time.Sleep(time.Duration(timeToWait) * time.Second)
 		project, err = c.GetProject(projectUUID)
+		if err != nil {
+			return "", err
+		}
 		logger.Debug.Println("project status update: ", projectUUID)
 	}
+
+	if project == nil {
+		return "", fmt.Errorf("Project %s not found", projectUUID)
+	}
+
 	if project.InfraStatus == "error" {
 		actions, err := c.GetInfrastructureActions(project.UUID)
 		if err != nil {
