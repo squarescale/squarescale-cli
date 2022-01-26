@@ -7,12 +7,12 @@ import (
 )
 
 type User struct {
-	UUID            string `json:"uid"`
-	Email           string `json:"email"`
-	FirstName       string `json:"first_name"`
-	LastName        string `string:"last_name"`
-	FullName        string `json:"name"`
-	IsAdmin         bool   `json:"is_admin"`
+	UUID      string `json:"uid"`
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `string:"last_name"`
+	FullName  string `json:"name"`
+	IsAdmin   bool   `json:"is_admin"`
 }
 
 // ValidateToken asks SquareScale service for token validity. Returns nil if user is authorized.
