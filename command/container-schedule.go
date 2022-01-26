@@ -9,14 +9,14 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ServiceScheduleCommand is a cli.Command implementation for top level `sqsc servic` command.
-type ServiceScheduleCommand struct {
+// ContainerScheduleCommand is a cli.Command implementation for top level `sqsc container` command.
+type ContainerScheduleCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (c *ServiceScheduleCommand) Run(args []string) int {
+func (c *ContainerScheduleCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
@@ -39,7 +39,7 @@ func (c *ServiceScheduleCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
 	}
 
-	return c.runWithSpinner("scheduling service", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("scheduling container", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -58,16 +58,16 @@ func (c *ServiceScheduleCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ServiceScheduleCommand) Synopsis() string {
-	return "Schedule a service"
+func (c *ContainerScheduleCommand) Synopsis() string {
+	return "Schedule a container"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ServiceScheduleCommand) Help() string {
+func (c *ContainerScheduleCommand) Help() string {
 	helpText := `
-usage: sqsc service schedule [options] <service_name>
+usage: sqsc container schedule [options] <service_name>
 
-  Schedule a service.
+  Schedule a container.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

@@ -150,13 +150,18 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"container delete": func() (cli.Command, error) {
+			return &command.ContainerDeleteCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"container list": func() (cli.Command, error) {
 			return &command.ContainerListCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"container show": func() (cli.Command, error) {
-			return &command.ContainerShowCommand{
+		"container schedule": func() (cli.Command, error) {
+			return &command.ContainerScheduleCommand{
 				Meta: *meta,
 			}, nil
 		},
@@ -165,8 +170,8 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
-		"container delete": func() (cli.Command, error) {
-			return &command.ContainerDeleteCommand{
+		"container show": func() (cli.Command, error) {
+			return &command.ContainerShowCommand{
 				Meta: *meta,
 			}, nil
 		},
@@ -305,14 +310,6 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 		},
 		"organization list": func() (cli.Command, error) {
 			return &command.OrganizationListCommand{
-				Meta: *meta,
-			}, nil
-		},
-		"service": func() (cli.Command, error) {
-			return &command.ServiceCommand{}, nil
-		},
-		"service schedule": func() (cli.Command, error) {
-			return &command.ServiceScheduleCommand{
 				Meta: *meta,
 			}, nil
 		},
