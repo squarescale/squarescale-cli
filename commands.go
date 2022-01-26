@@ -183,14 +183,6 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
-		"image": func() (cli.Command, error) {
-			return &command.ImageCommand{}, nil
-		},
-		"image add": func() (cli.Command, error) {
-			return &command.ImageAddCommand{
-				Meta: *meta,
-			}, nil
-		},
 		"project": func() (cli.Command, error) {
 			return &command.ProjectCommand{}, nil
 		},
