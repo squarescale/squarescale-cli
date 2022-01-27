@@ -21,7 +21,7 @@ func (c *ServiceListCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	projectName := c.flagSet.String("project-name", "", "set the name of the project")
-	containerArg := containerFlag(c.flagSet)
+	containerArg := serviceFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}

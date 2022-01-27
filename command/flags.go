@@ -68,8 +68,8 @@ func projectNameFlag(f *flag.FlagSet) *string {
 	return f.String("name", "", "Project name")
 }
 
-func containerFlag(f *flag.FlagSet) *string {
-	return f.String("container", "", "Container to configure")
+func serviceFlag(f *flag.FlagSet) *string {
+	return f.String("service", "", "Service aka Docker container to configure")
 }
 
 func filterNameFlag(f *flag.FlagSet) *string {
@@ -90,10 +90,6 @@ func exprFlag(f *flag.FlagSet) *string {
 
 func containerInstancesFlag(f *flag.FlagSet) *int {
 	return f.Int("instances", -1, "Number of container instances")
-}
-
-func containerBuildServiceFlag(f *flag.FlagSet) *string {
-	return f.String("build-service", "", "Build service to use (internal|travis)")
 }
 
 func containerNoRunCmdFlag(f *flag.FlagSet) *bool {

@@ -21,7 +21,7 @@ func (c *EnvGetCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	projectName := c.flagSet.String("project-name", "", "set the name of the project")
-	container := containerFlag(c.flagSet)
+	container := serviceFlag(c.flagSet)
 	all := c.flagSet.Bool("all", false, "Print all variables")
 
 	if err := c.flagSet.Parse(args); err != nil {
