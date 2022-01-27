@@ -22,7 +22,7 @@ func (c *ServiceAddCommand) Run(args []string) int {
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	projectName := c.flagSet.String("project-name", "", "set the name of the project")
 	serviceName := c.flagSet.String("servicename", "", "service name")
-	image := c.flagSet.String("name", "", "Docker image name")
+	image := c.flagSet.String("image", "", "Docker image name")
 	runCommand := c.flagSet.String("run-command", "", "command / arguments that are used for execution")
 	entrypoint := c.flagSet.String("entrypoint", "", "This is the script / program that will be executed")
 	username := c.flagSet.String("username", "", "Username")

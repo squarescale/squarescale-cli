@@ -21,7 +21,7 @@ func (c *ServiceSetCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	projectName := c.flagSet.String("project-name", "", "set the name of the project")
-	serviceArg := c.flagSet.String("service", "", "select the service")
+	serviceArg := serviceFlag(c.flagSet)
 	nInstancesArg := containerInstancesFlag(c.flagSet)
 	runCmdArg := containerRunCmdFlag(c.flagSet)
 	entrypoint := c.flagSet.String("entrypoint", "", "This is the script / program that will be executed")
@@ -66,12 +66,15 @@ func (c *ServiceSetCommand) Run(args []string) int {
 	return c.runWithSpinner("configure service", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
+		var projectToShow string
 		if *projectUUID == "" {
+			projectToShow = *projectName
 			UUID, err = client.ProjectByName(*projectName)
 			if err != nil {
 				return "", err
 			}
 		} else {
+			projectToShow = *projectUUID
 			UUID = *projectUUID
 		}
 
@@ -133,7 +136,7 @@ func (c *ServiceSetCommand) Run(args []string) int {
 
 		msg := fmt.Sprintf(
 			"Successfully configured service '%s' for project '%s'",
-			*serviceArg, *projectUUID)
+			*serviceArg, projectToShow)
 
 		c.Meta.spin.Start()
 		return msg, client.ConfigService(container)
