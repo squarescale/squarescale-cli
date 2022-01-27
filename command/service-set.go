@@ -155,10 +155,10 @@ usage: sqsc service set [options]
 
 Example:
   sqsc service set                \
-      -project="my-rails-project"   \
+      -project="my-rails-project" \
       -service="my-name/my-repo"  \
-      -instances=42                 \
-      -e env.json
+      -instances=42               \
+      -env=env.json
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

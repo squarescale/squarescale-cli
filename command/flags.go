@@ -117,7 +117,7 @@ func containerLimitCPUFlag(f *flag.FlagSet) *int {
 }
 
 func containerLimitIOPSFlag(f *flag.FlagSet) *int {
-	return f.Int("iops", -1, "This is an indicative limit of how many I/O operation per second your service requires.")
+	return f.Int("iops", -1, "This is an indicative limit of how many I/O operations per second your service requires.")
 }
 
 func containerLimitNetFlag(f *flag.FlagSet) *int {
@@ -157,7 +157,7 @@ func nowaitFlag(f *flag.FlagSet) *bool {
 }
 
 func envFileFlag(f *flag.FlagSet) *string {
-	return f.String("env", "", "json file with all env variable")
+	return f.String("env", "", "JSON file containing all environment variables")
 }
 
 func containerNameArg(f *flag.FlagSet, arg int) (string, error) {
