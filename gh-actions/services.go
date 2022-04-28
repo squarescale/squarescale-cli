@@ -48,12 +48,11 @@ func (s *Services) create() {
 		for serviceName, serviceContent := range services {
 			if !isServiceExists(serviceName) {
 				s.createService(serviceName, serviceContent)
-				s.insertServiceEnvAndLimits(serviceName, serviceContent)
-				s.insertNetworkRules(serviceName, serviceContent)
 			} else {
 				fmt.Println(fmt.Sprintf("Service %q already exists.", serviceName))
 			}
-
+			s.insertServiceEnvAndLimits(serviceName, serviceContent)
+			s.insertNetworkRules(serviceName, serviceContent)
 			s.schedule(serviceName)
 		}
 	}
