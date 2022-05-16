@@ -35,6 +35,23 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	dbEngine := c.flagSet.String("db-engine", "", "Select database engine")
 	dbSize := c.flagSet.String("db-size", "", "Select database size")
 	dbVersion := c.flagSet.String("db-version", "", "Select database version")
+
+	consulEnabled := c.flagSet.Bool("consul", false, "Enable Consul")
+	nomadEnabled := c.flagSet.Bool("nomad", false, "Enable Nomad")
+	vaultEnabled := c.flagSet.Bool("vault", false, "Enable Vault")
+
+	consulBasicAuth := c.flagSet.String("consul-basic-auth", "", "Set Consul Basic Authentication credentials")
+	nomadBasicAuth := c.flagSet.String("nomad-basic-auth", "", "Set Nomad Basic Authentication credentials")
+	vaultBasicAuth := c.flagSet.String("vault-basic-auth", "", "Set Vault Basic Authentication credentials")
+
+	consulPrefix := c.flagSet.String("consul-prefix", "", "Set Consul HTTP Prefix")
+	nomadPrefix := c.flagSet.String("nomad-prefix", "", "Set Nomad HTTP Prefix")
+	vaultPrefix := c.flagSet.String("vault-prefix", "", "Set Vault HTTP Prefix")
+
+	consulIpWhiteList := c.flagSet.String("consul-ip-whitelist", "", "Set Consul IP whitelist")
+	nomadIpWhiteList := c.flagSet.String("nomad-ip-whitelist", "", "Set Nomad IP whitelist")
+	vaultIpWhiteList := c.flagSet.String("vault-ip-whitelist", "", "Set Vault IP whitelist")
+
 	nowait := nowaitFlag(c.flagSet)
 
 	payload := squarescale.JSONObject{}
@@ -116,6 +133,21 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		payload["slack_webhook"] = *slackURL
 	}
 
+	var integrated_services []map[string]string
+
+	if *consulEnabled {
+		integrated_services = append(integrated_services, map[string]string{"name": "consul", "enabled": "true", "basicauth": *consulBasicAuth, "prefix": *consulPrefix, "ipwhitelist": *consulIpWhiteList})
+	}
+
+	if *nomadEnabled {
+		integrated_services = append(integrated_services, map[string]string{"name": "nomad", "enabled": "true", "basicauth": *nomadBasicAuth, "prefix": *nomadPrefix, "ipwhitelist": *nomadIpWhiteList})
+	}
+
+	if *vaultEnabled {
+		integrated_services = append(integrated_services, map[string]string{"name": "vault", "enabled": "true", "basicauth": *vaultBasicAuth, "prefix": *vaultPrefix, "ipwhitelist": *vaultIpWhiteList})
+	}
+
+	payload["integrated_services"] = integrated_services
 	// ask confirmation
 	c.Ui.Warn("Project will be created with the following configuration :")
 	c.Ui.Warn(fmt.Sprintf("name : %s", *name))
