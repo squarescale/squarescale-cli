@@ -36,9 +36,9 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	dbSize := c.flagSet.String("db-size", "", "Select database size")
 	dbVersion := c.flagSet.String("db-version", "", "Select database version")
 
-	consulEnabled := c.flagSet.Bool("consul", false, "Enable Consul")
-	nomadEnabled := c.flagSet.Bool("nomad", false, "Enable Nomad")
-	vaultEnabled := c.flagSet.Bool("vault", false, "Enable Vault")
+	consulEnabled := c.flagSet.Bool("consul-enabled", false, "Enable Consul")
+	nomadEnabled := c.flagSet.Bool("nomad-enabled", false, "Enable Nomad")
+	vaultEnabled := c.flagSet.Bool("vault-enabled", false, "Enable Vault")
 
 	consulBasicAuth := c.flagSet.String("consul-basic-auth", "", "Set Consul Basic Authentication credentials")
 	nomadBasicAuth := c.flagSet.String("nomad-basic-auth", "", "Set Nomad Basic Authentication credentials")
