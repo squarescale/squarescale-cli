@@ -6,6 +6,7 @@ on:
       - master
       - production
       - gh-actions
+      - '**-gh-actions'
 
 jobs:
   build:
