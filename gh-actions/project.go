@@ -24,7 +24,10 @@ func (p *Project) createProject() {
 	cmd += " -name " + os.Getenv(projectName)
 	cmd += " -node-size " + os.Getenv(nodeType)
 	cmd += " -infra-type " + os.Getenv(infraType)
-	cmd += " -organization " + os.Getenv(organizationName)
+	value, exists := os.LookupEnv(organizationName)
+	if exists && len(value) > 0 {
+		cmd += " -organization " + value
+	}
 	cmd += " -provider " + os.Getenv(iaasProvider)
 	cmd += " -region " + os.Getenv(iaasRegion)
 
