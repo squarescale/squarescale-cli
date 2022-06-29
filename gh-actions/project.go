@@ -42,7 +42,8 @@ func (p *Project) createProject() {
 
 func isProjectExists() bool {
 	_, projectNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc project get -project-name %s",
+		"%s project get -project-name %s",
+		getSqscCLICmd(),
 		getProjectName(),
 	)).Output()
 

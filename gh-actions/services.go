@@ -211,7 +211,8 @@ func (s *Services) schedule(serviceName string) {
 
 func isServiceExists(serviceName string) bool {
 	_, webServiceNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc container list -project-name %s | grep %s",
+		"%s container list -project-name %s | grep %s",
+		getSqscCLICmd(),
 		getProjectName(),
 		serviceName,
 	)).Output()

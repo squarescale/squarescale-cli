@@ -79,7 +79,8 @@ func getDockerImage() string {
 
 func getSQSCEnvValue(key string) string {
 	value, err := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc env get -project-name %s \"%s\" | grep -v %s | tr -d '\n'",
+		"%s env get -project-name %s \"%s\" | grep -v %s | tr -d '\n'",
+		getSqscCLICmd(),
 		getProjectName(),
 		key,
 		"...done",
@@ -95,7 +96,8 @@ func getSQSCEnvValue(key string) string {
 
 func isNetworkRuleExists(networkRuleName string, serviceName string) bool {
 	_, networkRuleNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc network-rule list -project-name %s -service-name %s | grep %s",
+		"%s network-rule list -project-name %s -service-name %s | grep %s",
+		getSqscCLICmd(),
 		getProjectName(),
 		serviceName,
 		networkRuleName,

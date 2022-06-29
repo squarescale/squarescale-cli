@@ -42,7 +42,8 @@ func (d *Database) createDatabase() {
 
 func isDatabaseExists() bool {
 	_, databaseNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc db show -project-name %s | grep \"DB enabled\" | grep true",
+		"%s db show -project-name %s | grep \"DB enabled\" | grep true",
+		getSqscCLICmd(),
 		getProjectName(),
 	)).Output()
 

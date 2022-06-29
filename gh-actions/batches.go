@@ -152,7 +152,8 @@ func (b *Batches) executeBatch(batchName string) {
 
 func isBatchExists(batchName string) bool {
 	_, batchNotExists := exec.Command("/bin/sh", "-c", fmt.Sprintf(
-		"/sqsc batch list -project-name %s | grep %s",
+		"%s batch list -project-name %s | grep %s",
+		getSqscCLICmd(),
 		getProjectName(),
 		batchName,
 	)).Output()
