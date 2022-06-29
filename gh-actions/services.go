@@ -86,7 +86,7 @@ func (s *Services) createService(serviceName string, serviceContent ServiceConte
 		cmd += " -password " + serviceContent.IMAGE_PASSWORD
 	}
 
-	executeCommand(cmd, fmt.Sprintf("Fail to create service %q.", serviceName))
+	executeCommand(cmd, fmt.Sprintf("Failed to create %q service.", serviceName))
 }
 
 func (s *Services) insertServiceEnvAndLimits(serviceName string, serviceContent ServiceContent) {
@@ -138,7 +138,7 @@ func (s *Services) insertServiceEnvAndLimits(serviceName string, serviceContent 
 			cmd += " -command " + command
 		}
 
-		executeCommand(cmd, fmt.Sprintf("Fail to import service %q environment variables.", serviceName))
+		executeCommand(cmd, fmt.Sprintf("Failed to import %q service environment variables.", serviceName))
 	}
 }
 
@@ -189,9 +189,9 @@ func (s *Services) insertNetworkRules(serviceName string, serviceContent Service
 					cmd += " -domain-expression " + domain
 				}
 
-				executeCommand(cmd, fmt.Sprintf("Fail to insert %q network rule on %s port", networkRuleName, internalPort))
+				executeCommand(cmd, fmt.Sprintf("Failed to insert %q network rule on %s port in %q service", networkRuleName, internalPort, serviceName))
 			} else {
-				fmt.Println(fmt.Sprintf("Network rule %s already exists.", networkRuleName))
+				fmt.Println(fmt.Sprintf("Network rule %s already exists in %q service.", networkRuleName, serviceName))
 			}
 		}
 	}
@@ -206,7 +206,7 @@ func (s *Services) schedule(serviceName string) {
 		getProjectName(),
 		serviceName,
 	)
-	executeCommand(cmd, fmt.Sprintf("Fail to schedule %q service.", serviceName))
+	executeCommand(cmd, fmt.Sprintf("Failed to schedule %q service.", serviceName))
 }
 
 func isServiceExists(serviceName string) bool {

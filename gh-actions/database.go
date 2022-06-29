@@ -37,7 +37,7 @@ func (d *Database) createDatabase() {
 		os.Getenv(dbEngineVersion),
 		os.Getenv(dbSize),
 	)
-	executeCommand(cmd, "Fail to create database.")
+	executeCommand(cmd, fmt.Sprintf("Failed to create database %q %q %q for %q project.", os.Getenv(dbEngine), os.Getenv(dbEngineVersion), os.Getenv(dbSize), getProjectName()))
 }
 
 func isDatabaseExists() bool {

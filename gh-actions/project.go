@@ -37,7 +37,7 @@ func (p *Project) createProject() {
 
 	cmd += " -yes "
 
-	executeCommand(cmd, fmt.Sprintf("Fail to create project %q.", os.Getenv(projectName)))
+	executeCommand(cmd, fmt.Sprintf("Failed to create project %q.", os.Getenv(projectName)))
 }
 
 func isProjectExists() bool {

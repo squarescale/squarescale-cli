@@ -92,7 +92,7 @@ func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 		cmd += " -time \"" + timezone + "\""
 	}
 
-	executeCommand(cmd, fmt.Sprintf("Fail to add %q batch.", batchName))
+	executeCommand(cmd, fmt.Sprintf("Failed to add %q batch.", batchName))
 }
 
 func (b *Batches) insertBatchEnvAndLimits(batchName string, batchContent BatchContent) {
@@ -134,7 +134,7 @@ func (b *Batches) insertBatchEnvAndLimits(batchName string, batchContent BatchCo
 			cmd += " -net " + limitNet
 		}
 
-		executeCommand(cmd, "Fail to insert batch env.")
+		executeCommand(cmd, fmt.Sprintf("Failed to insert %q batch environment and limits.", batchName))
 	}
 }
 
@@ -147,7 +147,7 @@ func (b *Batches) executeBatch(batchName string) {
 		getProjectName(),
 		batchName,
 	)
-	executeCommand(cmd, fmt.Sprintf("Fail to execute %q batch.", batchName))
+	executeCommand(cmd, fmt.Sprintf("Failed to execute %q batch.", batchName))
 }
 
 func isBatchExists(batchName string) bool {
