@@ -51,14 +51,14 @@ func checkEnvironmentVariablesExists() {
 
 func executeCommand(cmd string, errorMsg string) {
 	fmt.Println(cmd)
-	output, err := exec.Command("/bin/sh", "-c", cmd).CombinedOutput()
+	execCmd := exec.Command("/bin/sh", "-c", cmd)
+	execCmd.Stdout = os.Stdout
+	execCmd.Stderr = os.Stdout
+	err := execCmd.Run()
 
 	if err != nil {
-		fmt.Println(string(output))
 		log.Fatal(errorMsg)
 	}
-
-	fmt.Println(string(output))
 }
 
 func getProjectName() string {
