@@ -8,7 +8,23 @@ import (
 	"strings"
 )
 
-const sqscCLICmd string = "/sqsc -progress=false -color=false"
+const sqscCLICmd string = "/sqsc"
+
+func getSqscCLICmd() string {
+	envVars := []string{
+		"SQSC_CLI_COLOR",
+		"SQSC_CLI_FORMAT",
+		"SQSC_CLI_PROGRESS",
+	}
+	ret := sqscCLICmd
+	for _, envVar := range envVars {
+		value,  exists := os.LookupEnv(envVar)
+		if exists && len(strings.TrimSpace(value)) > 0 {
+			ret += fmt.Sprintf(" %s %s", strings.ToLower(strings.ReplaceAll(envVar, "SQSC_CLI_", "")), value)
+		}
+	}
+	return ret
+}
 
 func checkEnvironmentVariablesExists() {
 	fmt.Println("Checking environment variables...")

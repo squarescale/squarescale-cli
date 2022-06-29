@@ -61,7 +61,7 @@ func (s *Services) create() {
 func (s *Services) createService(serviceName string, serviceContent ServiceContent) {
 	fmt.Println(fmt.Sprintf("Creating %q service...", serviceName))
 
-	cmd := fmt.Sprintf("%s container add", sqscCLICmd)
+	cmd := fmt.Sprintf("%s container add", getSqscCLICmd())
 	cmd += " -project-name " + getProjectName()
 	cmd += " -servicename " + serviceName
 
@@ -100,7 +100,7 @@ func (s *Services) insertServiceEnvAndLimits(serviceName string, serviceContent 
 
 	if len(environment) != 0 || limitMemory != "" || limitNet != "" || limitCpu != "" {
 
-		cmd := fmt.Sprintf("%s container set", sqscCLICmd)
+		cmd := fmt.Sprintf("%s container set", getSqscCLICmd())
 		cmd += " -project-name " + getProjectName()
 		cmd += " -service " + serviceName
 
@@ -176,7 +176,7 @@ func (s *Services) insertNetworkRules(serviceName string, serviceContent Service
 
 				domain := networkRules.DOMAIN
 
-				cmd := fmt.Sprintf("%s network-rule create", sqscCLICmd)
+				cmd := fmt.Sprintf("%s network-rule create", getSqscCLICmd())
 				cmd += " -project-name " + getProjectName()
 				cmd += " -external-protocol " + externalProtocol
 				cmd += " -internal-port " + internalPort
@@ -202,7 +202,7 @@ func (s *Services) schedule(serviceName string) {
 
 	cmd := fmt.Sprintf(
 		"%s service schedule --project-name %s %s",
-		sqscCLICmd,
+		getSqscCLICmd(),
 		getProjectName(),
 		serviceName,
 	)

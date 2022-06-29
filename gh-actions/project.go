@@ -19,7 +19,7 @@ func (p *Project) create() {
 func (p *Project) createProject() {
 	fmt.Println("Creating project...")
 
-	cmd := fmt.Sprintf("%s project create", sqscCLICmd)
+	cmd := fmt.Sprintf("%s project create", getSqscCLICmd())
 	cmd += " -credential " + os.Getenv(iaasCred)
 	cmd += " -name " + os.Getenv(projectName)
 	cmd += " -node-size " + os.Getenv(nodeType)
