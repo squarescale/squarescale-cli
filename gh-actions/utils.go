@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const sqscCLICmd string = "/sqsc -progress=false -color=false"
+
 func checkEnvironmentVariablesExists() {
 	fmt.Println("Checking environment variables...")
 

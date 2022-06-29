@@ -59,7 +59,7 @@ func (b *Batches) create() {
 func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 	fmt.Println(fmt.Sprintf("Creating %q batch...", batchName))
 
-	cmd := "/sqsc batch add"
+	cmd := fmt.Sprintf("%s batch add", sqscCLICmd)
 	cmd += " -name " + batchName
 	cmd += " -project-name " + getProjectName()
 	cmd += " -run-command " + shellescape.Quote(batchContent.RUN_CMD)
@@ -104,7 +104,7 @@ func (b *Batches) insertBatchEnvAndLimits(batchName string, batchContent BatchCo
 
 	if len(environment) != 0 || limitMemory != "" || limitNet != "" || limitCpu != "" {
 
-		cmd := "/sqsc batch set"
+		cmd := fmt.Sprintf("%s batch set", sqscCLICmd)
 		cmd += " -project-name " + getProjectName()
 		cmd += " -batch-name " + batchName
 
@@ -142,7 +142,8 @@ func (b *Batches) executeBatch(batchName string) {
 	fmt.Println(fmt.Sprintf("Executing %q batch ...", batchName))
 
 	cmd := fmt.Sprintf(
-		"/sqsc batch exec -project-name %s %s",
+		"%s batch exec -project-name %s %s",
+		sqscCLICmd,
 		getProjectName(),
 		batchName,
 	)
