@@ -35,7 +35,7 @@ func checkEnvironmentVariablesExists() {
 
 func executeCommand(cmd string, errorMsg string) {
 	fmt.Println(cmd)
-	output, err := exec.Command("/bin/sh", "-c", cmd).Output()
+	output, err := exec.Command("/bin/sh", "-c", cmd).CombinedOutput()
 
 	if err != nil {
 		fmt.Println(string(output))
