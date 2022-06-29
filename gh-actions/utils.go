@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 func checkEnvironmentVariablesExists() {
@@ -22,8 +23,9 @@ func checkEnvironmentVariablesExists() {
 	}
 
 	for _, envVar := range envVars {
-		if _, exists := os.LookupEnv(envVar); !exists {
-			fmt.Println(fmt.Sprintf("%s is not set. Quitting.", envVar))
+		value,  exists := os.LookupEnv(envVar)
+		if !exists || len(strings.TrimSpace(value)) == 0 {
+			fmt.Println(fmt.Sprintf("%s is not set or is empty/filled with blanks. Quitting.", envVar))
 			os.Exit(1)
 		}
 	}
