@@ -13,8 +13,8 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1
+	github.com/hoisie/mustache v0.0.0-20160804235033-6375acf62c69
 	github.com/imdario/mergo v0.3.12 // indirect
-	github.com/hoisie/mustache v0.0.0-20160804235033-6375acf62c69 // indirect
 	github.com/jpillora/backoff v1.0.0 // indirect
 	github.com/jpillora/go-mime v0.0.0-20150326152935-4e683937836d
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
@@ -40,7 +40,7 @@ require (
 	golang.org/x/text v0.3.7 //  indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
-	gopkg.in/alessio/shellescape.v1 v1.0.0-20170105083845-52074bc9df61 // indirect
+	gopkg.in/alessio/shellescape.v1 v1.0.0-20170105083845-52074bc9df61
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c //indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
