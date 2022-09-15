@@ -1,4 +1,4 @@
-FROM golang:1.16-alpine3.13
+FROM golang:1.18-alpine3.13
 
 LABEL "com.github.actions.name"="squarescale-cli"
 LABEL "com.github.actions.description"="Squarescale CLI"
@@ -6,7 +6,7 @@ LABEL "com.github.actions.icon"="refresh-cw"
 LABEL "com.github.actions.color"="green"
 
 LABEL name="squarescale-cli"
-LABEL version="0.1.0"
+LABEL version="1.0.9"
 LABEL maintainer="SquareScale Engineering <engineering@squarescale.com>"
 LABEL repository="https://github.com/squarescale/squarescale-cli"
 
