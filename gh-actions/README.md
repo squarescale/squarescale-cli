@@ -8,7 +8,7 @@ This image is pushed to Squarescale docker hub through the tag name `gh-actions`
     steps:
       - name: Schedule a Web service
         uses: docker://squarescale/cli:gh-actions
-        env: 
+        env:
           [...]
 ```
 
@@ -110,7 +110,7 @@ SERVICES: >-
   }
 ```
 
-Here, a service named `web` will be schedule on Squarescale: 
+Here, a service named `web` will be schedule on Squarescale:
 - with a `Run command`
 - the `3000` port will be routed on prefix `/` (by default and not configurable yet)
 - 5 environements variables will be inserted into the service for logs and database. `{{ DB_* }}` corresponds to the global database environement variable created when the database was created before this services.
