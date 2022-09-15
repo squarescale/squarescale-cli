@@ -1,4 +1,4 @@
-FROM golang:1.18-alpine3.16
+FROM golang:1.19-alpine3.16
 
 LABEL "com.github.actions.name"="squarescale-cli"
 LABEL "com.github.actions.description"="Squarescale CLI"
