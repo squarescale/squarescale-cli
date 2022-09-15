@@ -6,7 +6,7 @@ LABEL "com.github.actions.icon"="refresh-cw"
 LABEL "com.github.actions.color"="green"
 
 LABEL name="squarescale-cli"
-LABEL version="1.0.9"
+LABEL version="1.1.0"
 LABEL maintainer="SquareScale Engineering <engineering@squarescale.com>"
 LABEL repository="https://github.com/squarescale/squarescale-cli"
 
