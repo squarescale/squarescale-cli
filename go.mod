@@ -15,7 +15,7 @@ require (
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.20.2
 	github.com/sirupsen/logrus v1.9.0
-	github.com/squarescale/actioncable-go v0.1.0
+	github.com/squarescale/actioncable-go v0.2.0
 	github.com/squarescale/go-netrc v0.1.3
 	github.com/squarescale/logger v0.1.4
 	gopkg.in/alessio/shellescape.v1 v1.0.0-20170105083845-52074bc9df61
