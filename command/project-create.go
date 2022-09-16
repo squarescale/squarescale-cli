@@ -31,6 +31,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	monitoringEngine := c.flagSet.String("monitoring", "", "Set the monitoring configuration (netdata)")
 	nodeSize := c.flagSet.String("node-size", "", "Set the cluster node size")
 	slackURL := c.flagSet.String("slackbot", "", "Set the Slack webhook URL")
+	hybridClusterEnabled := c.flagSet.Bool("hybrid-cluster-enabled", false, "Enable Hybrid Cluster")
 
 	dbEngine := c.flagSet.String("db-engine", "", "Select database engine")
 	dbSize := c.flagSet.String("db-size", "", "Select database size")
@@ -74,6 +75,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	}
 
 	payload["name"] = *name
+	payload["hybrid_cluster_enabled"] = *hybridClusterEnabled
 
 	if *uuid != "" {
 		payload["uuid"] = *uuid
