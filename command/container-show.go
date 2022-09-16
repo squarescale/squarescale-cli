@@ -53,11 +53,11 @@ func (c *ContainerShowCommand) Run(args []string) int {
 
 		var msg string
 		for _, co := range containers {
-			if msg != "" {
-				msg += "\n\n-----------\n\n\n"
-			}
 			if *containerArg != "" && *containerArg != co.Name {
 				continue
+			}
+			if msg != "" {
+				msg += "\n\n-----------\n\n\n"
 			}
 			tbl := ""
 			tbl += fmt.Sprintf("Name:\t%s\n", co.Name)
