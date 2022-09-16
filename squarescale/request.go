@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"strings"
 
 	multierr "github.com/hashicorp/go-multierror"
@@ -126,6 +127,13 @@ func (c *Client) request(method, path string, payload interface{}) (int, []byte,
 	req.Header.Set("Authorization", "bearer "+c.token)
 	req.Header.Set("API-Version", supportedAPI)
 
+	reqDump, err := httputil.DumpRequestOut(req, true)
+	if err != nil {
+		logger.Error.Println("Error dumping HTTP request:", err)
+	} else {
+		logger.Trace.Printf("REQUEST: %s", string(reqDump))
+	}
+
 	res, err := c.httpClient.Do(req)
 	if err != nil {
 		return 0, []byte{}, err
@@ -157,7 +165,7 @@ func (c *Client) request(method, path string, payload interface{}) (int, []byte,
 }
 
 type RequestError struct {
-	Error string `json:"error"`
+	Error         string   `json:"error"`
 	DetailedError []string `json:"detailed_error"`
 }
 
