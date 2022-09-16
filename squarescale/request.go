@@ -52,7 +52,7 @@ func (c *Client) cableClient() *actioncable.Client {
 }
 
 func (c *Client) cableHeaders() (*http.Header, error) {
-	h := make(http.Header, 2)
+	h := make(http.Header, 3)
 	h.Set("Authorization", "bearer "+c.token)
 	h.Set("API-Version", supportedAPI)
 	h.Set("Origin", c.endpoint)
