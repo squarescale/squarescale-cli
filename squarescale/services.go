@@ -202,6 +202,7 @@ func (c *Client) DeleteService(service Service) error {
 	}
 
 	switch code {
+	// strange reading this but seems like OK does continue without any return
 	case http.StatusOK:
 	case http.StatusNotFound:
 		return fmt.Errorf("service with id '%d' does not exist", service.ID)
