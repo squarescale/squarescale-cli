@@ -69,13 +69,6 @@ func (c *ContainerShowCommand) Run(args []string) int {
 			tbl += fmt.Sprintf("Network limit:\t%d Mbps\n", co.Limits.Net)
 			msg += c.FormatTable(tbl, false)
 			msg += "\n"
-
-			if len(co.RefreshCallbacks) > 0 {
-				msg += fmt.Sprintf("Refresh callbacks:\n")
-				for _, url := range co.RefreshCallbacks {
-					msg += fmt.Sprintf("  - %s\n", url)
-				}
-			}
 		}
 
 		if len(containers) == 0 {
