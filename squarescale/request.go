@@ -60,7 +60,6 @@ func (c *Client) cableHeaders() (*http.Header, error) {
 }
 
 func (c *Client) get(path string) (int, []byte, error) {
-	logger.Trace.Println("GET on:", path)
 	code, response, err := c.request("GET", path, nil)
 	logger.Trace.Println("HTTP Code:", code)
 	logger.Trace.Printf("HTTP Response: %s\n", response)
@@ -69,7 +68,6 @@ func (c *Client) get(path string) (int, []byte, error) {
 }
 
 func (c *Client) post(path string, payload interface{}) (int, []byte, error) {
-	logger.Trace.Println("POST on:", path)
 	code, response, err := c.request("POST", path, payload)
 	logger.Trace.Println("HTTP Code:", code)
 	logger.Trace.Printf("HTTP Response: %s\n", response)
@@ -78,7 +76,6 @@ func (c *Client) post(path string, payload interface{}) (int, []byte, error) {
 }
 
 func (c *Client) patch(path string, payload interface{}) (int, []byte, error) {
-	logger.Trace.Println("PATCH on:", path)
 	code, response, err := c.request("PATCH", path, payload)
 	logger.Trace.Println("HTTP Code:", code)
 	logger.Trace.Printf("HTTP Response: %s\n", response)
@@ -87,7 +84,6 @@ func (c *Client) patch(path string, payload interface{}) (int, []byte, error) {
 }
 
 func (c *Client) delete(path string) (int, []byte, error) {
-	logger.Trace.Println("DELETE on:", path)
 	code, response, err := c.request("DELETE", path, nil)
 	logger.Trace.Println("HTTP Code:", code)
 	logger.Trace.Printf("HTTP Response: %s\n", response)
@@ -96,7 +92,6 @@ func (c *Client) delete(path string) (int, []byte, error) {
 }
 
 func (c *Client) put(path string, payload interface{}) (int, []byte, error) {
-	logger.Trace.Println("PUT on:", path)
 	code, response, err := c.request("PUT", path, payload)
 	logger.Trace.Println("HTTP Code:", code)
 	logger.Trace.Printf("HTTP Response: %s\n", response)
