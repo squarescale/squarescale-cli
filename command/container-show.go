@@ -57,7 +57,7 @@ func (c *ContainerShowCommand) Run(args []string) int {
 				continue
 			}
 			if msg != "" {
-				msg += "\n\n-----------\n\n\n"
+				msg += "\n-----------\n\n"
 			}
 			tbl := ""
 			tbl += fmt.Sprintf("Name:\t%s\n", co.Name)
@@ -68,7 +68,7 @@ func (c *ContainerShowCommand) Run(args []string) int {
 			tbl += fmt.Sprintf("CPU limit:\t%d MHz\n", co.Limits.CPU)
 			tbl += fmt.Sprintf("Network limit:\t%d Mbps\n", co.Limits.Net)
 			msg += c.FormatTable(tbl, false)
-			msg += "\n\n"
+			msg += "\n"
 
 			if len(co.RefreshCallbacks) > 0 {
 				msg += fmt.Sprintf("Refresh callbacks:\n")
