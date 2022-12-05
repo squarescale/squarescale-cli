@@ -30,6 +30,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	infraType := c.flagSet.String("infra-type", "high-availability", "Set the infrastructure configuration (high-availability or single-node)")
 	monitoringEngine := c.flagSet.String("monitoring", "", "Set the monitoring configuration (netdata)")
 	nodeSize := c.flagSet.String("node-size", "", "Set the cluster node size")
+	rootDiskSizeGB := c.flagSet.Int("root-disk-size", 20, "Set the root filesystem size (in GB)")
 	slackURL := c.flagSet.String("slackbot", "", "Set the Slack webhook URL")
 	hybridClusterEnabled := c.flagSet.Bool("hybrid-cluster-enabled", false, "Enable Hybrid Cluster")
 
@@ -106,6 +107,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	}
 
 	payload["node_size"] = *nodeSize
+	payload["root_disk_size_gb"] = *rootDiskSizeGB
 
 	if *infraType != "high-availability" && *infraType != "single-node" {
 		return c.errorWithUsage(fmt.Errorf("Unknown infrastructure type: %v. Correct values are high-availability or single-node", *infraType))

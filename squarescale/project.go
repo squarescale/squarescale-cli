@@ -28,6 +28,7 @@ type Project struct {
 	HybridClusterEnabled bool      `json:"hybrid_cluster_enabled"`
 	ProviderLabel        string    `json:"provider_label"`
 	NodeSize             string    `json:"node_size"`
+	RootDiskSizeGB       int       `json:"root_disk_size_gb"`
 	RegionLabel          string    `json:"region_label"`
 	Credentials          string    `json:"credentials_name"`
 	CreatedAt            time.Time `json:"created_at"`
