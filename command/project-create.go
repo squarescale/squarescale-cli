@@ -24,7 +24,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	name := projectNameFlag(c.flagSet)
 	uuid := c.flagSet.String("uuid", "", "set the uuid of the project")
 	organization := c.flagSet.String("organization", "", "set the organization the project will belongs to")
-	provider := c.flagSet.String("provider", "", "set the cloud provider (aws or azure)")
+	provider := c.flagSet.String("provider", "", "set the cloud provider (aws or azure or outscale)")
 	region := c.flagSet.String("region", "", "set the cloud provider region (eu-west-1)")
 	credential := c.flagSet.String("credential", "", "set the credential used to build the infrastructure")
 	infraType := c.flagSet.String("infra-type", "high-availability", "Set the infrastructure configuration (high-availability or single-node)")
