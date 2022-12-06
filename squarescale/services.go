@@ -170,7 +170,7 @@ func (c *Client) ConfigService(service Service) error {
 	if service.Limits.CPU >= 0 {
 		limits["cpu"] = service.Limits.CPU
 	}
-	if service.Limits.IOPS >= 0 {
+	if service.Limits.IOPS > 0 {
 		limits["iops"] = service.Limits.IOPS
 	}
 	cont["limits"] = limits
