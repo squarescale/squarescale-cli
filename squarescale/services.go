@@ -77,7 +77,6 @@ type ServiceLimits struct {
 	Memory int `json:"mem"`
 	CPU    int `json:"cpu"`
 	IOPS   int `json:"iops"`
-	Net    int `json:"net"`
 }
 
 // GetContainers gets all the services attached to a Project
@@ -173,9 +172,6 @@ func (c *Client) ConfigService(service Service) error {
 	}
 	if service.Limits.IOPS >= 0 {
 		limits["iops"] = service.Limits.IOPS
-	}
-	if service.Limits.Net >= 0 {
-		limits["net"] = service.Limits.Net
 	}
 	cont["limits"] = limits
 	if service.CustomEnv != nil {

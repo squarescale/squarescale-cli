@@ -27,7 +27,6 @@ func (c *ServiceSetCommand) Run(args []string) int {
 	entrypoint := c.flagSet.String("entrypoint", "", "This is the script / program that will be executed")
 	limitMemoryArg := containerLimitMemoryFlag(c.flagSet)
 	limitCPUArg := containerLimitCPUFlag(c.flagSet)
-	limitNetArg := containerLimitNetFlag(c.flagSet)
 	noRunCmdArg := containerNoRunCmdFlag(c.flagSet)
 	envCmdArg := envFileFlag(c.flagSet)
 	schedulingGroupsArg := containerSchedulingGroupsFlag(c.flagSet)
@@ -57,7 +56,7 @@ func (c *ServiceSetCommand) Run(args []string) int {
 			c.Ui.Warn("Number of instances cannot be 0 or negative. This value won't be set.")
 		}
 
-		if *runCmdArg == "" && !*noRunCmdArg && *limitCPUArg < 0 && *limitMemoryArg < 0 && *limitNetArg < 0 {
+		if *runCmdArg == "" && !*noRunCmdArg && *limitCPUArg < 0 && *limitMemoryArg < 0 {
 			err := errors.New("Invalid values provided for instance number.")
 			return c.errorWithUsage(err)
 		}
@@ -115,10 +114,6 @@ func (c *ServiceSetCommand) Run(args []string) int {
 		if *limitCPUArg >= 0 {
 			c.info("Configure service with CPU limit of %d Mhz", *limitCPUArg)
 			container.Limits.CPU = *limitCPUArg
-		}
-		if *limitNetArg >= 0 {
-			c.info("Configure service with network bandwidth limit of %d Mbps", *limitNetArg)
-			container.Limits.Net = *limitNetArg
 		}
 		if *envCmdArg != "" {
 			c.info("Configure service with some env")
