@@ -3,7 +3,7 @@ package squarescale_test
 import (
 	"testing"
 
-	"github.com/onsi/ginkgo"
+	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
 
@@ -49,9 +49,6 @@ var PSpecify = ginkgo.PSpecify
 var XSpecify = ginkgo.XSpecify
 var By = ginkgo.By
 var Measure = ginkgo.Measure
-var FMeasure = ginkgo.FMeasure
-var PMeasure = ginkgo.PMeasure
-var XMeasure = ginkgo.XMeasure
 var BeforeSuite = ginkgo.BeforeSuite
 var AfterSuite = ginkgo.AfterSuite
 var SynchronizedBeforeSuite = ginkgo.SynchronizedBeforeSuite
@@ -71,7 +68,7 @@ var Eventually = gomega.Eventually
 var EventuallyWithOffset = gomega.EventuallyWithOffset
 var Consistently = gomega.Consistently
 var ConsistentlyWithOffset = gomega.ConsistentlyWithOffset
-var SetDefaultEventuallyTimeout = gomega.SetDefaultEventuallyTimeout
+
 var SetDefaultEventuallyPollingInterval = gomega.SetDefaultEventuallyPollingInterval
 var SetDefaultConsistentlyDuration = gomega.SetDefaultConsistentlyDuration
 var SetDefaultConsistentlyPollingInterval = gomega.SetDefaultConsistentlyPollingInterval
