@@ -8,3 +8,4 @@ gh-actions/mapEnvVar.json
 .envrc
 coverage.out
 coverage.html
+dist/
