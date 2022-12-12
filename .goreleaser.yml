@@ -1,5 +1,6 @@
 builds:
 -
+  ldflags: -s -w -X main.GitBranch={{.Version}} -X main.GitCommit=v{{.Version}}-{{.ShortCommit}} -X main.BuildDate={{.Date}}
   goos:
     - linux
     - darwin
