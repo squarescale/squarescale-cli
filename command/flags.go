@@ -313,7 +313,7 @@ func batchNoRunCmdFlag(f *flag.FlagSet) *bool {
 
 func dockerCapabilitiesFlag(f *flag.FlagSet) (*string, bool) {
 	var visited = false
-	f.Visit( func(d *flag.Flag) {
+	f.Visit(func(d *flag.Flag) {
 		if d.Name == "docker-capabilities" {
 			visited = true
 		}

@@ -125,13 +125,13 @@ func (b *BatchAddCommand) Run(args []string) int {
 	}
 
 	batchCommonContent := squarescale.BatchCommon{
-		Name:           *wantedBatchName,
-		Periodic:       *periodicBatch,
-		CronExpression: *cronExpression,
-		TimeZoneName:   *timeZoneName,
-		RunCommand:     *runCommand,
-		Entrypoint:     *entrypoint,
-		Limits:         batchLimitContent,
+		Name:               *wantedBatchName,
+		Periodic:           *periodicBatch,
+		CronExpression:     *cronExpression,
+		TimeZoneName:       *timeZoneName,
+		RunCommand:         *runCommand,
+		Entrypoint:         *entrypoint,
+		Limits:             batchLimitContent,
 		DockerCapabilities: dockerCapabilitiesArray,
 	}
 

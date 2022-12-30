@@ -67,7 +67,7 @@ func nominalCaseOnAddImage(t *testing.T) {
 	volumesToBind[0].MountPoint = "/usr/share/nginx/html"
 	volumesToBind[0].ReadOnly = false
 
-	dockerCapabilities := []string {"AUDIT_WRITE", "CHOWN"}
+	dockerCapabilities := []string{"AUDIT_WRITE", "CHOWN"}
 
 	errPublic := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities)
 	errPrivate := cli.AddImage(projectName, "nginx", "login", "pass", "", "", 1, "nginx", volumesToBind, dockerCapabilities)
@@ -99,7 +99,7 @@ func ClientHTTPErrorOnAddImage(t *testing.T) {
 	volumesToBind[0].MountPoint = "/usr/share/nginx/html"
 	volumesToBind[0].ReadOnly = false
 
-	dockerCapabilities := []string {"AUDIT_WRITE", "CHOWN"}
+	dockerCapabilities := []string{"AUDIT_WRITE", "CHOWN"}
 
 	errOnAdd := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities)
 
@@ -128,7 +128,7 @@ func InternalServerErrorOnAddImage(t *testing.T) {
 	volumesToBind[0].MountPoint = "/usr/share/nginx/html"
 	volumesToBind[0].ReadOnly = false
 
-	dockerCapabilities := []string {"AUDIT_WRITE", "CHOWN"}
+	dockerCapabilities := []string{"AUDIT_WRITE", "CHOWN"}
 
 	errOnAdd := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities)
 

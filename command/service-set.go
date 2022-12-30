@@ -133,7 +133,7 @@ func (c *ServiceSetCommand) Run(args []string) int {
 				container.DockerCapabilities = dockerCapabilitiesArray
 			}
 		} else {
-			container.DockerCapabilities = nil;
+			container.DockerCapabilities = nil
 		}
 
 		schedulingGroupsToAdd := getSchedulingGroupsArray(UUID, client, *schedulingGroupsArg)

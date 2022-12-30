@@ -105,9 +105,9 @@ func (c *BatchSetCommand) Run(args []string) int {
 				batch.DockerCapabilities = dockerCapabilitiesArray
 			}
 		} else {
-			batch.DockerCapabilities = nil;
+			batch.DockerCapabilities = nil
 		}
-	
+
 		if *envCmdArg != "" {
 			c.info("Configure batch with some env")
 			err := batch.SetEnv(*envCmdArg)
