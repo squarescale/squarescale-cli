@@ -28,7 +28,7 @@ func (c *ServiceAddCommand) Run(args []string) int {
 	username := c.flagSet.String("username", "", "Username")
 	password := c.flagSet.String("password", "", "Password")
 	volumes := c.flagSet.String("volumes", "", "Volumes. format: ${VOL2_NAME}:${VOL2_MOUNT_POINT}:ro,${VOL2_NAME}:${VOL2_MOUNT_POINT}:rw")
-	dockerCapabilities, _ := dockerCapabilitiesFlag(c.flagSet)
+	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
 	instances := repoOrImageInstancesFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
@@ -47,10 +47,7 @@ func (c *ServiceAddCommand) Run(args []string) int {
 		return c.errorWithUsage(err)
 	}
 
-	dockerCapabilitiesArray, err := getDockerCapabilitiesArray(*dockerCapabilities)
-	if err != nil {
-		return c.errorWithUsage(err)
-	}
+	dockerCapabilitiesArray := getDockerCapabilitiesArray(*dockerCapabilities)
 
 	volumesToBind := parseVolumesToBind(*volumes)
 

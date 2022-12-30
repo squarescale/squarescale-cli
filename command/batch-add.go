@@ -41,7 +41,7 @@ func (b *BatchAddCommand) Run(args []string) int {
 	limitMemory := b.flagSet.Int("mem", 256, "This is the maximum amount of memory your service will be able to use until it is killed and restarted automatically.")
 	limitIOPS := b.flagSet.Int("iops", 0, "This is an indicative limit of how many I/O operation per second your service requires.")
 	limitCPU := b.flagSet.Int("cpu", 100, "This is an indicative limit of how much CPU your service requires.")
-	dockerCapabilities, _ := dockerCapabilitiesFlag(b.flagSet)
+	dockerCapabilities := dockerCapabilitiesFlag(b.flagSet)
 	volumes := b.flagSet.String("volumes", "", "Volumes")
 
 	if err := b.flagSet.Parse(args); err != nil {
@@ -102,10 +102,7 @@ func (b *BatchAddCommand) Run(args []string) int {
 		return b.errorWithUsage(fmt.Errorf(("CPU must be greater than or equal to 100MHz")))
 	}
 
-	dockerCapabilitiesArray, err := getDockerCapabilitiesArray(*dockerCapabilities)
-	if err != nil {
-		return b.errorWithUsage(err)
-	}
+	dockerCapabilitiesArray := getDockerCapabilitiesArray(*dockerCapabilities)
 
 	volumesToBind := parseVolumesToBind(*volumes)
 

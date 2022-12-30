@@ -28,7 +28,7 @@ func (c *BatchSetCommand) Run(args []string) int {
 	limitCPUArg := batchLimitCPUFlag(c.flagSet)
 	limitNetArg := batchLimitNetFlag(c.flagSet)
 	noRunCmdArg := batchNoRunCmdFlag(c.flagSet)
-	dockerCapabilities, capabilitiesNeedUpdate := dockerCapabilitiesFlag(c.flagSet)
+	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
 	envCmdArg := envFileFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -96,16 +96,10 @@ func (c *BatchSetCommand) Run(args []string) int {
 			batch.Limits.NET = *limitNetArg
 		}
 
-		if capabilitiesNeedUpdate {
-			dockerCapabilitiesArray, err := getDockerCapabilitiesArray(*dockerCapabilities)
-			if err != nil {
-				return "", err
-			} else {
-				c.info("Configure batch with those capabilities : %v", strings.Join(dockerCapabilitiesArray, ", "))
-				batch.DockerCapabilities = dockerCapabilitiesArray
-			}
-		} else {
-			batch.DockerCapabilities = nil
+		if *dockerCapabilities != ""{
+			dockerCapabilitiesArray := getDockerCapabilitiesArray(*dockerCapabilities)
+			c.info("Configure batch with those capabilities : %v", strings.Join(dockerCapabilitiesArray, ", "))
+			batch.DockerCapabilities = dockerCapabilitiesArray
 		}
 
 		if *envCmdArg != "" {
