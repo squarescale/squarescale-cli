@@ -310,3 +310,13 @@ func batchLimitNetFlag(f *flag.FlagSet) *int {
 func batchNoRunCmdFlag(f *flag.FlagSet) *bool {
 	return f.Bool("no-command", false, "Disable command override")
 }
+
+func dockerCapabilitiesFlag(f *flag.FlagSet) (*string, bool) {
+	var visited = false
+	f.Visit( func(d *flag.Flag) {
+		if d.Name == "docker-capabilities" {
+			visited = true
+		}
+	})
+	return f.String("docker-capabilities", "AUDIT_WRITE,CHOWN,DAC_OVERRIDE,FOWNER,FSETID,KILL,MKNOD,NET_BIND_SERVICE,NET_RAW,SETFCAP,SETGID,SETPCAP,SETUID,SYS_CHROOT", "This is a list of enabled docker capabilities"), visited
+}

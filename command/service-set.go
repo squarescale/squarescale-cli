@@ -30,6 +30,7 @@ func (c *ServiceSetCommand) Run(args []string) int {
 	noRunCmdArg := containerNoRunCmdFlag(c.flagSet)
 	envCmdArg := envFileFlag(c.flagSet)
 	schedulingGroupsArg := containerSchedulingGroupsFlag(c.flagSet)
+	dockerCapabilities, capabilitiesNeedUpdate := dockerCapabilitiesFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -121,6 +122,18 @@ func (c *ServiceSetCommand) Run(args []string) int {
 			if err != nil {
 				c.error(err)
 			}
+		}
+
+		if capabilitiesNeedUpdate {
+			dockerCapabilitiesArray, err := getDockerCapabilitiesArray(*dockerCapabilities)
+			if err != nil {
+				return "", err
+			} else {
+				c.info("Configure batch with those capabilities : %v", strings.Join(dockerCapabilitiesArray, ", "))
+				container.DockerCapabilities = dockerCapabilitiesArray
+			}
+		} else {
+			container.DockerCapabilities = nil;
 		}
 
 		schedulingGroupsToAdd := getSchedulingGroupsArray(UUID, client, *schedulingGroupsArg)

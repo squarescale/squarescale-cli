@@ -67,8 +67,10 @@ func nominalCaseOnAddImage(t *testing.T) {
 	volumesToBind[0].MountPoint = "/usr/share/nginx/html"
 	volumesToBind[0].ReadOnly = false
 
-	errPublic := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind)
-	errPrivate := cli.AddImage(projectName, "nginx", "login", "pass", "", "", 1, "nginx", volumesToBind)
+	dockerCapabilities := []string {"AUDIT_WRITE", "CHOWN"}
+
+	errPublic := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities)
+	errPrivate := cli.AddImage(projectName, "nginx", "login", "pass", "", "", 1, "nginx", volumesToBind, dockerCapabilities)
 
 	// then
 	if errPublic != nil {
@@ -97,7 +99,9 @@ func ClientHTTPErrorOnAddImage(t *testing.T) {
 	volumesToBind[0].MountPoint = "/usr/share/nginx/html"
 	volumesToBind[0].ReadOnly = false
 
-	errOnAdd := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind)
+	dockerCapabilities := []string {"AUDIT_WRITE", "CHOWN"}
+
+	errOnAdd := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities)
 
 	// then
 	if errOnAdd == nil {
@@ -124,7 +128,9 @@ func InternalServerErrorOnAddImage(t *testing.T) {
 	volumesToBind[0].MountPoint = "/usr/share/nginx/html"
 	volumesToBind[0].ReadOnly = false
 
-	errOnAdd := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind)
+	dockerCapabilities := []string {"AUDIT_WRITE", "CHOWN"}
+
+	errOnAdd := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities)
 
 	// then
 	expectedError := "An unexpected error occurred (code: 500)"

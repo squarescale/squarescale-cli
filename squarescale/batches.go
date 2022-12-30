@@ -12,13 +12,14 @@ import (
 
 // Common
 type BatchCommon struct {
-	Name           string      `json:"name"`
-	Periodic       bool        `json:"periodic"`
-	CronExpression string      `json:"cron_expression"`
-	TimeZoneName   string      `json:"time_zone_name"`
-	Limits         BatchLimits `json:"limits"`
-	RunCommand     string      `json:"run_command,omitempty"`
-	Entrypoint     string      `json:"entrypoint,omitempty"`
+	Name           		 string      	`json:"name"`
+	Periodic       		 bool        	`json:"periodic"`
+	CronExpression 		 string      	`json:"cron_expression"`
+	TimeZoneName   		 string      	`json:"time_zone_name"`
+	Limits         		 BatchLimits 	`json:"limits"`
+	RunCommand     		 string      	`json:"run_command,omitempty"`
+	Entrypoint     		 string      	`json:"entrypoint,omitempty"`
+	DockerCapabilities []string 		`json:"docker_capabilities"`
 }
 
 type BatchLimits struct {
@@ -51,15 +52,16 @@ type DockerImageInfos struct {
 func (c *Client) CreateBatch(uuid string, batchOrderContent BatchOrder) (CreatedBatch, error) {
 
 	payload := &JSONObject{
-		"name":            batchOrderContent.BatchCommon.Name,
-		"docker_image":    batchOrderContent.DockerImage,
-		"periodic":        batchOrderContent.BatchCommon.Periodic,
-		"cron_expression": batchOrderContent.BatchCommon.CronExpression,
-		"time_zone_name":  batchOrderContent.BatchCommon.TimeZoneName,
-		"limits":          batchOrderContent.BatchCommon.Limits,
-		"volumes_to_bind": batchOrderContent.Volumes,
-		"run_command":     batchOrderContent.BatchCommon.RunCommand,
-		"entrypoint":      batchOrderContent.BatchCommon.Entrypoint,
+		"name":            					batchOrderContent.BatchCommon.Name,
+		"docker_image":    					batchOrderContent.DockerImage,
+		"periodic":        					batchOrderContent.BatchCommon.Periodic,
+		"cron_expression": 					batchOrderContent.BatchCommon.CronExpression,
+		"time_zone_name":  					batchOrderContent.BatchCommon.TimeZoneName,
+		"limits":          					batchOrderContent.BatchCommon.Limits,
+		"volumes_to_bind": 					batchOrderContent.Volumes,
+		"run_command":     					batchOrderContent.BatchCommon.RunCommand,
+		"entrypoint":      					batchOrderContent.BatchCommon.Entrypoint,
+		"docker_capabilities":      batchOrderContent.BatchCommon.DockerCapabilities,
 	}
 
 	code, body, err := c.post("/projects/"+uuid+"/batches", payload)
@@ -234,6 +236,9 @@ func (c *Client) ConfigBatch(batch RunningBatch, projectUUID string) error {
 	payload["limits"] = limits
 	if batch.CustomEnvironment != nil {
 		payload["custom_environment"] = batch.CustomEnvironment
+	}
+	if batch.DockerCapabilities != nil {
+		payload["docker_capabilities"] = batch.DockerCapabilities
 	}
 
 	logger.Debug.Println("Json payload : ", payload)

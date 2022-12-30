@@ -9,27 +9,27 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ServiceAddCommand is a cli.Command implementation for adding a service aka Docker container to project.
-type ServiceAddCommand struct {
+// ImageAddCommand is a cli.Command implementation for adding a Docker image to project.
+type ImageAddCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (c *ServiceAddCommand) Run(args []string) int {
+func (c *ImageAddCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	projectName := c.flagSet.String("project-name", "", "set the name of the project")
-	serviceName := c.flagSet.String("servicename", "", "service name")
-	image := c.flagSet.String("image", "", "Docker image name")
 	runCommand := c.flagSet.String("run-command", "", "command / arguments that are used for execution")
 	entrypoint := c.flagSet.String("entrypoint", "", "This is the script / program that will be executed")
+	serviceName := c.flagSet.String("servicename", "", "service name")
+	image := c.flagSet.String("name", "", "Docker image name")
 	username := c.flagSet.String("username", "", "Username")
 	password := c.flagSet.String("password", "", "Password")
-	volumes := c.flagSet.String("volumes", "", "Volumes. format: ${VOL2_NAME}:${VOL2_MOUNT_POINT}:ro,${VOL2_NAME}:${VOL2_MOUNT_POINT}:rw")
-	dockerCapabilities, _ := dockerCapabilitiesFlag(c.flagSet)
+	volumes := c.flagSet.String("volumes", "", "Volumes")
 	instances := repoOrImageInstancesFlag(c.flagSet)
+	dockerCapabilities, _ := dockerCapabilitiesFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -41,10 +41,6 @@ func (c *ServiceAddCommand) Run(args []string) int {
 
 	if *projectUUID == "" && *projectName == "" {
 		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
-	}
-
-	if err := c.validateArgs(*image, *instances); err != nil {
-		return c.errorWithUsage(err)
 	}
 
 	dockerCapabilitiesArray, err := getDockerCapabilitiesArray(*dockerCapabilities)
@@ -75,21 +71,21 @@ func (c *ServiceAddCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ServiceAddCommand) Synopsis() string {
-	return "Add service aka Docker container to project"
+func (c *ImageAddCommand) Synopsis() string {
+	return "Add Docker image to project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ServiceAddCommand) Help() string {
+func (c *ImageAddCommand) Help() string {
 	helpText := `
-usage: sqsc service add [options]
+usage: sqsc image add [options]
 
-  Add service aka Docker container to project.
+  Add Docker image to project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
 
-func (c *ServiceAddCommand) validateArgs(image string, instances int) error {
+func (c *ImageAddCommand) validateArgs(project, image string, instances int) error {
 	if image == "" {
 		return errors.New("Docker image name cannot be empty")
 	}
@@ -97,5 +93,6 @@ func (c *ServiceAddCommand) validateArgs(image string, instances int) error {
 	if instances <= 0 {
 		return errors.New("Invalid value provided for instances count: it cannot be 0 or negative")
 	}
-	return nil
+
+	return validateProjectName(project)
 }
