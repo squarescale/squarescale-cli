@@ -31,6 +31,7 @@ func (c *ServiceSetCommand) Run(args []string) int {
 	envCmdArg := envFileFlag(c.flagSet)
 	schedulingGroupsArg := containerSchedulingGroupsFlag(c.flagSet)
 	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
+	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -124,11 +125,13 @@ func (c *ServiceSetCommand) Run(args []string) int {
 			}
 		}
 
-		if *dockerCapabilities != "" {
-			dockerCapabilitiesArray := getDockerCapabilitiesArray(*dockerCapabilities)
-				c.info("Configure batch with those capabilities : %v", strings.Join(dockerCapabilitiesArray, ", "))
-				container.DockerCapabilities = dockerCapabilitiesArray
-			}
+		if *noDockerCapabilities {
+			container.DockerCapabilities = []string{"NONE"}
+			c.info("Configure batch with all capabilities disabled")
+		} else if *dockerCapabilities != "" {
+			container.DockerCapabilities = getDockerCapabilitiesArray(*dockerCapabilities)
+			c.info("Configure batch with those capabilities : %v", strings.Join(container.DockerCapabilities, ","))
+		}
 
 		schedulingGroupsToAdd := getSchedulingGroupsArray(UUID, client, *schedulingGroupsArg)
 		if len(schedulingGroupsToAdd) != 0 {

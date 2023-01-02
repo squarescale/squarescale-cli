@@ -29,6 +29,7 @@ func (c *BatchSetCommand) Run(args []string) int {
 	limitNetArg := batchLimitNetFlag(c.flagSet)
 	noRunCmdArg := batchNoRunCmdFlag(c.flagSet)
 	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
+	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
 	envCmdArg := envFileFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -96,10 +97,12 @@ func (c *BatchSetCommand) Run(args []string) int {
 			batch.Limits.NET = *limitNetArg
 		}
 
-		if *dockerCapabilities != ""{
-			dockerCapabilitiesArray := getDockerCapabilitiesArray(*dockerCapabilities)
-			c.info("Configure batch with those capabilities : %v", strings.Join(dockerCapabilitiesArray, ", "))
-			batch.DockerCapabilities = dockerCapabilitiesArray
+		if *noDockerCapabilities {
+			batch.DockerCapabilities = []string{"NONE"}
+			c.info("Configure batch with all capabilities disabled")
+		} else if *dockerCapabilities != "" {
+			batch.DockerCapabilities = getDockerCapabilitiesArray(*dockerCapabilities)
+			c.info("Configure batch with those capabilities : %v", strings.Join(batch.DockerCapabilities, ","))
 		}
 
 		if *envCmdArg != "" {

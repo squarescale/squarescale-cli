@@ -30,6 +30,7 @@ func (c *ImageAddCommand) Run(args []string) int {
 	volumes := c.flagSet.String("volumes", "", "Volumes")
 	instances := repoOrImageInstancesFlag(c.flagSet)
 	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
+	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -43,7 +44,10 @@ func (c *ImageAddCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	dockerCapabilitiesArray := getDockerCapabilitiesArray(*dockerCapabilities)
+	dockerCapabilitiesArray := []string{"NONE"}
+	if !*noDockerCapabilities {
+		dockerCapabilitiesArray = getDockerCapabilitiesArray(*dockerCapabilities)
+	}
 
 	volumesToBind := parseVolumesToBind(*volumes)
 

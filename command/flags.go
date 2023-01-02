@@ -324,7 +324,7 @@ func dockerCapabilitiesFlag(f *flag.FlagSet) *string {
 }
 
 func noDockerCapabilitiesFlag(f *flag.FlagSet) *bool {
-	return f.Bool("no-docker-capabilities", false, "Disable docker capabilities")
+	return f.Bool("no-docker-capabilities", false, "Disable all docker capabilities")
 }
 
 func entrypointFlag(f *flag.FlagSet) *string {
