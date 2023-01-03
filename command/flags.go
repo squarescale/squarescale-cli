@@ -68,10 +68,6 @@ func organizationFlag(f *flag.FlagSet) *string {
 	return f.String("organization", "", "organization name")
 }
 
-func projectNameFlag(f *flag.FlagSet) *string {
-	return f.String("name", "", "Project name")
-}
-
 func serviceFlag(f *flag.FlagSet) *string {
 	return f.String("service", "", "Service aka Docker container to configure")
 }
