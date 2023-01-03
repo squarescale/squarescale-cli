@@ -77,7 +77,6 @@ type ServiceLimits struct {
 	Memory int `json:"mem"`
 	CPU    int `json:"cpu"`
 	IOPS   int `json:"iops"`
-	Net    int `json:"net"`
 }
 
 // GetContainers gets all the services attached to a Project
@@ -139,6 +138,8 @@ func (c *Client) ScheduleService(projectUUID, name string) error {
 
 // GetServicesInfo get the service of a project based on its name.
 func (c *Client) GetServicesInfo(projectUUID, name string) (Service, error) {
+	// TODO: if services are to be retrieved with Docker image informations (like for service add)
+	// then GetServices should call GET on project_info/UUID and not project/UUID
 	services, err := c.GetServices(projectUUID)
 	if err != nil {
 		return Service{}, err
@@ -169,11 +170,8 @@ func (c *Client) ConfigService(service Service) error {
 	if service.Limits.CPU >= 0 {
 		limits["cpu"] = service.Limits.CPU
 	}
-	if service.Limits.IOPS >= 0 {
+	if service.Limits.IOPS > 0 {
 		limits["iops"] = service.Limits.IOPS
-	}
-	if service.Limits.Net >= 0 {
-		limits["net"] = service.Limits.Net
 	}
 	cont["limits"] = limits
 	if service.CustomEnv != nil {

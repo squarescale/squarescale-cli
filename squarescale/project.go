@@ -28,6 +28,7 @@ type Project struct {
 	HybridClusterEnabled bool      `json:"hybrid_cluster_enabled"`
 	ProviderLabel        string    `json:"provider_label"`
 	NodeSize             string    `json:"node_size"`
+	RootDiskSizeGB       int       `json:"root_disk_size_gb"`
 	RegionLabel          string    `json:"region_label"`
 	Credentials          string    `json:"credentials_name"`
 	CreatedAt            time.Time `json:"created_at"`
@@ -53,10 +54,10 @@ type UnprovisionError struct {
 
 // See front/utils/infraAction
 func (p *Project) ProjectAction() string {
-	if (p.TfCommand == "destroy") {
+	if p.TfCommand == "destroy" {
 		return "destroying"
 	}
-	if (p.StatusBefore == "no_infra") {
+	if p.StatusBefore == "no_infra" {
 		return "building"
 	}
 	return "updating"
@@ -64,8 +65,8 @@ func (p *Project) ProjectAction() string {
 
 // See front/src/components/InfraStatusBadge
 func (p *Project) ProjectStatus() string {
-	if (p.InfraStatus == "provisionning") {
-		if (p.ProjectAction() == "destroying") {
+	if p.InfraStatus == "provisionning" {
+		if p.ProjectAction() == "destroying" {
 			return "unprovisionning"
 		}
 		return "provisionning"
@@ -76,11 +77,11 @@ func (p *Project) ProjectStatus() string {
 // See front/src/components/ClusterStatusBadge
 func (p *Project) ProjectStateLessCount() string {
 	dsl := p.ClusterSize
-	if (p.DesiredStateless > dsl) {
+	if p.DesiredStateless > dsl {
 		dsl = p.DesiredStateless
 	}
 	asl := p.NomadNodesReady
-	if (p.ActualStateless > asl) {
+	if p.ActualStateless > asl {
 		asl = p.ActualStateless
 	}
 	return fmt.Sprintf("%d/%d", asl, dsl)
@@ -265,17 +266,25 @@ func (c *Client) WaitProject(projectUUID string, timeToWait int64) (string, erro
 
 	logger.Info.Println("wait for project : ", projectUUID)
 
-	for !(project.InfraStatus == "ok" || project.InfraStatus == "error") && err == nil {
+	for err == nil && project == nil && !(project.InfraStatus == "ok" || project.InfraStatus == "error") {
 		time.Sleep(time.Duration(timeToWait) * time.Second)
 		project, err = c.GetProject(projectUUID)
+		if err != nil {
+			return "", err
+		}
 		logger.Debug.Println("project status update: ", projectUUID)
 	}
-	if (project.InfraStatus == "error") {
+
+	if project == nil {
+		return "", fmt.Errorf("Project %s not found", projectUUID)
+	}
+
+	if project.InfraStatus == "error" {
 		actions, err := c.GetInfrastructureActions(project.UUID)
 		if err != nil {
 			return "", err
 		}
-		if (len(actions) == 0) {
+		if len(actions) == 0 {
 			return project.InfraStatus, errors.New("Unable to retrieve latest project deployment log")
 		} else {
 			return project.InfraStatus, errors.New(actions[0].Log)

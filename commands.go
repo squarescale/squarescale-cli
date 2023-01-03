@@ -142,31 +142,36 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
-		"container": func() (cli.Command, error) {
-			return &command.ContainerCommand{}, nil
+		"service": func() (cli.Command, error) {
+			return &command.ServiceCommand{}, nil
 		},
-		"container add": func() (cli.Command, error) {
-			return &command.ContainerAddCommand{
+		"service add": func() (cli.Command, error) {
+			return &command.ServiceAddCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"container list": func() (cli.Command, error) {
-			return &command.ContainerListCommand{
+		"service delete": func() (cli.Command, error) {
+			return &command.ServiceDeleteCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"container show": func() (cli.Command, error) {
-			return &command.ContainerShowCommand{
+		"service list": func() (cli.Command, error) {
+			return &command.ServiceListCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"container set": func() (cli.Command, error) {
-			return &command.ContainerSetCommand{
+		"service schedule": func() (cli.Command, error) {
+			return &command.ServiceScheduleCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"container delete": func() (cli.Command, error) {
-			return &command.ContainerDeleteCommand{
+		"service set": func() (cli.Command, error) {
+			return &command.ServiceSetCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"service show": func() (cli.Command, error) {
+			return &command.ServiceShowCommand{
 				Meta: *meta,
 			}, nil
 		},
@@ -180,14 +185,6 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 		},
 		"env set": func() (cli.Command, error) {
 			return &command.EnvSetCommand{
-				Meta: *meta,
-			}, nil
-		},
-		"image": func() (cli.Command, error) {
-			return &command.ImageCommand{}, nil
-		},
-		"image add": func() (cli.Command, error) {
-			return &command.ImageAddCommand{
 				Meta: *meta,
 			}, nil
 		},
@@ -313,14 +310,6 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 		},
 		"organization list": func() (cli.Command, error) {
 			return &command.OrganizationListCommand{
-				Meta: *meta,
-			}, nil
-		},
-		"service": func() (cli.Command, error) {
-			return &command.ServiceCommand{}, nil
-		},
-		"service schedule": func() (cli.Command, error) {
-			return &command.ServiceScheduleCommand{
 				Meta: *meta,
 			}, nil
 		},

@@ -9,25 +9,24 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ContainerSetCommand allows to configure a project container.
-type ContainerSetCommand struct {
+// ServiceSetCommand allows to configure a project service.
+type ServiceSetCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (c *ContainerSetCommand) Run(args []string) int {
+func (c *ServiceSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
 	projectName := c.flagSet.String("project-name", "", "set the name of the project")
-	serviceArg := c.flagSet.String("service", "", "select the service")
+	serviceArg := serviceFlag(c.flagSet)
 	nInstancesArg := containerInstancesFlag(c.flagSet)
 	runCmdArg := containerRunCmdFlag(c.flagSet)
 	entrypoint := c.flagSet.String("entrypoint", "", "This is the script / program that will be executed")
 	limitMemoryArg := containerLimitMemoryFlag(c.flagSet)
 	limitCPUArg := containerLimitCPUFlag(c.flagSet)
-	limitNetArg := containerLimitNetFlag(c.flagSet)
 	noRunCmdArg := containerNoRunCmdFlag(c.flagSet)
 	envCmdArg := envFileFlag(c.flagSet)
 	schedulingGroupsArg := containerSchedulingGroupsFlag(c.flagSet)
@@ -57,7 +56,7 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			c.Ui.Warn("Number of instances cannot be 0 or negative. This value won't be set.")
 		}
 
-		if *runCmdArg == "" && !*noRunCmdArg && *limitCPUArg < 0 && *limitMemoryArg < 0 && *limitNetArg < 0 {
+		if *runCmdArg == "" && !*noRunCmdArg && *limitCPUArg < 0 && *limitMemoryArg < 0 {
 			err := errors.New("Invalid values provided for instance number.")
 			return c.errorWithUsage(err)
 		}
@@ -66,12 +65,15 @@ func (c *ContainerSetCommand) Run(args []string) int {
 	return c.runWithSpinner("configure service", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
+		var projectToShow string
 		if *projectUUID == "" {
+			projectToShow = *projectName
 			UUID, err = client.ProjectByName(*projectName)
 			if err != nil {
 				return "", err
 			}
 		} else {
+			projectToShow = *projectUUID
 			UUID = *projectUUID
 		}
 
@@ -113,10 +115,6 @@ func (c *ContainerSetCommand) Run(args []string) int {
 			c.info("Configure service with CPU limit of %d Mhz", *limitCPUArg)
 			container.Limits.CPU = *limitCPUArg
 		}
-		if *limitNetArg >= 0 {
-			c.info("Configure service with network bandwidth limit of %d Mbps", *limitNetArg)
-			container.Limits.Net = *limitNetArg
-		}
 		if *envCmdArg != "" {
 			c.info("Configure service with some env")
 			err := container.SetEnv(*envCmdArg)
@@ -132,8 +130,8 @@ func (c *ContainerSetCommand) Run(args []string) int {
 		}
 
 		msg := fmt.Sprintf(
-			"Successfully configured container '%s' for project '%s'",
-			*serviceArg, *projectUUID)
+			"Successfully configured service '%s' for project '%s'",
+			*serviceArg, projectToShow)
 
 		c.Meta.spin.Start()
 		return msg, client.ConfigService(container)
@@ -141,24 +139,24 @@ func (c *ContainerSetCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ContainerSetCommand) Synopsis() string {
-	return "Set container runtime parameters for project"
+func (c *ServiceSetCommand) Synopsis() string {
+	return "Set service aka Docker container runtime parameters for project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ContainerSetCommand) Help() string {
+func (c *ServiceSetCommand) Help() string {
 	helpText := `
-usage: sqsc container set [options]
+usage: sqsc service set [options]
 
-  Set container runtime parameters for project.
-  Containers are specified using their given name.
+  Set service aka Docker container runtime parameters for project.
+  Services are specified using their given name.
 
 Example:
-  sqsc container set                \
-      -project="my-rails-project"   \
-      -container="my-name/my-repo"  \
-      -instances=42                 \
-      -e env.json
+  sqsc service set                \
+      -project="my-rails-project" \
+      -service="my-name/my-repo"  \
+      -instances=42               \
+      -env=env.json
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

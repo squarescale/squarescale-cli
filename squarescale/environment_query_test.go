@@ -273,7 +273,7 @@ var _ = Describe("VariableGroup", func() {
 			})
 
 			It("writes each variable as a key, value pair on a new line to the buffer", func() {
-				allVars := `^KEY_1=value_1\nKEY_2=value_2\nKEY_1=value_3\n$`
+				allVars := `^KEY_1=value_1\nKEY_2=value_2\nKEY_1=value_3$`
 				Expect(variableGroup.String()).To(MatchRegexp(allVars))
 			})
 		})

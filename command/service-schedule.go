@@ -9,7 +9,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ServiceScheduleCommand is a cli.Command implementation for top level `sqsc servic` command.
+// ServiceScheduleCommand is a cli.Command implementation for top level `sqsc service` command.
 type ServiceScheduleCommand struct {
 	Meta
 	flagSet *flag.FlagSet
@@ -59,7 +59,7 @@ func (c *ServiceScheduleCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ServiceScheduleCommand) Synopsis() string {
-	return "Schedule a service"
+	return "Schedule a service aka Docker container"
 }
 
 // Help is part of cli.Command implementation.
@@ -67,7 +67,7 @@ func (c *ServiceScheduleCommand) Help() string {
 	helpText := `
 usage: sqsc service schedule [options] <service_name>
 
-  Schedule a service.
+  Schedule a service aka Docker container.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

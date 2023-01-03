@@ -32,9 +32,11 @@ func TestGetRedis(t *testing.T) {
 	t.Run("Test HTTP client error on redis methods (get, add, delete and wait)", ClientHTTPErrorOnRedisMethods)
 	t.Run("Test internal server error on redis methods (get, add, delete and wait)", InternalServerErrorOnRedisMethods)
 	t.Run("Test badly JSON on redis methods (get)", CantUnmarshalOnRedisMethods)
+	t.Run("redis", nominalCaseOnGetRedis)
+
 }
 
-func nominalCaseOnGetRedes(t *testing.T) {
+func nominalCaseOnGetRedis(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -43,16 +45,7 @@ func nominalCaseOnGetRedes(t *testing.T) {
 		checkPath(t, "/projects/"+projectName+"/redis_databases", r.URL.Path)
 		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
-		resBody := `
-		[
-			{
-				"name": "cache1",
-			},
-			{
-				"name": "cache2",
-			}
-		]
-		`
+		resBody := `{"redis_database_configs": [ { "name": "cache1" }, { "name": "cache2" } ]}`
 
 		w.Header().Set("Content-Type", "application/json")
 
@@ -63,7 +56,7 @@ func nominalCaseOnGetRedes(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	redes, err := cli.GetRedis(projectName)
+	redis, err := cli.GetRedis(projectName)
 
 	// then
 	var expectedInt int
@@ -73,19 +66,19 @@ func nominalCaseOnGetRedes(t *testing.T) {
 		t.Fatalf("Expect no error, got `%s`", err)
 	}
 
-	expectedInt = 1
-	if len(redes) != expectedInt {
-		t.Fatalf("Expect redes to contain one element `%d`, but got actually `%d`", expectedInt, len(redes))
+	expectedInt = 2
+	if len(redis) != expectedInt {
+		t.Fatalf("Expect redes to contain one element `%d`, but got actually `%d`", expectedInt, len(redis))
 	}
 
 	expectedString = "cache1"
-	if redes[0].Name != expectedString {
-		t.Errorf("Expect redis.Name `%s`, got `%s`", expectedString, redes[0].Name)
+	if redis[0].Name != expectedString {
+		t.Errorf("Expect redis.Name `%s`, got `%s`", expectedString, redis[0].Name)
 	}
 
 	expectedString = "cache2"
-	if redes[1].Name != expectedString {
-		t.Errorf("Expect redis.Name `%s`, got `%s`", expectedString, redes[1].Name)
+	if redis[1].Name != expectedString {
+		t.Errorf("Expect redis.Name `%s`, got `%s`", expectedString, redis[1].Name)
 	}
 }
 

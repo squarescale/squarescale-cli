@@ -17,7 +17,7 @@ func (c *ServiceCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ServiceCommand) Synopsis() string {
-	return "Commands to interact with services in a project"
+	return "Commands to interact with services aka Docker containers in a project"
 }
 
 // Help is part of cli.Command implementation.
@@ -25,7 +25,7 @@ func (c *ServiceCommand) Help() string {
 	helpText := `
 usage: sqsc service <subcommand>
 
-  Run a project service related command.
+  Run a project service aka Docker container related command.
 
   List of supported subcommands is available below.
 

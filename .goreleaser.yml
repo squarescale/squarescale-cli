@@ -1,0 +1,68 @@
+builds:
+-
+  ldflags: -s -w -X main.GitBranch={{.Version}} -X main.GitCommit=v{{.Version}}-{{.ShortCommit}} -X main.BuildDate={{.Date}}
+  goos:
+    - linux
+    - darwin
+    #- freebsd
+  goarch:
+    #- 386
+    - amd64
+    #- arm
+    - arm64
+   #goarm:
+   #  - 6
+   #  - 7
+checksum:
+  name_template: 'checksums.txt'
+
+changelog:
+  use: github
+  sort: asc
+  filters:
+    exclude:
+    - '^gh-actions'
+    - Merge pull request
+    - Merge branch
+
+archives:
+  - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+    format_overrides:
+    - goos: windows
+      format: zip
+
+nfpms:
+  # note that this is an array of nfpm configs
+  -
+    id: sqsc
+
+    # Template to your app's homepage.
+    # Default is empty.
+    homepage: https://squarescale.com/
+
+    # Your app's maintainer (probably you).
+    # Default is empty.
+    maintainer: Team SQSC <team@squarescale.com>
+
+    # Template to your app's description.
+    # Default is empty.
+    description: |-
+      Squarescale CLI
+
+    # Your app's license.
+    # Default is empty.
+    license: Apache 2.0
+
+    # Formats to be generated.
+    formats:
+      - apk
+      - deb
+      - rpm
+      #- termux.deb # Since GoReleaser v1.11.
+      #- archlinux  # Since GoReleaser v1.13.

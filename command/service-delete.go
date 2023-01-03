@@ -9,14 +9,14 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ContainerDeleteCommand is a cli.Command implementation for deleting a Docker container of a project.
-type ContainerDeleteCommand struct {
+// ServiceDeleteCommand is a cli.Command implementation for deleting a service aka Docker container of a project.
+type ServiceDeleteCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (c *ContainerDeleteCommand) Run(args []string) int {
+func (c *ServiceDeleteCommand) Run(args []string) int {
 	// Parse flags
 	c.flagSet = newFlagSet(c, c.Ui)
 	alwaysYes := yesFlag(c.flagSet)
@@ -41,7 +41,7 @@ func (c *ContainerDeleteCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	c.Ui.Info("Are you sure you want to delete Docker container " + containerName + "?")
+	c.Ui.Info("Are you sure you want to delete service " + containerName + "?")
 	if *alwaysYes {
 		c.Ui.Info("(approved from command line)")
 	} else {
@@ -53,7 +53,7 @@ func (c *ContainerDeleteCommand) Run(args []string) int {
 		}
 	}
 
-	return c.runWithSpinner("deleting Docker container", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("deleting service", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -75,16 +75,16 @@ func (c *ContainerDeleteCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ContainerDeleteCommand) Synopsis() string {
-	return "Delete Docker container from project."
+func (c *ServiceDeleteCommand) Synopsis() string {
+	return "Delete service aka Docker container from project."
 }
 
 // Help is part of cli.Command implementation.
-func (c *ContainerDeleteCommand) Help() string {
+func (c *ServiceDeleteCommand) Help() string {
 	helpText := `
-usage: sqsc container delete [options] <container_name>
+usage: sqsc service delete [options] <service_name>
 
-  Delete Docker container from project.
+  Delete service aka Docker container from project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

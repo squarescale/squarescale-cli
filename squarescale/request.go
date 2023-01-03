@@ -144,14 +144,15 @@ func (c *Client) request(method, path string, payload interface{}) (int, []byte,
 	if res.StatusCode != http.StatusNoContent && !strings.Contains(res.Header.Get("Content-Type"), ct) {
 		if res.StatusCode == http.StatusInternalServerError &&
 			strings.Contains(res.Header.Get("Content-Type"), "text/html") &&
-			bytes.Contains(rbytes, []byte("<title>Action Controller: Exception caught</title>")) {
+			(bytes.Contains(rbytes, []byte("<title>Action Controller: Exception caught</title>")) || len(rbytes) == 0) {
 			err = fmt.Errorf(
-				"Something went wrong on server side. Please report error to support@squarescale.com.",
+				"%s: Something went wrong on server side. Please report error to support@squarescale.com.",
+				res.Status,
 			)
 		} else {
 			err = fmt.Errorf(
-				"Invalid response content type, got %q instead of %q.\nDo you use the right value for -endpoint=%s ?",
-				res.Header.Get("Content-Type"), ct, c.endpoint,
+				"Invalid response return code (got %q instead of %+v/%+v) or content type (got %q instead of %q).\nDo you use the right value for -endpoint=%s ?",
+				res.Status, http.StatusNoContent, http.StatusInternalServerError, res.Header.Get("Content-Type"), ct, c.endpoint,
 			)
 		}
 	}

@@ -153,6 +153,7 @@ func credentialMandatoryCaseCreateProject(t *testing.T) {
 	payload["infra_type"] = "single_node"
 	payload["node_size"] = "dev"
 	payload["slack_webhook"] = ""
+	payload["root_disk_size_gb"] = 15
 	payload["databases"] = "[]"
 	project, err := cli.CreateProject(&payload)
 
@@ -421,7 +422,8 @@ func nominalCaseListProjects(t *testing.T) {
 				"region_label": "Europe (Paris)",
 				"credentials_name": "aws-dev",
 				"created_at": "2020-11-13T14:55:07.880Z",
-				"infra_status": "ok"
+				"infra_status": "ok",
+				"root_disk_size_gb": 30
 			},
 			{
 				"id": 10,
@@ -437,7 +439,8 @@ func nominalCaseListProjects(t *testing.T) {
 				"region_label": "Europe (Irlande)",
 				"credentials_name": "aws-prod",
 				"created_at": "2020-11-12T15:01:41.310Z",
-				"infra_status": "provisionning"
+				"infra_status": "provisionning",
+				"root_disk_size_gb": 20
 			}
 		]`
 
@@ -483,6 +486,13 @@ func nominalCaseListProjects(t *testing.T) {
 	expectedString = "provisionning"
 	if projectsList[1].InfraStatus != expectedString {
 		t.Fatalf("Expect projectsList[1].InfraStatus`%s`, got `%s`", expectedString, projectsList[1].InfraStatus)
+	}
+
+	if projectsList[0].RootDiskSizeGB != 30 {
+		t.Fatalf("Expect projectsList[1].RootDiskSizeGB `%d`, got `%d`", 30, projectsList[1].RootDiskSizeGB)
+	}
+	if projectsList[1].RootDiskSizeGB != 20 {
+		t.Fatalf("Expect projectsList[1].RootDiskSizeGB `%d`, got `%d`", 20, projectsList[1].RootDiskSizeGB)
 	}
 }
 
