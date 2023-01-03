@@ -34,17 +34,18 @@ type Service struct {
 }
 
 type ServiceBody struct {
-	ID               int               `json:"container_id"`
-	Name             string            `json:"name"`
-	RunCommand       []string          `json:"run_command"`
-	Entrypoint       string            `json:"entrypoint"`
-	Running          int               `json:"running"`
-	Size             int               `json:"size"`
-	WebPort          int               `json:"web_port"`
-	RefreshCallbacks []string          `json:"refresh_callbacks"`
-	Limits           ServiceLimits     `json:"limits"`
-	CustomEnv        []ServiceEnv      `json:"custom_environment"`
-	SchedulingGroups []SchedulingGroup `json:"scheduling_groups"`
+	ID                 int               `json:"container_id"`
+	Name               string            `json:"name"`
+	RunCommand         []string          `json:"run_command"`
+	Entrypoint         string            `json:"entrypoint"`
+	Running            int               `json:"running"`
+	Size               int               `json:"size"`
+	WebPort            int               `json:"web_port"`
+	RefreshCallbacks   []string          `json:"refresh_callbacks"`
+	Limits             ServiceLimits     `json:"limits"`
+	CustomEnv          []ServiceEnv      `json:"custom_environment"`
+	SchedulingGroups   []SchedulingGroup `json:"scheduling_groups"`
+	DockerCapabilities []string          `json:"docker_capabilities"`
 }
 
 func (c *Service) SetEnv(path string) error {
@@ -105,17 +106,18 @@ func (c *Client) GetServices(projectUUID string) ([]Service, error) {
 
 	for _, c := range servicesBody {
 		service := &Service{
-			ID:               c.ID,
-			Name:             c.Name,
-			RunCommand:       strings.Join(c.RunCommand, " "),
-			Entrypoint:       c.Entrypoint,
-			Running:          c.Running,
-			Size:             c.Size,
-			WebPort:          c.WebPort,
-			RefreshCallbacks: c.RefreshCallbacks,
-			Limits:           c.Limits,
-			CustomEnv:        c.CustomEnv,
-			SchedulingGroups: c.SchedulingGroups,
+			ID:                 c.ID,
+			Name:               c.Name,
+			RunCommand:         strings.Join(c.RunCommand, " "),
+			Entrypoint:         c.Entrypoint,
+			Running:            c.Running,
+			Size:               c.Size,
+			WebPort:            c.WebPort,
+			RefreshCallbacks:   c.RefreshCallbacks,
+			Limits:             c.Limits,
+			CustomEnv:          c.CustomEnv,
+			SchedulingGroups:   c.SchedulingGroups,
+			DockerCapabilities: c.DockerCapabilities,
 		}
 		services = append(services, *service)
 	}
