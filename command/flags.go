@@ -48,8 +48,12 @@ func endpointFlag(f *flag.FlagSet) *endpoint {
 	return &endPointFlag
 }
 
-func projectFlag(f *flag.FlagSet) *string {
+func projectUUIDFlag(f *flag.FlagSet) *string {
 	return f.String("project", "", "SquareScale project")
+}
+
+func projectNameFlag(f *flag.FlagSet) *string {
+	return f.String("name", "", "Project name")
 }
 
 func providerFlag(f *flag.FlagSet) *string {
@@ -62,10 +66,6 @@ func regionFlag(f *flag.FlagSet) *string {
 
 func organizationFlag(f *flag.FlagSet) *string {
 	return f.String("organization", "", "organization name")
-}
-
-func projectNameFlag(f *flag.FlagSet) *string {
-	return f.String("name", "", "Project name")
 }
 
 func serviceFlag(f *flag.FlagSet) *string {
@@ -291,6 +291,10 @@ func optionsFromFlags(fs *flag.FlagSet) string {
 	return res
 }
 
+func batchNameFlag(f *flag.FlagSet) *string {
+	return f.String("name", "", "Batch name")
+}
+
 func batchRunCmdFlag(f *flag.FlagSet) *string {
 	return f.String("command", "", "Command to run when starting batch (override)")
 }
@@ -309,4 +313,20 @@ func batchLimitNetFlag(f *flag.FlagSet) *int {
 
 func batchNoRunCmdFlag(f *flag.FlagSet) *bool {
 	return f.Bool("no-command", false, "Disable command override")
+}
+
+func dockerCapabilitiesFlag(f *flag.FlagSet) *string {
+	return f.String("docker-capabilities", "", "This is a list of enabled docker capabilities")
+}
+
+func noDockerCapabilitiesFlag(f *flag.FlagSet) *bool {
+	return f.Bool("no-docker-capabilities", false, "Disable all docker capabilities")
+}
+
+func entrypointFlag(f *flag.FlagSet) *string {
+	return f.String("entrypoint", "", "This is the script / program that will be executed")
+}
+
+func volumeFlag(f *flag.FlagSet) *string {
+	return f.String("volumes", "", "Volumes. format: ${VOL2_NAME}:${VOL2_MOUNT_POINT}:ro,${VOL2_NAME}:${VOL2_MOUNT_POINT}:rw")
 }

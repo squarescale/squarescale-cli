@@ -18,7 +18,7 @@ func getSqscCLICmd() string {
 	}
 	ret := sqscCLICmd
 	for _, envVar := range envVars {
-		value,  exists := os.LookupEnv(envVar)
+		value, exists := os.LookupEnv(envVar)
 		if exists && len(strings.TrimSpace(value)) > 0 {
 			ret += fmt.Sprintf(" %s %s", strings.ToLower(strings.ReplaceAll(envVar, "SQSC_CLI_", "")), value)
 		}
@@ -41,7 +41,7 @@ func checkEnvironmentVariablesExists() {
 	}
 
 	for _, envVar := range envVars {
-		value,  exists := os.LookupEnv(envVar)
+		value, exists := os.LookupEnv(envVar)
 		if !exists || len(strings.TrimSpace(value)) == 0 {
 			fmt.Println(fmt.Sprintf("%s is not set or is empty/filled with blanks. Quitting.", envVar))
 			os.Exit(1)

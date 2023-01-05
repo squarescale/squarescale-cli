@@ -28,6 +28,8 @@ func (c *BatchSetCommand) Run(args []string) int {
 	limitCPUArg := batchLimitCPUFlag(c.flagSet)
 	limitNetArg := batchLimitNetFlag(c.flagSet)
 	noRunCmdArg := batchNoRunCmdFlag(c.flagSet)
+	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
+	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
 	envCmdArg := envFileFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -93,6 +95,14 @@ func (c *BatchSetCommand) Run(args []string) int {
 		if *limitNetArg >= 0 {
 			c.info("Configure batch with network bandwidth limit of %d Mbps", *limitNetArg)
 			batch.Limits.NET = *limitNetArg
+		}
+
+		if *noDockerCapabilities {
+			batch.DockerCapabilities = []string{"NONE"}
+			c.info("Configure batch with all capabilities disabled")
+		} else if *dockerCapabilities != "" {
+			batch.DockerCapabilities = getDockerCapabilitiesArray(*dockerCapabilities)
+			c.info("Configure batch with those capabilities : %v", strings.Join(batch.DockerCapabilities, ","))
 		}
 
 		if *envCmdArg != "" {

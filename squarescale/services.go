@@ -19,31 +19,33 @@ type ServiceEnv struct {
 
 // Service describes a project container as returned by the SquareScale API
 type Service struct {
-	ID               int               `json:"container_id"`
-	Name             string            `json:"name"`
-	RunCommand       string            `json:"run_command"`
-	Entrypoint       string            `json:"entrypoint"`
-	Running          int               `json:"running"`
-	Size             int               `json:"size"`
-	WebPort          int               `json:"web_port"`
-	RefreshCallbacks []string          `json:"refresh_callbacks"`
-	Limits           ServiceLimits     `json:"limits"`
-	CustomEnv        []ServiceEnv      `json:"custom_environment"`
-	SchedulingGroups []SchedulingGroup `json:"scheduling_groups"`
+	ID                 int               `json:"container_id"`
+	Name               string            `json:"name"`
+	RunCommand         string            `json:"run_command"`
+	Entrypoint         string            `json:"entrypoint"`
+	Running            int               `json:"running"`
+	Size               int               `json:"size"`
+	WebPort            int               `json:"web_port"`
+	RefreshCallbacks   []string          `json:"refresh_callbacks"`
+	Limits             ServiceLimits     `json:"limits"`
+	CustomEnv          []ServiceEnv      `json:"custom_environment"`
+	SchedulingGroups   []SchedulingGroup `json:"scheduling_groups"`
+	DockerCapabilities []string          `json:"docker_capabilities"`
 }
 
 type ServiceBody struct {
-	ID               int               `json:"container_id"`
-	Name             string            `json:"name"`
-	RunCommand       []string          `json:"run_command"`
-	Entrypoint       string            `json:"entrypoint"`
-	Running          int               `json:"running"`
-	Size             int               `json:"size"`
-	WebPort          int               `json:"web_port"`
-	RefreshCallbacks []string          `json:"refresh_callbacks"`
-	Limits           ServiceLimits     `json:"limits"`
-	CustomEnv        []ServiceEnv      `json:"custom_environment"`
-	SchedulingGroups []SchedulingGroup `json:"scheduling_groups"`
+	ID                 int               `json:"container_id"`
+	Name               string            `json:"name"`
+	RunCommand         []string          `json:"run_command"`
+	Entrypoint         string            `json:"entrypoint"`
+	Running            int               `json:"running"`
+	Size               int               `json:"size"`
+	WebPort            int               `json:"web_port"`
+	RefreshCallbacks   []string          `json:"refresh_callbacks"`
+	Limits             ServiceLimits     `json:"limits"`
+	CustomEnv          []ServiceEnv      `json:"custom_environment"`
+	SchedulingGroups   []SchedulingGroup `json:"scheduling_groups"`
+	DockerCapabilities []string          `json:"docker_capabilities"`
 }
 
 func (c *Service) SetEnv(path string) error {
@@ -104,17 +106,18 @@ func (c *Client) GetServices(projectUUID string) ([]Service, error) {
 
 	for _, c := range servicesBody {
 		service := &Service{
-			ID:               c.ID,
-			Name:             c.Name,
-			RunCommand:       strings.Join(c.RunCommand, " "),
-			Entrypoint:       c.Entrypoint,
-			Running:          c.Running,
-			Size:             c.Size,
-			WebPort:          c.WebPort,
-			RefreshCallbacks: c.RefreshCallbacks,
-			Limits:           c.Limits,
-			CustomEnv:        c.CustomEnv,
-			SchedulingGroups: c.SchedulingGroups,
+			ID:                 c.ID,
+			Name:               c.Name,
+			RunCommand:         strings.Join(c.RunCommand, " "),
+			Entrypoint:         c.Entrypoint,
+			Running:            c.Running,
+			Size:               c.Size,
+			WebPort:            c.WebPort,
+			RefreshCallbacks:   c.RefreshCallbacks,
+			Limits:             c.Limits,
+			CustomEnv:          c.CustomEnv,
+			SchedulingGroups:   c.SchedulingGroups,
+			DockerCapabilities: c.DockerCapabilities,
 		}
 		services = append(services, *service)
 	}
@@ -179,6 +182,9 @@ func (c *Client) ConfigService(service Service) error {
 	}
 	if len(service.SchedulingGroups) != 0 {
 		cont["scheduling_groups"] = getSchedulingGroupsIds(service.SchedulingGroups)
+	}	
+	if service.DockerCapabilities != nil {
+		cont["docker_capabilities"] = service.DockerCapabilities
 	}
 
 	payload := &JSONObject{"container": cont}
