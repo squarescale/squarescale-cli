@@ -20,16 +20,23 @@ When installing squarescale-cli, if you have an error `Unable to read Username f
 
 ## Publish a release on Github
 
-There is a Makefile rule for that ! But you need to create a Github OAuth2 token before you can publish anything:
-- Go to your profile settings on Github
-- Create a new personal access token (enter appropriate description)
-- Check the `repository` box level to give your token the permissions to create new releases
-- remember this token in a super safe place !
+Github action is triggered on tag creation named with pattern 'v*'.
 
-Publishing a new version of the CLI on Github is super simple:
+To release, just tag the version and push this tag:
+
 
 ```bash
-$> GITHUB_USER_TOKEN=[USER_NAME]:[OAUTH2_TOKEN] make publish
+$> git tag -m v1.x.x 1.x.x
+$> git push --tags
+```
+
+Under the hood, *goreleaser* is used to build binaries and distribution packages.
+Refer to the [documentation](https://goreleaser.com/intro/) to further details.
+
+To build locally into *dist/* directory, run the following command:
+
+```bash
+$> goreleaser release --snapshot --rm-dist
 ```
 
 ## Contribution
