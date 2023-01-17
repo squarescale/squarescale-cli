@@ -13,10 +13,10 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.19
+      - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: '^1.19.1'
+          go-version: 1.19
         id: go
 
       - name: Check out code into the Go module directory
@@ -34,7 +34,7 @@ jobs:
         run: go test ./...
 
       - name: Build
-        run: make dist-${GITHUB_REF##*/}
+        run: make build
 
       - name: Build gh-actions
         run: make build-gh-actions
