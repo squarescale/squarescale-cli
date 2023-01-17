@@ -1,6 +1,6 @@
 GIT_BRANCH    := $(shell git rev-parse --abbrev-ref HEAD || echo 'n/a')
-GIT_VERSION   := $(shell git describe --always --tags --dirty | sed -e 's/^v\([^-]*\)-.*/\1/' || echo 'n/a')
-GIT_REVISION  := $(shell git describe --always --tags --dirty | sed -e 's/^v[^-]*-[1-9][0-9]*-\(.*\)/\1/' || echo 'n/a')
+GIT_VERSION   := $(shell ./get-git-ref.sh version)
+GIT_REVISION  := $(shell ./get-git-ref.sh revision)
 GO_BUILD_DATE ?= $(shell date -u +%FT%T)
 GO_ARCH       := $(shell go env GOARCH)
 GO_OS         := $(shell go env GOOS)

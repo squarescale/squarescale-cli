@@ -34,7 +34,7 @@ jobs:
         run: go test ./...
 
       - name: Build
-        run: make build
+        run: make build docker-alpine-amd64
 
       - name: Build gh-actions
         run: make build-gh-actions
