@@ -1,8 +1,12 @@
-GIT_BRANCH   := $(shell git rev-parse --abbrev-ref HEAD || echo 'n/a')
-GIT_REVISION := $(shell git describe --always --tags --dirty || echo 'n/a')
+GIT_BRANCH    := $(shell git rev-parse --abbrev-ref HEAD || echo 'n/a')
+GIT_REVISION  := $(shell git describe --always --tags --dirty || echo 'n/a')
 GO_BUILD_DATE ?= $(shell date -u +%FT%T)
+GO_ARCH       := $(shell go env GOARCH)
+GO_OS         := $(shell go env GOOS)
 
-GO_LD_FLAGS ?= -ldflags "-X main.GitCommit=$(GIT_REVISION) \
+GO_LD_FLAGS ?= -ldflags "-X main.GoArch=$(GO_ARCH) \
+                         -X main.GoOs=$(GO_OS) \
+                         -X main.GitCommit=$(GIT_REVISION) \
                          -X main.GitBranch=$(GIT_BRANCH)   \
                          -X main.BuildDate=$(GO_BUILD_DATE)"
 

@@ -289,6 +289,8 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 			return &command.VersionCommand{
 				Meta:     *meta,
 				Version:  Version,
+				Arch:     GoArch,
+				Os:       GoOs,
 				Revision: GitCommit,
 				Branch:   GitBranch,
 				Date:     BuildDate,

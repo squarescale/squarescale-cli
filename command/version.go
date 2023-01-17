@@ -10,6 +10,8 @@ type VersionCommand struct {
 	Meta
 	Name     string
 	Version  string
+	Arch     string
+	Os       string
 	Revision string
 	Branch   string
 	Date     string
@@ -28,6 +30,12 @@ func (c *VersionCommand) Run(args []string) int {
 	}
 	if c.Date != "" {
 		fmt.Fprintf(&versionString, " %s", c.Date)
+	}
+	if c.Os != "" {
+		fmt.Fprintf(&versionString, " %s", c.Os)
+	}
+	if c.Arch != "" {
+		fmt.Fprintf(&versionString, " %s", c.Arch)
 	}
 
 	c.Ui.Output(versionString.String())
