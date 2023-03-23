@@ -32,6 +32,7 @@ func (c *ServiceSetCommand) Run(args []string) int {
 	schedulingGroupsArg := containerSchedulingGroupsFlag(c.flagSet)
 	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
 	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
+	autostart := autostart(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -123,6 +124,11 @@ func (c *ServiceSetCommand) Run(args []string) int {
 			if err != nil {
 				c.error(err)
 			}
+		}
+
+		if container.AutoStart != *autostart {
+			c.info("Configure service with CPU autostart %v", *autostart)
+			container.AutoStart = *autostart
 		}
 
 		if *noDockerCapabilities {

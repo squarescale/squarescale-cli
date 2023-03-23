@@ -31,6 +31,7 @@ type Service struct {
 	CustomEnv          []ServiceEnv      `json:"custom_environment"`
 	SchedulingGroups   []SchedulingGroup `json:"scheduling_groups"`
 	DockerCapabilities []string          `json:"docker_capabilities"`
+	AutoStart          bool              `json:"auto_start"`
 }
 
 type ServiceBody struct {
@@ -46,6 +47,7 @@ type ServiceBody struct {
 	CustomEnv          []ServiceEnv      `json:"custom_environment"`
 	SchedulingGroups   []SchedulingGroup `json:"scheduling_groups"`
 	DockerCapabilities []string          `json:"docker_capabilities"`
+	AutoStart          bool              `json:"auto_start"`
 }
 
 func (c *Service) SetEnv(path string) error {
@@ -118,6 +120,7 @@ func (c *Client) GetServices(projectUUID string) ([]Service, error) {
 			CustomEnv:          c.CustomEnv,
 			SchedulingGroups:   c.SchedulingGroups,
 			DockerCapabilities: c.DockerCapabilities,
+			AutoStart: c.AutoStart,
 		}
 		services = append(services, *service)
 	}
@@ -186,6 +189,7 @@ func (c *Client) ConfigService(service Service) error {
 	if service.DockerCapabilities != nil {
 		cont["docker_capabilities"] = service.DockerCapabilities
 	}
+	cont["auto_start"] = service.AutoStart
 
 	payload := &JSONObject{"container": cont}
 	logger.Debug.Println("Json payload : ", payload)

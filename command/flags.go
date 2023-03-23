@@ -323,6 +323,10 @@ func noDockerCapabilitiesFlag(f *flag.FlagSet) *bool {
 	return f.Bool("no-docker-capabilities", false, "Disable all docker capabilities")
 }
 
+func autostart(f *flag.FlagSet) *bool {
+	return f.Bool("auto-start", true, "Allow automatic start")
+}
+
 func entrypointFlag(f *flag.FlagSet) *string {
 	return f.String("entrypoint", "", "This is the script / program that will be executed")
 }
