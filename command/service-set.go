@@ -126,7 +126,7 @@ func (c *ServiceSetCommand) Run(args []string) int {
 			}
 		}
 
-		if container.AutoStart != *autostart {
+		if isFlagPassed("auto-start", c.flagSet) {
 			c.info("Configure service with CPU autostart %v", *autostart)
 			container.AutoStart = *autostart
 		}
