@@ -30,6 +30,7 @@ func (c *BatchSetCommand) Run(args []string) int {
 	noRunCmdArg := batchNoRunCmdFlag(c.flagSet)
 	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
 	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
+	dockerDevices := dockerDevicesFlag(c.flagSet)
 	envCmdArg := envFileFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -103,6 +104,15 @@ func (c *BatchSetCommand) Run(args []string) int {
 		} else if *dockerCapabilities != "" {
 			batch.DockerCapabilities = getDockerCapabilitiesArray(*dockerCapabilities)
 			c.info("Configure batch with those capabilities : %v", strings.Join(batch.DockerCapabilities, ","))
+		}
+
+		if isFlagPassed("docker-devices", c.flagSet) {
+			dockerDevicesArray, err := getDockerDevicesArray(*dockerDevices)
+			if err != nil {
+				return "", err
+			}
+			batch.DockerDevices = dockerDevicesArray
+			c.info("Configure batch with custom mapping")
 		}
 
 		if *envCmdArg != "" {

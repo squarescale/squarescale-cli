@@ -323,6 +323,10 @@ func noDockerCapabilitiesFlag(f *flag.FlagSet) *bool {
 	return f.Bool("no-docker-capabilities", false, "Disable all docker capabilities")
 }
 
+func dockerDevicesFlag(f *flag.FlagSet) *string {
+	return f.String("docker-devices", "", "The list of device mapping if any, separated with a comma. format: src:opt:dst")
+}
+
 func autostart(f *flag.FlagSet) *bool {
 	return f.Bool("auto-start", true, "Allow automatic start")
 }

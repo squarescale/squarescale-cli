@@ -33,6 +33,7 @@ func (c *ServiceSetCommand) Run(args []string) int {
 	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
 	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
 	autostart := autostart(c.flagSet)
+	dockerDevices := dockerDevicesFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -129,6 +130,16 @@ func (c *ServiceSetCommand) Run(args []string) int {
 		if isFlagPassed("auto-start", c.flagSet) {
 			c.info("Configure service with CPU autostart %v", *autostart)
 			container.AutoStart = *autostart
+		}
+
+		if isFlagPassed("docker-devices", c.flagSet) {
+			c.info("Configure service with custom mapping")
+			dockerDevicesArray, err := getDockerDevicesArray(*dockerDevices);
+			if err!= nil {
+				c.error(err)
+			} else {
+				container.DockerDevices = dockerDevicesArray
+			}
 		}
 
 		if *noDockerCapabilities {

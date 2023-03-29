@@ -31,6 +31,7 @@ type Service struct {
 	CustomEnv          []ServiceEnv      `json:"custom_environment"`
 	SchedulingGroups   []SchedulingGroup `json:"scheduling_groups"`
 	DockerCapabilities []string          `json:"docker_capabilities"`
+	DockerDevices []DockerDevice          `json:"docker_devices"`
 	AutoStart          bool              `json:"auto_start"`
 }
 
@@ -47,6 +48,7 @@ type ServiceBody struct {
 	CustomEnv          []ServiceEnv      `json:"custom_environment"`
 	SchedulingGroups   []SchedulingGroup `json:"scheduling_groups"`
 	DockerCapabilities []string          `json:"docker_capabilities"`
+	DockerDevices []DockerDevice          `json:"docker_devices"`
 	AutoStart          bool              `json:"auto_start"`
 }
 
@@ -120,6 +122,7 @@ func (c *Client) GetServices(projectUUID string) ([]Service, error) {
 			CustomEnv:          c.CustomEnv,
 			SchedulingGroups:   c.SchedulingGroups,
 			DockerCapabilities: c.DockerCapabilities,
+			DockerDevices: c.DockerDevices,
 			AutoStart: c.AutoStart,
 		}
 		services = append(services, *service)
@@ -188,6 +191,9 @@ func (c *Client) ConfigService(service Service) error {
 	}	
 	if service.DockerCapabilities != nil {
 		cont["docker_capabilities"] = service.DockerCapabilities
+	}
+	if service.DockerDevices != nil {
+		cont["docker_devices"] = service.DockerDevices
 	}
 	cont["auto_start"] = service.AutoStart
 

@@ -20,6 +20,7 @@ type BatchCommon struct {
 	RunCommand         string      `json:"run_command,omitempty"`
 	Entrypoint         string      `json:"entrypoint,omitempty"`
 	DockerCapabilities []string    `json:"docker_capabilities"`
+	DockerDevices []DockerDevice    `json:"docker_devices"`
 }
 
 type BatchLimits struct {
@@ -29,6 +30,11 @@ type BatchLimits struct {
 	IOPS   int `json:"iops"`
 }
 
+type DockerDevice struct {
+	SRC     string `json:"src_path"`
+	DST string `json:"dst_path,omitempty"`
+	OPT string `json:"options,omitempty"`
+}
 // Create Batch part
 type BatchOrder struct {
 	BatchCommon
@@ -62,6 +68,7 @@ func (c *Client) CreateBatch(uuid string, batchOrderContent BatchOrder) (Created
 		"run_command":         batchOrderContent.BatchCommon.RunCommand,
 		"entrypoint":          batchOrderContent.BatchCommon.Entrypoint,
 		"docker_capabilities": batchOrderContent.BatchCommon.DockerCapabilities,
+		"docker_devices": batchOrderContent.BatchCommon.DockerDevices,
 	}
 
 	code, body, err := c.post("/projects/"+uuid+"/batches", payload)
@@ -239,6 +246,9 @@ func (c *Client) ConfigBatch(batch RunningBatch, projectUUID string) error {
 	}
 	if batch.DockerCapabilities != nil {
 		payload["docker_capabilities"] = batch.DockerCapabilities
+	}
+	if batch.DockerDevices != nil {
+		payload["docker_devices"] = batch.DockerDevices
 	}
 
 	logger.Debug.Println("Json payload : ", payload)
