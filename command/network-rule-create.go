@@ -19,8 +19,8 @@ type NetworkRuleCreateCommand struct {
 func (c *NetworkRuleCreateCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
-	projectName := c.flagSet.String("project-name", "", "set the name of the project")
+	projectUUID := projectUUIDFlag(c.flagSet)
+	projectName := projectNameFlag(c.flagSet)
 	ruleName := c.flagSet.String("name", "", "name of the rule")
 	serviceName := c.flagSet.String("service-name", "", "name of the service the rule will be attached")
 	externalProtocol := c.flagSet.String("external-protocol", "", "name of the externally exposed protocol")

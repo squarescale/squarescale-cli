@@ -21,8 +21,9 @@ func (c *BatchDeleteCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
-	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
-	projectName := c.flagSet.String("project-name", "", "set the name of the project")
+	batchName := batchNameFlag(c.flagSet)
+	projectUUID := projectUUIDFlag(c.flagSet)
+	projectName := projectNameFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -32,16 +33,15 @@ func (c *BatchDeleteCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	batchName, err := batchNameArg(c.flagSet, 0)
-	if err != nil {
-		return c.errorWithUsage(err)
+	if *batchName == "" {
+		return c.errorWithUsage(fmt.Errorf(("Batch name is mandatory. Please, chose a batch name.")))
 	}
 
 	if c.flagSet.NArg() > 1 {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
 	}
 
-	c.Ui.Info("Are you sure you want to delete " + batchName + "?")
+	c.Ui.Info("Are you sure you want to delete " + *batchName + "?")
 	if *alwaysYes {
 		c.Ui.Info("(approved from command line)")
 	} else {
@@ -68,8 +68,8 @@ func (c *BatchDeleteCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
-		fmt.Printf("Delete on project `%s` the batch `%s`\n", projectToShow, batchName)
-		err = client.DeleteBatch(UUID, batchName) //insérer la fonction dans batches
+		fmt.Printf("Delete on project `%s` the batch `%s`\n", projectToShow, *batchName)
+		err = client.DeleteBatch(UUID, *batchName) //insérer la fonction dans batches
 		return "", err
 	})
 	if res != 0 {

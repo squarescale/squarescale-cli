@@ -19,8 +19,8 @@ type ExternalNodeListCommand struct {
 func (e *ExternalNodeListCommand) Run(args []string) int {
 	e.flagSet = newFlagSet(e, e.Ui)
 	endpoint := endpointFlag(e.flagSet)
-	projectUUID := e.flagSet.String("project-uuid", "", "set the uuid of the project")
-	projectName := e.flagSet.String("project-name", "", "set the name of the project")
+	projectUUID := projectUUIDFlag(e.flagSet)
+	projectName := projectNameFlag(e.flagSet)
 
 	if err := e.flagSet.Parse(args); err != nil {
 		return 1

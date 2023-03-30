@@ -19,8 +19,8 @@ type ServiceSetCommand struct {
 func (c *ServiceSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
-	projectName := c.flagSet.String("project-name", "", "set the name of the project")
+	projectUUID := projectUUIDFlag(c.flagSet)
+	projectName := projectNameFlag(c.flagSet)
 	serviceArg := serviceFlag(c.flagSet)
 	nInstancesArg := containerInstancesFlag(c.flagSet)
 	runCmdArg := containerRunCmdFlag(c.flagSet)

@@ -201,15 +201,6 @@ func externalNodeNameArg(f *flag.FlagSet, arg int) (string, error) {
 	}
 }
 
-func batchNameArg(f *flag.FlagSet, arg int) (string, error) {
-	value := f.Arg(arg)
-	if value == "" {
-		return "", errors.New("Batch name must be specified")
-	} else {
-		return value, nil
-	}
-}
-
 func serviceNameArg(f *flag.FlagSet, arg int) (string, error) {
 	value := f.Arg(arg)
 	if value == "" {
@@ -292,7 +283,7 @@ func optionsFromFlags(fs *flag.FlagSet) string {
 }
 
 func batchNameFlag(f *flag.FlagSet) *string {
-	return f.String("name", "", "Batch name")
+	return f.String("batch-name", "", "Batch name")
 }
 
 func batchRunCmdFlag(f *flag.FlagSet) *string {
@@ -305,6 +296,10 @@ func batchLimitMemoryFlag(f *flag.FlagSet) *int {
 
 func batchLimitCPUFlag(f *flag.FlagSet) *int {
 	return f.Int("cpu", -1, "This is an indicative limit of how much CPU your batch requires.")
+}
+
+func batchLimitIOPSFlag(f *flag.FlagSet) *int {
+	return f.Int("iops", 0, "This is an indicative limit of how many I/O operation per second your service requires.")
 }
 
 func batchLimitNetFlag(f *flag.FlagSet) *int {
@@ -329,4 +324,80 @@ func entrypointFlag(f *flag.FlagSet) *string {
 
 func volumeFlag(f *flag.FlagSet) *string {
 	return f.String("volumes", "", "Volumes. format: ${VOL2_NAME}:${VOL2_MOUNT_POINT}:ro,${VOL2_NAME}:${VOL2_MOUNT_POINT}:rw")
+}
+
+func dockerImageNameFlag(f *flag.FlagSet) *string {
+	return f.String("docker-image", "", "docker image name")
+}
+
+func dockerImagePrivateFlag(f *flag.FlagSet) *bool {
+	return f.Bool("imagePrivate", false, "docker image is private")
+}
+
+func dockerImageUsernameFlag(f *flag.FlagSet) *string {
+	return f.String("imageUsr", "", "docker image user")
+}
+
+func dockerImagePasswordFlag(f *flag.FlagSet) *string {
+	return f.String("imagePwd", "", "docker image user")
+}
+
+func periodicBatchFlag(f *flag.FlagSet) *bool {
+	return f.Bool("periodic", false, "batch periodicity")
+}
+
+func cronExpressionFlag(f *flag.FlagSet) *string {
+	return f.String("cron", "", "cron expression")
+}
+
+func timeZoneNameFlag(f *flag.FlagSet) *string {
+	return f.String("time", "", "time zone name")
+}
+
+func clusterSchedulingGroupsFlag(f *flag.FlagSet) *string {
+	return f.String("scheduling-groups", "", "Those are the scheduling groups of your cluster. Format: ${scheduling_group_name_1},${scheduling_group_name_2}")
+}
+
+func clusterNameFlag(f *flag.FlagSet) *string {
+	return f.String("cluster-name", "", "Cluster name")
+}
+
+func clusterSizeFlag(f *flag.FlagSet) *uint {
+	return f.Uint("size", 0, "Cluster Size")
+}
+
+func dbEngineFlag(f *flag.FlagSet) *string {
+	return f.String("engine", "", "Database engine")
+}
+
+func dbSizeFlag(f *flag.FlagSet) *string {
+	return f.String("size", "", "Database size")
+}
+
+func dbVersionFlag(f *flag.FlagSet) *string {
+	return f.String("version", "", "Database version")
+}
+
+func dbBackupFlag(f *flag.FlagSet) *bool {
+	return f.Bool("backup", false, "Enable database backup")
+}
+
+func envAllFlag(f *flag.FlagSet) *bool {
+	return f.Bool("all", false, "Print all variables")
+} 
+
+func envRemoveFlag(f *flag.FlagSet) *bool {
+	return f.Bool("remove", false, "Remove the key from environment variables")
+}
+
+func externalNodePublicIP(f *flag.FlagSet) *string {
+	return f.String("public-ip", "", "External node public IP")
+}
+
+func loadBalancerIDFlag(f *flag.FlagSet) *int64 {
+	return f.Int64("id", 0, "id of the targeted load balancer inside project")
+}
+
+func loadBalancerDisableFlag(f *flag.FlagSet) *bool {
+	return f.Bool("disable", false, "Disable load balancer")
 }

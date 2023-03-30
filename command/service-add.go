@@ -19,8 +19,8 @@ type ServiceAddCommand struct {
 func (c *ServiceAddCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
-	projectName := c.flagSet.String("project-name", "", "set the name of the project")
+	projectUUID := projectUUIDFlag(c.flagSet)
+	projectName := projectNameFlag(c.flagSet)
 	serviceName := c.flagSet.String("servicename", "", "service name")
 	image := c.flagSet.String("image", "", "Docker image name")
 	runCommand := c.flagSet.String("run-command", "", "command / arguments that are used for execution")

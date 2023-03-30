@@ -19,8 +19,8 @@ type StatefulNodeBindCommand struct {
 func (c *StatefulNodeBindCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
-	projectName := c.flagSet.String("project-name", "", "set the name of the project")
+	projectUUID := projectUUIDFlag(c.flagSet)
+	projectName := projectNameFlag(c.flagSet)
 	volumeName := c.flagSet.String("volume-name", "", "Volume name to bind")
 
 	if err := c.flagSet.Parse(args); err != nil {

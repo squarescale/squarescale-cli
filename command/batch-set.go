@@ -19,11 +19,11 @@ type BatchSetCommand struct {
 func (c *BatchSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
-	projectName := c.flagSet.String("project-name", "", "set the name of the project")
-	batchArg := c.flagSet.String("batch-name", "", "select the batch")
+	projectUUID := projectUUIDFlag(c.flagSet)
+	projectName := projectNameFlag(c.flagSet)
+	batchName := batchNameFlag(c.flagSet)
 	runCmdArg := batchRunCmdFlag(c.flagSet)
-	entrypoint := c.flagSet.String("entrypoint", "", "This is the script / program that will be executed")
+	entrypoint := entrypointFlag(c.flagSet)
 	limitMemoryArg := batchLimitMemoryFlag(c.flagSet)
 	limitCPUArg := batchLimitCPUFlag(c.flagSet)
 	limitNetArg := batchLimitNetFlag(c.flagSet)
@@ -43,7 +43,7 @@ func (c *BatchSetCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	if *batchArg == "" {
+	if *batchName == "" {
 		return c.errorWithUsage(errors.New("Batch name cannot be empty."))
 	}
 
@@ -63,7 +63,7 @@ func (c *BatchSetCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
-		batch, err := client.GetBatchesInfo(UUID, *batchArg)
+		batch, err := client.GetBatchesInfo(UUID, *batchName)
 		if err != nil {
 			return "", err
 		}
@@ -115,7 +115,7 @@ func (c *BatchSetCommand) Run(args []string) int {
 
 		msg := fmt.Sprintf(
 			"Successfully configured batch '%s' for project '%s'",
-			*batchArg, *projectUUID)
+			*batchName, *projectUUID)
 
 		c.Meta.spin.Start()
 		return msg, client.ConfigBatch(batch, UUID)

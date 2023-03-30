@@ -4,7 +4,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
@@ -20,10 +19,9 @@ type LBGetCommand struct {
 func (c *LBGetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	projectUUID := c.flagSet.String("project-uuid", "", "uuid of the targeted project")
-	projectName := c.flagSet.String("project-name", "", "set the name of the project")
-	lbIDFlag := c.flagSet.String("lb-id", "", "id of the targeted load balancer inside project")
-	var lbID int64
+	projectUUID := projectUUIDFlag(c.flagSet)
+	projectName := projectNameFlag(c.flagSet)
+	lbID := loadBalancerIDFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -36,11 +34,8 @@ func (c *LBGetCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	if *lbIDFlag == "" {
+	if *lbID == 0 {
 		return c.errorWithUsage(errors.New("Load balancer ID is mandatory"))
-	} else {
-		lbIDint, _ := strconv.Atoi(*lbIDFlag)
-		lbID = int64(lbIDint)
 	}
 
 	return c.runWithSpinner("load balancer config", endpoint.String(), func(client *squarescale.Client) (string, error) {
@@ -65,7 +60,7 @@ func (c *LBGetCommand) Run(args []string) int {
 
 		var msg string
 		for _, lb := range loadBalancers {
-			if lb.ID == lbID {
+			if lb.ID == *lbID {
 				msg += fmt.Sprintf("Public URL: %s\n", lb.PublicURL)
 				if lb.Active {
 					msg += fmt.Sprintf("Active: ✅\n")
