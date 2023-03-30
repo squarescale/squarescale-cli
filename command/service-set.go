@@ -134,8 +134,8 @@ func (c *ServiceSetCommand) Run(args []string) int {
 
 		if isFlagPassed("docker-devices", c.flagSet) {
 			c.info("Configure service with custom mapping")
-			dockerDevicesArray, err := getDockerDevicesArray(*dockerDevices);
-			if err!= nil {
+			dockerDevicesArray, err := getDockerDevicesArray(*dockerDevices)
+			if err != nil {
 				c.error(err)
 			} else {
 				container.DockerDevices = dockerDevicesArray

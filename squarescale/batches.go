@@ -12,15 +12,15 @@ import (
 
 // Common
 type BatchCommon struct {
-	Name               string      `json:"name"`
-	Periodic           bool        `json:"periodic"`
-	CronExpression     string      `json:"cron_expression"`
-	TimeZoneName       string      `json:"time_zone_name"`
-	Limits             BatchLimits `json:"limits"`
-	RunCommand         string      `json:"run_command,omitempty"`
-	Entrypoint         string      `json:"entrypoint,omitempty"`
-	DockerCapabilities []string    `json:"docker_capabilities"`
-	DockerDevices []DockerDevice    `json:"docker_devices"`
+	Name               string         `json:"name"`
+	Periodic           bool           `json:"periodic"`
+	CronExpression     string         `json:"cron_expression"`
+	TimeZoneName       string         `json:"time_zone_name"`
+	Limits             BatchLimits    `json:"limits"`
+	RunCommand         string         `json:"run_command,omitempty"`
+	Entrypoint         string         `json:"entrypoint,omitempty"`
+	DockerCapabilities []string       `json:"docker_capabilities"`
+	DockerDevices      []DockerDevice `json:"docker_devices"`
 }
 
 type BatchLimits struct {
@@ -31,10 +31,11 @@ type BatchLimits struct {
 }
 
 type DockerDevice struct {
-	SRC     string `json:"src_path"`
+	SRC string `json:"src_path"`
 	DST string `json:"dst_path,omitempty"`
 	OPT string `json:"options,omitempty"`
 }
+
 // Create Batch part
 type BatchOrder struct {
 	BatchCommon
@@ -68,7 +69,7 @@ func (c *Client) CreateBatch(uuid string, batchOrderContent BatchOrder) (Created
 		"run_command":         batchOrderContent.BatchCommon.RunCommand,
 		"entrypoint":          batchOrderContent.BatchCommon.Entrypoint,
 		"docker_capabilities": batchOrderContent.BatchCommon.DockerCapabilities,
-		"docker_devices": batchOrderContent.BatchCommon.DockerDevices,
+		"docker_devices":      batchOrderContent.BatchCommon.DockerDevices,
 	}
 
 	code, body, err := c.post("/projects/"+uuid+"/batches", payload)

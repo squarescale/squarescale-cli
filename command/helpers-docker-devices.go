@@ -18,10 +18,10 @@ func getDockerDevicesArray(devicesString string) ([]squarescale.DockerDevice, er
 	for _, device := range devicesArray {
 		mapping := strings.Split(device, ":")
 		dockerDevice := squarescale.DockerDevice{SRC: mapping[0]}
-		if (len(mapping)>1 && mapping[1]!="") {
+		if len(mapping) > 1 && mapping[1] != "" {
 			dockerDevice.DST = mapping[1]
 		}
-		if (len(mapping)>2 && mapping[2]!="") {
+		if len(mapping) > 2 && mapping[2] != "" {
 			dockerDevice.OPT = mapping[2]
 		}
 		dockerDevicesArray = append(dockerDevicesArray, dockerDevice)
@@ -30,12 +30,12 @@ func getDockerDevicesArray(devicesString string) ([]squarescale.DockerDevice, er
 }
 
 func checkDockerDevicesRegex(devices []string) error {
-	pattern, compError := regexp.Compile(`^(([^:\s])+(:[^:\s]+){0,2})$|^([^:\s]+):{2}([^:\s]+)$`);
+	pattern, compError := regexp.Compile(`^(([^:\s])+(:[^:\s]+){0,2})$|^([^:\s]+):{2}([^:\s]+)$`)
 	if compError != nil {
 		return compError
 	}
-	for _, device := range devices{
-    if !pattern.MatchString(device){
+	for _, device := range devices {
+		if !pattern.MatchString(device) {
 			return errors.New("wrong mapping format for " + device)
 		}
 	}
