@@ -4,7 +4,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
@@ -18,9 +17,9 @@ type ProjectSettingsCommand struct {
 func (p *ProjectSettingsCommand) Run(args []string) int {
 	p.flagSet = newFlagSet(p, p.Ui)
 	endpoint := endpointFlag(p.flagSet)
-	projectUUID := p.flagSet.String("project-uuid", "", "set the uuid of the project")
-	projectName := p.flagSet.String("project-name", "", "set the name of the project")
-	hybridClusterArg := p.flagSet.String("hybrid-cluster", "", "Enable/Disable hybrid cluster")
+	projectUUID := projectUUIDFlag(p.flagSet)
+	projectName := projectNameFlag(p.flagSet)
+	hybridCluster := projectHybridClusterFlag(p.flagSet)
 
 	if err := p.flagSet.Parse(args); err != nil {
 		return 1
@@ -28,10 +27,6 @@ func (p *ProjectSettingsCommand) Run(args []string) int {
 
 	if *projectUUID == "" && *projectName == "" {
 		return p.errorWithUsage(errors.New("Project name or uuid is mandatory"))
-	}
-
-	if *hybridClusterArg == "" {
-		return p.errorWithUsage(errors.New("Hybrid cluster is mandatory"))
 	}
 
 	if p.flagSet.NArg() > 0 {
@@ -55,13 +50,8 @@ func (p *ProjectSettingsCommand) Run(args []string) int {
 
 		msg := fmt.Sprintf("Successfully change project settings for project '%s'", projectToShow)
 
-		hybridCluster, parseErr := strconv.ParseBool(*hybridClusterArg)
-		if parseErr != nil {
-			return "", err
-		}
-
 		err = client.ConfigProjectSettings(UUID, squarescale.Project{
-			HybridClusterEnabled: hybridCluster,
+			HybridClusterEnabled: *hybridCluster,
 		})
 
 		return msg, err

@@ -21,13 +21,13 @@ func (c *NetworkRuleCreateCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := projectUUIDFlag(c.flagSet)
 	projectName := projectNameFlag(c.flagSet)
-	ruleName := c.flagSet.String("name", "", "name of the rule")
-	serviceName := c.flagSet.String("service-name", "", "name of the service the rule will be attached")
-	externalProtocol := c.flagSet.String("external-protocol", "", "name of the externally exposed protocol")
-	internalProtocol := c.flagSet.String("internal-protocol", "", "name of the internally mapped protocol")
-	internalPort := c.flagSet.Int("internal-port", 0, "value of the internal port")
-	domainExpression := c.flagSet.String("domain-expression", "", "custom domain the service is accessed")
-	pathPrefix := c.flagSet.String("path-prefix", "", "custom path routed to the service")
+	ruleName := networkRuleNameFlag(c.flagSet)
+	serviceName := networkServiceNameFlag(c.flagSet)
+	externalProtocol := networkExternalProtocolFlag(c.flagSet)
+	internalProtocol := networkInternalProtocolFlag(c.flagSet)
+	internalPort := networkInternalPortFlag(c.flagSet)
+	domainExpression := networkDomainFlag(c.flagSet)
+	pathPrefix := networkPathFlag(c.flagSet)
 	externalPort := 0
 
 	if err := c.flagSet.Parse(args); err != nil {

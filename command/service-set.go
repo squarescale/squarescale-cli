@@ -24,7 +24,7 @@ func (c *ServiceSetCommand) Run(args []string) int {
 	serviceArg := serviceFlag(c.flagSet)
 	nInstancesArg := containerInstancesFlag(c.flagSet)
 	runCmdArg := containerRunCmdFlag(c.flagSet)
-	entrypoint := c.flagSet.String("entrypoint", "", "This is the script / program that will be executed")
+	entrypoint := entrypointFlag(c.flagSet)
 	limitMemoryArg := containerLimitMemoryFlag(c.flagSet)
 	limitCPUArg := containerLimitCPUFlag(c.flagSet)
 	noRunCmdArg := containerNoRunCmdFlag(c.flagSet)

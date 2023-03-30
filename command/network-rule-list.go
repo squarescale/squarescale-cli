@@ -21,7 +21,7 @@ func (c *NetworkRuleListCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := projectUUIDFlag(c.flagSet)
 	projectName := projectNameFlag(c.flagSet)
-	serviceName := c.flagSet.String("service-name", "", "name of the service the rule will be attached")
+	serviceName := networkServiceNameFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1

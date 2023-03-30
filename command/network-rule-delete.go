@@ -21,8 +21,8 @@ func (c *NetworkRuleDeleteCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := projectUUIDFlag(c.flagSet)
 	projectName := projectNameFlag(c.flagSet)
-	ruleName := c.flagSet.String("name", "", "name of the rule")
-	serviceName := c.flagSet.String("service-name", "", "name of the service the rule will be attached")
+	ruleName := networkRuleNameFlag(c.flagSet)
+	serviceName := networkServiceNameFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1

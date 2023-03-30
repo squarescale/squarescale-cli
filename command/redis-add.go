@@ -20,8 +20,8 @@ func (r *RedisAddCommand) Run(args []string) int {
 	// Parse flags
 	r.flagSet = newFlagSet(r, r.Ui)
 	endpoint := endpointFlag(r.flagSet)
-	projectUUID := r.flagSet.String("project-uuid", "", "set the uuid of the project")
-	projectName := r.flagSet.String("project-name", "", "set the name of the project")
+	projectUUID := projectUUIDFlag(r.flagSet)
+	projectName := projectNameFlag(r.flagSet)
 
 	wantedRedisName := r.flagSet.String("name", "", "Redis name")
 

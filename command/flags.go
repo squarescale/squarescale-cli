@@ -49,11 +49,15 @@ func endpointFlag(f *flag.FlagSet) *endpoint {
 }
 
 func projectUUIDFlag(f *flag.FlagSet) *string {
-	return f.String("project", "", "SquareScale project")
+	return f.String("project-uuid", "", "Project UUID")
 }
 
 func projectNameFlag(f *flag.FlagSet) *string {
-	return f.String("name", "", "Project name")
+	return f.String("project-name", "", "Project name")
+}
+
+func projectHybridClusterFlag(f *flag.FlagSet) *bool {
+	return f.Bool("hybrid-cluster", false, "Enable/Disable hybrid cluster")
 }
 
 func providerFlag(f *flag.FlagSet) *string {
@@ -64,8 +68,12 @@ func regionFlag(f *flag.FlagSet) *string {
 	return f.String("region", "", "Cloud provider region name")
 }
 
-func organizationFlag(f *flag.FlagSet) *string {
-	return f.String("organization", "", "organization name")
+func organizationNameFlag(f *flag.FlagSet) *string {
+	return f.String("name", "", "organization name")
+}
+
+func organizationEmailFlag(f *flag.FlagSet) *string {
+	return f.String("email", "", "contact email")
 }
 
 func serviceFlag(f *flag.FlagSet) *string {
@@ -400,4 +408,48 @@ func loadBalancerIDFlag(f *flag.FlagSet) *int64 {
 
 func loadBalancerDisableFlag(f *flag.FlagSet) *bool {
 	return f.Bool("disable", false, "Disable load balancer")
+}
+
+func networkRuleNameFlag (f *flag.FlagSet) *string {
+	return f.String("name", "", "name of the rule")
+}
+
+func networkServiceNameFlag (f *flag.FlagSet) *string {
+	return f.String("service-name", "", "name of the service the rule will be attached")
+}
+
+func networkExternalProtocolFlag (f *flag.FlagSet) *string {
+	return f.String("external-protocol", "", "name of the externally exposed protocol")
+}
+
+func networkInternalProtocolFlag (f *flag.FlagSet) *string {
+	return f.String("internal-protocol", "", "name of the internally mapped protocol")
+}
+
+func networkInternalPortFlag (f *flag.FlagSet) *int {
+	return f.Int("internal-port", 0, "value of the internal port")
+}
+
+func networkDomainFlag (f *flag.FlagSet) *string {
+	return f.String("domain-expression", "", "custom domain the service is accessed")
+}
+
+func networkPathFlag (f *flag.FlagSet) *string {
+	return f.String("path", "", "custom path prefix routed to the service")
+}
+
+func volumeNameFlag (f *flag.FlagSet) *string {
+	return f.String("name", "", "Volume name")
+}
+
+func volumeSizeFlag (f *flag.FlagSet) *int {
+	return f.Int("size", 1, "Volume size (in Gb)")
+}
+
+func volumeTypeFlag (f *flag.FlagSet) *string {
+	return f.String("type", "gp2", "Volume type")
+}
+
+func volumeZoneFlag (f *flag.FlagSet) *string {
+	return f.String("zone", "eu-west-1a", "Volume zone")
 }

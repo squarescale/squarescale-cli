@@ -18,8 +18,8 @@ type SchedulingGroupGetCommand struct {
 func (b *SchedulingGroupGetCommand) Run(args []string) int {
 	b.flagSet = newFlagSet(b, b.Ui)
 	endpoint := endpointFlag(b.flagSet)
-	projectUUID := b.flagSet.String("project-uuid", "", "set the uuid of the project")
-	projectName := b.flagSet.String("project-name", "", "set the name of the project")
+	projectUUID := projectUUIDFlag(b.flagSet)
+	projectName := projectNameFlag(b.flagSet)
 
 	if err := b.flagSet.Parse(args); err != nil {
 		return 1
