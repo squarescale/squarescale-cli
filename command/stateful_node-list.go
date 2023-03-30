@@ -19,7 +19,7 @@ type StatefulNodeListCommand struct {
 func (b *StatefulNodeListCommand) Run(args []string) int {
 	b.flagSet = newFlagSet(b, b.Ui)
 	endpoint := endpointFlag(b.flagSet)
-	projectUUID :=projectUUIDFlag(b.flagSet)
+	projectUUID := projectUUIDFlag(b.flagSet)
 	projectName := projectNameFlag(b.flagSet)
 
 	if err := b.flagSet.Parse(args); err != nil {

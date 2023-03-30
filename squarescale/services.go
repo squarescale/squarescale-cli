@@ -182,7 +182,7 @@ func (c *Client) ConfigService(service Service) error {
 	}
 	if len(service.SchedulingGroups) != 0 {
 		cont["scheduling_groups"] = getSchedulingGroupsIds(service.SchedulingGroups)
-	}	
+	}
 	if service.DockerCapabilities != nil {
 		cont["docker_capabilities"] = service.DockerCapabilities
 	}

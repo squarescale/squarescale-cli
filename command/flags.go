@@ -392,7 +392,7 @@ func dbBackupFlag(f *flag.FlagSet) *bool {
 
 func envAllFlag(f *flag.FlagSet) *bool {
 	return f.Bool("all", false, "Print all variables")
-} 
+}
 
 func envRemoveFlag(f *flag.FlagSet) *bool {
 	return f.Bool("remove", false, "Remove the key from environment variables")
@@ -410,46 +410,46 @@ func loadBalancerDisableFlag(f *flag.FlagSet) *bool {
 	return f.Bool("disable", false, "Disable load balancer")
 }
 
-func networkRuleNameFlag (f *flag.FlagSet) *string {
+func networkRuleNameFlag(f *flag.FlagSet) *string {
 	return f.String("name", "", "name of the rule")
 }
 
-func networkServiceNameFlag (f *flag.FlagSet) *string {
+func networkServiceNameFlag(f *flag.FlagSet) *string {
 	return f.String("service-name", "", "name of the service the rule will be attached")
 }
 
-func networkExternalProtocolFlag (f *flag.FlagSet) *string {
+func networkExternalProtocolFlag(f *flag.FlagSet) *string {
 	return f.String("external-protocol", "", "name of the externally exposed protocol")
 }
 
-func networkInternalProtocolFlag (f *flag.FlagSet) *string {
+func networkInternalProtocolFlag(f *flag.FlagSet) *string {
 	return f.String("internal-protocol", "", "name of the internally mapped protocol")
 }
 
-func networkInternalPortFlag (f *flag.FlagSet) *int {
+func networkInternalPortFlag(f *flag.FlagSet) *int {
 	return f.Int("internal-port", 0, "value of the internal port")
 }
 
-func networkDomainFlag (f *flag.FlagSet) *string {
+func networkDomainFlag(f *flag.FlagSet) *string {
 	return f.String("domain-expression", "", "custom domain the service is accessed")
 }
 
-func networkPathFlag (f *flag.FlagSet) *string {
+func networkPathFlag(f *flag.FlagSet) *string {
 	return f.String("path", "", "custom path prefix routed to the service")
 }
 
-func volumeNameFlag (f *flag.FlagSet) *string {
+func volumeNameFlag(f *flag.FlagSet) *string {
 	return f.String("name", "", "Volume name")
 }
 
-func volumeSizeFlag (f *flag.FlagSet) *int {
+func volumeSizeFlag(f *flag.FlagSet) *int {
 	return f.Int("size", 1, "Volume size (in Gb)")
 }
 
-func volumeTypeFlag (f *flag.FlagSet) *string {
+func volumeTypeFlag(f *flag.FlagSet) *string {
 	return f.String("type", "gp2", "Volume type")
 }
 
-func volumeZoneFlag (f *flag.FlagSet) *string {
+func volumeZoneFlag(f *flag.FlagSet) *string {
 	return f.String("zone", "eu-west-1a", "Volume zone")
 }
