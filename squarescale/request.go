@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"strings"
+	"time"
 
 	multierr "github.com/hashicorp/go-multierror"
 	mime "github.com/jpillora/go-mime"
@@ -141,7 +142,16 @@ func (c *Client) request(method, path string, payload interface{}) (int, []byte,
 	}
 
 	// No content type on 204 !!! Damnit
-	if res.StatusCode != http.StatusNoContent && !strings.Contains(res.Header.Get("Content-Type"), ct) {
+	if res.StatusCode == http.StatusServiceUnavailable {
+		plannedDate := "Unknown"
+		retryAfter := res.Header.Get("Retry-After")
+		parseTime, err1 := time.Parse(time.RFC1123, retryAfter)
+		if err1 == nil {
+			deltaTime := parseTime.Sub(time.Now()).Round(1 * time.Minute)
+			plannedDate = strings.Trim(fmt.Sprintf("%v", deltaTime), "0s")
+		}
+		err = fmt.Errorf("%s: Potential date of service availability: %s (aka %s from now)", res.Status, retryAfter, plannedDate)
+	} else if res.StatusCode != http.StatusNoContent && !strings.Contains(res.Header.Get("Content-Type"), ct) {
 		if res.StatusCode == http.StatusInternalServerError &&
 			strings.Contains(res.Header.Get("Content-Type"), "text/html") &&
 			(bytes.Contains(rbytes, []byte("<title>Action Controller: Exception caught</title>")) || len(rbytes) == 0) {
