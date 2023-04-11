@@ -151,6 +151,8 @@ func (c *Client) request(method, path string, payload interface{}) (int, []byte,
 			plannedDate = strings.Trim(fmt.Sprintf("%v", deltaTime), "0s")
 		}
 		err = fmt.Errorf("%s: Potential date of service availability: %s (aka %s from now)", res.Status, retryAfter, plannedDate)
+	} else if res.StatusCode == http.StatusUnauthorized {
+		err = fmt.Errorf("%s: please make sure your SQSC_TOKEN environment variable is properly set", res.Status)
 	} else if res.StatusCode != http.StatusNoContent && !strings.Contains(res.Header.Get("Content-Type"), ct) {
 		if res.StatusCode == http.StatusInternalServerError &&
 			strings.Contains(res.Header.Get("Content-Type"), "text/html") &&
