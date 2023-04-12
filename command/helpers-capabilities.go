@@ -8,7 +8,7 @@ import (
 
 func getDockerCapabilitiesArray(capabilities string) []string {
 	if capabilities == "" {
-		return	[]string{}
-	} 
+		return []string{}
+	}
 	return strings.Split(capabilities, ",")
 }

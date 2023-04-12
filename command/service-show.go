@@ -67,6 +67,7 @@ func (c *ServiceShowCommand) Run(args []string) int {
 			tbl += fmt.Sprintf("Memory limit:\t%d MB\n", co.Limits.Memory)
 			tbl += fmt.Sprintf("CPU limit:\t%d MHz\n", co.Limits.CPU)
 			tbl += fmt.Sprintf("Enabled capabilities: \t%s \n", strings.Join(co.DockerCapabilities, ","))
+			tbl += fmt.Sprintf("Auto start: \t%v \n", co.AutoStart)
 			msg += c.FormatTable(tbl, false)
 			msg += "\n"
 		}
