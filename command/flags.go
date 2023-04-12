@@ -270,7 +270,7 @@ func optionsFromFlags(fs *flag.FlagSet) string {
 		return ""
 	}
 
-	res := "Options:\n\n"
+	res := "\nOptions:\n\n"
 	fs.VisitAll(func(f *flag.Flag) {
 		s := fmt.Sprintf("  -%s", f.Name)
 		name, usage := flag.UnquoteUsage(f)
@@ -284,10 +284,8 @@ func optionsFromFlags(fs *flag.FlagSet) string {
 		} else {
 			s += fmt.Sprintf(" (default %v)\n", f.DefValue)
 		}
-
 		res += s
 	})
-
 	return res
 }
 
