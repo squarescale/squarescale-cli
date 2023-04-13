@@ -322,7 +322,7 @@ func noDockerCapabilitiesFlag(f *flag.FlagSet) *bool {
 }
 
 func dockerDevicesFlag(f *flag.FlagSet) *string {
-	return f.String("docker-devices", "", "The list of device mapping if any, separated with a comma. format: src:opt:dst")
+	return f.String("docker-devices", "", "The list of device mappings if any, separated with commas. format: src:dst[:opt][,src:dst[:opt]]*")
 }
 
 func autostart(f *flag.FlagSet) *bool {
