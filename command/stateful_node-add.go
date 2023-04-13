@@ -19,8 +19,8 @@ type StatefulNodeAddCommand struct {
 func (c *StatefulNodeAddCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
-	projectName := c.flagSet.String("project-name", "", "set the name of the project")
+	projectUUID := projectUUIDFlag(c.flagSet)
+	projectName := projectNameFlag(c.flagSet)
 
 	nodeType := c.flagSet.String("node-type", "dev", "Stateful node type")
 	zone := c.flagSet.String("zone", "eu-west-1a", "Stateful node zone")

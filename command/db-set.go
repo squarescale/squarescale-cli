@@ -4,7 +4,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
@@ -21,12 +20,12 @@ func (c *DBSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	nowait := nowaitFlag(c.flagSet)
-	projectUUID := c.flagSet.String("project-uuid", "", "uuid of the targeted project")
-	projectName := c.flagSet.String("project-name", "", "set the name of the project")
-	dbEngine := c.flagSet.String("engine", "", "Database engine")
-	dbSize := c.flagSet.String("size", "", "Database size")
-	dbVersion := c.flagSet.String("engine-version", "", "Database version")
-	dbBackupEnabled := c.flagSet.String("backup-enabled", "", "Backup enabled")
+	projectUUID := projectUUIDFlag(c.flagSet)
+	projectName := projectNameFlag(c.flagSet)
+	dbEngine := dbEngineFlag(c.flagSet)
+	dbSize := dbSizeFlag(c.flagSet)
+	dbVersion := dbVersionFlag(c.flagSet)
+	dbBackupEnabled := dbBackupFlag(c.flagSet)
 	dbDisabled := c.flagSet.Bool("disable", false, "Disable database")
 	alwaysYes := yesFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
@@ -45,7 +44,7 @@ func (c *DBSetCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Cannot specify engine or size or version when disabling database."))
 	}
 
-	if !*dbDisabled && (*dbEngine == "" && *dbSize == "" && *dbVersion == "" && *dbBackupEnabled == "") {
+	if !*dbDisabled && (*dbEngine == "" && *dbSize == "" && *dbVersion == "" && !*dbBackupEnabled) {
 		return c.errorWithUsage(errors.New("Size, engine and version are mandatory."))
 	}
 
@@ -90,19 +89,12 @@ func (c *DBSetCommand) Run(args []string) int {
 		size := checkFlag(db.Size, dbSize)
 		version := checkFlag(db.Version, dbVersion)
 
-		var backupEnabled string
-		if *dbBackupEnabled == "" {
-			backupEnabled = strconv.FormatBool(db.BackupEnabled)
-		} else {
-			backupEnabled = *dbBackupEnabled
-		}
-
 		if *dbEngine == db.Engine && *dbSize == db.Size && *dbVersion == db.Version && !*dbDisabled == db.Enabled {
 			return fmt.Sprintf("Database for project '%s' is already configured with these parameters", projectToShow), nil
 		}
 
 		payload := squarescale.JSONObject{
-			"database": map[string]interface{}{"enabled": !*dbDisabled, "engine": engine, "size": size, "version": version, "backup_enabled": backupEnabled},
+			"database": map[string]interface{}{"enabled": !*dbDisabled, "engine": engine, "size": size, "version": version, "backup_enabled": dbBackupEnabled},
 		}
 
 		_, err = client.ConfigDB(UUID, &payload)

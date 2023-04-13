@@ -22,9 +22,9 @@ func (c *ClusterSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
 	nowait := nowaitFlag(c.flagSet)
-	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
-	projectName := c.flagSet.String("project-name", "", "set the name of the project")
-	c.flagSet.UintVar(&c.Cluster.Size, "size", 0, "Cluster Size")
+	projectUUID := projectUUIDFlag(c.flagSet)
+	projectName := projectNameFlag(c.flagSet)
+	c.Cluster.Size = *clusterSizeFlag(c.flagSet)
 	alwaysYes := yesFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1

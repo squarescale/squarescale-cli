@@ -19,8 +19,8 @@ type RedisListCommand struct {
 func (r *RedisListCommand) Run(args []string) int {
 	r.flagSet = newFlagSet(r, r.Ui)
 	endpoint := endpointFlag(r.flagSet)
-	projectUUID := r.flagSet.String("project-uuid", "", "set the uuid of the project")
-	projectName := r.flagSet.String("project-name", "", "set the name of the project")
+	projectUUID := projectUUIDFlag(r.flagSet)
+	projectName := projectNameFlag(r.flagSet)
 
 	if err := r.flagSet.Parse(args); err != nil {
 		return 1

@@ -18,8 +18,8 @@ type OrganizationAddCommand struct {
 func (c *OrganizationAddCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	name := c.flagSet.String("name", "", "name")
-	email := c.flagSet.String("email", "", "contact email")
+	name := organizationNameFlag(c.flagSet)
+	email := organizationEmailFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1

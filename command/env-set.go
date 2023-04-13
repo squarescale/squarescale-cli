@@ -19,10 +19,10 @@ type EnvSetCommand struct {
 func (c *EnvSetCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
-	projectName := c.flagSet.String("project-name", "", "set the name of the project")
+	projectUUID := projectUUIDFlag(c.flagSet)
+	projectName := projectNameFlag(c.flagSet)
 	container := serviceFlag(c.flagSet)
-	remove := c.flagSet.Bool("remove", false, "Remove the key from environment variables")
+	remove := envRemoveFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1

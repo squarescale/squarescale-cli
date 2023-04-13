@@ -19,16 +19,16 @@ type BatchExecuteCommand struct {
 func (c *BatchExecuteCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	projectUUID := c.flagSet.String("project-uuid", "", "set the uuid of the project")
-	projectName := c.flagSet.String("project-name", "", "set the name of the project")
+	batchName := batchNameFlag(c.flagSet)
+	projectUUID := projectUUIDFlag(c.flagSet)
+	projectName := projectNameFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	batchName, err := batchNameArg(c.flagSet, 0)
-	if err != nil {
-		return c.errorWithUsage(err)
+	if *batchName == "" {
+		return c.errorWithUsage(fmt.Errorf(("Batch name is mandatory. Please, chose a batch name.")))
 	}
 
 	if *projectUUID == "" && *projectName == "" {
@@ -54,8 +54,8 @@ func (c *BatchExecuteCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
-		fmt.Printf("Execute on project `%s` the batch `%s`\n", projectToShow, batchName)
-		err = client.ExecuteBatch(UUID, batchName)
+		fmt.Printf("Execute on project `%s` the batch `%s`\n", projectToShow, *batchName)
+		err = client.ExecuteBatch(UUID, *batchName)
 		return "", err
 	})
 

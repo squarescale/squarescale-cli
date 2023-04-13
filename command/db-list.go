@@ -22,8 +22,8 @@ type DBListCommand struct {
 func (c *DBListCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	endpoint := endpointFlag(c.flagSet)
-	provider := c.flagSet.String("provider", "", "set the cloud provider")
-	region := c.flagSet.String("region", "", "set the cloud provider region")
+	provider := providerFlag(c.flagSet)
+	region := regionFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1

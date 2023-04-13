@@ -19,7 +19,7 @@ func (c *OrganizationDeleteCommand) Run(args []string) int {
 	c.flagSet = newFlagSet(c, c.Ui)
 	alwaysYes := yesFlag(c.flagSet)
 	endpoint := endpointFlag(c.flagSet)
-	name := c.flagSet.String("name", "", "name")
+	name := organizationNameFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
