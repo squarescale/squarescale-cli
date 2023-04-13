@@ -345,15 +345,15 @@ func dockerImageNameFlag(f *flag.FlagSet) *string {
 }
 
 func dockerImagePrivateFlag(f *flag.FlagSet) *bool {
-	return f.Bool("imagePrivate", false, "Docker image is private")
+	return f.Bool("docker-image-private", false, "Docker image is private")
 }
 
 func dockerImageUsernameFlag(f *flag.FlagSet) *string {
-	return f.String("imageUsr", "", "Docker image user")
+	return f.String("docker-image-user", "", "Docker image user")
 }
 
 func dockerImagePasswordFlag(f *flag.FlagSet) *string {
-	return f.String("imagePwd", "", "Docker image password")
+	return f.String("docker-image-password", "", "Docker image password")
 }
 
 func periodicBatchFlag(f *flag.FlagSet) *bool {
