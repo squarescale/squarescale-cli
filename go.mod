@@ -1,6 +1,6 @@
 module github.com/squarescale/squarescale-cli
 
-go 1.19
+go 1.20
 
 require (
 	github.com/BenJetson/humantime v0.0.0-20200514023344-f59ec2835a87
