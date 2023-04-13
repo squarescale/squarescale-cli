@@ -61,13 +61,17 @@ func (c *ServiceShowCommand) Run(args []string) int {
 			}
 			tbl := ""
 			tbl += fmt.Sprintf("Name:\t%s\n", co.Name)
+			tbl += fmt.Sprintf("Auto start: \t%v \n", co.AutoStart)
 			tbl += fmt.Sprintf("Size:\t%d/%d\n", co.Running, co.Size)
 			tbl += fmt.Sprintf("Run Command:\t%s\n", co.RunCommand)
 			tbl += fmt.Sprintf("Web Port:\t%d\n", co.WebPort)
 			tbl += fmt.Sprintf("Memory limit:\t%d MB\n", co.Limits.Memory)
 			tbl += fmt.Sprintf("CPU limit:\t%d MHz\n", co.Limits.CPU)
 			tbl += fmt.Sprintf("Enabled capabilities: \t%s \n", strings.Join(co.DockerCapabilities, ","))
-			tbl += fmt.Sprintf("Auto start: \t%v \n", co.AutoStart)
+			tbl += fmt.Sprintf("Docker devices:\n")
+			for _, dev := range co.DockerDevices {
+				tbl += fmt.Sprintf("\tsrc:%s dst:%s opts:%s\n", dev.SRC, dev.DST, dev.OPT)
+			}
 			msg += c.FormatTable(tbl, false)
 			msg += "\n"
 		}
