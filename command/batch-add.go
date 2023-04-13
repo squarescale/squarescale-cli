@@ -43,6 +43,7 @@ func (b *BatchAddCommand) Run(args []string) int {
 	limitCPU := b.flagSet.Int("cpu", 100, "This is an indicative limit of how much CPU your service requires.")
 	dockerCapabilities := dockerCapabilitiesFlag(b.flagSet)
 	noDockerCapabilities := noDockerCapabilitiesFlag(b.flagSet)
+	dockerDevices := dockerDevicesFlag(b.flagSet)
 	volumes := b.flagSet.String("volumes", "", "Volumes")
 
 	if err := b.flagSet.Parse(args); err != nil {
@@ -108,6 +109,13 @@ func (b *BatchAddCommand) Run(args []string) int {
 		dockerCapabilitiesArray = getDockerCapabilitiesArray(*dockerCapabilities)
 	}
 
+	dockerDevicesArray, err := getDockerDevicesArray(*dockerDevices)
+	if isFlagPassed("docker-devices", b.flagSet) {
+		if err != nil {
+			return b.errorWithUsage(err)
+		}
+	}
+
 	volumesToBind := parseVolumesToBind(*volumes)
 
 	//payload
@@ -134,6 +142,10 @@ func (b *BatchAddCommand) Run(args []string) int {
 		Entrypoint:         *entrypoint,
 		Limits:             batchLimitContent,
 		DockerCapabilities: dockerCapabilitiesArray,
+	}
+
+	if len(dockerDevicesArray) > 0 {
+		batchCommonContent.DockerDevices = dockerDevicesArray
 	}
 
 	batchOrderContent := squarescale.BatchOrder{

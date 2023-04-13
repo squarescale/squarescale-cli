@@ -270,7 +270,7 @@ func optionsFromFlags(fs *flag.FlagSet) string {
 		return ""
 	}
 
-	res := "Options:\n\n"
+	res := "\nOptions:\n\n"
 	fs.VisitAll(func(f *flag.Flag) {
 		s := fmt.Sprintf("  -%s", f.Name)
 		name, usage := flag.UnquoteUsage(f)
@@ -284,10 +284,8 @@ func optionsFromFlags(fs *flag.FlagSet) string {
 		} else {
 			s += fmt.Sprintf(" (default %v)\n", f.DefValue)
 		}
-
 		res += s
 	})
-
 	return res
 }
 
@@ -321,6 +319,10 @@ func dockerCapabilitiesFlag(f *flag.FlagSet) *string {
 
 func noDockerCapabilitiesFlag(f *flag.FlagSet) *bool {
 	return f.Bool("no-docker-capabilities", false, "Disable all docker capabilities")
+}
+
+func dockerDevicesFlag(f *flag.FlagSet) *string {
+	return f.String("docker-devices", "", "The list of device mappings if any, separated with commas. format: src:dst[:opt][,src:dst[:opt]]*")
 }
 
 func autostart(f *flag.FlagSet) *bool {

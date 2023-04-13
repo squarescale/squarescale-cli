@@ -31,6 +31,7 @@ func (c *ServiceAddCommand) Run(args []string) int {
 	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
 	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
 	instances := repoOrImageInstancesFlag(c.flagSet)
+	dockerDevices := dockerDevicesFlag(c.flagSet)
 	autostart := autostart(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
@@ -54,6 +55,13 @@ func (c *ServiceAddCommand) Run(args []string) int {
 		dockerCapabilitiesArray = getDockerCapabilitiesArray(*dockerCapabilities)
 	}
 
+	dockerDevicesArray, err := getDockerDevicesArray(*dockerDevices)
+	if isFlagPassed("docker-devices", c.flagSet) {
+		if err != nil {
+			return c.errorWithUsage(err)
+		}
+	}
+
 	volumesToBind := parseVolumesToBind(*volumes)
 
 	return c.runWithSpinner("adding Docker image", endpoint.String(), func(client *squarescale.Client) (string, error) {
@@ -72,7 +80,7 @@ func (c *ServiceAddCommand) Run(args []string) int {
 		}
 
 		msg := fmt.Sprintf("Successfully added Docker image '%s' to project '%s' (%v instance(s))", *image, projectToShow, *instances)
-		return msg, client.AddImage(UUID, *image, *username, *password, *entrypoint, *runCommand, *instances, *serviceName, volumesToBind, dockerCapabilitiesArray, *autostart)
+		return msg, client.AddImage(UUID, *image, *username, *password, *entrypoint, *runCommand, *instances, *serviceName, volumesToBind, dockerCapabilitiesArray, dockerDevicesArray, *autostart)
 	})
 }
 
