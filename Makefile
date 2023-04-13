@@ -57,3 +57,6 @@ coverage: ## Run test suites in all packages with code coverage
 
 coverage_html: coverage ## Show code coverage html report
 	go tool cover -html=coverage.out -o coverage.html
+
+changelog:
+	git-chglog v1.1.3.. > CHANGELOG.md
