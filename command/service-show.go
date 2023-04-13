@@ -52,10 +52,12 @@ func (c *ServiceShowCommand) Run(args []string) int {
 		}
 
 		var msg string
+		found := false
 		for _, co := range containers {
 			if *containerArg != "" && *containerArg != co.Name {
 				continue
 			}
+			found = true
 			if msg != "" {
 				msg += "\n-----------\n\n"
 			}
@@ -77,7 +79,9 @@ func (c *ServiceShowCommand) Run(args []string) int {
 		}
 
 		if len(containers) == 0 {
-			msg = "No service found"
+			msg = fmt.Sprintf("\nNo service defined in project %s %s\n", *projectName, *projectUUID)
+		} else if !found {
+			msg = fmt.Sprintf("\nService %s not found in project %s %s\n", *containerArg, *projectName, *projectUUID)
 		}
 
 		return msg, nil
