@@ -71,9 +71,9 @@ func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 	cmd += " -imageName " + imageName
 
 	if batchContent.IS_PRIVATE {
-		cmd += " -imagePrivate"
-		cmd += " -imageUser " + batchContent.IMAGE_USER
-		cmd += " -imagePwd " + batchContent.IMAGE_PASSWORD
+		cmd += " -docker-image-private"
+		cmd += " -docker-image-user " + batchContent.IMAGE_USER
+		cmd += " -docker-image-password " + batchContent.IMAGE_PASSWORD
 	}
 
 	if (BatchPeriodic{}) != batchContent.PERIODIC {

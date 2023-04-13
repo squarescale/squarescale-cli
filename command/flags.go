@@ -341,19 +341,19 @@ func volumeFlag(f *flag.FlagSet) *string {
 }
 
 func dockerImageNameFlag(f *flag.FlagSet) *string {
-	return f.String("docker-image", "", "docker image name")
+	return f.String("docker-image", "", "Docker image name and potential repository and version (ex: [repoName[:repoPort]/]image[:version])")
 }
 
 func dockerImagePrivateFlag(f *flag.FlagSet) *bool {
-	return f.Bool("imagePrivate", false, "docker image is private")
+	return f.Bool("docker-image-private", false, "Docker image is private")
 }
 
 func dockerImageUsernameFlag(f *flag.FlagSet) *string {
-	return f.String("imageUsr", "", "docker image user")
+	return f.String("docker-image-user", "", "Docker image user")
 }
 
 func dockerImagePasswordFlag(f *flag.FlagSet) *string {
-	return f.String("imagePwd", "", "docker image user")
+	return f.String("docker-image-password", "", "Docker image password")
 }
 
 func periodicBatchFlag(f *flag.FlagSet) *bool {
