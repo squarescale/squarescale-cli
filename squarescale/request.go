@@ -152,7 +152,19 @@ func (c *Client) request(method, path string, payload interface{}) (int, []byte,
 		}
 		err = fmt.Errorf("%s: Potential date of service availability: %s (aka %s from now)", res.Status, retryAfter, plannedDate)
 	} else if res.StatusCode == http.StatusUnauthorized {
-		err = fmt.Errorf("%s: please make sure your SQSC_TOKEN environment variable is properly set", res.Status)
+		extra := ""
+		var reason map[string]interface{}
+		err1 := json.Unmarshal(rbytes, &reason)
+		if err1 != nil {
+			extra = fmt.Sprintf("%v, ", err1)
+		} else {
+			if val, ok := reason["error"]; ok {
+				extra = fmt.Sprintf("%v, ", val)
+			} else {
+				extra = fmt.Sprintf("%v, ", reason)
+			}
+		}
+		err = fmt.Errorf("%s: %splease make sure your SQSC_TOKEN environment variable is properly set", res.Status, extra)
 	} else if res.StatusCode != http.StatusNoContent && !strings.Contains(res.Header.Get("Content-Type"), ct) {
 		if res.StatusCode == http.StatusInternalServerError &&
 			strings.Contains(res.Header.Get("Content-Type"), "text/html") &&
