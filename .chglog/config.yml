@@ -1,0 +1,33 @@
+style: github
+template: CHANGELOG.tpl.md
+info:
+  title: CHANGELOG
+  repository_url: https://github.com/squarescale/squarescale-cli
+options:
+  sort: "date"
+  commits:
+    # filters:
+    #   Type:
+    #     - feat
+    #     - fix
+    #     - perf
+    #     - refactor
+  commit_groups:
+    group_by: Type
+    sort_by: Title
+    title_order:
+      - feat
+    title_maps:
+      feat: Features
+      fix: Bug Fixes
+      chore: Chores 
+      refactor: Code Refactoring
+  header:
+    pattern: "^([\\w-]*)\\(?([\\w-]*)?\\)?\\:\\s(.*)$"
+    pattern_maps:
+      - Type
+      - Scope
+      - Subject
+  notes:
+    keywords:
+      - BREAKING CHANGE
