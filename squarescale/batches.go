@@ -205,7 +205,7 @@ func (c *RunningBatch) SetEnv(path string) error {
 
 	file, err := os.Open(path)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Some error happened when reading env file : %s", err))
+		return errors.New(fmt.Sprintf("Error when reading env file: %s", err))
 	}
 
 	defer file.Close()
@@ -213,7 +213,7 @@ func (c *RunningBatch) SetEnv(path string) error {
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&env)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Some error happened when unmarshall env file : %s", err))
+		return errors.New(fmt.Sprintf("Error when unmarshalling env file: %s", err))
 	}
 
 	for k, v := range env {
