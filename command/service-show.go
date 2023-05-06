@@ -21,7 +21,7 @@ func (c *ServiceShowCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := projectUUIDFlag(c.flagSet)
 	projectName := projectNameFlag(c.flagSet)
-	containerArg := filterNameFlag(c.flagSet)
+	containerArg := filterServiceFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}

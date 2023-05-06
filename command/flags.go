@@ -80,8 +80,8 @@ func serviceFlag(f *flag.FlagSet) *string {
 	return f.String("service", "", "Service aka Docker container to configure")
 }
 
-func filterNameFlag(f *flag.FlagSet) *string {
-	return f.String("name", "", "Filter on name")
+func filterServiceFlag(f *flag.FlagSet) *string {
+	return f.String("service", "", "Filter on service name")
 }
 
 func filterTypeFlag(f *flag.FlagSet) *string {
