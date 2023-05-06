@@ -185,10 +185,10 @@ usage: sqsc service set [options]
   Services are specified using their given name.
 
 Example:
-  sqsc service set                \
-      -project="my-rails-project" \
-      -service="my-name/my-repo"  \
-      -instances=42               \
+  sqsc service set          \
+      -project="my-project" \
+      -service="my-service" \
+      -instances=42         \
       -env=env.json
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
