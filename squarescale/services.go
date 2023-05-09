@@ -82,6 +82,28 @@ func (c *Service) SetEnv(path string) error {
 	return nil
 }
 
+func (c *Service) SetEnvParams(params []string) error {
+	for _, p := range params {
+		v := strings.Split(p, "=")
+		if len(v) != 2 {
+			return errors.New(fmt.Sprintf("environment parameter %v not in the form param=value", p))
+		}
+		found := -1
+		for i, curParam := range c.CustomEnv {
+			if curParam.Key == v[0] {
+				found = i
+				break
+			}
+		}
+		if found >= 0 {
+			c.CustomEnv[found].Value = v[1]
+		} else {
+			c.CustomEnv = append(c.CustomEnv, ServiceEnv{Key: v[0], Value: v[1]})
+		}
+	}
+	return nil
+}
+
 type ServiceLimits struct {
 	Memory int `json:"mem"`
 	CPU    int `json:"cpu"`

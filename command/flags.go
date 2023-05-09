@@ -164,6 +164,16 @@ func envFileFlag(f *flag.FlagSet) *string {
 	return f.String("env", "", "JSON file containing all environment variables")
 }
 
+func envParameterFlag(f *flag.FlagSet, ret *[]string) {
+	f.Func("env-param", "add one/multiple environment parameter(s) in the form param=value (type is `string`)\n\tcan be speficied multiple times and takes precedence over values defined in -env", func(s string) error {
+		if len(strings.Split(s, "=")) != 2 {
+			return errors.New(fmt.Sprintf("env-param %v not in the form param=value", s))
+		}
+		*ret = append(*ret, s)
+		return nil
+	})
+}
+
 func containerNameArg(f *flag.FlagSet, arg int) (string, error) {
 	value := f.Arg(arg)
 	if value == "" {

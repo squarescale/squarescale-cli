@@ -29,6 +29,8 @@ func (c *ServiceSetCommand) Run(args []string) int {
 	limitCPU := containerLimitCPUFlag(c.flagSet)
 	noRunCommand := containerNoRunCmdFlag(c.flagSet)
 	envVariables := envFileFlag(c.flagSet)
+	var envParams []string
+	envParameterFlag(c.flagSet, &envParams)
 	schedulingGroups := containerSchedulingGroupsFlag(c.flagSet)
 	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
 	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
@@ -120,9 +122,17 @@ func (c *ServiceSetCommand) Run(args []string) int {
 			c.info("Configure service with CPU limit of %d Mhz", *limitCPU)
 			container.Limits.CPU = *limitCPU
 		}
+
 		if *envVariables != "" {
-			c.info("Configure service with some env")
+			c.info("Configure service with some environment JSON file")
 			err := container.SetEnv(*envVariables)
+			if err != nil {
+				c.error(err)
+			}
+		}
+		if len(envParams) > 0 {
+			c.info("Configure service with some environment parameters")
+			err := container.SetEnvParams(envParams)
 			if err != nil {
 				c.error(err)
 			}
