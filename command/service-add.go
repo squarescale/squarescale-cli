@@ -32,7 +32,7 @@ func (c *ServiceAddCommand) Run(args []string) int {
 	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
 	instances := repoOrImageInstancesFlag(c.flagSet)
 	dockerDevices := dockerDevicesFlag(c.flagSet)
-	autostart := autostart(c.flagSet)
+	autostart := autostartFlag(c.flagSet)
 	maxClientDisconnect := maxclientdisconnect(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {

@@ -328,7 +328,7 @@ func dockerDevicesFlag(f *flag.FlagSet) *string {
 	return f.String("docker-devices", "", "The list of device mappings if any, separated with commas. format: src:dst[:opt][,src:dst[:opt]]*")
 }
 
-func autostart(f *flag.FlagSet) *bool {
+func autostartFlag(f *flag.FlagSet) *bool {
 	return f.Bool("auto-start", true, "Allow automatic start")
 }
 
