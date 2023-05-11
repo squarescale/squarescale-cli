@@ -174,10 +174,15 @@ func (c *Client) request(method, path string, payload interface{}) (int, []byte,
 				res.Status,
 			)
 		} else {
-			err = fmt.Errorf(
-				"Invalid response return code (got %q instead of %+v/%+v) or content type (got %q instead of %q).\nDo you use the right value for -endpoint=%s ?",
-				res.Status, http.StatusNoContent, http.StatusInternalServerError, res.Header.Get("Content-Type"), ct, c.endpoint,
-			)
+			if res.StatusCode == http.StatusGatewayTimeout {
+				logger.Warn.Printf("Got %q from %s at %s", res.Status, res.Header.Get("Server"), res.Header.Get("Date"))
+				err = fmt.Errorf("Got %q from %s at %s", res.Status, res.Header.Get("Server"), res.Header.Get("Date"))
+			} else {
+				err = fmt.Errorf(
+					"Invalid response return code (got %q instead of %+v/%+v) or content type (got %q instead of %q).\nDo you use the right value for -endpoint=%s ?",
+					res.Status, http.StatusNoContent, http.StatusInternalServerError, res.Header.Get("Content-Type"), ct, c.endpoint,
+				)
+			}
 		}
 	}
 
