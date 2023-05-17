@@ -157,7 +157,7 @@ func (c *Client) GetServices(projectUUID string) ([]Service, error) {
 	return services, nil
 }
 
-// GetServicesInfo get the service of a project based on its name.
+// GetServiceInfo get the service of a project based on its name.
 func (c *Client) ScheduleService(projectUUID, name string) error {
 	code, body, err := c.post(fmt.Sprintf("/projects/%s/services/%s/schedule", projectUUID, name), nil)
 	if err != nil {
@@ -171,8 +171,8 @@ func (c *Client) ScheduleService(projectUUID, name string) error {
 	return nil
 }
 
-// GetServicesInfo get the service of a project based on its name.
-func (c *Client) GetServicesInfo(projectUUID, name string) (Service, error) {
+// GetServiceInfo get the service of a project based on its name.
+func (c *Client) GetServiceInfo(projectUUID, name string) (Service, error) {
 	// TODO: if services are to be retrieved with Docker image informations (like for service add)
 	// then GetServices should call GET on project_info/UUID and not project/UUID
 	services, err := c.GetServices(projectUUID)
@@ -270,4 +270,48 @@ func getSchedulingGroupsIds(schedulingGroups []SchedulingGroup) []int {
 	}
 
 	return schedulingGroupsIds
+}
+
+// AddService asks the SquareScale service to attach an image to the project.
+func (c *Client) AddService(projectUUID, name, username, password, entrypoint, runCommand string, instances int, serviceName string, volumeToBind []VolumeToBind, dockerCapabilities []string, dockerDevices []DockerDevice, autostart bool, schedulingGroups []SchedulingGroup, envFile string, envParams []string) error {
+	payload := JSONObject{
+		"docker_image": c.dockerImage(
+			name,
+			username,
+			password,
+		),
+		"auto_start":      autostart,
+		"size":            instances,
+		"volumes_to_bind": volumeToBind,
+	}
+
+	if len(serviceName) > 0 {
+		payload["name"] = serviceName
+	}
+
+	if len(entrypoint) > 0 {
+		payload["entrypoint"] = entrypoint
+	}
+
+	if len(runCommand) > 0 {
+		payload["run_command"] = runCommand
+	}
+
+	if len(dockerDevices) > 0 {
+		payload["docker_devices"] = dockerDevices
+	}
+
+	payload["docker_capabilities"] = dockerCapabilities
+
+	code, body, err := c.post("/projects/"+projectUUID+"/docker_images", &payload)
+	if err != nil {
+		return fmt.Errorf("Cannot add docker image '%s' to project '%s' (%d %s)\n\t%s", name, projectUUID, code, http.StatusText(code), err)
+	}
+
+	switch code {
+	case http.StatusCreated:
+		return nil
+	default:
+		return unexpectedHTTPError(code, body)
+	}
 }

@@ -65,7 +65,7 @@ func (c *ServiceDeleteCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
-		container, err := client.GetServicesInfo(UUID, containerName)
+		container, err := client.GetServiceInfo(UUID, containerName)
 		if err != nil {
 			return "", err
 		}

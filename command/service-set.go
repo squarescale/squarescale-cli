@@ -84,7 +84,7 @@ func (c *ServiceSetCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
-		container, err := client.GetServicesInfo(UUID, *serviceName)
+		container, err := client.GetServiceInfo(UUID, *serviceName)
 		if err != nil {
 			return "", err
 		}
