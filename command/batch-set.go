@@ -26,7 +26,6 @@ func (c *BatchSetCommand) Run(args []string) int {
 	entrypoint := entrypointFlag(c.flagSet)
 	limitMemoryArg := batchLimitMemoryFlag(c.flagSet)
 	limitCPUArg := batchLimitCPUFlag(c.flagSet)
-	limitNetArg := batchLimitNetFlag(c.flagSet)
 	noRunCmdArg := batchNoRunCmdFlag(c.flagSet)
 	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
 	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
@@ -92,10 +91,6 @@ func (c *BatchSetCommand) Run(args []string) int {
 		if *limitCPUArg >= 0 {
 			c.info("Configure batch with CPU limit of %d Mhz", *limitCPUArg)
 			batch.Limits.CPU = *limitCPUArg
-		}
-		if *limitNetArg >= 0 {
-			c.info("Configure batch with network bandwidth limit of %d Mbps", *limitNetArg)
-			batch.Limits.NET = *limitNetArg
 		}
 
 		if *noDockerCapabilities {

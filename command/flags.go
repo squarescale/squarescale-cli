@@ -310,10 +310,6 @@ func batchLimitIOPSFlag(f *flag.FlagSet) *int {
 	return f.Int("iops", 0, "This is an indicative limit of how many I/O operation per second your service requires.")
 }
 
-func batchLimitNetFlag(f *flag.FlagSet) *int {
-	return f.Int("net", -1, "This is an indicative limit of how much network bandwidth your batch requires.")
-}
-
 func batchNoRunCmdFlag(f *flag.FlagSet) *bool {
 	return f.Bool("no-command", false, "Disable command override")
 }

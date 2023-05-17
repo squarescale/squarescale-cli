@@ -26,7 +26,6 @@ type BatchCommon struct {
 type BatchLimits struct {
 	Memory int `json:"mem"`
 	CPU    int `json:"cpu"`
-	NET    int `json:"net"`
 	IOPS   int `json:"iops"`
 }
 
@@ -237,9 +236,6 @@ func (c *Client) ConfigBatch(batch RunningBatch, projectUUID string) error {
 	}
 	if batch.Limits.IOPS >= 0 {
 		limits["iops"] = batch.Limits.IOPS
-	}
-	if batch.Limits.NET >= 0 {
-		limits["net"] = batch.Limits.NET
 	}
 	payload["limits"] = limits
 	if batch.CustomEnvironment != nil {

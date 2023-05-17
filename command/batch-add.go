@@ -37,7 +37,6 @@ func (b *BatchAddCommand) Run(args []string) int {
 	periodicBatch := periodicBatchFlag(b.flagSet)
 	cronExpression := cronExpressionFlag(b.flagSet)
 	timeZoneName := timeZoneNameFlag(b.flagSet)
-	limitNet := batchLimitNetFlag(b.flagSet)
 	limitMemory := batchLimitMemoryFlag(b.flagSet)
 	limitIOPS := batchLimitIOPSFlag(b.flagSet)
 	limitCPU := batchLimitCPUFlag(b.flagSet)
@@ -92,10 +91,6 @@ func (b *BatchAddCommand) Run(args []string) int {
 		return b.errorWithUsage(fmt.Errorf(("Time_zone_name is not in the good format (IANA Time Zone name)")))
 	}
 
-	if *limitNet < 0 {
-		return b.errorWithUsage(fmt.Errorf(("NET must be strictly greater than 0")))
-	}
-
 	if *limitMemory <= 10 {
 		return b.errorWithUsage(fmt.Errorf(("Memory must be greater than or equal to 10MB")))
 	}
@@ -127,7 +122,6 @@ func (b *BatchAddCommand) Run(args []string) int {
 	}
 
 	batchLimitContent := squarescale.BatchLimits{
-		NET:    *limitNet,
 		CPU:    *limitCPU,
 		Memory: *limitMemory,
 		IOPS:   *limitIOPS,
