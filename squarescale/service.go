@@ -35,6 +35,7 @@ type Service struct {
 	DockerDevices       []DockerDevice    `json:"docker_devices"`
 	AutoStart           bool              `json:"auto_start"`
 	MaxClientDisconnect string            `json:"max_client_disconnect"`
+	Volumes             []VolumeToBind    `json:"volumes"`
 }
 
 type ServiceBody struct {
@@ -53,6 +54,7 @@ type ServiceBody struct {
 	DockerDevices       []DockerDevice    `json:"docker_devices"`
 	AutoStart           bool              `json:"auto_start"`
 	MaxClientDisconnect int               `json:"max_client_disconnect"`
+	Volumes             []VolumeToBind    `json:"volumes"`
 }
 
 func (c *Service) SetEnv(path string) error {
@@ -150,6 +152,7 @@ func (c *Client) GetServices(projectUUID string) ([]Service, error) {
 			DockerDevices:       c.DockerDevices,
 			AutoStart:           c.AutoStart,
 			MaxClientDisconnect: strconv.Itoa(c.MaxClientDisconnect),
+			Volumes:             c.Volumes,
 		}
 		services = append(services, *service)
 	}
