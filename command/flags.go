@@ -113,19 +113,11 @@ func containerRunCmdFlag(f *flag.FlagSet) *string {
 }
 
 func containerLimitMemoryFlag(f *flag.FlagSet) *int {
-	return f.Int("memory", -1, "This is the maximum amount of memory your service will be able to use until it is killed and restarted automatically.")
+	return f.Int("memory", 256, "This is the maximum amount of memory your service will be able to use until it is killed and restarted automatically.")
 }
 
 func containerLimitCPUFlag(f *flag.FlagSet) *int {
-	return f.Int("cpu", -1, "This is an indicative limit of how much CPU your service requires.")
-}
-
-func containerLimitIOPSFlag(f *flag.FlagSet) *int {
-	return f.Int("iops", -1, "This is an indicative limit of how many I/O operations per second your service requires.")
-}
-
-func containerLimitNetFlag(f *flag.FlagSet) *int {
-	return f.Int("net", -1, "This is an indicative limit of how much network bandwidth your service requires.")
+	return f.Int("cpu", 100, "This is an indicative limit of how much CPU your service requires.")
 }
 
 func disabledFlag(f *flag.FlagSet, doc string) *bool {
