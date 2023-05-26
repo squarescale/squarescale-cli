@@ -83,7 +83,7 @@ usage: sqsc project list [options]
 func fmtProjectListOutput(projects []squarescale.Project, organizations []squarescale.Organization) string {
 	tableString := &strings.Builder{}
 	table := tablewriter.NewWriter(tableString)
-	table.SetHeader([]string{"Name", "UUID", "Monitoring", "Provider", "Credentials", "Region", "Organization", "Status", "Nodes", "Stateful", "Size", "Created", "Age", "Slack Webhook"})
+	table.SetHeader([]string{"Name", "UUID", "Monitoring", "Provider", "Credentials", "Region", "Organization", "Status", "Nodes", "Stateful", "Size", "Created", "Age", "External ElasticSearch", "Slack Webhook"})
 	data := make([][]string, len(projects), len(projects))
 
 	location, _ := time.LoadLocation(time.Now().Location().String())
@@ -107,6 +107,7 @@ func fmtProjectListOutput(projects []squarescale.Project, organizations []square
 			project.NodeSize,
 			project.CreatedAt.In(location).Format("2006-01-02 15:04"),
 			humantime.Since(project.CreatedAt),
+			project.ExternalES,
 			project.SlackWebHook,
 		}
 	}

@@ -24,6 +24,7 @@ type Project struct {
 	MonitoringEnabled    bool      `json:"monitoring_enabled"`
 	MonitoringEngine     string    `json:"monitoring_engine"`
 	SlackWebHook         string    `json:"slack_webhook"`
+	ExternalES           string    `json:"external_elasticsearch"`
 	Error                string    `json:"error"`
 	HybridClusterEnabled bool      `json:"hybrid_cluster_enabled"`
 	ProviderLabel        string    `json:"provider_label"`
