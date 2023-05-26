@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
@@ -33,6 +34,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	rootDiskSizeGB := c.flagSet.Int("root-disk-size", 20, "Set the root filesystem size (in GB)")
 	slackURL := c.flagSet.String("slackbot", "", "Set the Slack webhook URL")
 	hybridClusterEnabled := c.flagSet.Bool("hybrid-cluster-enabled", false, "Enable Hybrid Cluster")
+	externalESURL := c.flagSet.String("external-elasticsearch", "", "Set the external ElasticSearch URL")
 
 	dbEngine := c.flagSet.String("db-engine", "", "Select database engine")
 	dbSize := c.flagSet.String("db-size", "", "Select database size")
@@ -137,6 +139,18 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		payload["slack_webhook"] = *slackURL
 	}
 
+	if *externalESURL != "" {
+		url, err := url.Parse(*externalESURL)
+		if err != nil {
+			return c.errorWithUsage(errors.New(fmt.Sprintf("URL format error on %s: %q", *externalESURL, err)))
+		}
+		// "host" could be valid entry but it results in empty scheme
+		if url.Scheme != "http" && url.Scheme != "https" {
+			return c.errorWithUsage(errors.New(fmt.Sprintf("URL scheme '%s' not supported for external ElasticSearch endpoint (should be either 'http' or 'https')", url.Scheme)))
+		}
+		payload["external_elasticsearch"] = *externalESURL
+	}
+
 	var integrated_services []map[string]string
 
 	if *consulEnabled {
@@ -150,6 +164,10 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	if *vaultEnabled {
 		integrated_services = append(integrated_services, map[string]string{"name": "vault", "enabled": "true", "basicauth": *vaultBasicAuth, "prefix": *vaultPrefix, "ipwhitelist": *vaultIpWhiteList})
 	}
+
+	// TODO: add observability and ElasticSearch integrated services
+
+	// TODO: add check to prevent both external ES and integrated ES
 
 	payload["integrated_services"] = integrated_services
 	// ask confirmation
