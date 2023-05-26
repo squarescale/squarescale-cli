@@ -64,7 +64,8 @@ func (c *ProjectGetCommand) Run(args []string) int {
 
 		msg = fmt.Sprintf("Name: %s\nUUID: %s\nMonitoring: %s\nProvider: %s\nCredentials: %s\n"+
 			"Region: %s\nOrganization: %s\nStatus: %s\nNodes: %s\n"+
-			"Stateful: %s\nSize: %s\nRootDiskSize: %d GB\nCreated: %s\nAge: %s\nSlack Webhook: %s\n",
+			"Stateful: %s\nSize: %s\nRootDiskSize: %d GB\nCreated: %s\nAge: %s\n"+
+			"External ElasticSearch: %s\nSlack Webhook: %s\n",
 			project.Name,
 			project.UUID,
 			monitoring,
@@ -79,6 +80,7 @@ func (c *ProjectGetCommand) Run(args []string) int {
 			project.RootDiskSizeGB,
 			project.CreatedAt.In(location).Format("2006-01-02 15:04"),
 			humantime.Since(project.CreatedAt),
+			project.ExternalES,
 			project.SlackWebHook,
 		)
 
