@@ -184,10 +184,10 @@ func volumeNameArg(f *flag.FlagSet, arg int) (string, error) {
 	}
 }
 
-func statefulNodeNameArg(f *flag.FlagSet, arg int) (string, error) {
+func extraNodeNameArg(f *flag.FlagSet, arg int) (string, error) {
 	value := f.Arg(arg)
 	if value == "" {
-		return "", errors.New("Stateful-node name must be specified")
+		return "", errors.New("Extra-node name must be specified")
 	} else {
 		return value, nil
 	}

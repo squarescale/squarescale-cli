@@ -9,14 +9,14 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// StatefulNodeDeleteCommand is a cli.Command implementation for deleting a stateful-node.
-type StatefulNodeDeleteCommand struct {
+// ExtraNodeDeleteCommand is a cli.Command implementation for deleting a extra-node.
+type ExtraNodeDeleteCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (c *StatefulNodeDeleteCommand) Run(args []string) int {
+func (c *ExtraNodeDeleteCommand) Run(args []string) int {
 	// Parse flags
 	c.flagSet = newFlagSet(c, c.Ui)
 	alwaysYes := yesFlag(c.flagSet)
@@ -29,7 +29,7 @@ func (c *StatefulNodeDeleteCommand) Run(args []string) int {
 		return 1
 	}
 
-	statefulNodeName, err := statefulNodeNameArg(c.flagSet, 0)
+	extraNodeName, err := extraNodeNameArg(c.flagSet, 0)
 	if err != nil {
 		return c.errorWithUsage(err)
 	}
@@ -42,7 +42,7 @@ func (c *StatefulNodeDeleteCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	c.Ui.Info("Are you sure you want to delete " + statefulNodeName + "?")
+	c.Ui.Info("Are you sure you want to delete " + extraNodeName + "?")
 	if *alwaysYes {
 		c.Ui.Info("(approved from command line)")
 	} else {
@@ -56,7 +56,7 @@ func (c *StatefulNodeDeleteCommand) Run(args []string) int {
 
 	var UUID string
 
-	res := c.runWithSpinner("deleting stateful-node", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := c.runWithSpinner("deleting extra-node", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
 		var projectToShow string
 		if *projectUUID == "" {
@@ -70,8 +70,8 @@ func (c *StatefulNodeDeleteCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
-		fmt.Printf("Delete on project `%s` the stateful node `%s`\n", projectToShow, statefulNodeName)
-		err = client.DeleteStatefulNode(UUID, statefulNodeName)
+		fmt.Printf("Delete on project `%s` the extra node `%s`\n", projectToShow, extraNodeName)
+		err = client.DeleteExtraNode(UUID, extraNodeName)
 		return "", err
 	})
 	if res != 0 {
@@ -79,7 +79,7 @@ func (c *StatefulNodeDeleteCommand) Run(args []string) int {
 	}
 
 	if !*nowait {
-		c.runWithSpinner("wait for stateful-node delete", endpoint.String(), func(client *squarescale.Client) (string, error) {
+		c.runWithSpinner("wait for extra-node delete", endpoint.String(), func(client *squarescale.Client) (string, error) {
 			_, err := client.WaitProject(UUID, 5)
 			if err != nil {
 				return "", err
@@ -93,16 +93,16 @@ func (c *StatefulNodeDeleteCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *StatefulNodeDeleteCommand) Synopsis() string {
-	return "Delete stateful-node from project."
+func (c *ExtraNodeDeleteCommand) Synopsis() string {
+	return "Delete extra-node from project."
 }
 
 // Help is part of cli.Command implementation.
-func (c *StatefulNodeDeleteCommand) Help() string {
+func (c *ExtraNodeDeleteCommand) Help() string {
 	helpText := `
-usage: sqsc stateful-node delete [options] <stateful_node_name>
+usage: sqsc extra node delete [options] <extra_node_name>
 
-  Delete stateful node from project.
+  Delete extra node from project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

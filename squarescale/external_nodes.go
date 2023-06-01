@@ -40,7 +40,7 @@ func (c *Client) GetExternalNodes(projectUUID string) ([]ExternalNode, error) {
 	return externalNodesByID, nil
 }
 
-// GetStatefulNodeInfo get information for a external node
+// GetExternalNodeInfo get information for a external node
 func (c *Client) GetExternalNodeInfo(projectUUID string, name string) (ExternalNode, error) {
 	externalNodes, err := c.GetExternalNodes(projectUUID)
 	if err != nil {
@@ -84,7 +84,7 @@ func (c *Client) AddExternalNode(projectUUID string, name string, public_ip stri
 	return newExternalNode, nil
 }
 
-// WaitExternalNode wait a new stateful-node
+// WaitExternalNode wait a new external-node
 func (c *Client) WaitExternalNode(projectUUID string, name string, timeToWait int64) (ExternalNode, error) {
 	externalNode, err := c.GetExternalNodeInfo(projectUUID, name)
 	if err != nil {

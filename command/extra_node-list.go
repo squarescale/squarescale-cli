@@ -9,14 +9,14 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// StatefulNodeListCommand is a cli.Command implementation for listing stateful-nodes.
-type StatefulNodeListCommand struct {
+// ExtraNodeListCommand is a cli.Command implementation for listing extra-nodes.
+type ExtraNodeListCommand struct {
 	Meta
 	flagSet *flag.FlagSet
 }
 
 // Run is part of cli.Command implementation.
-func (b *StatefulNodeListCommand) Run(args []string) int {
+func (b *ExtraNodeListCommand) Run(args []string) int {
 	b.flagSet = newFlagSet(b, b.Ui)
 	endpoint := endpointFlag(b.flagSet)
 	projectUUID := projectUUIDFlag(b.flagSet)
@@ -34,7 +34,7 @@ func (b *StatefulNodeListCommand) Run(args []string) int {
 		return b.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", b.flagSet.Args()))
 	}
 
-	return b.runWithSpinner("list stateful-node", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return b.runWithSpinner("list extra-node", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -46,22 +46,22 @@ func (b *StatefulNodeListCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
-		statefulNodes, err := client.GetStatefulNodes(UUID)
+		extraNodes, err := client.GetExtraNodes(UUID)
 		if err != nil {
 			return "", err
 		}
 
-		//msg doit retourner la list des stateful-nodes valides : verifier si on recoit une liste des stateful-nodes ou des ID
-		//msg := fmt.Sprintf("list of availables stateful-nodes: %v", stateful-node)
+		//msg doit retourner la list des extra-nodes valides : verifier si on recoit une liste des extra-nodes ou des ID
+		//msg := fmt.Sprintf("list of availables extra-nodes: %v", extra-node)
 
 		var msg string
 		msg = "Name\tNode type\tZone\t\tStatus\n"
-		for _, n := range statefulNodes {
+		for _, n := range extraNodes {
 			msg += fmt.Sprintf("%s\t%s\t%s\t%s\n", n.Name, n.NodeType, n.Zone, n.Status)
 		}
 
-		if len(statefulNodes) == 0 {
-			msg = "No stateful-node found"
+		if len(extraNodes) == 0 {
+			msg = "No extra-node found"
 		}
 
 		return msg, nil
@@ -69,16 +69,16 @@ func (b *StatefulNodeListCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (b *StatefulNodeListCommand) Synopsis() string {
-	return "List stateful nodes of project"
+func (b *ExtraNodeListCommand) Synopsis() string {
+	return "List extra nodes of project"
 }
 
 // Help is part of cli.Command implementation.
-func (b *StatefulNodeListCommand) Help() string {
+func (b *ExtraNodeListCommand) Help() string {
 	helpText := `
-usage: sqsc stateful node list [options]
+usage: sqsc extra node list [options]
 
-  List stateful nodes of project.
+  List extra nodes of project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(b.flagSet))
 }

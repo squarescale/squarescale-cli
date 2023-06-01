@@ -56,7 +56,7 @@ func (b *VolumeListCommand) Run(args []string) int {
 
 		var msg string = "Name\tSize\tType\tZone\t\tNode\tStatus\n"
 		for _, v := range volumes {
-			msg += fmt.Sprintf("%s\t%d\t%s\t%s\t%s\t%s\n", v.Name, v.Size, v.Type, v.Zone, v.StatefulNodeName, v.Status)
+			msg += fmt.Sprintf("%s\t%d\t%s\t%s\t%s\t%s\n", v.Name, v.Size, v.Type, v.Zone, v.ExtraNodeName, v.Status)
 		}
 
 		if len(volumes) == 0 {
