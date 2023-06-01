@@ -30,7 +30,7 @@ func (c *ServiceAddCommand) Run(args []string) int {
 	volumes := volumeFlag(c.flagSet)
 	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
 	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
-	instances := repoOrImageInstancesFlag(c.flagSet)
+	instances := containerInstancesFlag(c.flagSet)
 	dockerDevices := dockerDevicesFlag(c.flagSet)
 	autostart := autostartFlag(c.flagSet)
 	maxClientDisconnect := maxclientdisconnect(c.flagSet)
@@ -81,21 +81,7 @@ func (c *ServiceAddCommand) Run(args []string) int {
 		}
 
 		msg := fmt.Sprintf("Successfully added Docker image '%s' to project '%s' (%v instance(s))", *image, projectToShow, *instances)
-		return msg, client.AddImage(
-			UUID,
-			*image,
-			*username,
-			*password,
-			*entrypoint,
-			*runCommand,
-			*instances,
-			*serviceName,
-			volumesToBind,
-			dockerCapabilitiesArray,
-			dockerDevicesArray,
-			*autostart,
-			*maxClientDisconnect,
-		)
+		return msg, client.AddService(UUID, *image, *username, *password, *entrypoint, *runCommand, *instances, *serviceName, volumesToBind, dockerCapabilitiesArray, dockerDevicesArray, *autostart, *maxClientDisconnect, []squarescale.SchedulingGroup{}, "", []string{})
 	})
 }
 

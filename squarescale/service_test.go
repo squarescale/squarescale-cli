@@ -70,8 +70,8 @@ func nominalCaseOnAddService(t *testing.T) {
 	dockerCapabilities := []string{"AUDIT_WRITE", "CHOWN"}
 	dockerDevices := []squarescale.DockerDevice{{SRC: "src", DST: "dst"}}
 
-	errPublic := cli.AddService(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, []squarescale.SchedulingGroup{}, "", []string{})
-	errPrivate := cli.AddService(projectName, "nginx", "login", "pass", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, []squarescale.SchedulingGroup{}, "", []string{})
+	errPublic := cli.AddService(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, "0", []squarescale.SchedulingGroup{}, "", []string{})
+	errPrivate := cli.AddService(projectName, "nginx", "login", "pass", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, "0", []squarescale.SchedulingGroup{}, "", []string{})
 
 	// then
 	if errPublic != nil {
@@ -103,7 +103,7 @@ func ClientHTTPErrorOnAddService(t *testing.T) {
 	dockerCapabilities := []string{"AUDIT_WRITE", "CHOWN"}
 	dockerDevices := []squarescale.DockerDevice{{SRC: "src", DST: "dst"}}
 
-	errOnAdd := cli.AddService(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, []squarescale.SchedulingGroup{}, "", []string{})
+	errOnAdd := cli.AddService(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, "0", []squarescale.SchedulingGroup{}, "", []string{})
 
 	// then
 	if errOnAdd == nil {
@@ -133,7 +133,7 @@ func InternalServerErrorOnAddService(t *testing.T) {
 	dockerCapabilities := []string{"AUDIT_WRITE", "CHOWN"}
 	dockerDevices := []squarescale.DockerDevice{{SRC: "src", DST: "dst"}}
 
-	errOnAdd := cli.AddService(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, []squarescale.SchedulingGroup{}, "", []string{})
+	errOnAdd := cli.AddService(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, "0", []squarescale.SchedulingGroup{}, "", []string{})
 
 	// then
 	expectedError := "An unexpected error occurred (code: 500)"

@@ -276,9 +276,9 @@ func getSchedulingGroupsIds(schedulingGroups []SchedulingGroup) []int {
 }
 
 // AddService asks the SquareScale service to attach an image to the project.
-func (c *Client) AddService(projectUUID, name, username, password, entrypoint, runCommand string, instances int, serviceName string, volumeToBind []VolumeToBind, dockerCapabilities []string, dockerDevices []DockerDevice, autostart bool, schedulingGroups []SchedulingGroup, envFile string, envParams []string) error {
+func (c *Client) AddService(projectUUID, name, username, password, entrypoint, runCommand string, instances int, serviceName string, volumeToBind []VolumeToBind, dockerCapabilities []string, dockerDevices []DockerDevice, autostart bool, maxClientDisconnect string, schedulingGroups []SchedulingGroup, envFile string, envParams []string) error {
 	payload := JSONObject{
-		"docker_image": c.dockerImage(
+		"docker_image": c.DockerImage(
 			name,
 			username,
 			password,
@@ -286,6 +286,12 @@ func (c *Client) AddService(projectUUID, name, username, password, entrypoint, r
 		"auto_start":      autostart,
 		"size":            instances,
 		"volumes_to_bind": volumeToBind,
+	}
+
+	if len(maxClientDisconnect) > 0 {
+		payload["max_client_disconnect"] = maxClientDisconnect
+	} else {
+		payload["max_client_disconnect"] = "0"
 	}
 
 	if len(serviceName) > 0 {
@@ -317,4 +323,18 @@ func (c *Client) AddService(projectUUID, name, username, password, entrypoint, r
 	default:
 		return unexpectedHTTPError(code, body)
 	}
+}
+
+func (c *Client) DockerImage(name, username, password string) JSONObject {
+	o := JSONObject{
+		"name": name,
+	}
+
+	if username != "" && password != "" {
+		o["private"] = true
+		o["username"] = username
+		o["password"] = password
+	}
+
+	return o
 }
