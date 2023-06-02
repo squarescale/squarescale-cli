@@ -59,12 +59,16 @@ func (c *ProjectGetCommand) Run(args []string) int {
 		if project.MonitoringEnabled && len(project.MonitoringEngine) > 0 {
 			monitoring = project.MonitoringEngine
 		}
+		isHybrid := "false"
+		if project.HybridClusterEnabled {
+			isHybrid = "true"
+		}
 
 		location, _ := time.LoadLocation(time.Now().Location().String())
 
 		msg = fmt.Sprintf("Name: %s\nUUID: %s\nMonitoring: %s\nProvider: %s\nCredentials: %s\n"+
-			"Region: %s\nOrganization: %s\nStatus: %s\nNodes: %s\n"+
-			"Extra: %s\nSize: %s\nRootDiskSize: %d GB\nCreated: %s\nUpdated: %s\n"+
+			"Region: %s\nOrganization: %s\nStatus: %s\nCluster: %s\n"+
+			"Extra: %s\nHybrid: %s\nSize: %s\nRootDiskSize: %d GB\nCreated: %s\nUpdated: %s\n"+
 			"External ElasticSearch: %s\nSlack Webhook: %s\n",
 			project.Name,
 			project.UUID,
@@ -76,6 +80,7 @@ func (c *ProjectGetCommand) Run(args []string) int {
 			project.ProjectStatus(),
 			project.ProjectStateLessCount(),
 			project.ProjectStateFulCount(),
+			isHybrid,
 			project.NodeSize,
 			project.RootDiskSizeGB,
 			fmt.Sprintf("%s (%s)", project.CreatedAt.In(location).Format("2006-01-02 15:04"), humantime.Since(project.CreatedAt)),
