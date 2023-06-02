@@ -59,6 +59,7 @@ func TestProject(t *testing.T) {
 
 	// Error cases
 	t.Run("Test HTTP client error on project methods (create, provision, unprovision, get)", ClientHTTPErrorOnProjectMethods)
+	// TODO: see why the following was not implemented
 	// t.Run("Test internal server error on project methods ()", InternalServerErrorOnProjectMethods)
 	t.Run("Test badly JSON on project methods (create)", CantUnmarshalOnProjectMethods)
 }
@@ -1239,6 +1240,7 @@ func CantUnmarshalOnProjectMethods(t *testing.T) {
 	}
 }
 
+// TODO: see what the following comments are really meant for
 // ProjectUnprovision(project string) error {
 // ProjectDelete(project string) error {
 // ProjectLogs(project string, container string, after string) ([]string, string, error) {
