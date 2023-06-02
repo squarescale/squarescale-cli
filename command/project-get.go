@@ -64,7 +64,7 @@ func (c *ProjectGetCommand) Run(args []string) int {
 
 		msg = fmt.Sprintf("Name: %s\nUUID: %s\nMonitoring: %s\nProvider: %s\nCredentials: %s\n"+
 			"Region: %s\nOrganization: %s\nStatus: %s\nNodes: %s\n"+
-			"Extra: %s\nSize: %s\nRootDiskSize: %d GB\nCreated: %s\nAge: %s\n"+
+			"Extra: %s\nSize: %s\nRootDiskSize: %d GB\nCreated: %s\nUpdated: %s\n"+
 			"External ElasticSearch: %s\nSlack Webhook: %s\n",
 			project.Name,
 			project.UUID,
