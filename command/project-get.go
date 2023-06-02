@@ -78,8 +78,8 @@ func (c *ProjectGetCommand) Run(args []string) int {
 			project.ProjectStateFulCount(),
 			project.NodeSize,
 			project.RootDiskSizeGB,
-			project.CreatedAt.In(location).Format("2006-01-02 15:04"),
-			humantime.Since(project.CreatedAt),
+			fmt.Sprintf("%s (%s)", project.CreatedAt.In(location).Format("2006-01-02 15:04"), humantime.Since(project.CreatedAt)),
+			fmt.Sprintf("%s (%s)", project.UpdatedAt.In(location).Format("2006-01-02 15:04"), humantime.Since(project.UpdatedAt)),
 			project.ExternalES,
 			project.SlackWebHook,
 		)
