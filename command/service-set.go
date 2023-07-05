@@ -34,6 +34,7 @@ func (c *ServiceSetCommand) Run(args []string) int {
 	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
 	autostart := autostart(c.flagSet)
 	dockerDevices := dockerDevicesFlag(c.flagSet)
+	maxClientDisconnect := maxclientdisconnect(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -154,6 +155,11 @@ func (c *ServiceSetCommand) Run(args []string) int {
 		if len(schedulingGroupsToAdd) != 0 {
 			c.info("Configure scheduling groups")
 			container.SchedulingGroups = schedulingGroupsToAdd
+		}
+
+		if isFlagPassed("max-client-disconnect", c.flagSet) {
+			c.info("Configure max-client-disconnect")
+			container.MaxClientDisconnect = *maxClientDisconnect
 		}
 
 		msg := fmt.Sprintf(

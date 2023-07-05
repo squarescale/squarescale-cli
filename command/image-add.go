@@ -76,7 +76,7 @@ func (c *ImageAddCommand) Run(args []string) int {
 		}
 
 		msg := fmt.Sprintf("Successfully added Docker image '%s' to project '%s' (%v instance(s))", *image, projectToShow, *instances)
-		return msg, client.AddImage(UUID, *image, *username, *password, *entrypoint, *runCommand, *instances, *serviceName, volumesToBind, dockerCapabilitiesArray, dockerDevicesArray, *autostart)
+		return msg, client.AddImage(UUID, *image, *username, *password, *entrypoint, *runCommand, *instances, *serviceName, volumesToBind, dockerCapabilitiesArray, dockerDevicesArray, *autostart, "")
 	})
 }
 

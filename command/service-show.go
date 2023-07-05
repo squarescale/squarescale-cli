@@ -70,7 +70,8 @@ func (c *ServiceShowCommand) Run(args []string) int {
 			tbl += fmt.Sprintf("Memory limit:\t%d MB\n", co.Limits.Memory)
 			tbl += fmt.Sprintf("CPU limit:\t%d MHz\n", co.Limits.CPU)
 			tbl += fmt.Sprintf("Enabled capabilities: \t%s \n", strings.Join(co.DockerCapabilities, ","))
-			tbl += fmt.Sprintf("Docker devices:\n")
+			tbl += "Docker devices:\n"
+			tbl += fmt.Sprintf("Max Client Disconnect: \t%s\n", co.MaxClientDisconnect)
 			for _, dev := range co.DockerDevices {
 				tbl += fmt.Sprintf("\tsrc:%s dst:%s opts:%s\n", dev.SRC, dev.DST, dev.OPT)
 			}

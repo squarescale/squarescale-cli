@@ -70,8 +70,8 @@ func nominalCaseOnAddImage(t *testing.T) {
 	dockerCapabilities := []string{"AUDIT_WRITE", "CHOWN"}
 	dockerDevices := []squarescale.DockerDevice{{SRC: "src", DST: "dst"}}
 
-	errPublic := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true)
-	errPrivate := cli.AddImage(projectName, "nginx", "login", "pass", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true)
+	errPublic := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, "")
+	errPrivate := cli.AddImage(projectName, "nginx", "login", "pass", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, "")
 
 	// then
 	if errPublic != nil {
@@ -103,7 +103,7 @@ func ClientHTTPErrorOnAddImage(t *testing.T) {
 	dockerCapabilities := []string{"AUDIT_WRITE", "CHOWN"}
 	dockerDevices := []squarescale.DockerDevice{{SRC: "src", DST: "dst"}}
 
-	errOnAdd := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true)
+	errOnAdd := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, "")
 
 	// then
 	if errOnAdd == nil {
@@ -133,7 +133,7 @@ func InternalServerErrorOnAddImage(t *testing.T) {
 	dockerCapabilities := []string{"AUDIT_WRITE", "CHOWN"}
 	dockerDevices := []squarescale.DockerDevice{{SRC: "src", DST: "dst"}}
 
-	errOnAdd := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true)
+	errOnAdd := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, "")
 
 	// then
 	expectedError := "An unexpected error occurred (code: 500)"
