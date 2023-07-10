@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/squarescale/logger"
@@ -19,37 +20,39 @@ type ServiceEnv struct {
 
 // Service describes a project container as returned by the SquareScale API
 type Service struct {
-	ID                 int               `json:"container_id"`
-	Name               string            `json:"name"`
-	RunCommand         string            `json:"run_command"`
-	Entrypoint         string            `json:"entrypoint"`
-	Running            int               `json:"running"`
-	Size               int               `json:"size"`
-	WebPort            int               `json:"web_port"`
-	RefreshCallbacks   []string          `json:"refresh_callbacks"`
-	Limits             ServiceLimits     `json:"limits"`
-	CustomEnv          []ServiceEnv      `json:"custom_environment"`
-	SchedulingGroups   []SchedulingGroup `json:"scheduling_groups"`
-	DockerCapabilities []string          `json:"docker_capabilities"`
-	DockerDevices      []DockerDevice    `json:"docker_devices"`
-	AutoStart          bool              `json:"auto_start"`
+	ID                  int               `json:"container_id"`
+	Name                string            `json:"name"`
+	RunCommand          string            `json:"run_command"`
+	Entrypoint          string            `json:"entrypoint"`
+	Running             int               `json:"running"`
+	Size                int               `json:"size"`
+	WebPort             int               `json:"web_port"`
+	RefreshCallbacks    []string          `json:"refresh_callbacks"`
+	Limits              ServiceLimits     `json:"limits"`
+	CustomEnv           []ServiceEnv      `json:"custom_environment"`
+	SchedulingGroups    []SchedulingGroup `json:"scheduling_groups"`
+	DockerCapabilities  []string          `json:"docker_capabilities"`
+	DockerDevices       []DockerDevice    `json:"docker_devices"`
+	AutoStart           bool              `json:"auto_start"`
+	MaxClientDisconnect string            `json:"max_client_disconnect"`
 }
 
 type ServiceBody struct {
-	ID                 int               `json:"container_id"`
-	Name               string            `json:"name"`
-	RunCommand         []string          `json:"run_command"`
-	Entrypoint         string            `json:"entrypoint"`
-	Running            int               `json:"running"`
-	Size               int               `json:"size"`
-	WebPort            int               `json:"web_port"`
-	RefreshCallbacks   []string          `json:"refresh_callbacks"`
-	Limits             ServiceLimits     `json:"limits"`
-	CustomEnv          []ServiceEnv      `json:"custom_environment"`
-	SchedulingGroups   []SchedulingGroup `json:"scheduling_groups"`
-	DockerCapabilities []string          `json:"docker_capabilities"`
-	DockerDevices      []DockerDevice    `json:"docker_devices"`
-	AutoStart          bool              `json:"auto_start"`
+	ID                  int               `json:"container_id"`
+	Name                string            `json:"name"`
+	RunCommand          []string          `json:"run_command"`
+	Entrypoint          string            `json:"entrypoint"`
+	Running             int               `json:"running"`
+	Size                int               `json:"size"`
+	WebPort             int               `json:"web_port"`
+	RefreshCallbacks    []string          `json:"refresh_callbacks"`
+	Limits              ServiceLimits     `json:"limits"`
+	CustomEnv           []ServiceEnv      `json:"custom_environment"`
+	SchedulingGroups    []SchedulingGroup `json:"scheduling_groups"`
+	DockerCapabilities  []string          `json:"docker_capabilities"`
+	DockerDevices       []DockerDevice    `json:"docker_devices"`
+	AutoStart           bool              `json:"auto_start"`
+	MaxClientDisconnect int               `json:"max_client_disconnect"`
 }
 
 func (c *Service) SetEnv(path string) error {
@@ -110,20 +113,21 @@ func (c *Client) GetServices(projectUUID string) ([]Service, error) {
 
 	for _, c := range servicesBody {
 		service := &Service{
-			ID:                 c.ID,
-			Name:               c.Name,
-			RunCommand:         strings.Join(c.RunCommand, " "),
-			Entrypoint:         c.Entrypoint,
-			Running:            c.Running,
-			Size:               c.Size,
-			WebPort:            c.WebPort,
-			RefreshCallbacks:   c.RefreshCallbacks,
-			Limits:             c.Limits,
-			CustomEnv:          c.CustomEnv,
-			SchedulingGroups:   c.SchedulingGroups,
-			DockerCapabilities: c.DockerCapabilities,
-			DockerDevices:      c.DockerDevices,
-			AutoStart:          c.AutoStart,
+			ID:                  c.ID,
+			Name:                c.Name,
+			RunCommand:          strings.Join(c.RunCommand, " "),
+			Entrypoint:          c.Entrypoint,
+			Running:             c.Running,
+			Size:                c.Size,
+			WebPort:             c.WebPort,
+			RefreshCallbacks:    c.RefreshCallbacks,
+			Limits:              c.Limits,
+			CustomEnv:           c.CustomEnv,
+			SchedulingGroups:    c.SchedulingGroups,
+			DockerCapabilities:  c.DockerCapabilities,
+			DockerDevices:       c.DockerDevices,
+			AutoStart:           c.AutoStart,
+			MaxClientDisconnect: strconv.Itoa(c.MaxClientDisconnect),
 		}
 		services = append(services, *service)
 	}
@@ -194,6 +198,9 @@ func (c *Client) ConfigService(service Service) error {
 	}
 	if service.DockerDevices != nil {
 		cont["docker_devices"] = service.DockerDevices
+	}
+	if service.MaxClientDisconnect != "" {
+		cont["max_client_disconnect"] = service.MaxClientDisconnect
 	}
 	cont["auto_start"] = service.AutoStart
 

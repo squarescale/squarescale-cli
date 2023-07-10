@@ -332,6 +332,15 @@ func autostart(f *flag.FlagSet) *bool {
 	return f.Bool("auto-start", true, "Allow automatic start")
 }
 
+func maxclientdisconnect(f *flag.FlagSet) *string {
+	return f.String("max-client-disconnect", "",
+		"specifies a duration in second (or add a label suffix like '30m' or '1h' or '1d') "+
+			"during which the service is considered normally disconnected. "+
+			"After this duration the service will be tentatively rescheduled elsewhere. "+
+			"To reset to default set to 0 "+
+			"By default, this duration is quite short: 2m")
+}
+
 func entrypointFlag(f *flag.FlagSet) *string {
 	return f.String("entrypoint", "", "This is the script / program that will be executed")
 }
