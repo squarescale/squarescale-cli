@@ -50,7 +50,12 @@ func (c *DBShowCommand) Run(args []string) int {
 			return "", e
 		}
 
-		return c.FormatTable(fmt.Sprintf("DB enabled:\t%v\nDB Engine:\t%s\nDB Size:\t%s\nVersion:\t%s", db.Enabled, db.Engine, db.Size, db.Version), false), nil
+		return c.FormatTable(
+			fmt.Sprintf(
+				"DB Enabled:\t%v\nDB Engine:\t%s\nDB Size:\t%s\nDB Version:\t%s\nDB Backup Enabled:\t%v\nDB Backup Retention:\t%v",
+				db.Enabled, db.Engine, db.Size, db.Version, db.BackupEnabled, db.BackupRetention,
+			), false),
+			nil
 	})
 }
 
