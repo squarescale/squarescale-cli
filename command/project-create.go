@@ -39,6 +39,8 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	dbEngine := c.flagSet.String("db-engine", "", "Select database engine")
 	dbSize := c.flagSet.String("db-size", "", "Select database size")
 	dbVersion := c.flagSet.String("db-version", "", "Select database version")
+	dbBackupEnabled := c.flagSet.Bool("db-backup", false, "Enable database automated backups")
+	dbBackupRetention := c.flagSet.Int("db-backup-retention", 0, "Database automated backups retention days")
 
 	consulEnabled := c.flagSet.Bool("consul-enabled", false, "Enable Consul")
 	nomadEnabled := c.flagSet.Bool("nomad-enabled", false, "Enable Nomad")
@@ -132,7 +134,16 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	} else if *dbEngine == "" && *dbSize != "" {
 		return c.errorWithUsage(errors.New("if db size is present, db engine must be set"))
 	} else if *dbEngine != "" && *dbSize != "" {
-		payload["databases"] = []map[string]string{{"engine": *dbEngine, "size": *dbSize, "version": *dbVersion}}
+		if *dbBackupRetention < 0 {
+			return c.errorWithUsage(errors.New("retention value can not be negative"))
+		}
+		if *dbBackupEnabled && *dbBackupRetention == 0 {
+			return c.errorWithUsage(errors.New("retention value can only be strictly positive when db backup enabled"))
+		}
+		if !*dbBackupEnabled && *dbBackupRetention != 0 {
+			return c.errorWithUsage(errors.New("retention value can only be 0 when db backup disabled"))
+		}
+		payload["databases"] = []map[string]interface{}{{"engine": *dbEngine, "size": *dbSize, "version": *dbVersion, "backup_enabled": *dbBackupEnabled, "backup_retention_days": *dbBackupRetention}}
 	}
 
 	if *slackURL != "" {
@@ -194,6 +205,8 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		if *dbVersion != "" {
 			c.Ui.Warn(fmt.Sprintf("database version : %s", *dbVersion))
 		}
+		c.Ui.Warn(fmt.Sprintf("database backup : %v", *dbBackupEnabled))
+		c.Ui.Warn(fmt.Sprintf("database backup retention : %v", *dbBackupRetention))
 	}
 
 	ok, err := AskYesNo(c.Ui, alwaysYes, "Proceed ?", true)
