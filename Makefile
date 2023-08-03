@@ -54,6 +54,7 @@ tests: ## Run test suites in all packages
 
 coverage: ## Run test suites in all packages with code coverage
 	go test ./... -cover -coverprofile=coverage.out
+	go tool cover -func=coverage.out
 
 coverage_html: coverage ## Show code coverage html report
 	go tool cover -html=coverage.out -o coverage.html
