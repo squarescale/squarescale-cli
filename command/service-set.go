@@ -30,8 +30,8 @@ func (c *ServiceSetCommand) Run(args []string) int {
 	maxClientDisconnect := maxclientdisconnect(c.flagSet)
 
 	schedulingGroups := containerSchedulingGroupsFlag(c.flagSet)
-	limitMemory := containerLimitMemoryFlag(c.flagSet)
-	limitCPU := containerLimitCPUFlag(c.flagSet)
+	limitMemory := containerLimitMemoryFlag(c.flagSet, 0)
+	limitCPU := containerLimitCPUFlag(c.flagSet, 0)
 	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
 	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
 	dockerDevices := dockerDevicesFlag(c.flagSet)
