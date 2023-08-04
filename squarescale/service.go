@@ -194,12 +194,12 @@ func (c *Client) GetServiceInfo(projectUUID, name string) (Service, error) {
 
 // ConfigService calls the API to update the number of instances and update command.
 func (c *Client) ConfigService(service Service) error {
-	cont := JSONObject{}
+	svcConf := JSONObject{}
 	if len(service.RunCommand) != 0 {
-		cont["run_command"] = service.RunCommand
+		svcConf["run_command"] = service.RunCommand
 	}
 	if service.Size > 0 {
-		cont["size"] = service.Size
+		svcConf["size"] = service.Size
 	}
 	limits := JSONObject{}
 	if service.Limits.Memory >= 0 {
@@ -211,25 +211,25 @@ func (c *Client) ConfigService(service Service) error {
 	if service.Limits.IOPS > 0 {
 		limits["iops"] = service.Limits.IOPS
 	}
-	cont["limits"] = limits
+	svcConf["limits"] = limits
 	if service.CustomEnv != nil {
-		cont["custom_environment"] = service.CustomEnv
+		svcConf["custom_environment"] = service.CustomEnv
 	}
 	if len(service.SchedulingGroups) != 0 {
-		cont["scheduling_groups"] = getSchedulingGroupsIds(service.SchedulingGroups)
+		svcConf["scheduling_groups"] = getSchedulingGroupsIds(service.SchedulingGroups)
 	}
 	if service.DockerCapabilities != nil {
-		cont["docker_capabilities"] = service.DockerCapabilities
+		svcConf["docker_capabilities"] = service.DockerCapabilities
 	}
 	if service.DockerDevices != nil {
-		cont["docker_devices"] = service.DockerDevices
+		svcConf["docker_devices"] = service.DockerDevices
 	}
 	if service.MaxClientDisconnect != "" {
-		cont["max_client_disconnect"] = service.MaxClientDisconnect
+		svcConf["max_client_disconnect"] = service.MaxClientDisconnect
 	}
-	cont["auto_start"] = service.AutoStart
+	svcConf["auto_start"] = service.AutoStart
 
-	payload := &JSONObject{"container": cont}
+	payload := &JSONObject{"container": svcConf}
 	logger.Debug.Println("Json payload : ", payload)
 	code, body, err := c.put(fmt.Sprintf("/containers/%d", service.ID), payload)
 	if err != nil {
