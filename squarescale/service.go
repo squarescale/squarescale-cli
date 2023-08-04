@@ -226,6 +226,8 @@ func (c *Client) ConfigService(service Service) error {
 	}
 	if service.MaxClientDisconnect != "" {
 		svcConf["max_client_disconnect"] = service.MaxClientDisconnect
+	} else {
+		svcConf["max_client_disconnect"] = "0"
 	}
 	svcConf["auto_start"] = service.AutoStart
 
@@ -276,45 +278,10 @@ func getSchedulingGroupsIds(schedulingGroups []SchedulingGroup) []int {
 }
 
 // AddService asks the SquareScale service to attach an image to the project.
-func (c *Client) AddService(projectUUID, name, username, password, entrypoint, runCommand string, instances int, serviceName string, volumeToBind []VolumeToBind, dockerCapabilities []string, dockerDevices []DockerDevice, autostart bool, maxClientDisconnect string, schedulingGroups []SchedulingGroup, envFile string, envParams []string) error {
-	payload := JSONObject{
-		"docker_image": c.DockerImage(
-			name,
-			username,
-			password,
-		),
-		"auto_start":      autostart,
-		"size":            instances,
-		"volumes_to_bind": volumeToBind,
-	}
-
-	if len(maxClientDisconnect) > 0 {
-		payload["max_client_disconnect"] = maxClientDisconnect
-	} else {
-		payload["max_client_disconnect"] = "0"
-	}
-
-	if len(serviceName) > 0 {
-		payload["name"] = serviceName
-	}
-
-	if len(entrypoint) > 0 {
-		payload["entrypoint"] = entrypoint
-	}
-
-	if len(runCommand) > 0 {
-		payload["run_command"] = runCommand
-	}
-
-	if len(dockerDevices) > 0 {
-		payload["docker_devices"] = dockerDevices
-	}
-
-	payload["docker_capabilities"] = dockerCapabilities
-
+func (c *Client) AddService(projectUUID string, payload JSONObject) error {
 	code, body, err := c.post("/projects/"+projectUUID+"/docker_images", &payload)
 	if err != nil {
-		return fmt.Errorf("Cannot add docker image '%s' to project '%s' (%d %s)\n\t%s", name, projectUUID, code, http.StatusText(code), err)
+		return fmt.Errorf("Cannot add docker image '%v' to project '%s' (%d %s)\n\t%s", payload["docker_image"], projectUUID, code, http.StatusText(code), err)
 	}
 
 	switch code {
@@ -325,7 +292,7 @@ func (c *Client) AddService(projectUUID, name, username, password, entrypoint, r
 	}
 }
 
-func (c *Client) DockerImage(name, username, password string) JSONObject {
+func DockerImage(name, username, password string) JSONObject {
 	o := JSONObject{
 		"name": name,
 	}
