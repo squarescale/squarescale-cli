@@ -47,21 +47,25 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	nomadEnabled := c.flagSet.Bool("nomad-enabled", false, "Enable Nomad")
 	vaultEnabled := c.flagSet.Bool("vault-enabled", false, "Enable Vault")
 	observabilityEnabled := c.flagSet.Bool("observability-enabled", false, "Enable Observability")
+	elasticsearchEnabled := c.flagSet.Bool("elasticsearch-enabled", false, "Enable ElasticSearch")
 
 	consulBasicAuth := c.flagSet.String("consul-basic-auth", "", "Set Consul Basic Authentication credentials")
 	nomadBasicAuth := c.flagSet.String("nomad-basic-auth", "", "Set Nomad Basic Authentication credentials")
 	vaultBasicAuth := c.flagSet.String("vault-basic-auth", "", "Set Vault Basic Authentication credentials")
 	observabilityBasicAuth := c.flagSet.String("observability-basic-auth", "", "Set Observability Basic Authentication credentials")
+	elasticsearchBasicAuth := c.flagSet.String("elasticsearch-basic-auth", "", "Set ElasticSearch Basic Authentication credentials")
 
 	consulPrefix := c.flagSet.String("consul-prefix", "", "Set Consul HTTP Prefix")
 	nomadPrefix := c.flagSet.String("nomad-prefix", "", "Set Nomad HTTP Prefix")
 	vaultPrefix := c.flagSet.String("vault-prefix", "", "Set Vault HTTP Prefix")
 	observabilityPrefix := c.flagSet.String("observability-prefix", "", "Set Observability HTTP Prefix")
+	elasticsearchPrefix := c.flagSet.String("elasticsearch-prefix", "", "Set ElasticSearch HTTP Prefix")
 
 	consulIpWhiteList := c.flagSet.String("consul-ip-whitelist", "", "Set Consul IP whitelist")
 	nomadIpWhiteList := c.flagSet.String("nomad-ip-whitelist", "", "Set Nomad IP whitelist")
 	vaultIpWhiteList := c.flagSet.String("vault-ip-whitelist", "", "Set Vault IP whitelist")
 	observabilityIpWhiteList := c.flagSet.String("observability-ip-whitelist", "", "Set Observability IP whitelist")
+	elasticsearchIpWhiteList := c.flagSet.String("elasticsearch-ip-whitelist", "", "Set ElasticSearch IP whitelist")
 
 	nowait := nowaitFlag(c.flagSet)
 
@@ -195,7 +199,9 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 		integrated_services = append(integrated_services, map[string]string{"name": "observability", "enabled": "true", "basicauth": *observabilityBasicAuth, "prefix": *observabilityPrefix, "ipwhitelist": *observabilityIpWhiteList})
 	}
 
-	// TODO: add ElasticSearch integrated services
+	if *elasticsearchEnabled {
+		integrated_services = append(integrated_services, map[string]string{"name": "elasticsearch", "enabled": "true", "basicauth": *elasticsearchBasicAuth, "prefix": *elasticsearchPrefix, "ipwhitelist": *elasticsearchIpWhiteList})
+	}
 
 	// TODO: add check to prevent both external ES and integrated ES
 
