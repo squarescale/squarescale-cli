@@ -9,16 +9,16 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-func TestAddImage(t *testing.T) {
-	// AddImage
-	t.Run("Nominal case on AddImage", nominalCaseOnAddImage)
+func TestAddService(t *testing.T) {
+	// AddService
+	t.Run("Nominal case on AddService", nominalCaseOnAddService)
 
 	// Error cases
-	t.Run("Test HTTP client error on image methods (add)", ClientHTTPErrorOnAddImage)
-	t.Run("Test internal server error on image methods (add)", InternalServerErrorOnAddImage)
+	t.Run("Test HTTP client error on service methods (add)", ClientHTTPErrorOnAddService)
+	t.Run("Test internal server error on service methods (add)", InternalServerErrorOnAddService)
 }
 
-func nominalCaseOnAddImage(t *testing.T) {
+func nominalCaseOnAddService(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -70,8 +70,32 @@ func nominalCaseOnAddImage(t *testing.T) {
 	dockerCapabilities := []string{"AUDIT_WRITE", "CHOWN"}
 	dockerDevices := []squarescale.DockerDevice{{SRC: "src", DST: "dst"}}
 
-	errPublic := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, "")
-	errPrivate := cli.AddImage(projectName, "nginx", "login", "pass", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, "")
+	pubPayload := squarescale.JSONObject{
+		"docker_image": squarescale.DockerImage(
+			"nginx",
+			"",
+			"",
+		),
+		"auto_start":		true,
+		"size":			1,
+		"volumes_to_bind":	volumesToBind,
+		"docker_capabilities":	dockerCapabilities,
+		"docker_devices":	dockerDevices,
+	}
+	privPayload := squarescale.JSONObject{
+		"docker_image": squarescale.DockerImage(
+			"nginx",
+			"login",
+			"pass",
+		),
+		"auto_start":		true,
+		"size":			1,
+		"volumes_to_bind":	volumesToBind,
+		"docker_capabilities":	dockerCapabilities,
+		"docker_devices":	dockerDevices,
+	}
+	errPublic := cli.AddService(projectName, pubPayload)
+	errPrivate := cli.AddService(projectName, privPayload)
 
 	// then
 	if errPublic != nil {
@@ -83,7 +107,7 @@ func nominalCaseOnAddImage(t *testing.T) {
 	}
 }
 
-func ClientHTTPErrorOnAddImage(t *testing.T) {
+func ClientHTTPErrorOnAddService(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -103,15 +127,27 @@ func ClientHTTPErrorOnAddImage(t *testing.T) {
 	dockerCapabilities := []string{"AUDIT_WRITE", "CHOWN"}
 	dockerDevices := []squarescale.DockerDevice{{SRC: "src", DST: "dst"}}
 
-	errOnAdd := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, "")
+	payload := squarescale.JSONObject{
+		"docker_image": squarescale.DockerImage(
+			"nginx",
+			"",
+			"",
+		),
+		"auto_start":		true,
+		"size":			1,
+		"volumes_to_bind":	volumesToBind,
+		"docker_capabilities":	dockerCapabilities,
+		"docker_devices":	dockerDevices,
+	}
+	errOnAdd := cli.AddService(projectName, payload)
 
 	// then
 	if errOnAdd == nil {
-		t.Errorf("Error is not raised on image AddImage")
+		t.Errorf("Error is not raised on image AddService")
 	}
 }
 
-func InternalServerErrorOnAddImage(t *testing.T) {
+func InternalServerErrorOnAddService(t *testing.T) {
 	// given
 	token := "some-token"
 	projectName := "my-project"
@@ -133,7 +169,19 @@ func InternalServerErrorOnAddImage(t *testing.T) {
 	dockerCapabilities := []string{"AUDIT_WRITE", "CHOWN"}
 	dockerDevices := []squarescale.DockerDevice{{SRC: "src", DST: "dst"}}
 
-	errOnAdd := cli.AddImage(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, "")
+	payload := squarescale.JSONObject{
+		"docker_image": squarescale.DockerImage(
+			"nginx",
+			"",
+			"",
+		),
+		"auto_start":		true,
+		"size":			1,
+		"volumes_to_bind":	volumesToBind,
+		"docker_capabilities":	dockerCapabilities,
+		"docker_devices":	dockerDevices,
+	}
+	errOnAdd := cli.AddService(projectName, payload)
 
 	// then
 	expectedError := "An unexpected error occurred (code: 500)"

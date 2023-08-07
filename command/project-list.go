@@ -83,7 +83,10 @@ usage: sqsc project list [options]
 func fmtProjectListOutput(projects []squarescale.Project, organizations []squarescale.Organization) string {
 	tableString := &strings.Builder{}
 	table := tablewriter.NewWriter(tableString)
-	table.SetHeader([]string{"Name", "UUID", "Monitoring", "Provider", "Credentials", "Region", "Organization", "Status", "Nodes", "Stateful", "Size", "Created", "Age", "Slack Webhook"})
+	// reset by ui/table.go FormatTable function: table.SetAutoFormatHeaders(false)
+	// seems like this should be taken into account earlier than in the ui/table.go FormatTable function to have effect on fields
+	table.SetAutoWrapText(false)
+	table.SetHeader([]string{"Name", "UUID", "Monitoring", "Provider", "Credentials", "Region", "Organization", "Status", "Cluster", "Extra", "Hybrid", "Size", "Created", "Updated", "External ElasticSearch", "Slack Webhook"})
 	data := make([][]string, len(projects), len(projects))
 
 	location, _ := time.LoadLocation(time.Now().Location().String())
@@ -92,6 +95,10 @@ func fmtProjectListOutput(projects []squarescale.Project, organizations []square
 		monitoring := ""
 		if project.MonitoringEnabled && len(project.MonitoringEngine) > 0 {
 			monitoring = project.MonitoringEngine
+		}
+		isHybrid := "false"
+		if project.HybridClusterEnabled {
+			isHybrid = "true"
 		}
 		data[i] = []string{
 			project.Name,
@@ -104,9 +111,11 @@ func fmtProjectListOutput(projects []squarescale.Project, organizations []square
 			project.ProjectStatus(),
 			project.ProjectStateLessCount(),
 			project.ProjectStateFulCount(),
+			isHybrid,
 			project.NodeSize,
-			project.CreatedAt.In(location).Format("2006-01-02 15:04"),
-			humantime.Since(project.CreatedAt),
+			fmt.Sprintf("%s (%s)", project.CreatedAt.In(location).Format("2006-01-02 15:04"), humantime.Since(project.CreatedAt)),
+			fmt.Sprintf("%s (%s)", project.UpdatedAt.In(location).Format("2006-01-02 15:04"), humantime.Since(project.UpdatedAt)),
+			project.ExternalES,
 			project.SlackWebHook,
 		}
 	}
@@ -119,6 +128,10 @@ func fmtProjectListOutput(projects []squarescale.Project, organizations []square
 			if project.MonitoringEnabled && len(project.MonitoringEngine) > 0 {
 				monitoring = project.MonitoringEngine
 			}
+			isHybrid := "false"
+			if project.HybridClusterEnabled {
+				isHybrid = "true"
+			}
 			table.Append([]string{
 				project.Name,
 				project.UUID,
@@ -130,9 +143,12 @@ func fmtProjectListOutput(projects []squarescale.Project, organizations []square
 				project.ProjectStatus(),
 				project.ProjectStateLessCount(),
 				project.ProjectStateFulCount(),
+				isHybrid,
 				project.NodeSize,
-				project.CreatedAt.In(location).Format("2006-01-02 15:04"),
-				humantime.Since(project.CreatedAt),
+				fmt.Sprintf("%s (%s)", project.CreatedAt.In(location).Format("2006-01-02 15:04"), humantime.Since(project.CreatedAt)),
+				fmt.Sprintf("%s (%s)", project.UpdatedAt.In(location).Format("2006-01-02 15:04"), humantime.Since(project.UpdatedAt)),
+				project.ExternalES,
+				project.SlackWebHook,
 			})
 		}
 	}

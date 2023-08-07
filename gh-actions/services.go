@@ -24,7 +24,6 @@ type ServiceContent struct {
 	ENV            map[string]string     `json:"env"`
 	LIMIT_MEMORY   string                `json:"limit_memory"`
 	LIMIT_CPU      string                `json:"limit_cpu"`
-	LIMIT_NET      string                `json:"limit_net"`
 }
 
 type NetworkRulesContent struct {
@@ -92,13 +91,12 @@ func (s *Services) createService(serviceName string, serviceContent ServiceConte
 func (s *Services) insertServiceEnvAndLimits(serviceName string, serviceContent ServiceContent) {
 
 	limitMemory := serviceContent.LIMIT_MEMORY
-	limitNet := serviceContent.LIMIT_NET
 	limitCpu := serviceContent.LIMIT_CPU
 	instances := serviceContent.INSTANCES
 	command := serviceContent.RUN_CMD
 	environment := serviceContent.ENV
 
-	if len(environment) != 0 || limitMemory != "" || limitNet != "" || limitCpu != "" {
+	if len(environment) != 0 || limitMemory != "" || limitCpu != "" {
 
 		cmd := fmt.Sprintf("%s container set", getSqscCLICmd())
 		cmd += " -project-name " + getProjectName()
@@ -124,10 +122,6 @@ func (s *Services) insertServiceEnvAndLimits(serviceName string, serviceContent 
 
 		if limitCpu != "" {
 			cmd += " -cpu " + limitCpu
-		}
-
-		if limitNet != "" {
-			cmd += " -net " + limitNet
 		}
 
 		if instances != "" {

@@ -21,20 +21,25 @@ func (c *ServiceSetCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := projectUUIDFlag(c.flagSet)
 	projectName := projectNameFlag(c.flagSet)
-	serviceArg := serviceFlag(c.flagSet)
-	nInstancesArg := containerInstancesFlag(c.flagSet)
-	runCmdArg := containerRunCmdFlag(c.flagSet)
+	serviceName := serviceFlag(c.flagSet)
+	instances := containerInstancesFlag(c.flagSet)
+	runCommand := containerRunCmdFlag(c.flagSet)
+	noRunCommand := containerNoRunCmdFlag(c.flagSet)
 	entrypoint := entrypointFlag(c.flagSet)
-	limitMemoryArg := containerLimitMemoryFlag(c.flagSet)
-	limitCPUArg := containerLimitCPUFlag(c.flagSet)
-	noRunCmdArg := containerNoRunCmdFlag(c.flagSet)
-	envCmdArg := envFileFlag(c.flagSet)
-	schedulingGroupsArg := containerSchedulingGroupsFlag(c.flagSet)
+	autostart := autostartFlag(c.flagSet)
+	maxClientDisconnect := maxclientdisconnect(c.flagSet)
+
+	schedulingGroups := containerSchedulingGroupsFlag(c.flagSet)
+	limitMemory := containerLimitMemoryFlag(c.flagSet, 0)
+	limitCPU := containerLimitCPUFlag(c.flagSet, 0)
 	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
 	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
-	autostart := autostart(c.flagSet)
 	dockerDevices := dockerDevicesFlag(c.flagSet)
-	maxClientDisconnect := maxclientdisconnect(c.flagSet)
+
+	envVariables := envFileFlag(c.flagSet)
+	var envParams []string
+	envParameterFlag(c.flagSet, &envParams)
+	volumes := volumeFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -48,23 +53,22 @@ func (c *ServiceSetCommand) Run(args []string) int {
 		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	if *serviceArg == "" {
+	if *serviceName == "" {
 		return c.errorWithUsage(errors.New("Service name cannot be empty."))
 	}
 
-	if *noRunCmdArg && *runCmdArg != "" {
+	if *noRunCommand && *runCommand != "" {
 		return c.errorWithUsage(errors.New("Cannot specify an override command and disable it at the same time"))
 	}
 
-	if *nInstancesArg <= 0 {
-		if *nInstancesArg != -1 {
-			c.Ui.Warn("Number of instances cannot be 0 or negative. This value won't be set.")
+	if *instances <= 0 {
+		if *instances != -1 {
+			c.Ui.Warn("Number of instances cannot be 0 or negative. This value won't be set and default 1 will be used.")
 		}
+	}
 
-		if *runCmdArg == "" && !*noRunCmdArg && *limitCPUArg < 0 && *limitMemoryArg < 0 {
-			err := errors.New("Invalid values provided for instance number.")
-			return c.errorWithUsage(err)
-		}
+	if *limitCPU < 0 || *limitMemory < 0 {
+		return c.errorWithUsage(errors.New("Invalid values provided for limits."))
 	}
 
 	return c.runWithSpinner("configure service", endpoint.String(), func(client *squarescale.Client) (string, error) {
@@ -82,7 +86,7 @@ func (c *ServiceSetCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
-		container, err := client.GetServicesInfo(UUID, *serviceArg)
+		container, err := client.GetServiceInfo(UUID, *serviceName)
 		if err != nil {
 			return "", err
 		}
@@ -90,51 +94,59 @@ func (c *ServiceSetCommand) Run(args []string) int {
 		c.Meta.spin.Stop()
 		c.Meta.info("")
 
-		if *nInstancesArg > 0 {
-			container.Size = *nInstancesArg
-			c.info("Configure service with %d instances", *nInstancesArg)
+		if *instances > 0 && container.Size != *instances {
+			container.Size = *instances
+			c.info("Configure service with %d instances", *instances)
 		}
 
-		if *runCmdArg != "" {
-			c.info("Configure service with run command: %s", *runCmdArg)
-			container.RunCommand = *runCmdArg
+		if *runCommand != "" && container.RunCommand != *runCommand {
+			c.info("Configure service with run command: %s", *runCommand)
+			container.RunCommand = *runCommand
 			if len(container.RunCommand) == 0 {
 				container.RunCommand = ""
 			}
 		}
-		if *noRunCmdArg {
+		if *noRunCommand {
 			c.info("Configure service without run command")
 			container.RunCommand = ""
 		}
 
-		if *entrypoint != "" {
+		if *entrypoint != "" && container.Entrypoint != *entrypoint {
 			c.info("Configure service with entrypoint: %s", *entrypoint)
 			container.Entrypoint = *entrypoint
 		}
 
-		if *limitMemoryArg >= 0 {
-			c.info("Configure service with memory limit of %d MB", *limitMemoryArg)
-			container.Limits.Memory = *limitMemoryArg
+		if *limitMemory > 0 && container.Limits.Memory != *limitMemory {
+			c.info("Configure service with memory limit of %d MB", *limitMemory)
+			container.Limits.Memory = *limitMemory
 		}
-		if *limitCPUArg >= 0 {
-			c.info("Configure service with CPU limit of %d Mhz", *limitCPUArg)
-			container.Limits.CPU = *limitCPUArg
+		if *limitCPU > 0 && container.Limits.CPU != *limitCPU {
+			c.info("Configure service with CPU limit of %d Mhz", *limitCPU)
+			container.Limits.CPU = *limitCPU
 		}
-		if *envCmdArg != "" {
-			c.info("Configure service with some env")
-			err := container.SetEnv(*envCmdArg)
+
+		if *envVariables != "" {
+			c.info("Configure service with some environment JSON file")
+			err := container.SetEnv(*envVariables)
+			if err != nil {
+				c.error(err)
+			}
+		}
+		if len(envParams) > 0 {
+			c.info("Configure service with some environment parameters")
+			err := container.SetEnvParams(envParams)
 			if err != nil {
 				c.error(err)
 			}
 		}
 
 		if isFlagPassed("auto-start", c.flagSet) {
-			c.info("Configure service with CPU autostart %v", *autostart)
+			c.info("Configure service with CPU autostartFlag %v", *autostart)
 			container.AutoStart = *autostart
 		}
 
 		if isFlagPassed("docker-devices", c.flagSet) {
-			c.info("Configure service with custom mapping")
+			c.info("Configure service with custom Docker devices mapping")
 			dockerDevicesArray, err := getDockerDevicesArray(*dockerDevices)
 			if err != nil {
 				c.error(err)
@@ -145,15 +157,15 @@ func (c *ServiceSetCommand) Run(args []string) int {
 
 		if *noDockerCapabilities {
 			container.DockerCapabilities = []string{"NONE"}
-			c.info("Configure batch with all capabilities disabled")
+			c.info("Configure service with all capabilities disabled")
 		} else if *dockerCapabilities != "" {
 			container.DockerCapabilities = getDockerCapabilitiesArray(*dockerCapabilities)
-			c.info("Configure batch with those capabilities : %v", strings.Join(container.DockerCapabilities, ","))
+			c.info("Configure service with those capabilities : %v", strings.Join(container.DockerCapabilities, ","))
 		}
 
-		schedulingGroupsToAdd := getSchedulingGroupsArray(UUID, client, *schedulingGroupsArg)
+		schedulingGroupsToAdd := getSchedulingGroupsArray(UUID, client, *schedulingGroups)
 		if len(schedulingGroupsToAdd) != 0 {
-			c.info("Configure scheduling groups")
+			c.info("Configure service with some scheduling groups")
 			container.SchedulingGroups = schedulingGroupsToAdd
 		}
 
@@ -162,9 +174,15 @@ func (c *ServiceSetCommand) Run(args []string) int {
 			container.MaxClientDisconnect = *maxClientDisconnect
 		}
 
+		volumesToBind := parseVolumesToBind(*volumes)
+		if len(volumesToBind) != 0 {
+			c.info("Configure service with some volumes")
+			container.Volumes = volumesToBind
+		}
+
 		msg := fmt.Sprintf(
 			"Successfully configured service '%s' for project '%s'",
-			*serviceArg, projectToShow)
+			*serviceName, projectToShow)
 
 		c.Meta.spin.Start()
 		return msg, client.ConfigService(container)
@@ -185,10 +203,10 @@ usage: sqsc service set [options]
   Services are specified using their given name.
 
 Example:
-  sqsc service set                \
-      -project="my-rails-project" \
-      -service="my-name/my-repo"  \
-      -instances=42               \
+  sqsc service set          \
+      -project="my-project" \
+      -service="my-service" \
+      -instances=42         \
       -env=env.json
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))

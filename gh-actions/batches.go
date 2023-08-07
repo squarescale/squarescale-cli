@@ -24,7 +24,6 @@ type BatchContent struct {
 	ENV            map[string]string `json:"env"`
 	LIMIT_MEMORY   string            `json:"limit_memory"`
 	LIMIT_CPU      string            `json:"limit_cpu"`
-	LIMIT_NET      string            `json:"limit_net"`
 }
 
 type BatchPeriodic struct {
@@ -98,11 +97,10 @@ func (b *Batches) createBatch(batchName string, batchContent BatchContent) {
 func (b *Batches) insertBatchEnvAndLimits(batchName string, batchContent BatchContent) {
 
 	limitMemory := batchContent.LIMIT_MEMORY
-	limitNet := batchContent.LIMIT_NET
 	limitCpu := batchContent.LIMIT_CPU
 	environment := batchContent.ENV
 
-	if len(environment) != 0 || limitMemory != "" || limitNet != "" || limitCpu != "" {
+	if len(environment) != 0 || limitMemory != "" || limitCpu != "" {
 
 		cmd := fmt.Sprintf("%s batch set", getSqscCLICmd())
 		cmd += " -project-name " + getProjectName()
@@ -128,10 +126,6 @@ func (b *Batches) insertBatchEnvAndLimits(batchName string, batchContent BatchCo
 
 		if limitCpu != "" {
 			cmd += " -cpu " + limitCpu
-		}
-
-		if limitNet != "" {
-			cmd += " -net " + limitNet
 		}
 
 		executeCommand(cmd, fmt.Sprintf("Failed to insert %q batch environment and limits.", batchName))

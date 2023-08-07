@@ -59,8 +59,7 @@ func nominalCaseOnGetBatches(t *testing.T) {
 					"limits": {
 							"mem": 256,
 							"cpu": 100,
-							"iops": 0,
-							"net": 1
+							"iops": 0
 					},
 					"custom_environment": {
 						"custom_environment": "final-environment"
@@ -152,11 +151,6 @@ func nominalCaseOnGetBatches(t *testing.T) {
 	expectedInt = 100
 	if batches[0].Limits.CPU != expectedInt {
 		t.Errorf("Expected batches.Limits.CPU to be %d, but got %d instead", expectedInt, batches[0].Limits.CPU)
-	}
-
-	expectedInt = 1
-	if batches[0].Limits.NET != expectedInt {
-		t.Errorf("Expected batches.Limits.NET to be %d, but got %d instead", expectedInt, batches[0].Limits.NET)
 	}
 
 	expectedInt = 0
@@ -309,7 +303,6 @@ func nominalCaseOnCreateBatches(t *testing.T) {
 	periodicBatch := true
 	cronExpression := "* * * * *"
 	timeZoneName := "Europe/Paris"
-	limitNet := 1
 	limitMemory := 256
 	limitIOPS := 0
 	limitCPU := 100
@@ -332,7 +325,6 @@ func nominalCaseOnCreateBatches(t *testing.T) {
 		Password: dockerImagePassword,
 	}
 	batchLimitsContent := squarescale.BatchLimits{
-		NET:    limitNet,
 		Memory: limitMemory,
 		IOPS:   limitIOPS,
 		CPU:    limitCPU,
@@ -388,8 +380,7 @@ func nominalCaseOnCreateBatches(t *testing.T) {
 				"limits": {
 					"mem": 256,
 					"cpu": 100,
-					"iops": 40,
-					"net": 256
+					"iops": 40
 				}
 			}
 		`
@@ -504,12 +495,6 @@ func nominalCaseOnCreateBatches(t *testing.T) {
 	if batch.Limits.IOPS != expectedInt {
 		t.Errorf("Expected batches.Limits.IOPS to be %d, but got %d instead", expectedInt, batch.Limits.IOPS)
 	}
-
-	expectedInt = 256
-	if batch.Limits.NET != expectedInt {
-		t.Errorf("Expected batches.Limits.NET to be %d, but got %d instead", expectedInt, batch.Limits.NET)
-	}
-
 }
 
 func ProjectNotFoundOnCreateBatches(t *testing.T) {

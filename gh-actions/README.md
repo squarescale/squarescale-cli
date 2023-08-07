@@ -63,7 +63,6 @@ A service within this json has for key the name of the service and for value a j
 | instances | The number of instances you want to scale on this service. | string
 | limit_memory | Maximum amount of memory your service will be able to use until it is killed and restarted automatically. (MB) | string
 | limit_cpu | This is an indicative limit of how much CPU your service requires. (MHz) | string
-| limit_net | This is an indicative limit of how much network bandwidth your service requires. It is only used to optimize the placement on the cluster. (Mbps) | string
 | network_rules | The network rules.<br><ul><li>`name` (default `http`)</li><li>`internal_port` (default `80`)</li><li>`domain` (default: `""`)</li><li>`path_prefix` (default: `/`)</li><li>`internal_protocol` (default: `http`)</li><li>`external_protocol` (default: `http`)</li></ul> | json
 | env | The environment variables the application image needs to.  | json
 
@@ -82,7 +81,6 @@ SERVICES: >-
       "run_cmd": "bundle exec rails server -b 0.0.0.0",
       "limit_memory": "256",
       "limit_cpu": "100",
-      "limit_net": "1",
       "instances": "1",
       "network_rules": [
         {
@@ -134,7 +132,6 @@ A batch within this json has for key the name of the batch and for value a json 
 | periodic | Enable a periodic batch.<br><ul><li>`periodicity` (default: `* * * * *`)</li><li>`timezone` (default: `Europe/Paris`)</li></ul> | json
 | limit_memory | Maximum amount of memory your batch will be able to use until it is killed and restarted automatically. (MB) | string
 | limit_cpu | This is an indicative limit of how much CPU your batch requires. (MHz) | string
-| limit_net | This is an indicative limit of how much network bandwidth your batch requires. It is only used to optimize the placement on the cluster. (Mbps) | string
 | env | The environment variables the application image needs to. (see above with `SERVICES`)  | json
 
 Example:
@@ -147,7 +144,6 @@ BATCHES: >-
       "is_private": true,
       "limit_memory": "256",
       "limit_cpu": "100",
-      "limit_net": "1",
       "image_user": "${{ env.DOCKER_USER }}",
       "image_password": "${{ env.DOCKER_TOKEN }}",
       "run_cmd": "bundle exec rails db:setup",

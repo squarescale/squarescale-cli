@@ -21,7 +21,7 @@ func (c *ServiceShowCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := projectUUIDFlag(c.flagSet)
 	projectName := projectNameFlag(c.flagSet)
-	containerArg := filterNameFlag(c.flagSet)
+	containerArg := filterServiceFlag(c.flagSet)
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -69,9 +69,13 @@ func (c *ServiceShowCommand) Run(args []string) int {
 			tbl += fmt.Sprintf("Web Port:\t%d\n", co.WebPort)
 			tbl += fmt.Sprintf("Memory limit:\t%d MB\n", co.Limits.Memory)
 			tbl += fmt.Sprintf("CPU limit:\t%d MHz\n", co.Limits.CPU)
-			tbl += fmt.Sprintf("Enabled capabilities: \t%s \n", strings.Join(co.DockerCapabilities, ","))
-			tbl += "Docker devices:\n"
 			tbl += fmt.Sprintf("Max Client Disconnect: \t%s\n", co.MaxClientDisconnect)
+			tbl += fmt.Sprintf("Enabled capabilities: \t%s \n", strings.Join(co.DockerCapabilities, ","))
+			tbl += fmt.Sprintf("Volumes:\n")
+			for _, vol := range co.Volumes {
+				tbl += fmt.Sprintf("\tname:%s mount:%s R/O:%v\n", vol.Name, vol.MountPoint, vol.ReadOnly)
+			}
+			tbl += fmt.Sprintf("Docker devices:\n")
 			for _, dev := range co.DockerDevices {
 				tbl += fmt.Sprintf("\tsrc:%s dst:%s opts:%s\n", dev.SRC, dev.DST, dev.OPT)
 			}

@@ -122,8 +122,8 @@ func nominalCaseOnGetVolumes(t *testing.T) {
 	}
 
 	expectedString = "node02"
-	if volumes[0].StatefulNodeName != expectedString {
-		t.Errorf("Expect volume.StatefulNodeName `%s`, got `%s`", expectedString, volumes[0].StatefulNodeName)
+	if volumes[0].ExtraNodeName != expectedString {
+		t.Errorf("Expect volume.ExtraNodeName `%s`, got `%s`", expectedString, volumes[0].ExtraNodeName)
 	}
 
 	expectedString = "provisionned"
@@ -157,8 +157,8 @@ func nominalCaseOnGetVolumes(t *testing.T) {
 	}
 
 	expectedString = ""
-	if volumes[1].StatefulNodeName != expectedString {
-		t.Errorf("Expect volume.StatefulNodeName `%s`, got `%s`", expectedString, volumes[1].StatefulNodeName)
+	if volumes[1].ExtraNodeName != expectedString {
+		t.Errorf("Expect volume.ExtraNodeName `%s`, got `%s`", expectedString, volumes[1].ExtraNodeName)
 	}
 
 	expectedString = "not_provisionned"
@@ -239,8 +239,8 @@ func nominalCaseOnGetVolumeInfo(t *testing.T) {
 	}
 
 	expectedString = "node02"
-	if volume.StatefulNodeName != expectedString {
-		t.Errorf("Expect volume.StatefulNodeName `%s`, got `%s`", expectedString, volume.StatefulNodeName)
+	if volume.ExtraNodeName != expectedString {
+		t.Errorf("Expect volume.ExtraNodeName `%s`, got `%s`", expectedString, volume.ExtraNodeName)
 	}
 
 	expectedString = "provisionned"

@@ -35,6 +35,7 @@ type Service struct {
 	DockerDevices       []DockerDevice    `json:"docker_devices"`
 	AutoStart           bool              `json:"auto_start"`
 	MaxClientDisconnect string            `json:"max_client_disconnect"`
+	Volumes             []VolumeToBind    `json:"volumes"`
 }
 
 type ServiceBody struct {
@@ -53,6 +54,7 @@ type ServiceBody struct {
 	DockerDevices       []DockerDevice    `json:"docker_devices"`
 	AutoStart           bool              `json:"auto_start"`
 	MaxClientDisconnect int               `json:"max_client_disconnect"`
+	Volumes             []VolumeToBind    `json:"volumes"`
 }
 
 func (c *Service) SetEnv(path string) error {
@@ -61,7 +63,7 @@ func (c *Service) SetEnv(path string) error {
 
 	file, err := os.Open(path)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Some error happened when reading env file : %s", err))
+		return errors.New(fmt.Sprintf("Error when reading env file: %s", err))
 	}
 
 	defer file.Close()
@@ -69,7 +71,7 @@ func (c *Service) SetEnv(path string) error {
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&env)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Some error happened when unmarshall env file : %s", err))
+		return errors.New(fmt.Sprintf("Error when unmarshalling env file: %s", err))
 	}
 
 	c.CustomEnv = make([]ServiceEnv, len(env), len(env))
@@ -78,6 +80,28 @@ func (c *Service) SetEnv(path string) error {
 	for k, v := range env {
 		c.CustomEnv[i] = ServiceEnv{Key: k, Value: v}
 		i++
+	}
+	return nil
+}
+
+func (c *Service) SetEnvParams(params []string) error {
+	for _, p := range params {
+		v := strings.Split(p, "=")
+		if len(v) != 2 {
+			return errors.New(fmt.Sprintf("environment parameter %v not in the form param=value", p))
+		}
+		found := -1
+		for i, curParam := range c.CustomEnv {
+			if curParam.Key == v[0] {
+				found = i
+				break
+			}
+		}
+		if found >= 0 {
+			c.CustomEnv[found].Value = v[1]
+		} else {
+			c.CustomEnv = append(c.CustomEnv, ServiceEnv{Key: v[0], Value: v[1]})
+		}
 	}
 	return nil
 }
@@ -128,6 +152,7 @@ func (c *Client) GetServices(projectUUID string) ([]Service, error) {
 			DockerDevices:       c.DockerDevices,
 			AutoStart:           c.AutoStart,
 			MaxClientDisconnect: strconv.Itoa(c.MaxClientDisconnect),
+			Volumes:             c.Volumes,
 		}
 		services = append(services, *service)
 	}
@@ -135,7 +160,7 @@ func (c *Client) GetServices(projectUUID string) ([]Service, error) {
 	return services, nil
 }
 
-// GetServicesInfo get the service of a project based on its name.
+// GetServiceInfo get the service of a project based on its name.
 func (c *Client) ScheduleService(projectUUID, name string) error {
 	code, body, err := c.post(fmt.Sprintf("/projects/%s/services/%s/schedule", projectUUID, name), nil)
 	if err != nil {
@@ -149,8 +174,8 @@ func (c *Client) ScheduleService(projectUUID, name string) error {
 	return nil
 }
 
-// GetServicesInfo get the service of a project based on its name.
-func (c *Client) GetServicesInfo(projectUUID, name string) (Service, error) {
+// GetServiceInfo get the service of a project based on its name.
+func (c *Client) GetServiceInfo(projectUUID, name string) (Service, error) {
 	// TODO: if services are to be retrieved with Docker image informations (like for service add)
 	// then GetServices should call GET on project_info/UUID and not project/UUID
 	services, err := c.GetServices(projectUUID)
@@ -169,12 +194,12 @@ func (c *Client) GetServicesInfo(projectUUID, name string) (Service, error) {
 
 // ConfigService calls the API to update the number of instances and update command.
 func (c *Client) ConfigService(service Service) error {
-	cont := JSONObject{}
+	svcConf := JSONObject{}
 	if len(service.RunCommand) != 0 {
-		cont["run_command"] = service.RunCommand
+		svcConf["run_command"] = service.RunCommand
 	}
 	if service.Size > 0 {
-		cont["size"] = service.Size
+		svcConf["size"] = service.Size
 	}
 	limits := JSONObject{}
 	if service.Limits.Memory >= 0 {
@@ -186,25 +211,27 @@ func (c *Client) ConfigService(service Service) error {
 	if service.Limits.IOPS > 0 {
 		limits["iops"] = service.Limits.IOPS
 	}
-	cont["limits"] = limits
+	svcConf["limits"] = limits
 	if service.CustomEnv != nil {
-		cont["custom_environment"] = service.CustomEnv
+		svcConf["custom_environment"] = service.CustomEnv
 	}
 	if len(service.SchedulingGroups) != 0 {
-		cont["scheduling_groups"] = getSchedulingGroupsIds(service.SchedulingGroups)
+		svcConf["scheduling_groups"] = getSchedulingGroupsIds(service.SchedulingGroups)
 	}
 	if service.DockerCapabilities != nil {
-		cont["docker_capabilities"] = service.DockerCapabilities
+		svcConf["docker_capabilities"] = service.DockerCapabilities
 	}
 	if service.DockerDevices != nil {
-		cont["docker_devices"] = service.DockerDevices
+		svcConf["docker_devices"] = service.DockerDevices
 	}
 	if service.MaxClientDisconnect != "" {
-		cont["max_client_disconnect"] = service.MaxClientDisconnect
+		svcConf["max_client_disconnect"] = service.MaxClientDisconnect
+	} else {
+		svcConf["max_client_disconnect"] = "0"
 	}
-	cont["auto_start"] = service.AutoStart
+	svcConf["auto_start"] = service.AutoStart
 
-	payload := &JSONObject{"container": cont}
+	payload := &JSONObject{"container": svcConf}
 	logger.Debug.Println("Json payload : ", payload)
 	code, body, err := c.put(fmt.Sprintf("/containers/%d", service.ID), payload)
 	if err != nil {
@@ -248,4 +275,33 @@ func getSchedulingGroupsIds(schedulingGroups []SchedulingGroup) []int {
 	}
 
 	return schedulingGroupsIds
+}
+
+// AddService asks the SquareScale service to attach an image to the project.
+func (c *Client) AddService(projectUUID string, payload JSONObject) error {
+	code, body, err := c.post("/projects/"+projectUUID+"/docker_images", &payload)
+	if err != nil {
+		return fmt.Errorf("Cannot add docker image '%v' to project '%s' (%d %s)\n\t%s", payload["docker_image"], projectUUID, code, http.StatusText(code), err)
+	}
+
+	switch code {
+	case http.StatusCreated:
+		return nil
+	default:
+		return unexpectedHTTPError(code, body)
+	}
+}
+
+func DockerImage(name, username, password string) JSONObject {
+	o := JSONObject{
+		"name": name,
+	}
+
+	if username != "" && password != "" {
+		o["private"] = true
+		o["username"] = username
+		o["password"] = password
+	}
+
+	return o
 }

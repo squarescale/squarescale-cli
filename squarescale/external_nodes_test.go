@@ -23,13 +23,13 @@ func TestExternalNodes(t *testing.T) {
 	t.Run("Nominal case on AddExternalNode", nominalCaseOnAddExternalNode)
 	t.Run("Test project not found on AddExternalNode", UnknownProjectOnAddExternalNode)
 
-	// WaitStatefulNode
-	t.Run("Nominal case on WaitStatefulNode", nominalCaseOnWaitExternalNode)
+	// WaitExtraNode
+	t.Run("Nominal case on WaitExtraNode", nominalCaseOnWaitExternalNode)
 
 	// Error cases
-	// t.Run("Test HTTP client error on stateful-nodes methods (get, add, delete)", ClientHTTPErrorOnSchedulingGroupMethods)
-	// t.Run("Test internal server error on stateful-nodes methods (get, add, delete)", InternalServerErrorOnSchedulingGroupMethods)
-	// t.Run("Test badly JSON on stateful-nodes methods (get, add)", CantUnmarshalOnSchedulingGroupMethods)
+	t.Run("Test HTTP client error on external-nodes methods (get, add, delete)", ClientHTTPErrorOnSchedulingGroupMethods)
+	t.Run("Test internal server error on external-nodes methods (get, add, delete)", InternalServerErrorOnSchedulingGroupMethods)
+	t.Run("Test badly JSON on external-nodes methods (get, add)", CantUnmarshalOnSchedulingGroupMethods)
 }
 
 func nominalCaseOnGetExternalNodes(t *testing.T) {
@@ -362,14 +362,14 @@ func nominalCaseOnWaitExternalNode(t *testing.T) {
 		checkPath(t, "/projects/"+projectName+"/external_nodes", r.URL.Path)
 		checkAuthorization(t, r.Header.Get("Authorization"), token)
 
-		var statefulNodeStatus string
+		var extraNodeStatus string
 
 		httptestCount++
 
 		if httptestCount < 2 {
-			statefulNodeStatus = "not_provisionned"
+			extraNodeStatus = "not_provisionned"
 		} else {
-			statefulNodeStatus = "provisionned"
+			extraNodeStatus = "provisionned"
 		}
 		resBody := fmt.Sprintf(`
 		[
@@ -380,7 +380,7 @@ func nominalCaseOnWaitExternalNode(t *testing.T) {
 				"status": "%s"
 			}
 		]
-		`, statefulNodeStatus)
+		`, extraNodeStatus)
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(200)

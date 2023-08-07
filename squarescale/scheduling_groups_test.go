@@ -30,9 +30,9 @@ func TestSchedulingGroups(t *testing.T) {
 	t.Run("Test to delete a missing scheduling group on DeleteSchedulingGroup", UnknownSchedulingGroupOnDeleteSchedulingGroup)
 
 	// Error cases
-	t.Run("Test HTTP client error on stateful-nodes methods (get, add, delete)", ClientHTTPErrorOnSchedulingGroupMethods)
-	t.Run("Test internal server error on stateful-nodes methods (get, add, delete)", InternalServerErrorOnSchedulingGroupMethods)
-	t.Run("Test badly JSON on stateful-nodes methods (get, add)", CantUnmarshalOnSchedulingGroupMethods)
+	t.Run("Test HTTP client error on extra-nodes methods (get, add, delete)", ClientHTTPErrorOnSchedulingGroupMethods)
+	t.Run("Test internal server error on extra-nodes methods (get, add, delete)", InternalServerErrorOnSchedulingGroupMethods)
+	t.Run("Test badly JSON on extra-nodes methods (get, add)", CantUnmarshalOnSchedulingGroupMethods)
 }
 
 func nominalCaseOnGetSchedulingGroups(t *testing.T) {
