@@ -70,15 +70,15 @@ func (b *ExtraNodeListCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (b *ExtraNodeListCommand) Synopsis() string {
-	return "List extra nodes of project"
+	return "List extra-nodes of project"
 }
 
 // Help is part of cli.Command implementation.
 func (b *ExtraNodeListCommand) Help() string {
 	helpText := `
-usage: sqsc extra node list [options]
+usage: sqsc extra-node list [options]
 
-  List extra nodes of project.
+  List extra-nodes of project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(b.flagSet))
 }

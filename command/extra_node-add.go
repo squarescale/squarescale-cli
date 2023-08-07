@@ -22,8 +22,8 @@ func (c *ExtraNodeAddCommand) Run(args []string) int {
 	projectUUID := projectUUIDFlag(c.flagSet)
 	projectName := projectNameFlag(c.flagSet)
 
-	nodeType := c.flagSet.String("node-type", "dev", "Extra node type")
-	zone := c.flagSet.String("zone", "eu-west-1a", "Extra node zone")
+	nodeType := c.flagSet.String("node-type", "dev", "Extra-node type")
+	zone := c.flagSet.String("zone", "eu-west-1a", "Extra-node zone")
 	nowait := nowaitFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
@@ -82,15 +82,15 @@ func (c *ExtraNodeAddCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ExtraNodeAddCommand) Synopsis() string {
-	return "Add extra node to project."
+	return "Add extra-node to project."
 }
 
 // Help is part of cli.Command implementation.
 func (c *ExtraNodeAddCommand) Help() string {
 	helpText := `
-usage: sqsc extra node add [options] <extra_node_name>
+usage: sqsc extra-node add [options] <extra_node_name>
 
-  Add extra node to project.
+  Add extra-node to project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

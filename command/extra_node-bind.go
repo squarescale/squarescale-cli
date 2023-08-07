@@ -69,15 +69,15 @@ func (c *ExtraNodeBindCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ExtraNodeBindCommand) Synopsis() string {
-	return "Bind extra node to project."
+	return "Bind extra-node to project."
 }
 
 // Help is part of cli.Command implementation.
 func (c *ExtraNodeBindCommand) Help() string {
 	helpText := `
-usage: sqsc extra node bind [options] <extra_node_name>
+usage: sqsc extra-node bind [options] <extra_node_name>
 
-  Bind extra node to project.
+  Bind extra-node to project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

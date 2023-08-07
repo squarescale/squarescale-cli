@@ -6,7 +6,7 @@ import (
 	"github.com/mitchellh/cli"
 )
 
-// ExtraNodeCommand is a cli.Command implementation for top level `sqsc extra node` command.
+// ExtraNodeCommand is a cli.Command implementation for top level `sqsc extra-node` command.
 type ExtraNodeCommand struct {
 }
 
@@ -23,9 +23,9 @@ func (c *ExtraNodeCommand) Synopsis() string {
 // Help is part of cli.Command implementation.
 func (c *ExtraNodeCommand) Help() string {
 	helpText := `
-usage: sqsc extra node <subcommand>
+usage: sqsc extra-node <subcommand>
 
-  Run a project extra node related command.
+  Run a project extra-node related command.
 
   List of supported subcommands is available below.
 

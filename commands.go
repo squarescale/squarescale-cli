@@ -77,25 +77,25 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
-		"extra node": func() (cli.Command, error) {
+		"extra-node": func() (cli.Command, error) {
 			return &command.ExtraNodeCommand{}, nil
 		},
-		"extra node add": func() (cli.Command, error) {
+		"extra-node add": func() (cli.Command, error) {
 			return &command.ExtraNodeAddCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"extra node list": func() (cli.Command, error) {
+		"extra-node list": func() (cli.Command, error) {
 			return &command.ExtraNodeListCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"extra node delete": func() (cli.Command, error) {
+		"extra-node delete": func() (cli.Command, error) {
 			return &command.ExtraNodeDeleteCommand{
 				Meta: *meta,
 			}, nil
 		},
-		"extra node bind": func() (cli.Command, error) {
+		"extra-node bind": func() (cli.Command, error) {
 			return &command.ExtraNodeBindCommand{
 				Meta: *meta,
 			}, nil

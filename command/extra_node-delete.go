@@ -70,7 +70,7 @@ func (c *ExtraNodeDeleteCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
-		fmt.Printf("Delete on project `%s` the extra node `%s`\n", projectToShow, extraNodeName)
+		fmt.Printf("Delete on project `%s` the extra-node `%s`\n", projectToShow, extraNodeName)
 		err = client.DeleteExtraNode(UUID, extraNodeName)
 		return "", err
 	})
@@ -100,9 +100,9 @@ func (c *ExtraNodeDeleteCommand) Synopsis() string {
 // Help is part of cli.Command implementation.
 func (c *ExtraNodeDeleteCommand) Help() string {
 	helpText := `
-usage: sqsc extra node delete [options] <extra_node_name>
+usage: sqsc extra-node delete [options] <extra_node_name>
 
-  Delete extra node from project.
+  Delete extra-node from project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
