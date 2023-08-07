@@ -31,6 +31,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	infraType := c.flagSet.String("infra-type", "high-availability", "Set the infrastructure configuration (high-availability or single-node)")
 	monitoringEngine := c.flagSet.String("monitoring", "", "Set the monitoring configuration (netdata)")
 	nodeSize := c.flagSet.String("node-size", "", "Set the cluster node size")
+	nodeCount := c.flagSet.Int("node-count", 3, "Set the cluster node count (1 for single-node, odd number for high-availability)")
 	rootDiskSizeGB := c.flagSet.Int("root-disk-size", 20, "Set the root filesystem size (in GB)")
 	slackURL := c.flagSet.String("slackbot", "", "Set the Slack webhook URL")
 	hybridClusterEnabled := c.flagSet.Bool("hybrid-cluster-enabled", false, "Enable Hybrid Cluster")
@@ -111,14 +112,24 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	}
 
 	payload["node_size"] = *nodeSize
+	payload["desired_size"] = *nodeCount
 	payload["root_disk_size_gb"] = *rootDiskSizeGB
 
 	if *infraType != "high-availability" && *infraType != "single-node" {
 		return c.errorWithUsage(fmt.Errorf("Unknown infrastructure type: %v. Correct values are high-availability or single-node", *infraType))
 	} else if *infraType == "high-availability" {
 		payload["infra_type"] = "high_availability"
+		if *nodeCount < 3 {
+			return c.error(fmt.Errorf("Infrastructure type %v can not have less than 3 nodes (%d)", payload["infra_type"], *nodeCount))
+		}
+		if *nodeCount % 2 != 1 {
+			return c.error(fmt.Errorf("Infrastructure type %v must have odd number of nodes (%d)", payload["infra_type"], *nodeCount))
+		}
 	} else {
 		payload["infra_type"] = "single_node"
+		if *nodeCount != 1 {
+			return c.error(fmt.Errorf("Infrastructure type %v can not have more than 1 node (%d)", payload["infra_type"], *nodeCount))
+		}
 	}
 
 	if *monitoringEngine != "" && *monitoringEngine != "netdata" {
@@ -194,6 +205,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	c.Ui.Warn(fmt.Sprintf("cloud provider region : %s", *region))
 	c.Ui.Warn(fmt.Sprintf("credential : %s", *credential))
 	c.Ui.Warn(fmt.Sprintf("node size : %s", *nodeSize))
+	c.Ui.Warn(fmt.Sprintf("node count : %d", *nodeCount))
 	c.Ui.Warn(fmt.Sprintf("infra type : %s", *infraType))
 	c.Ui.Warn(fmt.Sprintf("monitoring engine : %s", *monitoringEngine))
 	if *slackURL != "" {
