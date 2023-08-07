@@ -70,8 +70,32 @@ func nominalCaseOnAddService(t *testing.T) {
 	dockerCapabilities := []string{"AUDIT_WRITE", "CHOWN"}
 	dockerDevices := []squarescale.DockerDevice{{SRC: "src", DST: "dst"}}
 
-	errPublic := cli.AddService(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, "0", []squarescale.SchedulingGroup{}, "", []string{})
-	errPrivate := cli.AddService(projectName, "nginx", "login", "pass", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, "0", []squarescale.SchedulingGroup{}, "", []string{})
+	pubPayload := squarescale.JSONObject{
+		"docker_image": squarescale.DockerImage(
+			"nginx",
+			"",
+			"",
+		),
+		"auto_start":		true,
+		"size":			1,
+		"volumes_to_bind":	volumesToBind,
+		"docker_capabilities":	dockerCapabilities,
+		"docker_devices":	dockerDevices,
+	}
+	privPayload := squarescale.JSONObject{
+		"docker_image": squarescale.DockerImage(
+			"nginx",
+			"login",
+			"pass",
+		),
+		"auto_start":		true,
+		"size":			1,
+		"volumes_to_bind":	volumesToBind,
+		"docker_capabilities":	dockerCapabilities,
+		"docker_devices":	dockerDevices,
+	}
+	errPublic := cli.AddService(projectName, pubPayload)
+	errPrivate := cli.AddService(projectName, privPayload)
 
 	// then
 	if errPublic != nil {
@@ -103,7 +127,19 @@ func ClientHTTPErrorOnAddService(t *testing.T) {
 	dockerCapabilities := []string{"AUDIT_WRITE", "CHOWN"}
 	dockerDevices := []squarescale.DockerDevice{{SRC: "src", DST: "dst"}}
 
-	errOnAdd := cli.AddService(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, "0", []squarescale.SchedulingGroup{}, "", []string{})
+	payload := squarescale.JSONObject{
+		"docker_image": squarescale.DockerImage(
+			"nginx",
+			"",
+			"",
+		),
+		"auto_start":		true,
+		"size":			1,
+		"volumes_to_bind":	volumesToBind,
+		"docker_capabilities":	dockerCapabilities,
+		"docker_devices":	dockerDevices,
+	}
+	errOnAdd := cli.AddService(projectName, payload)
 
 	// then
 	if errOnAdd == nil {
@@ -133,7 +169,19 @@ func InternalServerErrorOnAddService(t *testing.T) {
 	dockerCapabilities := []string{"AUDIT_WRITE", "CHOWN"}
 	dockerDevices := []squarescale.DockerDevice{{SRC: "src", DST: "dst"}}
 
-	errOnAdd := cli.AddService(projectName, "nginx", "", "", "", "", 1, "nginx", volumesToBind, dockerCapabilities, dockerDevices, true, "0", []squarescale.SchedulingGroup{}, "", []string{})
+	payload := squarescale.JSONObject{
+		"docker_image": squarescale.DockerImage(
+			"nginx",
+			"",
+			"",
+		),
+		"auto_start":		true,
+		"size":			1,
+		"volumes_to_bind":	volumesToBind,
+		"docker_capabilities":	dockerCapabilities,
+		"docker_devices":	dockerDevices,
+	}
+	errOnAdd := cli.AddService(projectName, payload)
 
 	// then
 	expectedError := "An unexpected error occurred (code: 500)"
