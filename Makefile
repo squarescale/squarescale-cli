@@ -60,4 +60,4 @@ coverage_html: coverage ## Show code coverage html report
 	go tool cover -html=coverage.out -o coverage.html
 
 changelog:
-	git-chglog v1.1.4.. > CHANGELOG.md
+	git-chglog v1.1.5.. > CHANGELOG.md
