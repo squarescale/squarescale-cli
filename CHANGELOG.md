@@ -1,6 +1,9 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+### Release
+- v1.1.5
+
 
 <a name="v1.1.5"></a>
 ## [v1.1.5] - 2023-08-07
