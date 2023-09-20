@@ -333,5 +333,30 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"network-policy get": func() (cli.Command, error) {
+			return &command.NetworkPolicyGetCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"network-policy add": func() (cli.Command, error) {
+			return &command.NetworkPolicyAddCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"network-policy list": func() (cli.Command, error) {
+			return &command.NetworkPolicyListCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"network-policy delete": func() (cli.Command, error) {
+			return &command.NetworkPolicyDeleteCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"network-policy deploy": func() (cli.Command, error) {
+			return &command.NetworkPolicyDeployCommand{
+				Meta: *meta,
+			}, nil
+		},
 	}
 }

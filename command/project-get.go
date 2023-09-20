@@ -47,10 +47,18 @@ func (c *ProjectGetCommand) Run(args []string) int {
 		} else {
 			UUID = *projectUUID
 		}
-
 		project, err := client.GetProject(UUID)
 		if err != nil {
 			return "", err
+		}
+
+		policy, err := client.GetNetworkPolicy(UUID, "")
+		if err != nil {
+			return "", err
+		}
+		policy_status := "none"
+		if policy.IsLoaded() {
+			policy_status = policy.String()
 		}
 
 		var msg string
@@ -69,7 +77,8 @@ func (c *ProjectGetCommand) Run(args []string) int {
 		msg = fmt.Sprintf("Name: %s\nUUID: %s\nMonitoring: %s\nProvider: %s\nCredentials: %s\n"+
 			"Region: %s\nOrganization: %s\nStatus: %s\nCluster: %s\n"+
 			"Extra: %s\nHybrid: %s\nSize: %s\nRootDiskSize: %d GB\nCreated: %s\nUpdated: %s\n"+
-			"External ElasticSearch: %s\nSlack Webhook: %s\n",
+			"External ElasticSearch: %s\nSlack Webhook: %s\n\n"+
+			"* Network policies * \n%s",
 			project.Name,
 			project.UUID,
 			monitoring,
@@ -87,6 +96,7 @@ func (c *ProjectGetCommand) Run(args []string) int {
 			fmt.Sprintf("%s (%s)", project.UpdatedAt.In(location).Format("2006-01-02 15:04"), humantime.Since(project.UpdatedAt)),
 			project.ExternalES,
 			project.SlackWebHook,
+			policy_status,
 		)
 
 		return msg, nil

@@ -462,3 +462,28 @@ func volumeTypeFlag(f *flag.FlagSet) *string {
 func volumeZoneFlag(f *flag.FlagSet) *string {
 	return f.String("zone", "eu-west-1a", "Volume zone")
 }
+
+func networkPolicyNameFlag(f *flag.FlagSet) *string {
+	return f.String("name", "", "Name of the network policy")
+}
+
+func networkPolicyFileArg(f *flag.FlagSet) (string, error) {
+	value := f.Arg(0)
+	if value == "" {
+		return "", errors.New("Network policy JSON file must be provided")
+	} else {
+		return value, nil
+	}
+}
+
+func jsonFormatFlag(f *flag.FlagSet) *bool {
+	return f.Bool("json", false, "Output into JSON format")
+}
+
+func networkPolicyDumpFlag(f *flag.FlagSet) *bool {
+	return f.Bool("dump", false, "Dump network policy rules into a file (YAML format)")
+}
+
+func networkPolicyVersionArg(f *flag.FlagSet) string {
+	return f.Arg(0)
+}
