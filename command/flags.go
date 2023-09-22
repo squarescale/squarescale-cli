@@ -392,7 +392,7 @@ func dbSizeFlag(f *flag.FlagSet) *string {
 }
 
 func dbVersionFlag(f *flag.FlagSet) *string {
-	return f.String("version", "", "Database version")
+	return f.String("db-version", "", "Database version")
 }
 
 func dbBackupFlag(f *flag.FlagSet) *bool {
