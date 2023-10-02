@@ -67,9 +67,13 @@ func (b *NetworkPolicyListCommand) Run(args []string) int {
 			buffer.WriteString("\n")
 		}
 
-		if *jsonFormat {
-			j, _ := json.Marshal(versions)
-			return string(j), nil
+		if len(versions) == 0 {
+			buffer.WriteString("No network policies found")
+		} else {
+			if *jsonFormat {
+				j, _ := json.Marshal(versions)
+				return string(j), nil
+			}
 		}
 
 		return buffer.String(), nil
