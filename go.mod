@@ -18,6 +18,7 @@ require (
 	github.com/squarescale/go-netrc v0.1.3
 	github.com/squarescale/logger v0.1.4
 	gopkg.in/alessio/shellescape.v1 v1.0.0-20170105083845-52074bc9df61
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -59,7 +60,6 @@ require (
 	golang.org/x/tools v0.12.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c //indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 replace github.com/imdario/mergo v1.0.0 => dario.cat/mergo v1.0.0
