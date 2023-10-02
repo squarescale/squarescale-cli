@@ -56,7 +56,7 @@ func (b *NetworkPolicyGetCommand) Run(args []string) int {
 			return "", err
 		}
 
-		if *dumpFlag {
+		if *dumpFlag && policy.IsLoaded() {
 			// dump YAML into file
 			data, err := policy.DumpYAMLRules()
 
@@ -70,8 +70,11 @@ func (b *NetworkPolicyGetCommand) Run(args []string) int {
 		}
 
 		if *jsonFormat {
-			j, _ := json.Marshal(policy)
-			return string(j), nil
+			if policy.IsLoaded() {
+				j, _ := json.Marshal(policy)
+				return string(j), nil
+			}
+			return "{}", nil
 		}
 
 		policy_status := "none"
@@ -79,7 +82,7 @@ func (b *NetworkPolicyGetCommand) Run(args []string) int {
 			policy_status = policy.String()
 		}
 
-		if *dumpFlag {
+		if *dumpFlag && policy.IsLoaded() {
 			policy_status = fmt.Sprintf(
 				"%s\n(network policy rules dumped to %s file)\n",
 				policy_status,
