@@ -82,7 +82,7 @@ func (b *NetworkPolicyAddCommand) Synopsis() string {
 // Help is part of cli.Command implementation.
 func (b *NetworkPolicyAddCommand) Help() string {
 	helpText := `
-usage: sqsc network-policy add --name NAME FILE-PATH
+usage: sqsc network-policy add -network-policy-name NAME FILE-PATH
 
   Add a new network policy to a project
 `
