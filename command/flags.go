@@ -464,7 +464,7 @@ func volumeZoneFlag(f *flag.FlagSet) *string {
 }
 
 func networkPolicyNameFlag(f *flag.FlagSet) *string {
-	return f.String("name", "", "Name of the network policy")
+	return f.String("network-policy-name", "", "Name of the network policy")
 }
 
 func networkPolicyFileArg(f *flag.FlagSet) (string, error) {
