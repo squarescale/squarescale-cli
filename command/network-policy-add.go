@@ -49,7 +49,7 @@ func (b *NetworkPolicyAddCommand) Run(args []string) int {
 	if policyFile != "" {
 		err := policy.ImportPoliciesFromFile(policyFile)
 		if err != nil {
-			b.error(err)
+			return b.error(err)
 		}
 	}
 
