@@ -11,7 +11,7 @@ import (
 	"github.com/squarescale/squarescale-cli/squarescale"
 )
 
-// ProjectGetCommand is a cli.Command implementation for listing all projects.
+// ProjectGetCommand is a cli.Command implementation for listing project basic infos.
 type ProjectGetCommand struct {
 	Meta
 	flagSet *flag.FlagSet
@@ -36,7 +36,7 @@ func (c *ProjectGetCommand) Run(args []string) int {
 		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	return c.runWithSpinner("get projects", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("get project", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -113,7 +113,7 @@ func (c *ProjectGetCommand) Help() string {
 	helpText := `
 usage: sqsc project get [options]
 
-  Get projects attached to the authenticated account.
+  Get project basic informations.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
