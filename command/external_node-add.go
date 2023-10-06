@@ -71,7 +71,8 @@ func (c *ExternalNodeAddCommand) Run(args []string) int {
 
 	if !*nowait {
 		c.runWithSpinner("wait for external node add", endpoint.String(), func(client *squarescale.Client) (string, error) {
-			externalNode, err := client.WaitExternalNode(UUID, externalNodeName, 5)
+			// can also be externalNode, err := client.WaitExternalNode(UUID, externalNodeName, 5, []string{"provisionned", "inconsistent"})
+			externalNode, err := client.WaitExternalNode(UUID, externalNodeName, 5, []string{})
 			if err != nil {
 				return "", err
 			} else {
