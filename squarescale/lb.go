@@ -13,6 +13,7 @@ type LoadBalancer struct {
 	CertificateBody  string `json:"certificate_body"`
 	CertificateChain string `json:"certificate_chain"`
 	HTTPS            bool   `json:"https"`
+	PublicDomain     string `json:"public_domain"`
 	PublicURL        string `json:"public_url"`
 }
 

@@ -10,10 +10,11 @@ import (
 )
 
 type ExternalNode struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	PublicIP string `json:"public_ip"`
-	Status   string `json:"status"`
+	ID             int    `json:"id"`
+	Name           string `json:"name"`
+	PublicIP       string `json:"public_ip"`
+	Status         string `json:"status"`
+	PrivateNetwork string `json:"private_network"`
 }
 
 // GetExternalNodes gets all the external nodes attached to a Project

@@ -9,9 +9,10 @@ import (
 type ClusterMember struct {
 	ID              int             `json:"id"`
 	Name            string          `json:"name"`
-	PublicIP        string          `json:"public_ip"`
 	PrivateIP       string          `json:"private_ip"`
+	PublicIP        string          `json:"public_ip"`
 	Status          string          `json:"nomad_status"`
+	Zone            string          `json:"zone"`
 	SchedulingGroup SchedulingGroup `json:"scheduling_group"`
 }
 

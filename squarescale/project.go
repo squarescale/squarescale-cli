@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/squarescale/logger"
 )
 
@@ -42,9 +43,168 @@ type Project struct {
 	TfCommand            string    `json:"tf_command"`
 }
 
-/*
-  json.organization p.organization&.name
-*/
+// Need special decoding
+// cf https://stackoverflow.com/questions/37782278/fully-parsing-timestamps-in-golang
+// or more complete example
+// https://dev.to/arshamalh/how-to-unmarshal-json-in-a-custom-way-in-golang-42m5
+type Timestamp struct {
+	time.Time
+}
+
+// UnmarshalJSON decodes an int64 timestamp into a time.Time object
+func (p *Timestamp) UnmarshalJSON(bytes []byte) error {
+	// 1. Decode the bytes into an int64
+	var raw int64
+	err := json.Unmarshal(bytes, &raw)
+
+	if err != nil {
+		fmt.Printf("error decoding timestamp: %s\n", err)
+		return err
+	}
+
+	// 2. Parse the unix timestamp
+	p.Time = time.Unix(raw, 0)
+	return nil
+}
+
+type Notification struct {
+//	Component         string    `json:"component_name"`
+	Level             string    `json:"level"`
+	NotificationType  string    `json:"type"`
+	Message           string    `json:"message"`
+	NotifiedAt        Timestamp `json:"notified_at"`
+	ProjectUUID       string    `json:"project_uuid"`
+}
+
+type ClusterMemberDetails struct {
+	ConsulName        string `json:"consul_name"`
+	ConsulVersion     string `json:"consul_version"`
+	CPUArch           string `json:"cpu_arch"`
+	CPUCores          string `json:"cpu_cores"`
+	CPUFrequency      string `json:"cpu_frequency"`
+	CPUModel          string `json:"cpu_model_name"`
+	// Drivers
+	Hostname          string `json:"hostname"`
+	ID                int    `json:"id"`
+	InstanceID        string `json:"instance_id"`
+	InstanceType      string `json:"instance_type"`
+	KernelArch        string `json:"kernel_arch"`
+	KernelName        string `json:"kernel_name"`
+	KernelVersion     string `json:"kernel_version"`
+	Memory            string `json:"memory"`
+	Name              string `json:"name"`
+	NomadEligibility  string `json:"nomad_eligibility"`
+	NomadID           string `json:"nomad_id"`
+	NomadStatus       string `json:"nomad_status"`
+	NomadVersion      string `json:"nomad_version"`
+	OSName            string `json:"os_name"`
+	OSVersion         string `json:"os_version"`
+	PrivateIP         string `json:"private_ip"`
+	// PublicIP
+	// SchedulingGroup
+	// StatefulNode
+	StorageBytesFree  string `json:"storage_bytesfree"`
+	StorageBytesTotal string `json:"storage_bytestotal"`
+	Zone              string `json:"zone"`
+}
+
+type Cluster struct {
+	ActualExternal        int                    `json:"actual_external"`
+	ActualStateful        int                    `json:"actual_stateful"`
+	ActualStateless       int                    `json:"actual_stateless"`
+	CurrentSize           int                    `json:"current_size"`
+	DesiredExternal       int                    `json:"desired_external"`
+	DesiredSize           int                    `json:"desired_size"`
+	DesiredStateful       int                    `json:"desired_stateful"`
+	DesiredStateless      int                    `json:"desired_stateless"`
+	ExternalNodes         []ExternalNode         `json:"external_nodes"`
+	ClusterMembersDetails []ClusterMemberDetails `json:"members"`
+	RootDiskSize          int                    `json:"root_disk_size_gb"`
+	SchedulingGroups      []SchedulingGroup      `json:"scheduling_groups"`
+	Status                string                 `json:"status"`
+}
+
+type IntegratedServices struct {
+	IntegratedServices []IntegratedServiceInfo
+}
+
+type IntegratedServiceInfo struct {
+	BasicAuth   string     `json:"basic_auth"`
+	Enabled     bool       `json:"enabled"`
+	IPWhiteList string     `json:"ip_whitelist"`
+	Name        string     `json:"name"`
+	Prefix      string     `json:"prefix"`
+	URLs        [][]string `json:"urls"`
+}
+
+// UnmarshalJSON decodes an Integrated Service JSON map into a proper object
+func (p *IntegratedServices) UnmarshalJSON(bytes []byte) error {
+	// 1. Decode the bytes into a raw interface object
+	var raw map[string]IntegratedServiceInfo
+	err := json.Unmarshal(bytes, &raw)
+
+	if err != nil {
+		fmt.Printf("error decoding integrated service: %s\n", err)
+		return err
+	}
+
+	res := make([]IntegratedServiceInfo, len(raw))
+	i := 0
+	for _, v := range raw {
+		res[i] = v
+		i++
+	}
+	*p = IntegratedServices{
+		IntegratedServices: res,
+	}
+	// 2. Parse the unix timestamp
+	//p.Time = time.Unix(raw, 0)
+	return nil
+}
+
+type Infrastructure struct {
+	Action             string             `json:"action"`
+	Cluster            Cluster            `json:"cluster"`
+	Database           Database           `json:"db"`
+	IntegratedServices IntegratedServices `json:"integrated_services"`
+	LoadBalancer       LoadBalancer       `json:"lb"`
+	MonitoringEngine   string             `json:"monitoring_engine"`
+	NodeSize           string             `json:"node_size"`
+	CloudProvider      string             `json:"provider"`
+	CredentialName     string             `json:"provider_credential_name"`
+	CloudProviderLabel string             `json:"provider_label"`
+	//`json:"redis_databases"`
+	Region             string             `json:"region"`
+	RegionLabel        string             `json:"region_label"`
+	RootDiskSize       int                `json:"root_disk_size_gb"`
+	Status             string             `json:"status"`
+	TFRunAt            time.Time          `json:"terraform_run_at"`
+	Type               string             `json:"type"`
+}
+
+type ProjectDetails struct {
+	CreatedAt             time.Time      `json:"created_at"`
+	ExternalElasticSearch string         `json:"external_elasticsearch"`
+	//`json:"global_environment"`
+	HighAvailability      bool           `json:"high_availability"`
+	HybridClusterEnabled  bool           `json:"hybrid_cluster_enabled"`
+	Infrastructure        Infrastructure `json:"infra"`
+	//`json:"integrated_services"`
+	//`json:"intentions"`
+	//`json:"managed_services"`
+	Name                  string         `json:"name"`
+	Organization          string         `json:"organization_name"`
+	//`json:"services"`
+	SlackWebHook          string         `json:"slack_webhook"`
+	UpdatedAt             time.Time      `json:"updated_at"`
+	User                  User           `json:"user"`
+	UUID                  string         `json:"uuid"`
+}
+
+type ProjectWithAllDetails struct {
+	Notifications  []Notification `json:"notifications"`
+	Project        ProjectDetails `json:"project"`
+}
 
 // UnprovisionError defined how export provision errors
 type UnprovisionError struct {
@@ -234,7 +394,33 @@ func (c *Client) ProjectByName(projectName string) (string, error) {
 	return "", fmt.Errorf("Project '%s' not found", projectName)
 }
 
-// GetProject return the status of the project
+// GetProjectDetails return the detailed informations of the project
+func (c *Client) GetProjectDetails(project string) (*ProjectWithAllDetails, error) {
+	code, body, err := c.get("/project_info/" + project)
+	if err != nil {
+		return nil, err
+	}
+
+	switch code {
+	case http.StatusOK:
+	case http.StatusNotFound:
+		return nil, fmt.Errorf("Project '%s' not found", project)
+	default:
+		return nil, unexpectedHTTPError(code, body)
+	}
+
+	var details ProjectWithAllDetails
+	err = json.Unmarshal(body, &details)
+	if err != nil {
+		fmt.Printf("ERROR %+v\n", err)
+		return nil, err
+	}
+	fmt.Printf("GOT  %s\n", spew.Sdump(details))
+
+	return &details, nil
+}
+
+// GetProject return the basic infos of the project
 func (c *Client) GetProject(project string) (*Project, error) {
 	code, body, err := c.get("/projects/" + project)
 	if err != nil {
@@ -249,13 +435,13 @@ func (c *Client) GetProject(project string) (*Project, error) {
 		return nil, unexpectedHTTPError(code, body)
 	}
 
-	var status Project
-	err = json.Unmarshal(body, &status)
+	var basicInfos Project
+	err = json.Unmarshal(body, &basicInfos)
 	if err != nil {
 		return nil, err
 	}
 
-	return &status, nil
+	return &basicInfos, nil
 }
 
 // WaitProject wait project provisioning
