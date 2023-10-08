@@ -4,9 +4,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"regexp"
 	"strings"
 
+	"github.com/olekukonko/tablewriter"
 	"github.com/squarescale/squarescale-cli/squarescale"
+	"github.com/squarescale/squarescale-cli/ui"
 )
 
 // ExternalNodeListCommand is a cli.Command implementation for listing external nodes.
@@ -51,16 +54,30 @@ func (e *ExternalNodeListCommand) Run(args []string) int {
 			return "", err
 		}
 
-		var msg string = "Name\t\t\t\tPublicIP\tStatus\n"
+		tableString := &strings.Builder{}
+		table := tablewriter.NewWriter(tableString)
+		// reset by ui/table.go FormatTable function: table.SetAutoFormatHeaders(false)
+		// seems like this should be taken into account earlier than in the ui/table.go FormatTable function to have effect on fields
+		table.SetAutoWrapText(false)
+		table.SetHeader([]string{"Name", "PublicIP", "Status"})
+
 		for _, en := range externalNodes {
-			msg += fmt.Sprintf("%s\t%s\t%s\n", en.Name, en.PublicIP, en.Status)
+			table.Append([]string{
+				en.Name,
+				en.PublicIP,
+				en.Status,
+			})
 		}
 
 		if len(externalNodes) == 0 {
-			msg = "No external nodes"
+			return "No external nodes", nil
 		}
 
-		return msg, nil
+		ui.FormatTable(table)
+
+		table.Render()
+		// Remove trailing \n and HT
+		return string(regexp.MustCompile(`[\n\x09][\n\x09]*$`).ReplaceAll([]byte(tableString.String()), []byte(""))), nil
 	})
 }
 

@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/squarescale/logger"
 )
 
@@ -182,23 +181,29 @@ type Infrastructure struct {
 	Type               string             `json:"type"`
 }
 
+type GenericVariable struct {
+	Key        string
+	Value      interface{}
+	Predefined bool
+}
+
 type ProjectDetails struct {
-	CreatedAt             time.Time      `json:"created_at"`
-	ExternalElasticSearch string         `json:"external_elasticsearch"`
-	//`json:"global_environment"`
-	HighAvailability      bool           `json:"high_availability"`
-	HybridClusterEnabled  bool           `json:"hybrid_cluster_enabled"`
-	Infrastructure        Infrastructure `json:"infra"`
+	CreatedAt             time.Time         `json:"created_at"`
+	ExternalElasticSearch string            `json:"external_elasticsearch"`
+	Environment           []GenericVariable `json:"global_environment"`
+	HighAvailability      bool              `json:"high_availability"`
+	HybridClusterEnabled  bool              `json:"hybrid_cluster_enabled"`
+	Infrastructure        Infrastructure    `json:"infra"`
 	//`json:"integrated_services"`
 	//`json:"intentions"`
 	//`json:"managed_services"`
-	Name                  string         `json:"name"`
-	Organization          string         `json:"organization_name"`
+	Name                  string            `json:"name"`
+	Organization          string            `json:"organization_name"`
 	//`json:"services"`
-	SlackWebHook          string         `json:"slack_webhook"`
-	UpdatedAt             time.Time      `json:"updated_at"`
-	User                  User           `json:"user"`
-	UUID                  string         `json:"uuid"`
+	SlackWebHook          string            `json:"slack_webhook"`
+	UpdatedAt             time.Time         `json:"updated_at"`
+	User                  User              `json:"user"`
+	UUID                  string            `json:"uuid"`
 }
 
 type ProjectWithAllDetails struct {
@@ -415,7 +420,6 @@ func (c *Client) GetProjectDetails(project string) (*ProjectWithAllDetails, erro
 		fmt.Printf("ERROR %+v\n", err)
 		return nil, err
 	}
-	fmt.Printf("GOT  %s\n", spew.Sdump(details))
 
 	return &details, nil
 }
