@@ -57,9 +57,10 @@ func (c *ProjectDetailsCommand) Run(args []string) int {
 		if projectDetails == nil {
 			return "No details to show", nil
 		}
-		// TODO: add scheduling groups + external nodes + Main cluster + Extra nodes + Volumes sections
+		// TODO: add external nodes + Main cluster + Extra nodes + Volumes sections
 		return ProjectSummary(projectDetails) + "\n" +
-			ProjectComputeNodes(projectDetails),
+			ProjectComputeNodes(projectDetails) + "\n" +
+			ProjectSchedulingGroups(projectDetails),
 			nil
 	})
 }
@@ -161,6 +162,48 @@ func ProjectComputeNodes(project *squarescale.ProjectWithAllDetails) string {
 			schedulingGroup,
 			c.NomadVersion,
 			c.ConsulVersion,
+		})
+	}
+
+	ui.FormatTable(table)
+
+	table.Render()
+	return tableString.String()
+}
+
+// Return project scheduling groups like in front Compute Resources page
+// See font/src/components/infrastructure/ComputeResourcesTab.jsx
+func ProjectSchedulingGroups(project *squarescale.ProjectWithAllDetails) string {
+	tableString := &strings.Builder{}
+	tableString.WriteString(fmt.Sprintf("========== Scheduling groups: %s [%s]\n", project.Project.Name, project.Project.Organization))
+	table := tablewriter.NewWriter(tableString)
+	// reset by ui/table.go FormatTable function: table.SetAutoFormatHeaders(false)
+	// seems like this should be taken into account earlier than in the ui/table.go FormatTable function to have effect on fields
+	table.SetAutoWrapText(false)
+	// TODO: add monitoring URLs
+	table.SetHeader([]string{"Name", "# Nodes", "Nodes", "# Services", "Services"})
+
+	for _, s := range project.Project.Infrastructure.Cluster.SchedulingGroups {
+		nodes := ""
+		for _, n := range s.ClusterMembers {
+			nodes += "," + n.Name
+		}
+		if len(nodes) > 0 {
+			nodes = nodes[1:]
+		}
+		services := ""
+		for _, n := range s.Services {
+			services += "," + n.Name
+		}
+		if len(services) > 0 {
+			services = services[1:]
+		}
+		table.Append([]string{
+			s.Name,
+			fmt.Sprintf("%d", len(s.ClusterMembers)),
+			nodes,
+			fmt.Sprintf("%d", len(s.Services)),
+			services,
 		})
 	}
 
