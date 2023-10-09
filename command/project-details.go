@@ -57,10 +57,11 @@ func (c *ProjectDetailsCommand) Run(args []string) int {
 		if projectDetails == nil {
 			return "No details to show", nil
 		}
-		// TODO: add external nodes + Main cluster + Extra nodes + Volumes sections
+		// TODO: add Main cluster + Extra nodes + Volumes sections
 		return ProjectSummary(projectDetails) + "\n" +
 			ProjectComputeNodes(projectDetails) + "\n" +
-			ProjectSchedulingGroups(projectDetails),
+			ProjectSchedulingGroups(projectDetails) + "\n" +
+			ProjectExternalNodes(projectDetails),
 			nil
 	})
 }
@@ -204,6 +205,51 @@ func ProjectSchedulingGroups(project *squarescale.ProjectWithAllDetails) string 
 			nodes,
 			fmt.Sprintf("%d", len(s.Services)),
 			services,
+		})
+	}
+
+	ui.FormatTable(table)
+
+	table.Render()
+	return tableString.String()
+}
+
+func findComputeNodeRef(name string, project *squarescale.ProjectWithAllDetails) *squarescale.ClusterMemberDetails {
+	for _, n := range project.Project.Infrastructure.Cluster.ClusterMembersDetails {
+		if n.Name == name {
+			return &n
+		}
+	}
+	return nil
+}
+
+// Return project external nodes like in front Compute Resources page
+// See font/src/components/infrastructure/externalNodes/ExternalNodes.jsx
+func ProjectExternalNodes(project *squarescale.ProjectWithAllDetails) string {
+	tableString := &strings.Builder{}
+	tableString.WriteString(fmt.Sprintf("========== External nodes: %s [%s]\n", project.Project.Name, project.Project.Organization))
+	table := tablewriter.NewWriter(tableString)
+	// reset by ui/table.go FormatTable function: table.SetAutoFormatHeaders(false)
+	// seems like this should be taken into account earlier than in the ui/table.go FormatTable function to have effect on fields
+	table.SetAutoWrapText(false)
+	// TODO: add monitoring URLs
+	table.SetHeader([]string{"Hostname", "Public IP", "Status", "Private Network"})
+
+	for _, s := range project.Project.Infrastructure.Cluster.ExternalNodes {
+		status := s.Status
+		computeRef := findComputeNodeRef(s.Name, project)
+		if computeRef != nil {
+			if computeRef.NomadStatus == "ready" {
+				status = "Connected"
+			} else {
+				status = "Not connected"
+			}
+		}
+		table.Append([]string{
+			s.Name,
+			s.PublicIP,
+			status,
+			s.PrivateNetwork,
 		})
 	}
 
