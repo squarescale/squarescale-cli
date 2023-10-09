@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"strings"
+	"strconv"
 	"time"
 
 	"github.com/BenJetson/humantime"
@@ -56,7 +57,10 @@ func (c *ProjectDetailsCommand) Run(args []string) int {
 		if projectDetails == nil {
 			return "No details to show", nil
 		}
-		return ProjectSummary(projectDetails), nil
+		// TODO: add scheduling groups + external nodes + Main cluster + Extra nodes + Volumes sections
+		return ProjectSummary(projectDetails) + "\n" +
+			ProjectComputeNodes(projectDetails),
+			nil
 	})
 }
 
@@ -91,6 +95,74 @@ func ProjectSummary(project *squarescale.ProjectWithAllDetails) string {
 		fmt.Sprintf("Slack WebHook: %s", project.Project.SlackWebHook),
 		"",
 	})
+
+	ui.FormatTable(table)
+
+	table.Render()
+	return tableString.String()
+}
+
+func findExternalNodeRef(name string, project *squarescale.ProjectWithAllDetails) *squarescale.ExternalNode {
+	for _, n := range project.Project.Infrastructure.Cluster.ExternalNodes {
+		if n.Name == name {
+			return &n
+		}
+	}
+	return nil
+}
+
+// Return project compute nodes like in front Compute Resources page
+// See font/src/components/infrastructure/ComputeResourcesTab.jsx
+func ProjectComputeNodes(project *squarescale.ProjectWithAllDetails) string {
+	tableString := &strings.Builder{}
+	tableString.WriteString(fmt.Sprintf("========== Compute resources: %s [%s]\n", project.Project.Name, project.Project.Organization))
+	table := tablewriter.NewWriter(tableString)
+	// reset by ui/table.go FormatTable function: table.SetAutoFormatHeaders(false)
+	// seems like this should be taken into account earlier than in the ui/table.go FormatTable function to have effect on fields
+	table.SetAutoWrapText(false)
+	// TODO: add monitoring URLs
+	table.SetHeader([]string{"Hostname", "Arch", "(v)CPUs", "Freq (Ghz)", "Mem (Gb)", "Type", "Disk (Gb)", "Free Disk (Gb)", "IP Address", "OS", "Status", "Mode", "Availability Zone", "Scheduling group", "Nomad", "Consul"})
+
+	for _, c := range project.Project.Infrastructure.Cluster.ClusterMembersDetails {
+		freq, _ := strconv.ParseFloat(c.CPUFrequency, 32)
+		mem, _ := strconv.ParseFloat(c.Memory, 32)
+		stt, _ := strconv.ParseFloat(c.StorageBytesTotal, 32)
+		stf, _ := strconv.ParseFloat(c.StorageBytesFree, 32)
+		extRef := findExternalNodeRef(c.Name, project)
+		mode := "Cluster"
+		zone := "N/A"
+		fullStorage := ""
+		freeStorage := fmt.Sprintf("%.0f (%.2f%%%%)", stf / 1024.0 / 1024.0 / 1024.0, (100.0 * stf) / stt)
+		schedulingGroup := "None"
+		if c.SchedulingGroup.Name != "" {
+			schedulingGroup = c.SchedulingGroup.Name
+		}
+		if extRef != nil {
+			mode = fmt.Sprintf("External: %s", c.Name)
+			fullStorage = fmt.Sprintf("%.0f", stt / 1024.0 / 1024.0 / 1024.0)
+		} else {
+			fullStorage = fmt.Sprintf("%d",  project.Project.Infrastructure.Cluster.RootDiskSize)
+			zone = c.Zone
+		}
+		table.Append([]string{
+			c.Hostname,
+			c.CPUArch,
+			c.CPUCores,
+			fmt.Sprintf("%.1f", freq / 1000.0 ),
+			fmt.Sprintf("%.2f", mem / 1024.0 / 1024.0 / 1024.0),
+			c.InstanceType,
+			fullStorage,
+			freeStorage,
+			c.PrivateIP,
+			fmt.Sprintf("%s %s", c.OSName, c.OSVersion),
+			c.NomadStatus,
+			mode,
+			zone,
+			schedulingGroup,
+			c.NomadVersion,
+			c.ConsulVersion,
+		})
+	}
 
 	ui.FormatTable(table)
 

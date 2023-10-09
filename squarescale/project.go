@@ -418,7 +418,7 @@ func (c *Client) GetProjectDetails(project string) (*ProjectWithAllDetails, erro
 	var details ProjectWithAllDetails
 	err = json.Unmarshal(body, &details)
 	if err != nil {
-		fmt.Printf("ERROR %+v\n", err)
+		fmt.Printf("Error decoding project details %+v\n", err)
 		return nil, err
 	}
 
