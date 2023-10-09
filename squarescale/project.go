@@ -76,35 +76,35 @@ type Notification struct {
 }
 
 type ClusterMemberDetails struct {
-	ConsulName        string `json:"consul_name"`
-	ConsulVersion     string `json:"consul_version"`
-	CPUArch           string `json:"cpu_arch"`
-	CPUCores          string `json:"cpu_cores"`
-	CPUFrequency      string `json:"cpu_frequency"`
-	CPUModel          string `json:"cpu_model_name"`
+	ConsulName        string          `json:"consul_name"`
+	ConsulVersion     string          `json:"consul_version"`
+	CPUArch           string          `json:"cpu_arch"`
+	CPUCores          string          `json:"cpu_cores"`
+	CPUFrequency      string          `json:"cpu_frequency"`
+	CPUModel          string          `json:"cpu_model_name"`
 	// Drivers
-	Hostname          string `json:"hostname"`
-	ID                int    `json:"id"`
-	InstanceID        string `json:"instance_id"`
-	InstanceType      string `json:"instance_type"`
-	KernelArch        string `json:"kernel_arch"`
-	KernelName        string `json:"kernel_name"`
-	KernelVersion     string `json:"kernel_version"`
-	Memory            string `json:"memory"`
-	Name              string `json:"name"`
-	NomadEligibility  string `json:"nomad_eligibility"`
-	NomadID           string `json:"nomad_id"`
-	NomadStatus       string `json:"nomad_status"`
-	NomadVersion      string `json:"nomad_version"`
-	OSName            string `json:"os_name"`
-	OSVersion         string `json:"os_version"`
-	PrivateIP         string `json:"private_ip"`
+	Hostname          string          `json:"hostname"`
+	ID                int             `json:"id"`
+	InstanceID        string          `json:"instance_id"`
+	InstanceType      string          `json:"instance_type"`
+	KernelArch        string          `json:"kernel_arch"`
+	KernelName        string          `json:"kernel_name"`
+	KernelVersion     string          `json:"kernel_version"`
+	Memory            string          `json:"memory"`
+	Name              string          `json:"name"`
+	NomadEligibility  string          `json:"nomad_eligibility"`
+	NomadID           string          `json:"nomad_id"`
+	NomadStatus       string          `json:"nomad_status"`
+	NomadVersion      string          `json:"nomad_version"`
+	OSName            string          `json:"os_name"`
+	OSVersion         string          `json:"os_version"`
+	PrivateIP         string          `json:"private_ip"`
 	// PublicIP
-	// SchedulingGroup
+	SchedulingGroup   SchedulingGroup `json:"scheduling_group"`
 	// StatefulNode
-	StorageBytesFree  string `json:"storage_bytesfree"`
-	StorageBytesTotal string `json:"storage_bytestotal"`
-	Zone              string `json:"zone"`
+	StorageBytesFree  string          `json:"storage_bytesfree"`
+	StorageBytesTotal string          `json:"storage_bytestotal"`
+	Zone              string          `json:"zone"`
 }
 
 type Cluster struct {
@@ -199,6 +199,7 @@ type ProjectDetails struct {
 	//`json:"managed_services"`
 	Name                  string            `json:"name"`
 	Organization          string            `json:"organization_name"`
+	// TODO: see if type is Service or ServiceBody
 	Services              []Service         `json:"services"`
 	SlackWebHook          string            `json:"slack_webhook"`
 	UpdatedAt             time.Time         `json:"updated_at"`
