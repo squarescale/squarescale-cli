@@ -487,3 +487,19 @@ func networkPolicyDumpFlag(f *flag.FlagSet) *bool {
 func networkPolicyVersionArg(f *flag.FlagSet) string {
 	return f.Arg(0)
 }
+
+func projectDetailsNoSummaryFlag(f *flag.FlagSet) *bool {
+	return f.Bool("no-summary", false, "Enable/Disable project detailed informations summary section")
+}
+
+func projectDetailsNoComputeResourcesFlag(f *flag.FlagSet) *bool {
+	return f.Bool("no-compute-resources", false, "Enable/Disable project detailed informations compute resources section")
+}
+
+func projectDetailsNoSchedulingGroupsFlag(f *flag.FlagSet) *bool {
+	return f.Bool("no-scheduling-groups", false, "Enable/Disable project detailed informations scheduling groups section")
+}
+
+func projectDetailsNoExternalNodesFlag(f *flag.FlagSet) *bool {
+	return f.Bool("no-external-nodes", false, "Enable/Disable project detailed informations external nodes section")
+}

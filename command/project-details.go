@@ -26,6 +26,10 @@ func (c *ProjectDetailsCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := projectUUIDFlag(c.flagSet)
 	projectName := projectNameFlag(c.flagSet)
+	noSummary := projectDetailsNoSummaryFlag(c.flagSet)
+	noComputeResources := projectDetailsNoComputeResourcesFlag(c.flagSet)
+	noSchedulingGroups := projectDetailsNoSchedulingGroupsFlag(c.flagSet)
+	noExternalNodes := projectDetailsNoExternalNodesFlag(c.flagSet)
 
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
@@ -58,18 +62,27 @@ func (c *ProjectDetailsCommand) Run(args []string) int {
 			return "No details to show", nil
 		}
 		// TODO: add Main cluster + Extra nodes + Volumes sections
-		return ProjectSummary(projectDetails) + "\n" +
-			ProjectComputeNodes(projectDetails) + "\n" +
-			ProjectSchedulingGroups(projectDetails) + "\n" +
-			ProjectExternalNodes(projectDetails),
-			nil
+		res := ""
+		if !*noSummary {
+			res += ProjectSummary(projectDetails) + "\n"
+		}
+		if !*noComputeResources {
+			res += ProjectComputeNodes(projectDetails) + "\n"
+		}
+		if !*noSchedulingGroups {
+			res += ProjectSchedulingGroups(projectDetails) + "\n"
+		}
+		if !*noExternalNodes {
+			res += ProjectExternalNodes(projectDetails) + "\n"
+		}
+		return res, nil
 	})
 }
 
 // Return project summary info like in front Overview page
 func ProjectSummary(project *squarescale.ProjectWithAllDetails) string {
 	tableString := &strings.Builder{}
-	tableString.WriteString(fmt.Sprintf("========== Project Summary: %s [%s]\n", project.Project.Name, project.Project.Organization))
+	tableString.WriteString(fmt.Sprintf("========== Summary: %s [%s]\n", project.Project.Name, project.Project.Organization))
 	table := tablewriter.NewWriter(tableString)
 	// reset by ui/table.go FormatTable function: table.SetAutoFormatHeaders(false)
 	// seems like this should be taken into account earlier than in the ui/table.go FormatTable function to have effect on fields
