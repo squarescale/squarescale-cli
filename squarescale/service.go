@@ -18,6 +18,10 @@ type ServiceEnv struct {
 	Predefined bool   `json:"predefined"`
 }
 
+// TODO: add missing allocations, docker_image, custom_environment -> environment, instances_count
+// refresh_callbacks, status
+// TODO: see why 2 different structs are used ???
+
 // Service describes a project container as returned by the SquareScale API
 type Service struct {
 	ID                  int               `json:"container_id"`

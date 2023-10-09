@@ -199,7 +199,7 @@ type ProjectDetails struct {
 	//`json:"managed_services"`
 	Name                  string            `json:"name"`
 	Organization          string            `json:"organization_name"`
-	//`json:"services"`
+	Services              []Service         `json:"services"`
 	SlackWebHook          string            `json:"slack_webhook"`
 	UpdatedAt             time.Time         `json:"updated_at"`
 	User                  User              `json:"user"`
