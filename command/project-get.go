@@ -105,7 +105,7 @@ func (c *ProjectGetCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ProjectGetCommand) Synopsis() string {
-	return "Get project informations"
+	return "Get project basic informations"
 }
 
 // Help is part of cli.Command implementation.

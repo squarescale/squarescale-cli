@@ -261,7 +261,7 @@ func ProjectExternalNodes(project *squarescale.ProjectWithAllDetails) string {
 
 // Synopsis is part of cli.Command implementation.
 func (c *ProjectDetailsCommand) Synopsis() string {
-	return "Get project informations"
+	return "Get project detailed informations"
 }
 
 // Help is part of cli.Command implementation.
