@@ -127,3 +127,39 @@ func (c *Client) GetSchedulingGroupNodes(schedulingGroup SchedulingGroup, concat
 	}
 	return strings.Join(nodes[:], concatSep)
 }
+
+func (c *Client) PutSchedulingGroupsNodes(projectUUID, schedulingGroupName, payloadEntry string, ids []int) error {
+	if len(ids) == 0 {
+		return fmt.Errorf("Can not add empty list of nodes to project %s scheduling group %s", projectUUID, schedulingGroupName)
+	}
+
+	if payloadEntry == "cluster_members_to_add" {
+		payload := &JSONObject{payloadEntry: ids}
+		return c.sendSchedulingGroupsPut(projectUUID, schedulingGroupName, payload)
+	} else {
+		for _, id := range ids {
+			payload := &JSONObject{payloadEntry: id}
+			err := c.sendSchedulingGroupsPut(projectUUID, schedulingGroupName, payload)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (c *Client) sendSchedulingGroupsPut(projectUUID, schedulingGroupName string, payload *JSONObject) error {
+	code, body, err := c.put("/projects/" + projectUUID + "/scheduling_groups/" + schedulingGroupName, payload)
+	if err != nil {
+		return err
+	}
+
+	switch code {
+	case http.StatusOK:
+		return nil
+	case http.StatusNotFound:
+		return fmt.Errorf("Project '%s' does not exist", projectUUID)
+	default:
+		return unexpectedHTTPError(code, body)
+	}
+}
