@@ -123,6 +123,16 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 				Meta: *meta,
 			}, nil
 		},
+		"scheduling-group assign": func() (cli.Command, error) {
+			return &command.SchedulingGroupAssignCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"scheduling-group unassign": func() (cli.Command, error) {
+			return &command.SchedulingGroupUnAssignCommand{
+				Meta: *meta,
+			}, nil
+		},
 		"external-node": func() (cli.Command, error) {
 			return &command.ExternalNodeCommand{}, nil
 		},
@@ -213,6 +223,11 @@ func Commands(meta *command.Meta) map[string]cli.CommandFactory {
 		},
 		"project get": func() (cli.Command, error) {
 			return &command.ProjectGetCommand{
+				Meta: *meta,
+			}, nil
+		},
+		"project details": func() (cli.Command, error) {
+			return &command.ProjectDetailsCommand{
 				Meta: *meta,
 			}, nil
 		},

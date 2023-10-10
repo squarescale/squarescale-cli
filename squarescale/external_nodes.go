@@ -10,10 +10,11 @@ import (
 )
 
 type ExternalNode struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	PublicIP string `json:"public_ip"`
-	Status   string `json:"status"`
+	ID             int    `json:"id"`
+	Name           string `json:"name"`
+	PublicIP       string `json:"public_ip"`
+	Status         string `json:"status"`
+	PrivateNetwork string `json:"private_network"`
 }
 
 // GetExternalNodes gets all the external nodes attached to a Project
@@ -84,17 +85,30 @@ func (c *Client) AddExternalNode(projectUUID string, name string, public_ip stri
 	return newExternalNode, nil
 }
 
-// WaitExternalNode wait a new external-node
-func (c *Client) WaitExternalNode(projectUUID string, name string, timeToWait int64) (ExternalNode, error) {
+// TODO: potentially add a real timeout on this wait condition
+// WaitExternalNode wait a new external-node to reach one status
+func (c *Client) WaitExternalNode(projectUUID string, name string, timeToWait int64, targetStatuses []string) (ExternalNode, error) {
 	externalNode, err := c.GetExternalNodeInfo(projectUUID, name)
 	if err != nil {
 		return externalNode, err
 	}
 
-	for externalNode.Status != "provisionned" && err == nil {
-		time.Sleep(time.Duration(timeToWait) * time.Second)
-		externalNode, err = c.GetExternalNodeInfo(projectUUID, name)
-		logger.Debug.Println("externalNode status update: ", externalNode.Name)
+	if len(targetStatuses) > 0 {
+		found := false
+		logger.Debug.Println("externalNode status: ", externalNode.Name, " Status: ", externalNode.Status)
+		for err == nil && !found {
+			for _, v := range targetStatuses {
+				if externalNode.Status == v {
+					found = true
+					break
+				}
+			}
+			if !found {
+				time.Sleep(time.Duration(timeToWait) * time.Second)
+				externalNode, err = c.GetExternalNodeInfo(projectUUID, name)
+				logger.Debug.Println("externalNode status update: ", externalNode.Name, " Status: ", externalNode.Status)
+			}
+		}
 	}
 
 	return externalNode, err

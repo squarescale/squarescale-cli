@@ -18,11 +18,15 @@ type ServiceEnv struct {
 	Predefined bool   `json:"predefined"`
 }
 
+// TODO: add missing allocations, docker_image, custom_environment -> environment, instances_count
+// refresh_callbacks, status
+// TODO: see why 2 different structs are used ???
+
 // Service describes a project container as returned by the SquareScale API
 type Service struct {
 	ID                  int               `json:"container_id"`
 	Name                string            `json:"name"`
-	RunCommand          string            `json:"run_command"`
+	RunCommand          string            `json:"run_command"` // is array in the next structure
 	Entrypoint          string            `json:"entrypoint"`
 	Running             int               `json:"running"`
 	Size                int               `json:"size"`
@@ -34,14 +38,14 @@ type Service struct {
 	DockerCapabilities  []string          `json:"docker_capabilities"`
 	DockerDevices       []DockerDevice    `json:"docker_devices"`
 	AutoStart           bool              `json:"auto_start"`
-	MaxClientDisconnect string            `json:"max_client_disconnect"`
+	MaxClientDisconnect string            `json:"max_client_disconnect"` // is int in the next structure
 	Volumes             []VolumeToBind    `json:"volumes"`
 }
 
 type ServiceBody struct {
 	ID                  int               `json:"container_id"`
 	Name                string            `json:"name"`
-	RunCommand          []string          `json:"run_command"`
+	RunCommand          []string          `json:"run_command"` // is not an array in the previous structure
 	Entrypoint          string            `json:"entrypoint"`
 	Running             int               `json:"running"`
 	Size                int               `json:"size"`
@@ -53,7 +57,7 @@ type ServiceBody struct {
 	DockerCapabilities  []string          `json:"docker_capabilities"`
 	DockerDevices       []DockerDevice    `json:"docker_devices"`
 	AutoStart           bool              `json:"auto_start"`
-	MaxClientDisconnect int               `json:"max_client_disconnect"`
+	MaxClientDisconnect int               `json:"max_client_disconnect"` // is string in previous structure
 	Volumes             []VolumeToBind    `json:"volumes"`
 }
 
@@ -112,6 +116,7 @@ type ServiceLimits struct {
 	IOPS   int `json:"iops"`
 }
 
+// TODO: get /projects/" + projectUUID + "/project_info"
 // GetContainers gets all the services attached to a Project
 func (c *Client) GetServices(projectUUID string) ([]Service, error) {
 	code, body, err := c.get("/projects/" + projectUUID + "/services")

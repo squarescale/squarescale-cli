@@ -393,7 +393,7 @@ func nominalCaseOnWaitExternalNode(t *testing.T) {
 	cli := squarescale.NewClient(server.URL, token)
 
 	// when
-	_, err := cli.WaitExternalNode(projectName, nodeName, 0)
+	_, err := cli.WaitExternalNode(projectName, nodeName, 0, []string{})
 
 	// then
 	if err != nil {

@@ -27,6 +27,16 @@ type DbConfig struct {
 	BackupRetention int    `json:"backup_retention_days"`
 }
 
+type Database struct {
+	BackupEnabled   bool   `json:"backup_enabled"`
+	BackupRetention int    `json:"backup_retention_days"`
+	Enabled         bool   `json:"enabled"`
+	Engine          string `json:"engine"`
+	Size            string `json:"size"`
+	Status          string `json:"status"`
+	Version         string `json:"version"`
+}
+
 func (db *DbConfig) String() string {
 	if db.Enabled {
 		return db.Size + " " + db.Engine
