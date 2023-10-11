@@ -177,7 +177,7 @@ func (c *ServiceAddCommand) Run(args []string) int {
 		// you only get non fatal error output like
 		// adding Docker imageScheduling group 'dummy' not found for project '8944c0fd-98a5-4620-96a0-0d5603cb0e6d'
 		// but service will still be created
-		schedulingGroupsToAdd := getSchedulingGroupsArray(UUID, client, *schedulingGroups)
+		schedulingGroupsToAdd := getSchedulingGroupsIntArray(UUID, client, *schedulingGroups)
 		if len(schedulingGroupsToAdd) != 0 {
 			payload["scheduling_groups"] = schedulingGroupsToAdd
 		}
