@@ -29,3 +29,23 @@ func getSchedulingGroupsArray(UUID string, client *squarescale.Client, schedulin
 
 	return schedulingGroupsArray
 }
+
+func getSchedulingGroupsIntArray(UUID string, client *squarescale.Client, schedulingGroups string) []int {
+	if schedulingGroups == "" {
+		return []int{}
+	}
+
+	schedulingGroupsNameSplitted := strings.Split(schedulingGroups, ",")
+	var schedulingGroupsArray []int
+
+	for _, name := range schedulingGroupsNameSplitted {
+		schedulingGroup, err := client.GetSchedulingGroupInfo(UUID, name)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		schedulingGroupsArray = append(schedulingGroupsArray, schedulingGroup.ID)
+	}
+
+	return schedulingGroupsArray
+}
