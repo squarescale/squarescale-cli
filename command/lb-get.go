@@ -80,7 +80,7 @@ func (c *LBGetCommand) Run(args []string) int {
 				return msg, nil
 			}
 		}
-		return "", errors.New(fmt.Sprintf("Load balancer with ID %d not found in project %s", lbID, projectToShow))
+		return "", errors.New(fmt.Sprintf("Load balancer with ID %d not found in project %s", *lbID, projectToShow))
 	})
 }
 
