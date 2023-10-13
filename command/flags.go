@@ -220,6 +220,10 @@ func externalNodeNameArg(f *flag.FlagSet, arg int) (string, error) {
 	}
 }
 
+func externalNodeConfigNameFlag(f *flag.FlagSet) *string {
+	return f.String("config-name", "all", "Configuration service name (all/openvpn/consul/nomad [default to all])")
+}
+
 func serviceNameArg(f *flag.FlagSet, arg int) (string, error) {
 	value := f.Arg(arg)
 	if value == "" {
