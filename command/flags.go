@@ -424,10 +424,6 @@ func externalNodePublicIP(f *flag.FlagSet) *string {
 	return f.String("public-ip", "", "External node public IP")
 }
 
-func loadBalancerIDFlag(f *flag.FlagSet) *int64 {
-	return f.Int64("id", 0, "id of the targeted load balancer inside project")
-}
-
 func loadBalancerDisableFlag(f *flag.FlagSet) *bool {
 	return f.Bool("disable", false, "Disable load balancer")
 }
