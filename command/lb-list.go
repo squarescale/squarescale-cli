@@ -54,7 +54,7 @@ func (c *LBListCommand) Run(args []string) int {
 		var activeIcon string
 		var certBodyIcon string
 		var httpsIcon string
-		msg += fmt.Sprintf("ID\tActive\tCertificateBody\tHTTPS\tPublicURL\n")
+		msg += fmt.Sprintf("Active\tCertificateBody\tHTTPS\tPublicURL\n")
 		msg += fmt.Sprintf("--\t------\t---------------\t-----\t---------\n")
 		for _, lb := range loadBalancers {
 			if lb.Active {
@@ -72,7 +72,7 @@ func (c *LBListCommand) Run(args []string) int {
 			} else {
 				httpsIcon = "❌"
 			}
-			msg += fmt.Sprintf("%d\t%s\t%s\t\t%s\t%s\n", lb.ID, activeIcon, certBodyIcon, httpsIcon, lb.PublicURL)
+			msg += fmt.Sprintf("%s\t%s\t\t%s\t%s\n", activeIcon, certBodyIcon, httpsIcon, lb.PublicURL)
 		}
 		return msg, nil
 	})
