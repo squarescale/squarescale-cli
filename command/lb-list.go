@@ -4,9 +4,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"regexp"
 	"strings"
 
+	"github.com/olekukonko/tablewriter"
 	"github.com/squarescale/squarescale-cli/squarescale"
+	"github.com/squarescale/squarescale-cli/ui"
 )
 
 // LBListCommand gets the URL of the load balancer associated to a projects and prints it on the standard output.
@@ -50,12 +53,15 @@ func (c *LBListCommand) Run(args []string) int {
 			return "", err
 		}
 
-		var msg string
+		tableString := &strings.Builder{}
+		table := tablewriter.NewWriter(tableString)
+		// reset by ui/table.go FormatTable function: table.SetAutoFormatHeaders(false)
+		// seems like this should be taken into account earlier than in the ui/table.go FormatTable function to have effect on fields
+		table.SetAutoWrapText(false)
+		table.SetHeader([]string{"Active", "Certificate Body", "HTTPS", "Public URL"})
 		var activeIcon string
 		var certBodyIcon string
 		var httpsIcon string
-		msg += fmt.Sprintf("Active\tCertificateBody\tHTTPS\tPublicURL\n")
-		msg += fmt.Sprintf("--\t------\t---------------\t-----\t---------\n")
 		for _, lb := range loadBalancers {
 			if lb.Active {
 				activeIcon = "✅"
@@ -72,9 +78,18 @@ func (c *LBListCommand) Run(args []string) int {
 			} else {
 				httpsIcon = "❌"
 			}
-			msg += fmt.Sprintf("%s\t%s\t\t%s\t%s\n", activeIcon, certBodyIcon, httpsIcon, lb.PublicURL)
+			table.Append([]string{
+				activeIcon,
+				certBodyIcon,
+				httpsIcon,
+				lb.PublicURL,
+			})
 		}
-		return msg, nil
+		ui.FormatTable(table)
+
+		table.Render()
+		// Remove trailing \n and HT
+		return string(regexp.MustCompile(`[\n\x09][\n\x09]*$`).ReplaceAll([]byte(tableString.String()), []byte(""))), nil
 	})
 }
 
