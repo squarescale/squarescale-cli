@@ -95,17 +95,15 @@ func (c *LBListCommand) Run(args []string) int {
 
 // Synopsis is part of cli.Command implementation.
 func (c *LBListCommand) Synopsis() string {
-	return "Display project's public URL if available"
+	return "Display project's list of load balancers"
 }
 
 // Help is part of cli.Command implementation.
 func (c *LBListCommand) Help() string {
 	helpText := `
-usage: sqsc lb get [options]
+usage: sqsc lb list [options]
 
-  Display load balancer state (enabled, disabled). In case the load
-  balancer is enabled, all the project containers are displayed together
-  with their ports.
+  Display load balancer list for given project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
