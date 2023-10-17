@@ -113,3 +113,34 @@ func (c *Client) WaitExternalNode(projectUUID string, name string, timeToWait in
 
 	return externalNode, err
 }
+
+// DownloadConfigExternalNode download service configuration file(s) for a external node
+func (c *Client) DownloadConfigExternalNode(projectUUID, name, configName string) (error) {
+	externalNodes, err := c.GetExternalNodes(projectUUID)
+	if err != nil {
+		return err
+	}
+
+	for _, externalNode := range externalNodes {
+		if externalNode.Name == name {
+			for _, cfg := range []string{"openvpn", "consul", "nomad"} {
+				if configName == "all" || configName == cfg {
+					code, err := c.download(fmt.Sprintf("/projects/%s/external_nodes/%d/%s_client", projectUUID, externalNode.ID, cfg), name)
+					if err != nil {
+						return err
+					}
+
+					switch code {
+					case http.StatusOK:
+					case http.StatusNotFound:
+						return fmt.Errorf("Error retrieving service configuration %s for external node %s in project '%s'", configName, name, projectUUID)
+					default:
+						return unexpectedHTTPError(code, []byte{})
+					}
+				}
+			}
+			return nil
+		}
+	}
+	return fmt.Errorf("Unable to find external node '%s' in project '%s'", name, projectUUID)
+}

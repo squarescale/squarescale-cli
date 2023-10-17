@@ -9,6 +9,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
+	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -98,6 +100,76 @@ func (c *Client) put(path string, payload interface{}) (int, []byte, error) {
 	logger.Trace.Printf("HTTP Response: %s\n", response)
 	logger.Trace.Println("Err:", err)
 	return code, response, err
+}
+
+func (c *Client) download(path, nodeName string) (int, error) {
+	var bodyReader io.Reader
+	req, err := http.NewRequest("GET", c.endpoint+path, bodyReader)
+	if err != nil {
+		return 0, err
+	}
+
+	req.Header.Set("Authorization", "bearer "+c.token)
+	req.Header.Set("API-Version", supportedAPI)
+
+	reqDump, err := httputil.DumpRequestOut(req, true)
+	if err != nil {
+		logger.Error.Println("Error dumping HTTP request:", err)
+	} else {
+		logger.Trace.Printf("REQUEST: %s", string(reqDump))
+	}
+
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return 0, err
+	}
+	fName := ""
+	val, ok := res.Header["Content-Disposition"]
+	if ok {
+		if len(val) != 1 {
+			return 0, fmt.Errorf("Content-Disposition header value: %+v", val)
+		}
+		re := regexp.MustCompile(`.*filename="([^"]*)".*`)
+		fName = re.ReplaceAllString(val[0], "$1")
+	}
+
+	defer res.Body.Close()
+	// Check server response
+	if res.StatusCode != http.StatusOK {
+		var reason map[string]interface{}
+		rbytes, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return 0, fmt.Errorf("bad status: %s unabled to read body error: %+v", res.Status, err)
+		}
+		err1 := json.Unmarshal(rbytes, &reason)
+		if err1 != nil {
+			return 0, fmt.Errorf("bad status: %s unabled to decode error: %+v", res.Status, err1)
+		}
+		var val1 map[string]interface{}
+		val1, ok := reason["errors"].(map[string]interface{})
+		if ok {
+			val, ok := val1["Error"]
+			if ok {
+				return 0, fmt.Errorf("Error: %s", val.(string))
+			}
+		}
+		return 0, fmt.Errorf("bad status: %s", res.Status)
+	}
+
+	// Create the file
+	out, err := os.Create(fmt.Sprintf("%s_%s", nodeName, fName))
+	if err != nil  {
+		return 0, err
+	}
+	defer out.Close()
+
+	// Writer the body to file
+	_, err = io.Copy(out, res.Body)
+	if err != nil  {
+		return 0, err
+	}
+
+	return res.StatusCode, nil
 }
 
 func (c *Client) request(method, path string, payload interface{}) (int, []byte, error) {

@@ -1,5 +1,6 @@
 builds:
 -
+  binary: sqsc
   ldflags: -s -w -X main.Version={{.Version}} -X main.GitBranch={{.Branch}} -X main.GitCommit={{.ShortCommit}} -X main.BuildDate={{.Date}}
   goos:
     - linux
