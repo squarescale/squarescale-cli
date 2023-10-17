@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 
@@ -62,6 +63,12 @@ func (c *LBListCommand) Run(args []string) int {
 		var activeIcon string
 		var certBodyIcon string
 		var httpsIcon string
+		extraMsg := ""
+		termType := os.Getenv("TERM_PROGRAM")
+		matchTerm, _ := regexp.MatchString(".*[Tt][Mm][Uu][Xx].*", termType)
+		if matchTerm {
+			extraMsg = "\n\nPlease note that as you are using Tmux the UTF-8 icons might not be displayed properly unless you used the `-u` option"
+		}
 		for _, lb := range loadBalancers {
 			if lb.Active {
 				activeIcon = "✅"
@@ -89,7 +96,7 @@ func (c *LBListCommand) Run(args []string) int {
 
 		table.Render()
 		// Remove trailing \n and HT
-		return string(regexp.MustCompile(`[\n\x09][\n\x09]*$`).ReplaceAll([]byte(tableString.String()), []byte(""))), nil
+		return string(regexp.MustCompile(`[\n\x09][\n\x09]*$`).ReplaceAll([]byte(tableString.String()), []byte(""))) + extraMsg, nil
 	})
 }
 
