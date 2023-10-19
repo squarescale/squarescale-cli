@@ -4,9 +4,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
+	"regexp"
 	"strings"
 
+	"github.com/olekukonko/tablewriter"
 	"github.com/squarescale/squarescale-cli/squarescale"
+	"github.com/squarescale/squarescale-cli/ui"
 )
 
 // LBListCommand gets the URL of the load balancer associated to a projects and prints it on the standard output.
@@ -50,12 +54,21 @@ func (c *LBListCommand) Run(args []string) int {
 			return "", err
 		}
 
-		var msg string
+		tableString := &strings.Builder{}
+		table := tablewriter.NewWriter(tableString)
+		// reset by ui/table.go FormatTable function: table.SetAutoFormatHeaders(false)
+		// seems like this should be taken into account earlier than in the ui/table.go FormatTable function to have effect on fields
+		table.SetAutoWrapText(false)
+		table.SetHeader([]string{"Active", "Certificate Body", "HTTPS", "Public URL"})
 		var activeIcon string
 		var certBodyIcon string
 		var httpsIcon string
-		msg += fmt.Sprintf("ID\tActive\tCertificateBody\tHTTPS\tPublicURL\n")
-		msg += fmt.Sprintf("--\t------\t---------------\t-----\t---------\n")
+		extraMsg := ""
+		termType := os.Getenv("TERM_PROGRAM")
+		matchTerm, _ := regexp.MatchString(".*[Tt][Mm][Uu][Xx].*", termType)
+		if matchTerm {
+			extraMsg = "\n\nPlease note that as you are using Tmux the UTF-8 icons might not be displayed properly unless you used the `-u` option"
+		}
 		for _, lb := range loadBalancers {
 			if lb.Active {
 				activeIcon = "✅"
@@ -72,25 +85,32 @@ func (c *LBListCommand) Run(args []string) int {
 			} else {
 				httpsIcon = "❌"
 			}
-			msg += fmt.Sprintf("%d\t%s\t%s\t\t%s\t%s\n", lb.ID, activeIcon, certBodyIcon, httpsIcon, lb.PublicURL)
+			table.Append([]string{
+				activeIcon,
+				certBodyIcon,
+				httpsIcon,
+				lb.PublicURL,
+			})
 		}
-		return msg, nil
+		ui.FormatTable(table)
+
+		table.Render()
+		// Remove trailing \n and HT
+		return string(regexp.MustCompile(`[\n\x09][\n\x09]*$`).ReplaceAll([]byte(tableString.String()), []byte(""))) + extraMsg, nil
 	})
 }
 
 // Synopsis is part of cli.Command implementation.
 func (c *LBListCommand) Synopsis() string {
-	return "Display project's public URL if available"
+	return "Display project's list of load balancers"
 }
 
 // Help is part of cli.Command implementation.
 func (c *LBListCommand) Help() string {
 	helpText := `
-usage: sqsc lb get [options]
+usage: sqsc lb list [options]
 
-  Display load balancer state (enabled, disabled). In case the load
-  balancer is enabled, all the project containers are displayed together
-  with their ports.
+  Display load balancer list for given project.
 `
 	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

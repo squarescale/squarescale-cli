@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
@@ -21,7 +22,7 @@ func (c *LBGetCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := projectUUIDFlag(c.flagSet)
 	projectName := projectNameFlag(c.flagSet)
-	lbID := loadBalancerIDFlag(c.flagSet)
+
 	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
@@ -32,10 +33,6 @@ func (c *LBGetCommand) Run(args []string) int {
 
 	if *projectUUID == "" && *projectName == "" {
 		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
-	}
-
-	if *lbID == 0 {
-		return c.errorWithUsage(errors.New("Load balancer ID is mandatory"))
 	}
 
 	return c.runWithSpinner("load balancer config", endpoint.String(), func(client *squarescale.Client) (string, error) {
@@ -57,30 +54,31 @@ func (c *LBGetCommand) Run(args []string) int {
 		if err != nil {
 			return "", err
 		}
+		if len(loadBalancers) != 1 {
+			log.Printf("Warning project %s has %d Load Balancers (only 1 expected)", UUID, len(loadBalancers))
+		}
 
 		var msg string
 		for _, lb := range loadBalancers {
-			if lb.ID == *lbID {
-				msg += fmt.Sprintf("Public URL: %s\n", lb.PublicURL)
-				if lb.Active {
-					msg += fmt.Sprintf("Active: ✅\n")
-				} else {
-					msg += fmt.Sprintf("Active: ❌\n")
-				}
-				if lb.HTTPS {
-					msg += fmt.Sprintf("HTTPS: ✅\n")
-				} else {
-					msg += fmt.Sprintf("HTTPS: ❌\n")
-				}
-				if lb.CertificateBody != "" {
-					msg += fmt.Sprintf("Certificate body:\n%s\n", lb.CertificateBody)
-				} else {
-					msg += fmt.Sprintf("Certificate body: ❌\n")
-				}
-				return msg, nil
+			msg += fmt.Sprintf("Public URL: %s\n", lb.PublicURL)
+			if lb.Active {
+				msg += fmt.Sprintf("Active: ✅\n")
+			} else {
+				msg += fmt.Sprintf("Active: ❌\n")
 			}
+			if lb.HTTPS {
+				msg += fmt.Sprintf("HTTPS: ✅\n")
+			} else {
+				msg += fmt.Sprintf("HTTPS: ❌\n")
+			}
+			if lb.CertificateBody != "" {
+				msg += fmt.Sprintf("Certificate body:\n%s\n", lb.CertificateBody)
+			} else {
+				msg += fmt.Sprintf("Certificate body: ❌\n")
+			}
+			return msg, nil
 		}
-		return "", errors.New(fmt.Sprintf("Load balancer with ID %d not found in project %s", lbID, projectToShow))
+		return "", errors.New(fmt.Sprintf("No load balancer found in project %s", projectToShow))
 	})
 }
 

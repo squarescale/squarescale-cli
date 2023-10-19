@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"strings"
 
 	"github.com/squarescale/squarescale-cli/squarescale"
@@ -22,7 +23,6 @@ func (c *LBSetCommand) Run(args []string) int {
 	endpoint := endpointFlag(c.flagSet)
 	projectUUID := projectUUIDFlag(c.flagSet)
 	projectName := projectNameFlag(c.flagSet)
-	loadBalancerID := loadBalancerIDFlag(c.flagSet)
 	disableArg := loadBalancerDisableFlag(c.flagSet)
 	certArg := certFlag(c.flagSet)
 	certChainArg := certChainFlag(c.flagSet)
@@ -37,10 +37,6 @@ func (c *LBSetCommand) Run(args []string) int {
 
 	if *projectUUID == "" && *projectName == "" {
 		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
-	}
-
-	if *loadBalancerID == 0 {
-		return c.errorWithUsage(errors.New("Load balancer ID is mandatory"))
 	}
 
 	var cert, secretKey string
@@ -87,12 +83,20 @@ func (c *LBSetCommand) Run(args []string) int {
 			UUID = *projectUUID
 		}
 
+		loadBalancers, err := client.LoadBalancerGet(UUID)
+		if err != nil {
+			return "", err
+		}
+		if len(loadBalancers) != 1 {
+			log.Printf("Warning project %s has %d Load Balancers (only 1 expected)", UUID, len(loadBalancers))
+		}
+
 		if *disableArg {
-			err = client.LoadBalancerDisable(UUID, *loadBalancerID)
+			err = client.LoadBalancerDisable(UUID, loadBalancers[0].ID)
 			return fmt.Sprintf("Successfully disable load balancer for project '%s'", projectToShow), err
 		}
 
-		err = client.LoadBalancerEnable(UUID, *loadBalancerID, cert, certChain, secretKey)
+		err = client.LoadBalancerEnable(UUID, loadBalancers[0].ID, cert, certChain, secretKey)
 		return fmt.Sprintf("Successfully update load balancer for project '%s'", projectToShow), err
 	})
 
