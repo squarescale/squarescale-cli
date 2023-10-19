@@ -4,11 +4,12 @@ go 1.21
 
 require (
 	github.com/BenJetson/humantime v0.0.0-20200514023344-f59ec2835a87
+	github.com/alessio/shellescape v1.4.2
 	github.com/briandowns/spinner v1.23.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hoisie/mustache v0.0.0-20160804235033-6375acf62c69
 	github.com/jpillora/go-mime v0.0.0-20150326152935-4e683937836d
-	github.com/mattn/go-isatty v0.0.19
+	github.com/mattn/go-isatty v0.0.20
 	github.com/mitchellh/cli v1.1.5
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/onsi/ginkgo/v2 v2.13.0
@@ -17,7 +18,6 @@ require (
 	github.com/squarescale/actioncable-go v0.2.0
 	github.com/squarescale/go-netrc v0.1.3
 	github.com/squarescale/logger v0.1.4
-	gopkg.in/alessio/shellescape.v1 v1.0.0-20170105083845-52074bc9df61
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -26,7 +26,6 @@ require (
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.3 // indirect
-	github.com/alessio/shellescape v1.4.2 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
