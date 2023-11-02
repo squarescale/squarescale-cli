@@ -99,9 +99,13 @@ func (b *BatchAddCommand) Run(args []string) int {
 		return b.errorWithUsage(fmt.Errorf(("CPU must be greater than or equal to 100MHz")))
 	}
 
-	dockerCapabilitiesArray := []string{"NONE"}
-	if !*noDockerCapabilities {
+	dockerCapabilitiesArray := []string{}
+	if *noDockerCapabilities {
+		dockerCapabilitiesArray = []string{"NONE"}
+	} else if *dockerCapabilities != "" {
 		dockerCapabilitiesArray = getDockerCapabilitiesArray(*dockerCapabilities)
+	} else {
+		dockerCapabilitiesArray = getDefaultDockerCapabilitiesArray()
 	}
 
 	dockerDevicesArray, err := getDockerDevicesArray(*dockerDevices)
