@@ -26,11 +26,13 @@ func (cmd *ServiceAddCommand) Run(args []string) int {
 	endpoint := endpointFlag(cmd.flagSet)
 	projectUUID := projectUUIDFlag(cmd.flagSet)
 	projectName := projectNameFlag(cmd.flagSet)
+
 	serviceName := serviceFlag(cmd.flagSet)
-	instances := containerInstancesFlag(cmd.flagSet)
 	runCommand := containerRunCmdFlag(cmd.flagSet)
 	noRunCommand := containerNoRunCmdFlag(cmd.flagSet)
 	entrypoint := entrypointFlag(cmd.flagSet)
+
+	instances := containerInstancesFlag(cmd.flagSet)
 	autostart := autostartFlag(cmd.flagSet)
 	maxClientDisconnect := maxclientdisconnect(cmd.flagSet)
 

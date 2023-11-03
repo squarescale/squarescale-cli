@@ -14,35 +14,40 @@ import (
 type BatchAddCommand struct {
 	Meta
 	flagSet   *flag.FlagSet
-	DbDisable bool
-	Db        squarescale.DbConfig
-	Cluster   squarescale.ClusterConfig
 }
 
 // Run is part of cli.Command implementation.
 func (cmd *BatchAddCommand) Run(args []string) int {
 	// Parse flags
 	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+
+	image := dockerImageNameFlag(cmd.flagSet)
+	username := dockerImageUsernameFlag(cmd.flagSet)
+	password := dockerImagePasswordFlag(cmd.flagSet)
+
 	endpoint := endpointFlag(cmd.flagSet)
 	projectUUID := projectUUIDFlag(cmd.flagSet)
 	projectName := projectNameFlag(cmd.flagSet)
 
-	wantedBatchName := batchNameFlag(cmd.flagSet)
-	runCommand := batchRunCmdFlag(cmd.flagSet)
+	batchName := serviceFlag(cmd.flagSet)
+	runCommand := containerRunCmdFlag(cmd.flagSet)
+	noRunCommand := containerNoRunCmdFlag(cmd.flagSet)
 	entrypoint := entrypointFlag(cmd.flagSet)
-	dockerImageName := dockerImageNameFlag(cmd.flagSet)
-	dockerImagePrivate := dockerImagePrivateFlag(cmd.flagSet)
-	dockerImageUsername := dockerImageUsernameFlag(cmd.flagSet)
-	dockerImagePassword := dockerImagePasswordFlag(cmd.flagSet)
+
 	periodicBatch := periodicBatchFlag(cmd.flagSet)
 	cronExpression := cronExpressionFlag(cmd.flagSet)
 	timeZoneName := timeZoneNameFlag(cmd.flagSet)
-	limitMemory := batchLimitMemoryFlag(cmd.flagSet)
-	limitIOPS := batchLimitIOPSFlag(cmd.flagSet)
-	limitCPU := batchLimitCPUFlag(cmd.flagSet)
+
+	schedulingGroups := containerSchedulingGroupsFlag(cmd.flagSet)
+	limitMemory := containerLimitMemoryFlag(cmd.flagSet, 256)
+	limitCPU := containerLimitCPUFlag(cmd.flagSet, 100)
 	dockerCapabilities := dockerCapabilitiesFlag(cmd.flagSet)
 	noDockerCapabilities := noDockerCapabilitiesFlag(cmd.flagSet)
 	dockerDevices := dockerDevicesFlag(cmd.flagSet)
+
+	envVariables := envFileFlag(cmd.flagSet)
+	var envParams []string
+	envParameterFlag(cmd.flagSet, &envParams)
 	volumes := cmd.flagSet.String("volumes", "", "Volumes")
 
 	if err := cmd.flagSet.Parse(args); err != nil {
@@ -53,9 +58,13 @@ func (cmd *BatchAddCommand) Run(args []string) int {
 		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	if *wantedBatchName == "" && cmd.flagSet.Arg(0) != "" {
+	if *noRunCommand && *runCommand != "" {
+		return cmd.errorWithUsage(errors.New("Cannot specify an override command and disable it at the same time"))
+	}
+
+	if *batchName == "" && cmd.flagSet.Arg(0) != "" {
 		name := cmd.flagSet.Arg(0)
-		wantedBatchName = &name
+		batchName = &name
 	}
 
 	if cmd.flagSet.NArg() > 1 {
@@ -63,20 +72,12 @@ func (cmd *BatchAddCommand) Run(args []string) int {
 	}
 
 	//check rules
-	if *wantedBatchName == "" {
+	if *batchName == "" {
 		return cmd.errorWithUsage(fmt.Errorf(("Batch name is mandatory. Please, chose a batch name.")))
 	}
 
-	if *dockerImageName == "" {
+	if *image == "" {
 		return cmd.errorWithUsage(fmt.Errorf(("DockerImage name is mandatory. Please, chose a dockerImage name.")))
-	}
-
-	if *dockerImagePrivate == true && *dockerImageUsername == "" {
-		return cmd.errorWithUsage(fmt.Errorf(("Username is mandatory when the dockerImage is private. Please, complete the username.")))
-	}
-
-	if *dockerImagePrivate == true && *dockerImagePassword == "" {
-		return cmd.errorWithUsage(fmt.Errorf(("Password is mandatory when the dockerImage is private. Please, complete the password.")))
 	}
 
 	if *periodicBatch == true && *cronExpression == "" {
@@ -119,20 +120,19 @@ func (cmd *BatchAddCommand) Run(args []string) int {
 
 	//payload
 	dockerImageContent := squarescale.DockerImageInfos{
-		Name:     *dockerImageName,
-		Private:  *dockerImagePrivate,
-		Username: *dockerImageUsername,
-		Password: *dockerImagePassword,
+		Name:     *image,
+		Private:  (*username != "" && *password != ""),
+		Username: *username,
+		Password: *password,
 	}
 
 	batchLimitContent := squarescale.BatchLimits{
 		CPU:    *limitCPU,
 		Memory: *limitMemory,
-		IOPS:   *limitIOPS,
 	}
 
 	batchCommonContent := squarescale.BatchCommon{
-		Name:               *wantedBatchName,
+		Name:               *batchName,
 		Periodic:           *periodicBatch,
 		CronExpression:     *cronExpression,
 		TimeZoneName:       *timeZoneName,
@@ -152,6 +152,24 @@ func (cmd *BatchAddCommand) Run(args []string) int {
 		Volumes:     volumesToBind,
 	}
 
+	container := squarescale.Service{}
+	if *envVariables != "" {
+		err := container.SetEnv(*envVariables)
+		if err != nil {
+			cmd.error(err)
+		}
+	}
+	if len(envParams) > 0 {
+		err := container.SetEnvParams(envParams)
+		if err != nil {
+			cmd.error(err)
+		}
+	}
+	if len(container.CustomEnv) > 0 {
+		fmt.Println("XXX")
+		//payload["custom_environment"] = container.CustomEnv
+	}
+
 	res := cmd.runWithSpinner("add batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
 
 		var UUID string
@@ -165,11 +183,16 @@ func (cmd *BatchAddCommand) Run(args []string) int {
 		} else {
 			UUID = *projectUUID
 		}
-
-		//create function
+		schedulingGroupsToAdd := getSchedulingGroupsIntArray(UUID, client, *schedulingGroups)
+/*		if len(schedulingGroupsToAdd) != 0 {
+			payload["scheduling_groups"] = schedulingGroupsToAdd
+		}*/
+		fmt.Printf("GOT %s\nBATCH\n%+v\nSCHED\n%+v\n", UUID, batchOrderContent, schedulingGroupsToAdd)
+		return fmt.Sprintf("Not creating batch '%s'", *batchName), fmt.Errorf("toto")
+/*		//create function
 		_, err = client.CreateBatch(UUID, batchOrderContent)
 
-		return fmt.Sprintf("Successfully added batch '%s'", *wantedBatchName), err
+		return fmt.Sprintf("Successfully added batch '%s'", *batchName), err*/
 	})
 
 	if res != 0 {
