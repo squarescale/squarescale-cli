@@ -19,25 +19,25 @@ type ExternalNodeListCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (e *ExternalNodeListCommand) Run(args []string) int {
-	e.flagSet = newFlagSet(e, e.Ui)
-	endpoint := endpointFlag(e.flagSet)
-	projectUUID := projectUUIDFlag(e.flagSet)
-	projectName := projectNameFlag(e.flagSet)
+func (c *ExternalNodeListCommand) Run(args []string) int {
+	c.flagSet = newFlagSet(c, c.Ui)
+	endpoint := endpointFlag(c.flagSet)
+	projectUUID := projectUUIDFlag(c.flagSet)
+	projectName := projectNameFlag(c.flagSet)
 
-	if err := e.flagSet.Parse(args); err != nil {
+	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if e.flagSet.NArg() > 0 {
-		return e.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", e.flagSet.Args()))
+	if c.flagSet.NArg() > 0 {
+		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return e.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	return e.runWithSpinner("list external nodes", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("list external nodes", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -82,16 +82,16 @@ func (e *ExternalNodeListCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (e *ExternalNodeListCommand) Synopsis() string {
+func (c *ExternalNodeListCommand) Synopsis() string {
 	return "List external nodes of project"
 }
 
 // Help is part of cli.Command implementation.
-func (e *ExternalNodeListCommand) Help() string {
+func (c *ExternalNodeListCommand) Help() string {
 	helpText := `
 usage: sqsc external-node list [options]
 
   List external nodes of project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(e.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

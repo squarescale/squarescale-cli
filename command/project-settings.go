@@ -14,26 +14,26 @@ type ProjectSettingsCommand struct {
 	flagSet *flag.FlagSet
 }
 
-func (p *ProjectSettingsCommand) Run(args []string) int {
-	p.flagSet = newFlagSet(p, p.Ui)
-	endpoint := endpointFlag(p.flagSet)
-	projectUUID := projectUUIDFlag(p.flagSet)
-	projectName := projectNameFlag(p.flagSet)
-	hybridCluster := projectHybridClusterFlag(p.flagSet)
+func (c *ProjectSettingsCommand) Run(args []string) int {
+	c.flagSet = newFlagSet(c, c.Ui)
+	endpoint := endpointFlag(c.flagSet)
+	projectUUID := projectUUIDFlag(c.flagSet)
+	projectName := projectNameFlag(c.flagSet)
+	hybridCluster := projectHybridClusterFlag(c.flagSet)
 
-	if err := p.flagSet.Parse(args); err != nil {
+	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return p.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	if p.flagSet.NArg() > 0 {
-		return p.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", p.flagSet.Args()))
+	if c.flagSet.NArg() > 0 {
+		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
 
-	return p.runWithSpinner("change project settings", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("change project settings", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
 		var UUID string
 		var projectToShow string
@@ -59,16 +59,16 @@ func (p *ProjectSettingsCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (p *ProjectSettingsCommand) Synopsis() string {
+func (c *ProjectSettingsCommand) Synopsis() string {
 	return "Change settings of a project."
 }
 
 // Help is part of cli.Command implementation.
-func (p *ProjectSettingsCommand) Help() string {
+func (c *ProjectSettingsCommand) Help() string {
 	helpText := `
 usage: sqsc settings [options]
 
   Change settings of a project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(p.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

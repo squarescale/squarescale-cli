@@ -15,29 +15,29 @@ type NetworkPolicyDeployCommand struct {
 	flagSet *flag.FlagSet
 }
 
-func (b *NetworkPolicyDeployCommand) Run(args []string) int {
-	b.flagSet = newFlagSet(b, b.Ui)
-	endpoint := endpointFlag(b.flagSet)
-	projectUUID := projectUUIDFlag(b.flagSet)
-	projectName := projectNameFlag(b.flagSet)
+func (c *NetworkPolicyDeployCommand) Run(args []string) int {
+	c.flagSet = newFlagSet(c, c.Ui)
+	endpoint := endpointFlag(c.flagSet)
+	projectUUID := projectUUIDFlag(c.flagSet)
+	projectName := projectNameFlag(c.flagSet)
 
-	if err := b.flagSet.Parse(args); err != nil {
+	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return b.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	if b.flagSet.NArg() > 1 {
-		return b.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", b.flagSet.Args()))
+	if c.flagSet.NArg() > 1 {
+		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
 	}
-	version := networkPolicyVersionArg(b.flagSet)
+	version := networkPolicyVersionArg(c.flagSet)
 	if version == "" {
-		return b.errorWithUsage(fmt.Errorf("version is mandator"))
+		return c.errorWithUsage(fmt.Errorf("version is mandator"))
 	}
 
-	return b.runWithSpinner("deploy network policy version", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return c.runWithSpinner("deploy network policy version", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -59,16 +59,16 @@ func (b *NetworkPolicyDeployCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (b *NetworkPolicyDeployCommand) Synopsis() string {
+func (c *NetworkPolicyDeployCommand) Synopsis() string {
 	return "Deploy specific network policy version"
 }
 
 // Help is part of cli.Command implementation.
-func (b *NetworkPolicyDeployCommand) Help() string {
+func (c *NetworkPolicyDeployCommand) Help() string {
 	helpText := `
 usage: sqsc network-policy deploy [options] VERSION
 
   Deploy network policy version
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(b.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }

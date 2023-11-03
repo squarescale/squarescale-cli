@@ -20,83 +20,83 @@ type BatchAddCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (b *BatchAddCommand) Run(args []string) int {
+func (c *BatchAddCommand) Run(args []string) int {
 	// Parse flags
-	b.flagSet = newFlagSet(b, b.Ui)
-	endpoint := endpointFlag(b.flagSet)
-	projectUUID := projectUUIDFlag(b.flagSet)
-	projectName := projectNameFlag(b.flagSet)
+	c.flagSet = newFlagSet(c, c.Ui)
+	endpoint := endpointFlag(c.flagSet)
+	projectUUID := projectUUIDFlag(c.flagSet)
+	projectName := projectNameFlag(c.flagSet)
 
-	wantedBatchName := batchNameFlag(b.flagSet)
-	runCommand := batchRunCmdFlag(b.flagSet)
-	entrypoint := entrypointFlag(b.flagSet)
-	dockerImageName := dockerImageNameFlag(b.flagSet)
-	dockerImagePrivate := dockerImagePrivateFlag(b.flagSet)
-	dockerImageUsername := dockerImageUsernameFlag(b.flagSet)
-	dockerImagePassword := dockerImagePasswordFlag(b.flagSet)
-	periodicBatch := periodicBatchFlag(b.flagSet)
-	cronExpression := cronExpressionFlag(b.flagSet)
-	timeZoneName := timeZoneNameFlag(b.flagSet)
-	limitMemory := batchLimitMemoryFlag(b.flagSet)
-	limitIOPS := batchLimitIOPSFlag(b.flagSet)
-	limitCPU := batchLimitCPUFlag(b.flagSet)
-	dockerCapabilities := dockerCapabilitiesFlag(b.flagSet)
-	noDockerCapabilities := noDockerCapabilitiesFlag(b.flagSet)
-	dockerDevices := dockerDevicesFlag(b.flagSet)
-	volumes := b.flagSet.String("volumes", "", "Volumes")
+	wantedBatchName := batchNameFlag(c.flagSet)
+	runCommand := batchRunCmdFlag(c.flagSet)
+	entrypoint := entrypointFlag(c.flagSet)
+	dockerImageName := dockerImageNameFlag(c.flagSet)
+	dockerImagePrivate := dockerImagePrivateFlag(c.flagSet)
+	dockerImageUsername := dockerImageUsernameFlag(c.flagSet)
+	dockerImagePassword := dockerImagePasswordFlag(c.flagSet)
+	periodicBatch := periodicBatchFlag(c.flagSet)
+	cronExpression := cronExpressionFlag(c.flagSet)
+	timeZoneName := timeZoneNameFlag(c.flagSet)
+	limitMemory := batchLimitMemoryFlag(c.flagSet)
+	limitIOPS := batchLimitIOPSFlag(c.flagSet)
+	limitCPU := batchLimitCPUFlag(c.flagSet)
+	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
+	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
+	dockerDevices := dockerDevicesFlag(c.flagSet)
+	volumes := c.flagSet.String("volumes", "", "Volumes")
 
-	if err := b.flagSet.Parse(args); err != nil {
+	if err := c.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return b.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	if *wantedBatchName == "" && b.flagSet.Arg(0) != "" {
-		name := b.flagSet.Arg(0)
+	if *wantedBatchName == "" && c.flagSet.Arg(0) != "" {
+		name := c.flagSet.Arg(0)
 		wantedBatchName = &name
 	}
 
-	if b.flagSet.NArg() > 1 {
-		return b.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", b.flagSet.Args()[1:]))
+	if c.flagSet.NArg() > 1 {
+		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
 	}
 
 	//check rules
 	if *wantedBatchName == "" {
-		return b.errorWithUsage(fmt.Errorf(("Batch name is mandatory. Please, chose a batch name.")))
+		return c.errorWithUsage(fmt.Errorf(("Batch name is mandatory. Please, chose a batch name.")))
 	}
 
 	if *dockerImageName == "" {
-		return b.errorWithUsage(fmt.Errorf(("DockerImage name is mandatory. Please, chose a dockerImage name.")))
+		return c.errorWithUsage(fmt.Errorf(("DockerImage name is mandatory. Please, chose a dockerImage name.")))
 	}
 
 	if *dockerImagePrivate == true && *dockerImageUsername == "" {
-		return b.errorWithUsage(fmt.Errorf(("Username is mandatory when the dockerImage is private. Please, complete the username.")))
+		return c.errorWithUsage(fmt.Errorf(("Username is mandatory when the dockerImage is private. Please, complete the username.")))
 	}
 
 	if *dockerImagePrivate == true && *dockerImagePassword == "" {
-		return b.errorWithUsage(fmt.Errorf(("Password is mandatory when the dockerImage is private. Please, complete the password.")))
+		return c.errorWithUsage(fmt.Errorf(("Password is mandatory when the dockerImage is private. Please, complete the password.")))
 	}
 
 	if *periodicBatch == true && *cronExpression == "" {
-		return b.errorWithUsage(fmt.Errorf(("Cron_expression is mandatory when the batch is periodic. Please, complete the cron_expression.")))
+		return c.errorWithUsage(fmt.Errorf(("Cron_expression is mandatory when the batch is periodic. Please, complete the cron_expression.")))
 	}
 
 	if *periodicBatch == true && *timeZoneName == "" {
-		return b.errorWithUsage(fmt.Errorf(("Time_zone_name is mandatory when the batch is periodic. Please, complete the time_zone_name.")))
+		return c.errorWithUsage(fmt.Errorf(("Time_zone_name is mandatory when the batch is periodic. Please, complete the time_zone_name.")))
 	}
 
 	if _, err := time.LoadLocation(*timeZoneName); err != nil {
-		return b.errorWithUsage(fmt.Errorf(("Time_zone_name is not in the good format (IANA Time Zone name)")))
+		return c.errorWithUsage(fmt.Errorf(("Time_zone_name is not in the good format (IANA Time Zone name)")))
 	}
 
 	if *limitMemory <= 10 {
-		return b.errorWithUsage(fmt.Errorf(("Memory must be greater than or equal to 10MB")))
+		return c.errorWithUsage(fmt.Errorf(("Memory must be greater than or equal to 10MB")))
 	}
 
 	if *limitCPU < 99 {
-		return b.errorWithUsage(fmt.Errorf(("CPU must be greater than or equal to 100MHz")))
+		return c.errorWithUsage(fmt.Errorf(("CPU must be greater than or equal to 100MHz")))
 	}
 
 	dockerCapabilitiesArray := []string{}
@@ -109,9 +109,9 @@ func (b *BatchAddCommand) Run(args []string) int {
 	}
 
 	dockerDevicesArray, err := getDockerDevicesArray(*dockerDevices)
-	if isFlagPassed("docker-devices", b.flagSet) {
+	if isFlagPassed("docker-devices", c.flagSet) {
 		if err != nil {
-			return b.errorWithUsage(err)
+			return c.errorWithUsage(err)
 		}
 	}
 
@@ -152,7 +152,7 @@ func (b *BatchAddCommand) Run(args []string) int {
 		Volumes:     volumesToBind,
 	}
 
-	res := b.runWithSpinner("add batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := c.runWithSpinner("add batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
 
 		var UUID string
 		var err error
@@ -181,16 +181,16 @@ func (b *BatchAddCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (b *BatchAddCommand) Synopsis() string {
+func (c *BatchAddCommand) Synopsis() string {
 	return "Add batch to project"
 }
 
 // Help is part of cli.Command implementation.
-func (b *BatchAddCommand) Help() string {
+func (c *BatchAddCommand) Help() string {
 	helpText := `
 usage: sqsc batch add [options] <batch_name>
 
   Add batch to project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(b.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
 }
