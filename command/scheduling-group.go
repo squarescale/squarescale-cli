@@ -11,17 +11,17 @@ type SchedulingGroupCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *SchedulingGroupCommand) Run(args []string) int {
+func (cmd *SchedulingGroupCommand) Run(args []string) int {
 	return cli.RunResultHelp
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *SchedulingGroupCommand) Synopsis() string {
+func (cmd *SchedulingGroupCommand) Synopsis() string {
 	return "Commands related to a scheduling groups"
 }
 
 // Help is part of cli.Command implementation.
-func (c *SchedulingGroupCommand) Help() string {
+func (cmd *SchedulingGroupCommand) Help() string {
 	helpText := `
 usage: sqsc scheduling-group <subcommand>
 

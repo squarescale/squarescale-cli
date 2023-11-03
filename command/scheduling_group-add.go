@@ -16,31 +16,31 @@ type SchedulingGroupAddCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *SchedulingGroupAddCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
+func (cmd *SchedulingGroupAddCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	schedulingGroupName, err := schedulingGroupNameArg(c.flagSet, 0)
+	schedulingGroupName, err := schedulingGroupNameArg(cmd.flagSet, 0)
 	if err != nil {
-		return c.errorWithUsage(err)
+		return cmd.errorWithUsage(err)
 	}
 
-	if c.flagSet.NArg() > 1 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 1 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 	var UUID string
 
-	res := c.runWithSpinner("add scheduling group", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := cmd.runWithSpinner("add scheduling group", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
 		var projectToShow string
 		if *projectUUID == "" {
@@ -66,16 +66,16 @@ func (c *SchedulingGroupAddCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *SchedulingGroupAddCommand) Synopsis() string {
+func (cmd *SchedulingGroupAddCommand) Synopsis() string {
 	return "Add scheduling group to project."
 }
 
 // Help is part of cli.Command implementation.
-func (c *SchedulingGroupAddCommand) Help() string {
+func (cmd *SchedulingGroupAddCommand) Help() string {
 	helpText := `
 usage: sqsc scheduling-group add [options] <scheduling_group_name>
 
   Add scheduling group to project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

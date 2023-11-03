@@ -11,17 +11,17 @@ type BatchCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *BatchCommand) Run(args []string) int {
+func (cmd *BatchCommand) Run(args []string) int {
 	return cli.RunResultHelp
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *BatchCommand) Synopsis() string {
+func (cmd *BatchCommand) Synopsis() string {
 	return "Commands to interact with batch jobs in a project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *BatchCommand) Help() string {
+func (cmd *BatchCommand) Help() string {
 	helpText := `
 usage: sqsc batch <subcommand>
 

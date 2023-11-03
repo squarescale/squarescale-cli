@@ -11,17 +11,17 @@ type LBCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *LBCommand) Run(args []string) int {
+func (cmd *LBCommand) Run(args []string) int {
 	return cli.RunResultHelp
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *LBCommand) Synopsis() string {
+func (cmd *LBCommand) Synopsis() string {
 	return "Commands to interact with load balancer in a project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *LBCommand) Help() string {
+func (cmd *LBCommand) Help() string {
 	helpText := `
 usage: sqsc lb <subcommand>
 

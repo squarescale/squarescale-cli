@@ -15,35 +15,35 @@ type SchedulingGroupAssignCommand struct {
 	flagSet *flag.FlagSet
 }
 
-func (c *SchedulingGroupAssignCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
+func (cmd *SchedulingGroupAssignCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	schedulingGroupName, err := schedulingGroupNameArg(c.flagSet, 0)
+	schedulingGroupName, err := schedulingGroupNameArg(cmd.flagSet, 0)
 	if err != nil {
-		return c.errorWithUsage(err)
+		return cmd.errorWithUsage(err)
 	}
 
-	schedulingGroupHosts, err := schedulingGroupHostsArg(c.flagSet, 1)
+	schedulingGroupHosts, err := schedulingGroupHostsArg(cmd.flagSet, 1)
 	if err != nil {
-		return c.errorWithUsage(err)
+		return cmd.errorWithUsage(err)
 	}
 
-	if c.flagSet.NArg() > 2 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 2 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
-	return c.runWithSpinner("assign host(s) to scheduling group", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("assign host(s) to scheduling group", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -99,16 +99,16 @@ func (c *SchedulingGroupAssignCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *SchedulingGroupAssignCommand) Synopsis() string {
+func (cmd *SchedulingGroupAssignCommand) Synopsis() string {
 	return "Assign host(s) to scheduling group of project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *SchedulingGroupAssignCommand) Help() string {
+func (cmd *SchedulingGroupAssignCommand) Help() string {
 	helpText := `
 usage: sqsc scheduling-group assign [options] <scheduling_group_name> <host1[,host2...,[hostn]>
 
   Assign host(s) to scheduling group of project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

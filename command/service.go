@@ -11,17 +11,17 @@ type ServiceCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *ServiceCommand) Run(args []string) int {
+func (cmd *ServiceCommand) Run(args []string) int {
 	return cli.RunResultHelp
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ServiceCommand) Synopsis() string {
+func (cmd *ServiceCommand) Synopsis() string {
 	return "Commands to interact with services aka Docker containers in a project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ServiceCommand) Help() string {
+func (cmd *ServiceCommand) Help() string {
 	helpText := `
 usage: sqsc service <subcommand>
 

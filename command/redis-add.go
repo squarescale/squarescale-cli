@@ -16,38 +16,38 @@ type RedisAddCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *RedisAddCommand) Run(args []string) int {
+func (cmd *RedisAddCommand) Run(args []string) int {
 	// Parse flags
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
 
-	wantedRedisName := c.flagSet.String("name", "", "Redis name")
+	wantedRedisName := cmd.flagSet.String("name", "", "Redis name")
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	if *wantedRedisName == "" && c.flagSet.Arg(0) != "" {
-		name := c.flagSet.Arg(0)
+	if *wantedRedisName == "" && cmd.flagSet.Arg(0) != "" {
+		name := cmd.flagSet.Arg(0)
 		wantedRedisName = &name
 	}
 
-	if c.flagSet.NArg() > 1 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
+	if cmd.flagSet.NArg() > 1 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()[1:]))
 	}
 
 	//check rules
 	if *wantedRedisName == "" {
-		return c.errorWithUsage(fmt.Errorf(("Redis name is mandatory. Please, choose a redis name.")))
+		return cmd.errorWithUsage(fmt.Errorf(("Redis name is mandatory. Please, choose a redis name.")))
 	}
 
-	res := c.runWithSpinner("add redis", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := cmd.runWithSpinner("add redis", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -74,17 +74,17 @@ func (c *RedisAddCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *RedisAddCommand) Synopsis() string {
+func (cmd *RedisAddCommand) Synopsis() string {
 	return "Add a new Redis in a SquareScale project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *RedisAddCommand) Help() string {
+func (cmd *RedisAddCommand) Help() string {
 	helpText := `
 usage: sqsc redis add [options] <redis_name>
 
   Add a new redis using the provided redis name (name is mandatory).
 
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

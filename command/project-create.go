@@ -17,75 +17,75 @@ type ProjectCreateCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *ProjectCreateCommand) Run(args []string) int {
+func (cmd *ProjectCreateCommand) Run(args []string) int {
 	// Parse flags
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	alwaysYes := yesFlag(c.flagSet)
-	name := projectNameFlag(c.flagSet)
-	uuid := c.flagSet.String("uuid", "", "set the uuid of the project")
-	organization := c.flagSet.String("organization", "", "set the organization the project will belongs to")
-	provider := c.flagSet.String("provider", "", "set the cloud provider (aws or azure or outscale)")
-	region := c.flagSet.String("region", "", "set the cloud provider region (eu-west-1)")
-	credential := c.flagSet.String("credential", "", "set the credential used to build the infrastructure")
-	infraType := c.flagSet.String("infra-type", "high-availability", "Set the infrastructure configuration (high-availability or single-node)")
-	monitoringEngine := c.flagSet.String("monitoring", "", "Set the monitoring configuration (netdata)")
-	nodeSize := c.flagSet.String("node-size", "", "Set the cluster node size")
-	nodeCount := c.flagSet.Int("node-count", 3, "Set the cluster node count (1 for single-node, odd number for high-availability)")
-	rootDiskSizeGB := c.flagSet.Int("root-disk-size", 20, "Set the root filesystem size (in GB)")
-	slackURL := c.flagSet.String("slackbot", "", "Set the Slack webhook URL")
-	hybridClusterEnabled := c.flagSet.Bool("hybrid-cluster-enabled", false, "Enable Hybrid Cluster")
-	externalESURL := c.flagSet.String("external-elasticsearch", "", "Set the external ElasticSearch URL")
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	alwaysYes := yesFlag(cmd.flagSet)
+	name := projectNameFlag(cmd.flagSet)
+	uuid := cmd.flagSet.String("uuid", "", "set the uuid of the project")
+	organization := cmd.flagSet.String("organization", "", "set the organization the project will belongs to")
+	provider := cmd.flagSet.String("provider", "", "set the cloud provider (aws or azure or outscale)")
+	region := cmd.flagSet.String("region", "", "set the cloud provider region (eu-west-1)")
+	credential := cmd.flagSet.String("credential", "", "set the credential used to build the infrastructure")
+	infraType := cmd.flagSet.String("infra-type", "high-availability", "Set the infrastructure configuration (high-availability or single-node)")
+	monitoringEngine := cmd.flagSet.String("monitoring", "", "Set the monitoring configuration (netdata)")
+	nodeSize := cmd.flagSet.String("node-size", "", "Set the cluster node size")
+	nodeCount := cmd.flagSet.Int("node-count", 3, "Set the cluster node count (1 for single-node, odd number for high-availability)")
+	rootDiskSizeGB := cmd.flagSet.Int("root-disk-size", 20, "Set the root filesystem size (in GB)")
+	slackURL := cmd.flagSet.String("slackbot", "", "Set the Slack webhook URL")
+	hybridClusterEnabled := cmd.flagSet.Bool("hybrid-cluster-enabled", false, "Enable Hybrid Cluster")
+	externalESURL := cmd.flagSet.String("external-elasticsearch", "", "Set the external ElasticSearch URL")
 
-	dbEngine := c.flagSet.String("db-engine", "", "Select database engine")
-	dbSize := c.flagSet.String("db-size", "", "Select database size")
-	dbVersion := c.flagSet.String("db-version", "", "Select database version")
-	dbBackupEnabled := c.flagSet.Bool("db-backup", false, "Enable database automated backups")
-	dbBackupRetention := c.flagSet.Int("db-backup-retention", 0, "Database automated backups retention days")
+	dbEngine := cmd.flagSet.String("db-engine", "", "Select database engine")
+	dbSize := cmd.flagSet.String("db-size", "", "Select database size")
+	dbVersion := cmd.flagSet.String("db-version", "", "Select database version")
+	dbBackupEnabled := cmd.flagSet.Bool("db-backup", false, "Enable database automated backups")
+	dbBackupRetention := cmd.flagSet.Int("db-backup-retention", 0, "Database automated backups retention days")
 
-	consulEnabled := c.flagSet.Bool("consul-enabled", false, "Enable Consul")
-	nomadEnabled := c.flagSet.Bool("nomad-enabled", false, "Enable Nomad")
-	vaultEnabled := c.flagSet.Bool("vault-enabled", false, "Enable Vault")
-	observabilityEnabled := c.flagSet.Bool("observability-enabled", false, "Enable Observability")
-	elasticsearchEnabled := c.flagSet.Bool("elasticsearch-enabled", false, "Enable ElasticSearch")
+	consulEnabled := cmd.flagSet.Bool("consul-enabled", false, "Enable Consul")
+	nomadEnabled := cmd.flagSet.Bool("nomad-enabled", false, "Enable Nomad")
+	vaultEnabled := cmd.flagSet.Bool("vault-enabled", false, "Enable Vault")
+	observabilityEnabled := cmd.flagSet.Bool("observability-enabled", false, "Enable Observability")
+	elasticsearchEnabled := cmd.flagSet.Bool("elasticsearch-enabled", false, "Enable ElasticSearch")
 
-	consulBasicAuth := c.flagSet.String("consul-basic-auth", "", "Set Consul Basic Authentication credentials")
-	nomadBasicAuth := c.flagSet.String("nomad-basic-auth", "", "Set Nomad Basic Authentication credentials")
-	vaultBasicAuth := c.flagSet.String("vault-basic-auth", "", "Set Vault Basic Authentication credentials")
-	observabilityBasicAuth := c.flagSet.String("observability-basic-auth", "", "Set Observability Basic Authentication credentials")
-	elasticsearchBasicAuth := c.flagSet.String("elasticsearch-basic-auth", "", "Set ElasticSearch Basic Authentication credentials")
+	consulBasicAuth := cmd.flagSet.String("consul-basic-auth", "", "Set Consul Basic Authentication credentials")
+	nomadBasicAuth := cmd.flagSet.String("nomad-basic-auth", "", "Set Nomad Basic Authentication credentials")
+	vaultBasicAuth := cmd.flagSet.String("vault-basic-auth", "", "Set Vault Basic Authentication credentials")
+	observabilityBasicAuth := cmd.flagSet.String("observability-basic-auth", "", "Set Observability Basic Authentication credentials")
+	elasticsearchBasicAuth := cmd.flagSet.String("elasticsearch-basic-auth", "", "Set ElasticSearch Basic Authentication credentials")
 
-	consulPrefix := c.flagSet.String("consul-prefix", "", "Set Consul HTTP Prefix")
-	nomadPrefix := c.flagSet.String("nomad-prefix", "", "Set Nomad HTTP Prefix")
-	vaultPrefix := c.flagSet.String("vault-prefix", "", "Set Vault HTTP Prefix")
-	observabilityPrefix := c.flagSet.String("observability-prefix", "", "Set Observability HTTP Prefix")
-	elasticsearchPrefix := c.flagSet.String("elasticsearch-prefix", "", "Set ElasticSearch HTTP Prefix")
+	consulPrefix := cmd.flagSet.String("consul-prefix", "", "Set Consul HTTP Prefix")
+	nomadPrefix := cmd.flagSet.String("nomad-prefix", "", "Set Nomad HTTP Prefix")
+	vaultPrefix := cmd.flagSet.String("vault-prefix", "", "Set Vault HTTP Prefix")
+	observabilityPrefix := cmd.flagSet.String("observability-prefix", "", "Set Observability HTTP Prefix")
+	elasticsearchPrefix := cmd.flagSet.String("elasticsearch-prefix", "", "Set ElasticSearch HTTP Prefix")
 
-	consulIpWhiteList := c.flagSet.String("consul-ip-whitelist", "", "Set Consul IP whitelist")
-	nomadIpWhiteList := c.flagSet.String("nomad-ip-whitelist", "", "Set Nomad IP whitelist")
-	vaultIpWhiteList := c.flagSet.String("vault-ip-whitelist", "", "Set Vault IP whitelist")
-	observabilityIpWhiteList := c.flagSet.String("observability-ip-whitelist", "", "Set Observability IP whitelist")
-	elasticsearchIpWhiteList := c.flagSet.String("elasticsearch-ip-whitelist", "", "Set ElasticSearch IP whitelist")
+	consulIpWhiteList := cmd.flagSet.String("consul-ip-whitelist", "", "Set Consul IP whitelist")
+	nomadIpWhiteList := cmd.flagSet.String("nomad-ip-whitelist", "", "Set Nomad IP whitelist")
+	vaultIpWhiteList := cmd.flagSet.String("vault-ip-whitelist", "", "Set Vault IP whitelist")
+	observabilityIpWhiteList := cmd.flagSet.String("observability-ip-whitelist", "", "Set Observability IP whitelist")
+	elasticsearchIpWhiteList := cmd.flagSet.String("elasticsearch-ip-whitelist", "", "Set ElasticSearch IP whitelist")
 
-	nowait := nowaitFlag(c.flagSet)
+	nowait := nowaitFlag(cmd.flagSet)
 
 	payload := squarescale.JSONObject{}
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if *name == "" && c.flagSet.Arg(0) != "" {
-		nameArg := c.flagSet.Arg(0)
+	if *name == "" && cmd.flagSet.Arg(0) != "" {
+		nameArg := cmd.flagSet.Arg(0)
 		name = &nameArg
 	}
 
-	if c.flagSet.NArg() > 1 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
+	if cmd.flagSet.NArg() > 1 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()[1:]))
 	}
 
 	if *name == "" {
-		return c.errorWithUsage(errors.New("Project name is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name is mandatory"))
 	}
 
 	payload["name"] = *name
@@ -100,13 +100,13 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	}
 
 	if *provider == "" {
-		return c.errorWithUsage(errors.New("Cloud provider is mandatory"))
+		return cmd.errorWithUsage(errors.New("Cloud provider is mandatory"))
 	}
 
 	payload["provider"] = *provider
 
 	if *region == "" {
-		return c.errorWithUsage(errors.New("Cloud provider region is mandatory"))
+		return cmd.errorWithUsage(errors.New("Cloud provider region is mandatory"))
 	}
 
 	payload["region"] = *region
@@ -116,7 +116,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	}
 
 	if *nodeSize == "" {
-		return c.errorWithUsage(errors.New("node size is mandatory"))
+		return cmd.errorWithUsage(errors.New("node size is mandatory"))
 	}
 
 	payload["node_size"] = *nodeSize
@@ -124,24 +124,24 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	payload["root_disk_size_gb"] = *rootDiskSizeGB
 
 	if *infraType != "high-availability" && *infraType != "single-node" {
-		return c.errorWithUsage(fmt.Errorf("Unknown infrastructure type: %v. Correct values are high-availability or single-node", *infraType))
+		return cmd.errorWithUsage(fmt.Errorf("Unknown infrastructure type: %v. Correct values are high-availability or single-node", *infraType))
 	} else if *infraType == "high-availability" {
 		payload["infra_type"] = "high_availability"
 		if *nodeCount < 3 {
-			return c.error(fmt.Errorf("Infrastructure type %v can not have less than 3 nodes (%d)", payload["infra_type"], *nodeCount))
+			return cmd.error(fmt.Errorf("Infrastructure type %v can not have less than 3 nodes (%d)", payload["infra_type"], *nodeCount))
 		}
 		if *nodeCount % 2 != 1 {
-			return c.error(fmt.Errorf("Infrastructure type %v must have odd number of nodes (%d)", payload["infra_type"], *nodeCount))
+			return cmd.error(fmt.Errorf("Infrastructure type %v must have odd number of nodes (%d)", payload["infra_type"], *nodeCount))
 		}
 	} else {
 		payload["infra_type"] = "single_node"
 		if *nodeCount != 1 {
-			return c.error(fmt.Errorf("Infrastructure type %v can not have more than 1 node (%d)", payload["infra_type"], *nodeCount))
+			return cmd.error(fmt.Errorf("Infrastructure type %v can not have more than 1 node (%d)", payload["infra_type"], *nodeCount))
 		}
 	}
 
 	if *monitoringEngine != "" && *monitoringEngine != "netdata" {
-		return c.errorWithUsage(fmt.Errorf("Unknown monitoring engine: %v. Correct values are empty-string (aka '') or netdata", *monitoringEngine))
+		return cmd.errorWithUsage(fmt.Errorf("Unknown monitoring engine: %v. Correct values are empty-string (aka '') or netdata", *monitoringEngine))
 	} else if *monitoringEngine == "netdata" {
 		payload["monitoring"] = map[string]string{"engine": "netdata", "enabled": "true"}
 	} else {
@@ -149,18 +149,18 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	}
 
 	if *dbEngine != "" && *dbSize == "" {
-		return c.errorWithUsage(errors.New("if db engine is present, db size must be set"))
+		return cmd.errorWithUsage(errors.New("if db engine is present, db size must be set"))
 	} else if *dbEngine == "" && *dbSize != "" {
-		return c.errorWithUsage(errors.New("if db size is present, db engine must be set"))
+		return cmd.errorWithUsage(errors.New("if db size is present, db engine must be set"))
 	} else if *dbEngine != "" && *dbSize != "" {
 		if *dbBackupRetention < 0 {
-			return c.errorWithUsage(errors.New("retention value can not be negative"))
+			return cmd.errorWithUsage(errors.New("retention value can not be negative"))
 		}
 		if *dbBackupEnabled && *dbBackupRetention == 0 {
-			return c.errorWithUsage(errors.New("retention value can only be strictly positive when db backup enabled"))
+			return cmd.errorWithUsage(errors.New("retention value can only be strictly positive when db backup enabled"))
 		}
 		if !*dbBackupEnabled && *dbBackupRetention != 0 {
-			return c.errorWithUsage(errors.New("retention value can only be 0 when db backup disabled"))
+			return cmd.errorWithUsage(errors.New("retention value can only be 0 when db backup disabled"))
 		}
 		payload["databases"] = []map[string]interface{}{{"engine": *dbEngine, "size": *dbSize, "version": *dbVersion, "backup_enabled": *dbBackupEnabled, "backup_retention_days": *dbBackupRetention}}
 	}
@@ -172,11 +172,11 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	if *externalESURL != "" {
 		url, err := url.Parse(*externalESURL)
 		if err != nil {
-			return c.errorWithUsage(errors.New(fmt.Sprintf("URL format error on %s: %q", *externalESURL, err)))
+			return cmd.errorWithUsage(errors.New(fmt.Sprintf("URL format error on %s: %q", *externalESURL, err)))
 		}
 		// "host" could be valid entry but it results in empty scheme
 		if url.Scheme != "http" && url.Scheme != "https" {
-			return c.errorWithUsage(errors.New(fmt.Sprintf("URL scheme '%s' not supported for external ElasticSearch endpoint (should be either 'http' or 'https')", url.Scheme)))
+			return cmd.errorWithUsage(errors.New(fmt.Sprintf("URL scheme '%s' not supported for external ElasticSearch endpoint (should be either 'http' or 'https')", url.Scheme)))
 		}
 		payload["external_elasticsearch"] = *externalESURL
 	}
@@ -207,44 +207,44 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 
 	payload["integrated_services"] = integrated_services
 	// ask confirmation
-	c.Ui.Warn("Project will be created with the following configuration :")
-	c.Ui.Warn(fmt.Sprintf("name : %s", *name))
+	cmd.Ui.Warn("Project will be created with the following configuration :")
+	cmd.Ui.Warn(fmt.Sprintf("name : %s", *name))
 	if *uuid != "" {
-		c.Ui.Warn(fmt.Sprintf("uuid : %s", *uuid))
+		cmd.Ui.Warn(fmt.Sprintf("uuid : %s", *uuid))
 	}
 	if *organization != "" {
-		c.Ui.Warn(fmt.Sprintf("organization : %s", *organization))
+		cmd.Ui.Warn(fmt.Sprintf("organization : %s", *organization))
 	}
-	c.Ui.Warn(fmt.Sprintf("cloud provider : %s", *provider))
-	c.Ui.Warn(fmt.Sprintf("cloud provider region : %s", *region))
-	c.Ui.Warn(fmt.Sprintf("credential : %s", *credential))
-	c.Ui.Warn(fmt.Sprintf("node size : %s", *nodeSize))
-	c.Ui.Warn(fmt.Sprintf("node count : %d", *nodeCount))
-	c.Ui.Warn(fmt.Sprintf("infra type : %s", *infraType))
-	c.Ui.Warn(fmt.Sprintf("monitoring engine : %s", *monitoringEngine))
+	cmd.Ui.Warn(fmt.Sprintf("cloud provider : %s", *provider))
+	cmd.Ui.Warn(fmt.Sprintf("cloud provider region : %s", *region))
+	cmd.Ui.Warn(fmt.Sprintf("credential : %s", *credential))
+	cmd.Ui.Warn(fmt.Sprintf("node size : %s", *nodeSize))
+	cmd.Ui.Warn(fmt.Sprintf("node count : %d", *nodeCount))
+	cmd.Ui.Warn(fmt.Sprintf("infra type : %s", *infraType))
+	cmd.Ui.Warn(fmt.Sprintf("monitoring engine : %s", *monitoringEngine))
 	if *slackURL != "" {
-		c.Ui.Warn(fmt.Sprintf("Slack webhook : %s", *slackURL))
+		cmd.Ui.Warn(fmt.Sprintf("Slack webhook : %s", *slackURL))
 	}
 	if *dbEngine != "" && *dbSize != "" {
-		c.Ui.Warn(fmt.Sprintf("database engine : %s", *dbEngine))
-		c.Ui.Warn(fmt.Sprintf("database size : %s", *dbSize))
+		cmd.Ui.Warn(fmt.Sprintf("database engine : %s", *dbEngine))
+		cmd.Ui.Warn(fmt.Sprintf("database size : %s", *dbSize))
 		if *dbVersion != "" {
-			c.Ui.Warn(fmt.Sprintf("database version : %s", *dbVersion))
+			cmd.Ui.Warn(fmt.Sprintf("database version : %s", *dbVersion))
 		}
-		c.Ui.Warn(fmt.Sprintf("database backup : %v", *dbBackupEnabled))
-		c.Ui.Warn(fmt.Sprintf("database backup retention : %v", *dbBackupRetention))
+		cmd.Ui.Warn(fmt.Sprintf("database backup : %v", *dbBackupEnabled))
+		cmd.Ui.Warn(fmt.Sprintf("database backup retention : %v", *dbBackupRetention))
 	}
 
-	ok, err := AskYesNo(c.Ui, alwaysYes, "Proceed ?", true)
+	ok, err := AskYesNo(cmd.Ui, alwaysYes, "Proceed ?", true)
 	if err != nil {
-		return c.error(err)
+		return cmd.error(err)
 	} else if !ok {
-		return c.error(CancelledError)
+		return cmd.error(CancelledError)
 	}
 
 	var project squarescale.Project
 
-	res := c.runWithSpinner("create project", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := cmd.runWithSpinner("create project", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
 		project, err = client.CreateProject(&payload)
 		return fmt.Sprintf("Created project '%s' with UUID '%s'", project.Name, project.UUID), err
@@ -255,7 +255,7 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 	}
 
 	if !*nowait {
-		res = c.runWithSpinner("wait for project creation", endpoint.String(), func(client *squarescale.Client) (string, error) {
+		res = cmd.runWithSpinner("wait for project creation", endpoint.String(), func(client *squarescale.Client) (string, error) {
 			projectStatus, err := client.WaitProject(project.UUID, 5)
 			if err != nil {
 				return projectStatus, err
@@ -269,24 +269,24 @@ func (c *ProjectCreateCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ProjectCreateCommand) Synopsis() string {
+func (cmd *ProjectCreateCommand) Synopsis() string {
 	return "Create project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ProjectCreateCommand) Help() string {
+func (cmd *ProjectCreateCommand) Help() string {
 	helpText := `
 usage: sqsc project create [options]
 
   Creates a new project using the provided options.
 
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }
 
-func (c *ProjectCreateCommand) askConfirmation(alwaysYes *bool, name string) error {
-	c.pauseSpinner()
+func (cmd *ProjectCreateCommand) askConfirmation(alwaysYes *bool, name string) error {
+	cmd.pauseSpinner()
 
-	c.startSpinner()
+	cmd.startSpinner()
 	return nil
 }

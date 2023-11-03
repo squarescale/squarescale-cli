@@ -16,16 +16,16 @@ type LoginCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *LoginCommand) Run(args []string) int {
+func (cmd *LoginCommand) Run(args []string) int {
 	// Parse flags
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	if err := c.flagSet.Parse(args); err != nil {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	var apiKey string
@@ -36,45 +36,45 @@ func (c *LoginCommand) Run(args []string) int {
 		apiKey, err = tokenstore.GetToken(endpoint.String())
 		if err != nil || apiKey == "" {
 			// Retrieve credentials from user input
-			apiKey, err = c.askForCredentials()
+			apiKey, err = cmd.askForCredentials()
 			if err != nil {
-				return c.error(err)
+				return cmd.error(err)
 			}
 		}
 	}
 
 	err = tokenstore.SaveToken(endpoint.String(), apiKey)
 	if err != nil {
-		return c.error(err)
+		return cmd.error(err)
 	} else {
-		_, err = c.ensureLogin(endpoint.String())
+		_, err = cmd.ensureLogin(endpoint.String())
 		if err != nil {
-			return c.error(err)
+			return cmd.error(err)
 		} else {
-			c.Ui.Info(fmt.Sprintf("Successfully authenticated !"))
+			cmd.Ui.Info(fmt.Sprintf("Successfully authenticated !"))
 			return 0
 		}
 	}
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *LoginCommand) Synopsis() string {
+func (cmd *LoginCommand) Synopsis() string {
 	return "login to SquareScale platform"
 }
 
 // Help is part of cli.Command implementation.
-func (c *LoginCommand) Help() string {
+func (cmd *LoginCommand) Help() string {
 	helpText := `
 usage: sqsc login [options]
 
   Logs the user in SquareScale platform.
 
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }
 
-func (c *LoginCommand) askForCredentials() (string, error) {
-	apiKey, err := c.Ui.AskSecret("API key (typing will be hidden):")
+func (cmd *LoginCommand) askForCredentials() (string, error) {
+	apiKey, err := cmd.Ui.AskSecret("API key (typing will be hidden):")
 	if err != nil {
 		return "", err
 	}

@@ -16,70 +16,70 @@ type ServiceAddCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *ServiceAddCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
+func (cmd *ServiceAddCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
 
-	image := dockerImageNameFlag(c.flagSet)
-	username := dockerImageUsernameFlag(c.flagSet)
-	password := dockerImagePasswordFlag(c.flagSet)
+	image := dockerImageNameFlag(cmd.flagSet)
+	username := dockerImageUsernameFlag(cmd.flagSet)
+	password := dockerImagePasswordFlag(cmd.flagSet)
 
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
-	serviceName := serviceFlag(c.flagSet)
-	instances := containerInstancesFlag(c.flagSet)
-	runCommand := containerRunCmdFlag(c.flagSet)
-	noRunCommand := containerNoRunCmdFlag(c.flagSet)
-	entrypoint := entrypointFlag(c.flagSet)
-	autostart := autostartFlag(c.flagSet)
-	maxClientDisconnect := maxclientdisconnect(c.flagSet)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
+	serviceName := serviceFlag(cmd.flagSet)
+	instances := containerInstancesFlag(cmd.flagSet)
+	runCommand := containerRunCmdFlag(cmd.flagSet)
+	noRunCommand := containerNoRunCmdFlag(cmd.flagSet)
+	entrypoint := entrypointFlag(cmd.flagSet)
+	autostart := autostartFlag(cmd.flagSet)
+	maxClientDisconnect := maxclientdisconnect(cmd.flagSet)
 
-	schedulingGroups := containerSchedulingGroupsFlag(c.flagSet)
-	limitMemory := containerLimitMemoryFlag(c.flagSet, 256)
-	limitCPU := containerLimitCPUFlag(c.flagSet, 100)
-	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
-	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
-	dockerDevices := dockerDevicesFlag(c.flagSet)
+	schedulingGroups := containerSchedulingGroupsFlag(cmd.flagSet)
+	limitMemory := containerLimitMemoryFlag(cmd.flagSet, 256)
+	limitCPU := containerLimitCPUFlag(cmd.flagSet, 100)
+	dockerCapabilities := dockerCapabilitiesFlag(cmd.flagSet)
+	noDockerCapabilities := noDockerCapabilitiesFlag(cmd.flagSet)
+	dockerDevices := dockerDevicesFlag(cmd.flagSet)
 
-	envVariables := envFileFlag(c.flagSet)
+	envVariables := envFileFlag(cmd.flagSet)
 	var envParams []string
-	envParameterFlag(c.flagSet, &envParams)
-	volumes := volumeFlag(c.flagSet)
+	envParameterFlag(cmd.flagSet, &envParams)
+	volumes := volumeFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *noRunCommand && *runCommand != "" {
-		return c.errorWithUsage(errors.New("Cannot specify an override command and disable it at the same time"))
+		return cmd.errorWithUsage(errors.New("Cannot specify an override command and disable it at the same time"))
 	}
 
 	if *instances <= 0 {
 		if *instances != -1 {
-			c.Ui.Warn("Number of instances cannot be 0 or negative. This value won't be set and default 1 will be used.")
+			cmd.Ui.Warn("Number of instances cannot be 0 or negative. This value won't be set and default 1 will be used.")
 		}
 	}
 
 	if *limitCPU <= 0 || *limitMemory <= 0 {
-		return c.errorWithUsage(errors.New("Invalid values provided for limits."))
+		return cmd.errorWithUsage(errors.New("Invalid values provided for limits."))
 	}
 
-	if err := c.validateArgs(*image, *instances); err != nil {
-		return c.errorWithUsage(err)
+	if err := cmd.validateArgs(*image, *instances); err != nil {
+		return cmd.errorWithUsage(err)
 	}
 
 	dockerDevicesArray, err := getDockerDevicesArray(*dockerDevices)
-	if isFlagPassed("docker-devices", c.flagSet) {
+	if isFlagPassed("docker-devices", cmd.flagSet) {
 		if err != nil {
-			return c.errorWithUsage(err)
+			return cmd.errorWithUsage(err)
 		}
 	}
 
@@ -136,13 +136,13 @@ func (c *ServiceAddCommand) Run(args []string) int {
 	if *envVariables != "" {
 		err := container.SetEnv(*envVariables)
 		if err != nil {
-			c.error(err)
+			cmd.error(err)
 		}
 	}
 	if len(envParams) > 0 {
 		err := container.SetEnvParams(envParams)
 		if err != nil {
-			c.error(err)
+			cmd.error(err)
 		}
 	}
 	if len(container.CustomEnv) > 0 {
@@ -159,7 +159,7 @@ func (c *ServiceAddCommand) Run(args []string) int {
 	}
 	payload["docker_capabilities"] = dockerCapabilitiesArray
 
-	return c.runWithSpinner("adding Docker image", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("adding Docker image", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		var projectToShow string
@@ -187,21 +187,21 @@ func (c *ServiceAddCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ServiceAddCommand) Synopsis() string {
+func (cmd *ServiceAddCommand) Synopsis() string {
 	return "Add service aka Docker container to project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ServiceAddCommand) Help() string {
+func (cmd *ServiceAddCommand) Help() string {
 	helpText := `
 usage: sqsc service add [options]
 
   Add service aka Docker container to project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }
 
-func (c *ServiceAddCommand) validateArgs(image string, instances int) error {
+func (cmd *ServiceAddCommand) validateArgs(image string, instances int) error {
 	if image == "" {
 		return errors.New("Docker image name cannot be empty")
 	}

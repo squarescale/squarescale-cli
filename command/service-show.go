@@ -16,25 +16,25 @@ type ServiceShowCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *ServiceShowCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
-	containerArg := filterServiceFlag(c.flagSet)
-	if err := c.flagSet.Parse(args); err != nil {
+func (cmd *ServiceShowCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
+	containerArg := filterServiceFlag(cmd.flagSet)
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	return c.runWithSpinner("showing service", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("showing service", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -79,7 +79,7 @@ func (c *ServiceShowCommand) Run(args []string) int {
 			for _, dev := range co.DockerDevices {
 				tbl += fmt.Sprintf("\tsrc:%s dst:%s opts:%s\n", dev.SRC, dev.DST, dev.OPT)
 			}
-			msg += c.FormatTable(tbl, false)
+			msg += cmd.FormatTable(tbl, false)
 			msg += "\n"
 		}
 
@@ -94,16 +94,16 @@ func (c *ServiceShowCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ServiceShowCommand) Synopsis() string {
+func (cmd *ServiceShowCommand) Synopsis() string {
 	return "Show service aka Docker container of project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ServiceShowCommand) Help() string {
+func (cmd *ServiceShowCommand) Help() string {
 	helpText := `
 usage: sqsc service show [options]
 
   Show service aka Docker container of project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

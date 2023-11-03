@@ -16,44 +16,44 @@ type RedisDeleteCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *RedisDeleteCommand) Run(args []string) int {
+func (cmd *RedisDeleteCommand) Run(args []string) int {
 	// Parse flags
-	c.flagSet = newFlagSet(c, c.Ui)
-	alwaysYes := yesFlag(c.flagSet)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	alwaysYes := yesFlag(cmd.flagSet)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	redisName, err := redisNameArg(c.flagSet, 0)
+	redisName, err := redisNameArg(cmd.flagSet, 0)
 	if err != nil {
-		return c.errorWithUsage(err)
+		return cmd.errorWithUsage(err)
 	}
 
-	if c.flagSet.NArg() > 1 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
+	if cmd.flagSet.NArg() > 1 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()[1:]))
 	}
 
-	c.Ui.Info("Are you sure you want to delete " + redisName + "?")
+	cmd.Ui.Info("Are you sure you want to delete " + redisName + "?")
 	if *alwaysYes {
-		c.Ui.Info("(approved from command line)")
+		cmd.Ui.Info("(approved from command line)")
 	} else {
-		res, err := c.Ui.Ask("y/N")
+		res, err := cmd.Ui.Ask("y/N")
 		if err != nil {
-			return c.error(err)
+			return cmd.error(err)
 		} else if res != "Y" && res != "y" {
-			return c.cancelled()
+			return cmd.cancelled()
 		}
 	}
 
-	res := c.runWithSpinner("deleting redis", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := cmd.runWithSpinner("deleting redis", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		var projectToShow string
@@ -78,17 +78,17 @@ func (c *RedisDeleteCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *RedisDeleteCommand) Synopsis() string {
+func (cmd *RedisDeleteCommand) Synopsis() string {
 	return "Delete a redis on the project."
 }
 
 // Help is part of cli.Command implementation.
-func (c *RedisDeleteCommand) Help() string {
+func (cmd *RedisDeleteCommand) Help() string {
 	helpText := `
 usage: sqsc redis delete [options] <redis_name>
 
   Delete the redis from the project.
 
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

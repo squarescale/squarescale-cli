@@ -15,30 +15,30 @@ type StatusCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *StatusCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	if err := c.flagSet.Parse(args); err != nil {
+func (cmd *StatusCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	fmt.Printf("SquareScale endpoint: %s\n", endpoint.String())
-	return c.runWithSpinner("check authorization", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("check authorization", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		return "You're currently logged in", nil // do nothing as we are already authenticated here.
 	})
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *StatusCommand) Synopsis() string {
+func (cmd *StatusCommand) Synopsis() string {
 	return "authorization check to SquareScale platform"
 }
 
 // Help is part of cli.Command implementation.
-func (c *StatusCommand) Help() string {
+func (cmd *StatusCommand) Help() string {
 	helpText := `
 usage: sqsc status [options]
 
@@ -47,5 +47,5 @@ usage: sqsc status [options]
   stored in the $HOME/.netrc file.
 
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

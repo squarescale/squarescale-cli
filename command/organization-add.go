@@ -15,29 +15,29 @@ type OrganizationAddCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *OrganizationAddCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	name := organizationNameFlag(c.flagSet)
-	email := organizationEmailFlag(c.flagSet)
+func (cmd *OrganizationAddCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	name := organizationNameFlag(cmd.flagSet)
+	email := organizationEmailFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	if *name == "" {
-		return c.errorWithUsage(fmt.Errorf("Name must not be empty, use -name option"))
+		return cmd.errorWithUsage(fmt.Errorf("Name must not be empty, use -name option"))
 	}
 
 	if *email == "" {
-		return c.errorWithUsage(fmt.Errorf("email must not be empty, use -email option"))
+		return cmd.errorWithUsage(fmt.Errorf("email must not be empty, use -email option"))
 	}
 
-	res := c.runWithSpinner("add organization", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := cmd.runWithSpinner("add organization", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		msg := fmt.Sprintf("Successfully added organization '%s'", *name)
 		err := client.AddOrganization(*name, *email)
 		return msg, err
@@ -51,16 +51,16 @@ func (c *OrganizationAddCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *OrganizationAddCommand) Synopsis() string {
+func (cmd *OrganizationAddCommand) Synopsis() string {
 	return "Add organization"
 }
 
 // Help is part of cli.Command implementation.
-func (c *OrganizationAddCommand) Help() string {
+func (cmd *OrganizationAddCommand) Help() string {
 	helpText := `
 usage: sqsc organization add [options]
 
   Add organization.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

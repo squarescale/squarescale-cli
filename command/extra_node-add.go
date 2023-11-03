@@ -16,35 +16,35 @@ type ExtraNodeAddCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *ExtraNodeAddCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
+func (cmd *ExtraNodeAddCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
 
-	nodeType := c.flagSet.String("node-type", "dev", "Extra-node type")
-	zone := c.flagSet.String("zone", "eu-west-1a", "Extra-node zone")
-	nowait := nowaitFlag(c.flagSet)
+	nodeType := cmd.flagSet.String("node-type", "dev", "Extra-node type")
+	zone := cmd.flagSet.String("zone", "eu-west-1a", "Extra-node zone")
+	nowait := nowaitFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	extraNodeName, err := extraNodeNameArg(c.flagSet, 0)
+	extraNodeName, err := extraNodeNameArg(cmd.flagSet, 0)
 	if err != nil {
-		return c.errorWithUsage(err)
+		return cmd.errorWithUsage(err)
 	}
 
-	if c.flagSet.NArg() > 1 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 1 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 	var UUID string
 
-	res := c.runWithSpinner("add extra-node", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := cmd.runWithSpinner("add extra-node", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
 		var projectToShow string
 		if *projectUUID == "" {
@@ -67,7 +67,7 @@ func (c *ExtraNodeAddCommand) Run(args []string) int {
 	}
 
 	if !*nowait {
-		c.runWithSpinner("wait for extra-node add", endpoint.String(), func(client *squarescale.Client) (string, error) {
+		cmd.runWithSpinner("wait for extra-node add", endpoint.String(), func(client *squarescale.Client) (string, error) {
 			extraNode, err := client.WaitExtraNode(UUID, extraNodeName, 5)
 			if err != nil {
 				return "", err
@@ -81,16 +81,16 @@ func (c *ExtraNodeAddCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ExtraNodeAddCommand) Synopsis() string {
+func (cmd *ExtraNodeAddCommand) Synopsis() string {
 	return "Add extra-node to project."
 }
 
 // Help is part of cli.Command implementation.
-func (c *ExtraNodeAddCommand) Help() string {
+func (cmd *ExtraNodeAddCommand) Help() string {
 	helpText := `
 usage: sqsc extra-node add [options] <extra_node_name>
 
   Add extra-node to project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

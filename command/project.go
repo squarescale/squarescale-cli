@@ -11,17 +11,17 @@ type ProjectCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *ProjectCommand) Run(args []string) int {
+func (cmd *ProjectCommand) Run(args []string) int {
 	return cli.RunResultHelp
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ProjectCommand) Synopsis() string {
+func (cmd *ProjectCommand) Synopsis() string {
 	return "Commands to interact with projects"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ProjectCommand) Help() string {
+func (cmd *ProjectCommand) Help() string {
 	helpText := `
 usage: sqsc project <subcommand>
 

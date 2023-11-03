@@ -15,35 +15,35 @@ type ExternalNodeDownloadConfigCommand struct {
 	flagSet *flag.FlagSet
 }
 
-func (c *ExternalNodeDownloadConfigCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
-	configName := externalNodeConfigNameFlag(c.flagSet)
+func (cmd *ExternalNodeDownloadConfigCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
+	configName := externalNodeConfigNameFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *configName == "" || (*configName != "all" && *configName != "openvpn" && *configName != "consul" && *configName != "nomad") {
-		return c.errorWithUsage(errors.New(fmt.Sprintf("Invalid service configuration name: %s", *configName)))
+		return cmd.errorWithUsage(errors.New(fmt.Sprintf("Invalid service configuration name: %s", *configName)))
 	}
 
-	externalNodeName, err := externalNodeNameArg(c.flagSet, 0)
+	externalNodeName, err := externalNodeNameArg(cmd.flagSet, 0)
 	if err != nil {
-		return c.errorWithUsage(err)
+		return cmd.errorWithUsage(err)
 	}
 
-	if c.flagSet.NArg() > 1 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 1 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
-	return c.runWithSpinner("downloading external node service configuration file(s)", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("downloading external node service configuration file(s)", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -65,16 +65,16 @@ func (c *ExternalNodeDownloadConfigCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ExternalNodeDownloadConfigCommand) Synopsis() string {
+func (cmd *ExternalNodeDownloadConfigCommand) Synopsis() string {
 	return "Download service configuration file(s) for external node of project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ExternalNodeDownloadConfigCommand) Help() string {
+func (cmd *ExternalNodeDownloadConfigCommand) Help() string {
 	helpText := `
 usage: sqsc external-node download-config [options] <external_node_name>
 
   Download service configuration file(s) for external node of project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

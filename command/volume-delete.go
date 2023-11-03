@@ -16,47 +16,47 @@ type VolumeDeleteCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *VolumeDeleteCommand) Run(args []string) int {
+func (cmd *VolumeDeleteCommand) Run(args []string) int {
 	// Parse flags
-	c.flagSet = newFlagSet(c, c.Ui)
-	alwaysYes := yesFlag(c.flagSet)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
-	nowait := nowaitFlag(c.flagSet)
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	alwaysYes := yesFlag(cmd.flagSet)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
+	nowait := nowaitFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	volumeName, err := volumeNameArg(c.flagSet, 0)
+	volumeName, err := volumeNameArg(cmd.flagSet, 0)
 	if err != nil {
-		return c.errorWithUsage(err)
+		return cmd.errorWithUsage(err)
 	}
 
-	if c.flagSet.NArg() > 4 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
+	if cmd.flagSet.NArg() > 4 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()[1:]))
 	}
 
-	c.Ui.Info("Are you sure you want to delete " + volumeName + "?")
+	cmd.Ui.Info("Are you sure you want to delete " + volumeName + "?")
 	if *alwaysYes {
-		c.Ui.Info("(approved from command line)")
+		cmd.Ui.Info("(approved from command line)")
 	} else {
-		res, err := c.Ui.Ask("y/N")
+		res, err := cmd.Ui.Ask("y/N")
 		if err != nil {
-			return c.error(err)
+			return cmd.error(err)
 		} else if res != "Y" && res != "y" {
-			return c.cancelled()
+			return cmd.cancelled()
 		}
 	}
 
 	var UUID string
 
-	res := c.runWithSpinner("deleting volume", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := cmd.runWithSpinner("deleting volume", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
 		if *projectUUID == "" {
 			UUID, err = client.ProjectByName(*projectName)
@@ -75,7 +75,7 @@ func (c *VolumeDeleteCommand) Run(args []string) int {
 	}
 
 	if !*nowait {
-		c.runWithSpinner("wait for volume delete", endpoint.String(), func(client *squarescale.Client) (string, error) {
+		cmd.runWithSpinner("wait for volume delete", endpoint.String(), func(client *squarescale.Client) (string, error) {
 			_, err := client.WaitProject(UUID, 5)
 			if err != nil {
 				return "", err
@@ -89,16 +89,16 @@ func (c *VolumeDeleteCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *VolumeDeleteCommand) Synopsis() string {
+func (cmd *VolumeDeleteCommand) Synopsis() string {
 	return "Delete volume from project."
 }
 
 // Help is part of cli.Command implementation.
-func (c *VolumeDeleteCommand) Help() string {
+func (cmd *VolumeDeleteCommand) Help() string {
 	helpText := `
 usage: sqsc volume delete [options] <volume_name>
 
   Delete volume from project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

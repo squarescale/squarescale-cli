@@ -16,30 +16,30 @@ type BatchExecuteCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *BatchExecuteCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	batchName := batchNameFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
+func (cmd *BatchExecuteCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	batchName := batchNameFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *batchName == "" {
-		return c.errorWithUsage(fmt.Errorf(("Batch name is mandatory. Please, chose a batch name.")))
+		return cmd.errorWithUsage(fmt.Errorf(("Batch name is mandatory. Please, chose a batch name.")))
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	if c.flagSet.NArg() > 4 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
+	if cmd.flagSet.NArg() > 4 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()[1:]))
 	}
 
-	return c.runWithSpinner("executing batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("executing batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		var projectToShow string
@@ -62,16 +62,16 @@ func (c *BatchExecuteCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *BatchExecuteCommand) Synopsis() string {
+func (cmd *BatchExecuteCommand) Synopsis() string {
 	return "Execute a batch"
 }
 
 // Help is part of cli.Command implementation.
-func (c *BatchExecuteCommand) Help() string {
+func (cmd *BatchExecuteCommand) Help() string {
 	helpText := `
 usage: sqsc batch exec [options] <batch_name>
 
   Schedule a batch.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

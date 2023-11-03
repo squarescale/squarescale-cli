@@ -18,36 +18,36 @@ type VersionCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *VersionCommand) Run(args []string) int {
+func (cmd *VersionCommand) Run(args []string) int {
 	var versionString bytes.Buffer
 
-	fmt.Fprintf(&versionString, "%s version %s", c.Name, c.Version)
-	if c.Branch != "" {
-		fmt.Fprintf(&versionString, " %s", c.Branch)
+	fmt.Fprintf(&versionString, "%s version %s", cmd.Name, cmd.Version)
+	if cmd.Branch != "" {
+		fmt.Fprintf(&versionString, " %s", cmd.Branch)
 	}
-	if c.Revision != "" {
-		fmt.Fprintf(&versionString, " %s", c.Revision)
+	if cmd.Revision != "" {
+		fmt.Fprintf(&versionString, " %s", cmd.Revision)
 	}
-	if c.Date != "" {
-		fmt.Fprintf(&versionString, " %s", c.Date)
+	if cmd.Date != "" {
+		fmt.Fprintf(&versionString, " %s", cmd.Date)
 	}
-	if c.Os != "" {
-		fmt.Fprintf(&versionString, " %s", c.Os)
+	if cmd.Os != "" {
+		fmt.Fprintf(&versionString, " %s", cmd.Os)
 	}
-	if c.Arch != "" {
-		fmt.Fprintf(&versionString, " %s", c.Arch)
+	if cmd.Arch != "" {
+		fmt.Fprintf(&versionString, " %s", cmd.Arch)
 	}
 
-	c.Ui.Output(versionString.String())
+	cmd.Ui.Output(versionString.String())
 	return 0
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *VersionCommand) Synopsis() string {
-	return fmt.Sprintf("Print %s version and quit", c.Name)
+func (cmd *VersionCommand) Synopsis() string {
+	return fmt.Sprintf("Print %s version and quit", cmd.Name)
 }
 
 // Help is part of cli.Command implementation.
-func (c *VersionCommand) Help() string {
+func (cmd *VersionCommand) Help() string {
 	return ""
 }
