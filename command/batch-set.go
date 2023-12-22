@@ -16,42 +16,42 @@ type BatchSetCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *BatchSetCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
-	batchName := batchNameFlag(c.flagSet)
-	runCmdArg := batchRunCmdFlag(c.flagSet)
-	entrypoint := entrypointFlag(c.flagSet)
-	limitMemoryArg := batchLimitMemoryFlag(c.flagSet)
-	limitCPUArg := batchLimitCPUFlag(c.flagSet)
-	noRunCmdArg := batchNoRunCmdFlag(c.flagSet)
-	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
-	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
-	dockerDevices := dockerDevicesFlag(c.flagSet)
-	envCmdArg := envFileFlag(c.flagSet)
-	if err := c.flagSet.Parse(args); err != nil {
+func (cmd *BatchSetCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
+	batchName := batchNameFlag(cmd.flagSet)
+	runCmdArg := containerRunCmdFlag(cmd.flagSet)
+	entrypoint := entrypointFlag(cmd.flagSet)
+	limitMemoryArg := containerLimitMemoryFlag(cmd.flagSet, 256)
+	limitCPUArg := containerLimitCPUFlag(cmd.flagSet, 100)
+	noRunCmdArg := containerNoRunCmdFlag(cmd.flagSet)
+	dockerCapabilities := dockerCapabilitiesFlag(cmd.flagSet)
+	noDockerCapabilities := noDockerCapabilitiesFlag(cmd.flagSet)
+	dockerDevices := dockerDevicesFlag(cmd.flagSet)
+	envCmdArg := envFileFlag(cmd.flagSet)
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *batchName == "" {
-		return c.errorWithUsage(errors.New("Batch name cannot be empty."))
+		return cmd.errorWithUsage(errors.New("Batch name cannot be empty."))
 	}
 
 	if *noRunCmdArg && *runCmdArg != "" {
-		return c.errorWithUsage(errors.New("Cannot specify an override command and disable it at the same time"))
+		return cmd.errorWithUsage(errors.New("Cannot specify an override command and disable it at the same time"))
 	}
 
-	return c.runWithSpinner("configure batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("configure batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -68,53 +68,53 @@ func (c *BatchSetCommand) Run(args []string) int {
 			return "", err
 		}
 
-		c.Meta.spin.Stop()
-		c.Meta.info("")
+		cmd.Meta.spin.Stop()
+		cmd.Meta.info("")
 		if *runCmdArg != "" {
-			c.info("Configure batch with run command: %s", *runCmdArg)
+			cmd.info("Configure batch with run command: %s", *runCmdArg)
 			batch.RunCommand = *runCmdArg
 		}
 		if *noRunCmdArg {
-			c.info("Configure batch without run command")
+			cmd.info("Configure batch without run command")
 			batch.RunCommand = ""
 		}
 
 		if *entrypoint != "" {
-			c.info("Configure batch with entrypoint: %s", *entrypoint)
+			cmd.info("Configure batch with entrypoint: %s", *entrypoint)
 			batch.Entrypoint = *entrypoint
 		}
 
 		if *limitMemoryArg >= 0 {
-			c.info("Configure batch with memory limit of %d MB", *limitMemoryArg)
+			cmd.info("Configure batch with memory limit of %d MB", *limitMemoryArg)
 			batch.Limits.Memory = *limitMemoryArg
 		}
 		if *limitCPUArg >= 0 {
-			c.info("Configure batch with CPU limit of %d Mhz", *limitCPUArg)
+			cmd.info("Configure batch with CPU limit of %d Mhz", *limitCPUArg)
 			batch.Limits.CPU = *limitCPUArg
 		}
 
 		if *noDockerCapabilities {
 			batch.DockerCapabilities = []string{"NONE"}
-			c.info("Configure batch with all capabilities disabled")
+			cmd.info("Configure batch with all capabilities disabled")
 		} else if *dockerCapabilities != "" {
 			batch.DockerCapabilities = getDockerCapabilitiesArray(*dockerCapabilities)
-			c.info("Configure batch with those capabilities : %v", strings.Join(batch.DockerCapabilities, ","))
+			cmd.info("Configure batch with those capabilities : %v", strings.Join(batch.DockerCapabilities, ","))
 		}
 
-		if isFlagPassed("docker-devices", c.flagSet) {
+		if isFlagPassed("docker-devices", cmd.flagSet) {
 			dockerDevicesArray, err := getDockerDevicesArray(*dockerDevices)
 			if err != nil {
 				return "", err
 			}
 			batch.DockerDevices = dockerDevicesArray
-			c.info("Configure batch with custom mapping")
+			cmd.info("Configure batch with custom mapping")
 		}
 
 		if *envCmdArg != "" {
-			c.info("Configure batch with some env")
+			cmd.info("Configure batch with some env")
 			err := batch.SetEnv(*envCmdArg)
 			if err != nil {
-				c.error(err)
+				cmd.error(err)
 			}
 		}
 
@@ -122,18 +122,18 @@ func (c *BatchSetCommand) Run(args []string) int {
 			"Successfully configured batch '%s' for project '%s'",
 			*batchName, *projectUUID)
 
-		c.Meta.spin.Start()
+		cmd.Meta.spin.Start()
 		return msg, client.ConfigBatch(batch, UUID)
 	})
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *BatchSetCommand) Synopsis() string {
+func (cmd *BatchSetCommand) Synopsis() string {
 	return "Set batch runtime parameters for project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *BatchSetCommand) Help() string {
+func (cmd *BatchSetCommand) Help() string {
 	helpText := `
 usage: sqsc batch set [options]
 
@@ -146,5 +146,5 @@ Example:
 			-batch-name my-batch             \
       -e env.json
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

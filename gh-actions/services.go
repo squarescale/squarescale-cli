@@ -8,7 +8,7 @@ import (
 	"os"
 	"os/exec"
 
-	"gopkg.in/alessio/shellescape.v1"
+	"github.com/alessio/shellescape"
 )
 
 type Services struct{}

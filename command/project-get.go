@@ -18,25 +18,25 @@ type ProjectGetCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *ProjectGetCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
+func (cmd *ProjectGetCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
-	return c.runWithSpinner("get project", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("get project", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -104,16 +104,16 @@ func (c *ProjectGetCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ProjectGetCommand) Synopsis() string {
+func (cmd *ProjectGetCommand) Synopsis() string {
 	return "Get project basic informations"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ProjectGetCommand) Help() string {
+func (cmd *ProjectGetCommand) Help() string {
 	helpText := `
 usage: sqsc project get [options]
 
   Get project basic informations.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

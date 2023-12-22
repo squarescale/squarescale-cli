@@ -19,29 +19,29 @@ type DBListCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *DBListCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	provider := providerFlag(c.flagSet)
-	region := regionFlag(c.flagSet)
+func (cmd *DBListCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	provider := providerFlag(cmd.flagSet)
+	region := regionFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	if *provider == "" {
-		return c.errorWithUsage(errors.New("Cloud provider is mandatory"))
+		return cmd.errorWithUsage(errors.New("Cloud provider is mandatory"))
 	}
 
 	if *region == "" {
-		return c.errorWithUsage(errors.New("Cloud provider region is mandatory"))
+		return cmd.errorWithUsage(errors.New("Cloud provider region is mandatory"))
 	}
 
-	return c.runWithSpinner("list available database engines and sizes", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("list available database engines and sizes", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		engines, err := client.GetAvailableDBEngines(*provider, *region)
 		if err != nil {
 			return "", err
@@ -61,19 +61,19 @@ func (c *DBListCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *DBListCommand) Synopsis() string {
+func (cmd *DBListCommand) Synopsis() string {
 	return "List available database engines and sizes"
 }
 
 // Help is part of cli.Command implementation.
-func (c *DBListCommand) Help() string {
+func (cmd *DBListCommand) Help() string {
 	helpText := `
 usage: sqsc db list
 
   List database engines and sizes available for use
   on the SquareScale platform.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }
 
 func fmtDbEngineListOutput(engines []squarescale.DataseEngine) string {

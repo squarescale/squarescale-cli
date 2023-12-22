@@ -15,30 +15,30 @@ type ExternalNodeGetCommand struct {
 	flagSet *flag.FlagSet
 }
 
-func (b *ExternalNodeGetCommand) Run(args []string) int {
-	b.flagSet = newFlagSet(b, b.Ui)
-	endpoint := endpointFlag(b.flagSet)
-	projectUUID := projectUUIDFlag(b.flagSet)
-	projectName := projectNameFlag(b.flagSet)
+func (cmd *ExternalNodeGetCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
 
-	if err := b.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return b.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	externalNodeName, err := externalNodeNameArg(b.flagSet, 0)
+	externalNodeName, err := externalNodeNameArg(cmd.flagSet, 0)
 	if err != nil {
-		return b.errorWithUsage(err)
+		return cmd.errorWithUsage(err)
 	}
 
-	if b.flagSet.NArg() > 1 {
-		return b.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", b.flagSet.Args()))
+	if cmd.flagSet.NArg() > 1 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
-	return b.runWithSpinner("show external nodes", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("show external nodes", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -66,16 +66,16 @@ func (b *ExternalNodeGetCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (b *ExternalNodeGetCommand) Synopsis() string {
+func (cmd *ExternalNodeGetCommand) Synopsis() string {
 	return "Get a external node of project"
 }
 
 // Help is part of cli.Command implementation.
-func (b *ExternalNodeGetCommand) Help() string {
+func (cmd *ExternalNodeGetCommand) Help() string {
 	helpText := `
 usage: sqsc external-node get [options] <external_node_name>
 
   Get a external node of project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(b.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

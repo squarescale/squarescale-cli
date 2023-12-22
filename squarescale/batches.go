@@ -57,7 +57,7 @@ type DockerImageInfos struct {
 
 func (c *Client) CreateBatch(uuid string, batchOrderContent BatchOrder) (CreatedBatch, error) {
 
-	payload := &JSONObject{
+	payload := JSONObject{
 		"name":                batchOrderContent.BatchCommon.Name,
 		"docker_image":        batchOrderContent.DockerImage,
 		"periodic":            batchOrderContent.BatchCommon.Periodic,
@@ -68,7 +68,9 @@ func (c *Client) CreateBatch(uuid string, batchOrderContent BatchOrder) (Created
 		"run_command":         batchOrderContent.BatchCommon.RunCommand,
 		"entrypoint":          batchOrderContent.BatchCommon.Entrypoint,
 		"docker_capabilities": batchOrderContent.BatchCommon.DockerCapabilities,
-		"docker_devices":      batchOrderContent.BatchCommon.DockerDevices,
+	}
+	if batchOrderContent.BatchCommon.DockerDevices != nil {
+		payload["docker_devices"] = batchOrderContent.BatchCommon.DockerDevices
 	}
 
 	code, body, err := c.post("/projects/"+uuid+"/batches", payload)

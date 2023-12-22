@@ -17,25 +17,25 @@ type LBGetCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *LBGetCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
+func (cmd *LBGetCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	return c.runWithSpinner("load balancer config", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("load balancer config", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		var projectToShow string
@@ -83,12 +83,12 @@ func (c *LBGetCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *LBGetCommand) Synopsis() string {
+func (cmd *LBGetCommand) Synopsis() string {
 	return "Display project's public URL if available"
 }
 
 // Help is part of cli.Command implementation.
-func (c *LBGetCommand) Help() string {
+func (cmd *LBGetCommand) Help() string {
 	helpText := `
 usage: sqsc lb get [options]
 
@@ -96,5 +96,5 @@ usage: sqsc lb get [options]
   balancer is enabled, all the project containers are displayed together
   with their ports.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

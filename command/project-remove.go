@@ -17,24 +17,24 @@ type ProjectRemoveCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *ProjectRemoveCommand) Run(args []string) int {
+func (cmd *ProjectRemoveCommand) Run(args []string) int {
 	// Parse flags
-	c.flagSet = newFlagSet(c, c.Ui)
-	alwaysYes := yesFlag(c.flagSet)
-	endpoint := endpointFlag(c.flagSet)
-	nowait := nowaitFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
-	if err := c.flagSet.Parse(args); err != nil {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	alwaysYes := yesFlag(cmd.flagSet)
+	endpoint := endpointFlag(cmd.flagSet)
+	nowait := nowaitFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	if c.flagSet.NArg() > 1 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
+	if cmd.flagSet.NArg() > 1 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()[1:]))
 	}
 
 	var UUID string
@@ -46,15 +46,15 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 		projectToShow = *projectUUID
 	}
 
-	c.Ui.Info("Destroy infrastructure and configuration for project " + projectToShow + "?")
-	ok, err := AskYesNo(c.Ui, alwaysYes, "Proceed ?", true)
+	cmd.Ui.Info("Destroy infrastructure and configuration for project " + projectToShow + "?")
+	ok, err := AskYesNo(cmd.Ui, alwaysYes, "Proceed ?", true)
 	if err != nil {
-		return c.error(err)
+		return cmd.error(err)
 	} else if !ok {
-		return c.error(CancelledError)
+		return cmd.error(CancelledError)
 	}
 
-	res := c.runWithSpinner("unprovision project", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := cmd.runWithSpinner("unprovision project", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
 		if *projectUUID == "" {
 			UUID, err = client.ProjectByName(*projectName)
@@ -84,7 +84,7 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 				break loop
 			} else if infraStatus != status.InfraStatus {
 				infraStatus = status.InfraStatus
-				c.Ui.Info("Infrastructure status: " + infraStatus)
+				cmd.Ui.Info("Infrastructure status: " + infraStatus)
 			}
 
 			time.Sleep(time.Second)
@@ -96,7 +96,7 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 		return res
 	}
 
-	res = c.runWithSpinner("delete project", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res = cmd.runWithSpinner("delete project", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		err := client.ProjectDelete(UUID)
 		return fmt.Sprintf("Remove project '%s'", UUID), err
 	})
@@ -106,7 +106,7 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 	}
 
 	if !*nowait {
-		res = c.runWithSpinner("wait for project remove", endpoint.String(), func(client *squarescale.Client) (string, error) {
+		res = cmd.runWithSpinner("wait for project remove", endpoint.String(), func(client *squarescale.Client) (string, error) {
 			projectStatus, err := client.WaitProject(UUID, 5)
 			if err != nil {
 				return projectStatus, err
@@ -120,16 +120,16 @@ func (c *ProjectRemoveCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ProjectRemoveCommand) Synopsis() string {
+func (cmd *ProjectRemoveCommand) Synopsis() string {
 	return "Remove project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ProjectRemoveCommand) Help() string {
+func (cmd *ProjectRemoveCommand) Help() string {
 	helpText := `
 usage: sqsc project remove [options] <project_name>
 
   Destroy infrastructure and remove project completely.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

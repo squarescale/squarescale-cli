@@ -16,38 +16,38 @@ type ExternalNodeAddCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *ExternalNodeAddCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
+func (cmd *ExternalNodeAddCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
 
-	publicIP := externalNodePublicIP(c.flagSet)
-	nowait := nowaitFlag(c.flagSet)
+	publicIP := externalNodePublicIP(cmd.flagSet)
+	nowait := nowaitFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	externalNodeName, err := externalNodeNameArg(c.flagSet, 0)
+	externalNodeName, err := externalNodeNameArg(cmd.flagSet, 0)
 	if err != nil {
-		return c.errorWithUsage(err)
+		return cmd.errorWithUsage(err)
 	}
 
 	if *publicIP == "" {
-		return c.errorWithUsage(errors.New("Public IP is mandatory"))
+		return cmd.errorWithUsage(errors.New("Public IP is mandatory"))
 	}
 
-	if c.flagSet.NArg() > 1 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 1 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 	var UUID string
 
-	res := c.runWithSpinner("add external node", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := cmd.runWithSpinner("add external node", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
 		var projectToShow string
 		if *projectUUID == "" {
@@ -70,7 +70,7 @@ func (c *ExternalNodeAddCommand) Run(args []string) int {
 	}
 
 	if !*nowait {
-		c.runWithSpinner("wait for external node add", endpoint.String(), func(client *squarescale.Client) (string, error) {
+		cmd.runWithSpinner("wait for external node add", endpoint.String(), func(client *squarescale.Client) (string, error) {
 			// can also be externalNode, err := client.WaitExternalNode(UUID, externalNodeName, 5, []string{"provisionned", "inconsistent"})
 			externalNode, err := client.WaitExternalNode(UUID, externalNodeName, 5, []string{})
 			if err != nil {
@@ -85,16 +85,16 @@ func (c *ExternalNodeAddCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ExternalNodeAddCommand) Synopsis() string {
+func (cmd *ExternalNodeAddCommand) Synopsis() string {
 	return "Add external node node to project."
 }
 
 // Help is part of cli.Command implementation.
-func (c *ExternalNodeAddCommand) Help() string {
+func (cmd *ExternalNodeAddCommand) Help() string {
 	helpText := `
 usage: sqsc external-node add [options] <external_node_name>
 
   Add external node node to project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

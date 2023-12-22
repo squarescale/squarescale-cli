@@ -15,35 +15,35 @@ type SchedulingGroupUnAssignCommand struct {
 	flagSet *flag.FlagSet
 }
 
-func (b *SchedulingGroupUnAssignCommand) Run(args []string) int {
-	b.flagSet = newFlagSet(b, b.Ui)
-	endpoint := endpointFlag(b.flagSet)
-	projectUUID := projectUUIDFlag(b.flagSet)
-	projectName := projectNameFlag(b.flagSet)
+func (cmd *SchedulingGroupUnAssignCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
 
-	if err := b.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return b.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	schedulingGroupName, err := schedulingGroupNameArg(b.flagSet, 0)
+	schedulingGroupName, err := schedulingGroupNameArg(cmd.flagSet, 0)
 	if err != nil {
-		return b.errorWithUsage(err)
+		return cmd.errorWithUsage(err)
 	}
 
-	schedulingGroupHosts, err := schedulingGroupHostsArg(b.flagSet, 1)
+	schedulingGroupHosts, err := schedulingGroupHostsArg(cmd.flagSet, 1)
 	if err != nil {
-		return b.errorWithUsage(err)
+		return cmd.errorWithUsage(err)
 	}
 
-	if b.flagSet.NArg() > 2 {
-		return b.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", b.flagSet.Args()))
+	if cmd.flagSet.NArg() > 2 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
-	return b.runWithSpinner("unassign host(s) from scheduling group", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("unassign host(s) from scheduling group", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -99,16 +99,16 @@ func (b *SchedulingGroupUnAssignCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (b *SchedulingGroupUnAssignCommand) Synopsis() string {
+func (cmd *SchedulingGroupUnAssignCommand) Synopsis() string {
 	return "Unassign host(s) from scheduling group of project"
 }
 
 // Help is part of cli.Command implementation.
-func (b *SchedulingGroupUnAssignCommand) Help() string {
+func (cmd *SchedulingGroupUnAssignCommand) Help() string {
 	helpText := `
 usage: sqsc scheduling-group unassign [options] <scheduling_group_name> <host1[,host2...,[hostn]>
 
   Unassign host(s) from scheduling group of project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(b.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

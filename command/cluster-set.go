@@ -18,24 +18,24 @@ type ClusterSetCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *ClusterSetCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	nowait := nowaitFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
-	c.Cluster.Size = *clusterSizeFlag(c.flagSet)
-	alwaysYes := yesFlag(c.flagSet)
-	if err := c.flagSet.Parse(args); err != nil {
+func (cmd *ClusterSetCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	nowait := nowaitFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
+	cmd.Cluster.Size = *clusterSizeFlag(cmd.flagSet)
+	alwaysYes := yesFlag(cmd.flagSet)
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	var projectToShow string
@@ -45,17 +45,17 @@ func (c *ClusterSetCommand) Run(args []string) int {
 		projectToShow = *projectUUID
 	}
 
-	c.Ui.Warn(fmt.Sprintf("Changing cluster settings for project '%s' may cause a downtime.", projectToShow))
-	ok, err := AskYesNo(c.Ui, alwaysYes, "Is this ok?", false)
+	cmd.Ui.Warn(fmt.Sprintf("Changing cluster settings for project '%s' may cause a downtime.", projectToShow))
+	ok, err := AskYesNo(cmd.Ui, alwaysYes, "Is this ok?", false)
 	if err != nil {
-		return c.error(err)
+		return cmd.error(err)
 	} else if !ok {
-		return c.cancelled()
+		return cmd.cancelled()
 	}
 
 	var UUID string
 
-	res := c.runWithSpinner("scale project cluster", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := cmd.runWithSpinner("scale project cluster", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
 		if *projectUUID == "" {
 			UUID, err = client.ProjectByName(*projectName)
@@ -71,12 +71,12 @@ func (c *ClusterSetCommand) Run(args []string) int {
 			return "", e
 		}
 
-		if c.Cluster.Size == cluster.Size {
+		if cmd.Cluster.Size == cluster.Size {
 			*nowait = true
 			return fmt.Sprintf("Cluster for project '%s' is already configured with these parameters", projectToShow), nil
 		}
 
-		cluster.Update(c.Cluster)
+		cluster.Update(cmd.Cluster)
 
 		_, err = client.ConfigCluster(UUID, cluster)
 
@@ -91,7 +91,7 @@ func (c *ClusterSetCommand) Run(args []string) int {
 	}
 
 	if !*nowait {
-		res = c.runWithSpinner("wait for cluster change", endpoint.String(), func(client *squarescale.Client) (string, error) {
+		res = cmd.runWithSpinner("wait for cluster change", endpoint.String(), func(client *squarescale.Client) (string, error) {
 			projectStatus, err := client.WaitProject(UUID, 5)
 			if err != nil {
 				return projectStatus, err
@@ -105,18 +105,18 @@ func (c *ClusterSetCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ClusterSetCommand) Synopsis() string {
+func (cmd *ClusterSetCommand) Synopsis() string {
 	return "Set and scale up/down cluster attached to project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ClusterSetCommand) Help() string {
+func (cmd *ClusterSetCommand) Help() string {
 	helpText := `
 usage: sqsc cluster set [options]
 
   Set and scale up/down cluster attached to project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }
 
 func validateClusterSetCommandArgs(project string, cluster squarescale.ClusterConfig) error {

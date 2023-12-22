@@ -16,25 +16,25 @@ type ServiceListCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *ServiceListCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
-	containerArg := serviceFlag(c.flagSet)
-	if err := c.flagSet.Parse(args); err != nil {
+func (cmd *ServiceListCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
+	containerArg := serviceFlag(cmd.flagSet)
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	return c.runWithSpinner("listing services", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("listing services", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -69,21 +69,21 @@ func (c *ServiceListCommand) Run(args []string) int {
 			msg = "No service found"
 		}
 
-		return c.FormatTable(msg, true), nil
+		return cmd.FormatTable(msg, true), nil
 	})
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ServiceListCommand) Synopsis() string {
+func (cmd *ServiceListCommand) Synopsis() string {
 	return "List services aka Docker containers of project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ServiceListCommand) Help() string {
+func (cmd *ServiceListCommand) Help() string {
 	helpText := `
 usage: sqsc service list [options]
 
   List services aka Docker containers of project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

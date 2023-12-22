@@ -20,18 +20,18 @@ type ProjectListCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *ProjectListCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	if err := c.flagSet.Parse(args); err != nil {
+func (cmd *ProjectListCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
-	return c.runWithSpinner("list projects", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("list projects", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		projects, err := client.ListProjects()
 		if err != nil {
 			return "", err
@@ -66,18 +66,18 @@ func (c *ProjectListCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ProjectListCommand) Synopsis() string {
+func (cmd *ProjectListCommand) Synopsis() string {
 	return "List projects"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ProjectListCommand) Help() string {
+func (cmd *ProjectListCommand) Help() string {
 	helpText := `
 usage: sqsc project list [options]
 
   List projects attached to the authenticated account.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }
 
 func fmtProjectListOutput(projects []squarescale.Project, organizations []squarescale.Organization) string {

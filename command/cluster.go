@@ -11,17 +11,17 @@ type ClusterCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *ClusterCommand) Run(args []string) int {
+func (cmd *ClusterCommand) Run(args []string) int {
 	return cli.RunResultHelp
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ClusterCommand) Synopsis() string {
+func (cmd *ClusterCommand) Synopsis() string {
 	return "Commands to interact with cluster instances in a project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ClusterCommand) Help() string {
+func (cmd *ClusterCommand) Help() string {
 	helpText := `
 usage: sqsc cluster <subcommand>
 

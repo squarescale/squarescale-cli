@@ -52,94 +52,94 @@ func DefaultMeta(ui cli.Ui, color, niceFormat, spinnerEnable bool, spinTime time
 	}
 }
 
-func (m *Meta) info(message string, args ...interface{}) int {
-	m.Ui.Info(fmt.Sprintf(message, args...))
+func (meta *Meta) info(message string, args ...interface{}) int {
+	meta.Ui.Info(fmt.Sprintf(message, args...))
 	return 0
 }
 
-func (m *Meta) error(err error) int {
+func (meta *Meta) error(err error) int {
 	if err == CancelledError {
-		return m.cancelled()
+		return meta.cancelled()
 	} else {
-		m.Ui.Error(err.Error())
+		meta.Ui.Error(err.Error())
 		return 1
 	}
 }
 
-func (m *Meta) cancelled() int {
+func (meta *Meta) cancelled() int {
 	return 2
 }
 
-func (m *Meta) errorWithUsage(err error) int {
-	m.error(errors.New(err.Error() + "\n"))
+func (meta *Meta) errorWithUsage(err error) int {
+	meta.error(errors.New(err.Error() + "\n"))
 	return cli.RunResultHelp
 }
 
-func (m *Meta) runWithSpinner(text, endpoint string, action func(*squarescale.Client) (string, error)) int {
-	m.startSpinner()
-	m.spin.Suffix = " " + text
+func (meta *Meta) runWithSpinner(text, endpoint string, action func(*squarescale.Client) (string, error)) int {
+	meta.startSpinner()
+	meta.spin.Suffix = " " + text
 
-	client, err := m.ensureLogin(endpoint)
+	client, err := meta.ensureLogin(endpoint)
 	if err != nil {
-		m.errorSpinner(err)
-		return m.error(err)
+		meta.errorSpinner(err)
+		return meta.error(err)
 	}
 
 	finalMsg, err := action(client)
 	if err != nil {
-		m.errorSpinner(err)
-		return m.error(err)
+		meta.errorSpinner(err)
+		return meta.error(err)
 	}
 
-	m.stopSpinner()
+	meta.stopSpinner()
 	if finalMsg != "" {
-		return m.info(finalMsg)
+		return meta.info(finalMsg)
 	} else {
 		return 0
 	}
 }
 
-func (m *Meta) startSpinner() {
-	if !m.spinEnable {
+func (meta *Meta) startSpinner() {
+	if !meta.spinEnable {
 		return
 	}
 
-	m.spin.Start()
+	meta.spin.Start()
 }
 
-func (m *Meta) pauseSpinner() {
-	if !m.spinEnable {
+func (meta *Meta) pauseSpinner() {
+	if !meta.spinEnable {
 		return
 	}
 
-	m.spin.FinalMSG = "... paused\n"
-	m.spin.Stop()
+	meta.spin.FinalMSG = "... paused\n"
+	meta.spin.Stop()
 	time.Sleep(time.Millisecond) // leave time to the UI to refresh properly
 }
 
-func (m *Meta) stopSpinner() {
-	if !m.spinEnable {
+func (meta *Meta) stopSpinner() {
+	if !meta.spinEnable {
 		return
 	}
 
-	m.spin.FinalMSG = "... done\n"
-	m.spin.Stop()
+	meta.spin.FinalMSG = "... done\n"
+	meta.spin.Stop()
 }
 
-func (m *Meta) errorSpinner(err error) {
-	if !m.spinEnable {
+func (meta *Meta) errorSpinner(err error) {
+	if !meta.spinEnable {
 		return
 	}
 
 	if err == CancelledError {
-		m.spin.FinalMSG = "... cancelled\n"
+		meta.spin.FinalMSG = "... cancelled\n"
 	} else {
-		m.spin.FinalMSG = "... error\n"
+		meta.spin.FinalMSG = "... error\n"
 	}
-	m.spin.Stop()
+	meta.spin.Stop()
 }
 
-func (m *Meta) ensureLogin(endpoint string) (*squarescale.Client, error) {
+func (meta *Meta) ensureLogin(endpoint string) (*squarescale.Client, error) {
 	token, err := tokenstore.GetToken(endpoint)
 	if err != nil {
 		return nil, err
@@ -154,9 +154,9 @@ func (m *Meta) ensureLogin(endpoint string) (*squarescale.Client, error) {
 	return client, nil
 }
 
-func (m *Meta) FormatTable(table string, header bool) string {
+func (meta *Meta) FormatTable(table string, header bool) string {
 	table = strings.Trim(table, "\n")
-	if !m.niceFormat {
+	if !meta.niceFormat {
 		return table
 	}
 

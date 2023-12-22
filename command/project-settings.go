@@ -14,26 +14,26 @@ type ProjectSettingsCommand struct {
 	flagSet *flag.FlagSet
 }
 
-func (p *ProjectSettingsCommand) Run(args []string) int {
-	p.flagSet = newFlagSet(p, p.Ui)
-	endpoint := endpointFlag(p.flagSet)
-	projectUUID := projectUUIDFlag(p.flagSet)
-	projectName := projectNameFlag(p.flagSet)
-	hybridCluster := projectHybridClusterFlag(p.flagSet)
+func (cmd *ProjectSettingsCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
+	hybridCluster := projectHybridClusterFlag(cmd.flagSet)
 
-	if err := p.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return p.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	if p.flagSet.NArg() > 0 {
-		return p.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", p.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
-	return p.runWithSpinner("change project settings", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("change project settings", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
 		var UUID string
 		var projectToShow string
@@ -59,16 +59,16 @@ func (p *ProjectSettingsCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (p *ProjectSettingsCommand) Synopsis() string {
+func (cmd *ProjectSettingsCommand) Synopsis() string {
 	return "Change settings of a project."
 }
 
 // Help is part of cli.Command implementation.
-func (p *ProjectSettingsCommand) Help() string {
+func (cmd *ProjectSettingsCommand) Help() string {
 	helpText := `
 usage: sqsc settings [options]
 
   Change settings of a project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(p.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

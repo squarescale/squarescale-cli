@@ -16,40 +16,40 @@ type EnvSetCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *EnvSetCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
-	container := serviceFlag(c.flagSet)
-	remove := envRemoveFlag(c.flagSet)
+func (cmd *EnvSetCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
+	container := serviceFlag(cmd.flagSet)
+	remove := envRemoveFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	var key, value string
-	args = c.flagSet.Args()
+	args = cmd.flagSet.Args()
 	switch len(args) {
 	case 0:
-		return c.errorWithUsage(fmt.Errorf("No argument provided"))
+		return cmd.errorWithUsage(fmt.Errorf("No argument provided"))
 	case 1:
 		key = args[0]
 	case 2:
 		key, value = args[0], args[1]
 	default:
-		return c.errorWithUsage(fmt.Errorf("Extra arguments on the command line: %v", args[2:]))
+		return cmd.errorWithUsage(fmt.Errorf("Extra arguments on the command line: %v", args[2:]))
 	}
 
 	if err := validateEnvVariable(key, value, *remove); err != nil {
-		return c.errorWithUsage(err)
+		return cmd.errorWithUsage(err)
 	}
 
-	return c.runWithSpinner("set environment variable", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("set environment variable", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -101,12 +101,12 @@ func (c *EnvSetCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *EnvSetCommand) Synopsis() string {
+func (cmd *EnvSetCommand) Synopsis() string {
 	return "Set environment variable for project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *EnvSetCommand) Help() string {
+func (cmd *EnvSetCommand) Help() string {
 	helpText := `
 usage: sqsc env set [options] <key> <value>
 
@@ -115,7 +115,7 @@ usage: sqsc env set [options] <key> <value>
   are both strings. When "--remove" is specified, only the
   key to remove is required.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }
 
 func validateEnvVariable(key, value string, remove bool) error {

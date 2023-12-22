@@ -16,36 +16,36 @@ type DBSetCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *DBSetCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	nowait := nowaitFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
-	dbEngine := dbEngineFlag(c.flagSet)
-	dbSize := dbSizeFlag(c.flagSet)
-	dbVersion := dbVersionFlag(c.flagSet)
-	dbBackupEnabled := dbBackupFlag(c.flagSet)
-	dbDisabled := c.flagSet.Bool("disable", false, "Disable database")
-	alwaysYes := yesFlag(c.flagSet)
-	if err := c.flagSet.Parse(args); err != nil {
+func (cmd *DBSetCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	nowait := nowaitFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
+	dbEngine := dbEngineFlag(cmd.flagSet)
+	dbSize := dbSizeFlag(cmd.flagSet)
+	dbVersion := dbVersionFlag(cmd.flagSet)
+	dbBackupEnabled := dbBackupFlag(cmd.flagSet)
+	dbDisabled := cmd.flagSet.Bool("disable", false, "Disable database")
+	alwaysYes := yesFlag(cmd.flagSet)
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *dbDisabled && (*dbEngine != "" || *dbSize != "" || *dbVersion != "") {
-		return c.errorWithUsage(errors.New("Cannot specify engine or size or version when disabling database."))
+		return cmd.errorWithUsage(errors.New("Cannot specify engine or size or version when disabling database."))
 	}
 
 	if !*dbDisabled && (*dbEngine == "" && *dbSize == "" && *dbVersion == "" && !*dbBackupEnabled) {
-		return c.errorWithUsage(errors.New("Size, engine and version are mandatory."))
+		return cmd.errorWithUsage(errors.New("Size, engine and version are mandatory."))
 	}
 
 	var projectToShow string
@@ -55,17 +55,17 @@ func (c *DBSetCommand) Run(args []string) int {
 		projectToShow = *projectUUID
 	}
 
-	c.Ui.Warn(fmt.Sprintf("Changing cluster settings for project '%s' will cause a downtime.", projectToShow))
-	ok, err := AskYesNo(c.Ui, alwaysYes, "Is this ok?", false)
+	cmd.Ui.Warn(fmt.Sprintf("Changing cluster settings for project '%s' will cause a downtime.", projectToShow))
+	ok, err := AskYesNo(cmd.Ui, alwaysYes, "Is this ok?", false)
 	if err != nil {
-		return c.error(err)
+		return cmd.error(err)
 	} else if !ok {
-		return c.cancelled()
+		return cmd.cancelled()
 	}
 
 	var UUID string
 
-	res := c.runWithSpinner("scale project database", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := cmd.runWithSpinner("scale project database", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var err error
 		if *projectUUID == "" {
 			UUID, err = client.ProjectByName(*projectName)
@@ -115,7 +115,7 @@ func (c *DBSetCommand) Run(args []string) int {
 	}
 
 	if !*nowait {
-		res = c.runWithSpinner("wait for database change", endpoint.String(), func(client *squarescale.Client) (string, error) {
+		res = cmd.runWithSpinner("wait for database change", endpoint.String(), func(client *squarescale.Client) (string, error) {
 			projectStatus, err := client.WaitProject(UUID, 5)
 			if err != nil {
 				return projectStatus, err
@@ -129,12 +129,12 @@ func (c *DBSetCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *DBSetCommand) Synopsis() string {
+func (cmd *DBSetCommand) Synopsis() string {
 	return "Set and scale up/down the database engine attached to project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *DBSetCommand) Help() string {
+func (cmd *DBSetCommand) Help() string {
 	helpText := `
 usage: sqsc db set [options]
 
@@ -142,7 +142,7 @@ usage: sqsc db set [options]
   The list of database engines and instances available for use can be accessed
   using the 'db list' command.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }
 
 // validateDBSetCommandArgs ensures that the following predicate is satisfied:

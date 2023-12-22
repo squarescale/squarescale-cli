@@ -15,19 +15,19 @@ type OrganizationListCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *OrganizationListCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
+func (cmd *OrganizationListCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
-	return c.runWithSpinner("list organizations", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("list organizations", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		organizations, err := client.ListOrganizations()
 
 		if err != nil {
@@ -62,21 +62,21 @@ func (c *OrganizationListCommand) Run(args []string) int {
 			msg = "No organizations found"
 		}
 
-		return c.FormatTable(msg, true), nil
+		return cmd.FormatTable(msg, true), nil
 	})
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *OrganizationListCommand) Synopsis() string {
+func (cmd *OrganizationListCommand) Synopsis() string {
 	return "List organizations"
 }
 
 // Help is part of cli.Command implementation.
-func (c *OrganizationListCommand) Help() string {
+func (cmd *OrganizationListCommand) Help() string {
 	helpText := `
 usage: sqsc organization list [options]
 
   List organizations.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

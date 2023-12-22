@@ -11,17 +11,17 @@ type NetworkRuleCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *NetworkRuleCommand) Run(args []string) int {
+func (cmd *NetworkRuleCommand) Run(args []string) int {
 	return cli.RunResultHelp
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *NetworkRuleCommand) Synopsis() string {
+func (cmd *NetworkRuleCommand) Synopsis() string {
 	return "Commands to interact with network rules in a project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *NetworkRuleCommand) Help() string {
+func (cmd *NetworkRuleCommand) Help() string {
 	helpText := `
 usage: sqsc network-rule <subcommand>
 

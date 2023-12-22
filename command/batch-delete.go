@@ -16,44 +16,44 @@ type BatchDeleteCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *BatchDeleteCommand) Run(args []string) int {
+func (cmd *BatchDeleteCommand) Run(args []string) int {
 	// Parse flags
-	c.flagSet = newFlagSet(c, c.Ui)
-	alwaysYes := yesFlag(c.flagSet)
-	endpoint := endpointFlag(c.flagSet)
-	batchName := batchNameFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	alwaysYes := yesFlag(cmd.flagSet)
+	endpoint := endpointFlag(cmd.flagSet)
+	batchName := batchNameFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *batchName == "" {
-		return c.errorWithUsage(fmt.Errorf(("Batch name is mandatory. Please, chose a batch name.")))
+		return cmd.errorWithUsage(fmt.Errorf(("Batch name is mandatory. Please, chose a batch name.")))
 	}
 
-	if c.flagSet.NArg() > 1 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()[1:]))
+	if cmd.flagSet.NArg() > 1 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()[1:]))
 	}
 
-	c.Ui.Info("Are you sure you want to delete " + *batchName + "?")
+	cmd.Ui.Info("Are you sure you want to delete " + *batchName + "?")
 	if *alwaysYes {
-		c.Ui.Info("(approved from command line)")
+		cmd.Ui.Info("(approved from command line)")
 	} else {
-		res, err := c.Ui.Ask("y/N")
+		res, err := cmd.Ui.Ask("y/N")
 		if err != nil {
-			return c.error(err)
+			return cmd.error(err)
 		} else if res != "Y" && res != "y" {
-			return c.cancelled()
+			return cmd.cancelled()
 		}
 	}
 
-	res := c.runWithSpinner("deleting batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := cmd.runWithSpinner("deleting batch", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		var projectToShow string
@@ -80,16 +80,16 @@ func (c *BatchDeleteCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *BatchDeleteCommand) Synopsis() string {
+func (cmd *BatchDeleteCommand) Synopsis() string {
 	return "Delete batch from project."
 }
 
 // Help is part of cli.Command implementation.
-func (c *BatchDeleteCommand) Help() string {
+func (cmd *BatchDeleteCommand) Help() string {
 	helpText := `
 usage: sqsc batch delete [options] <batch_name>
 
   Delete batch from project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

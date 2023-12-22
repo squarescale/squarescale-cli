@@ -16,25 +16,25 @@ type RedisListCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (r *RedisListCommand) Run(args []string) int {
-	r.flagSet = newFlagSet(r, r.Ui)
-	endpoint := endpointFlag(r.flagSet)
-	projectUUID := projectUUIDFlag(r.flagSet)
-	projectName := projectNameFlag(r.flagSet)
+func (cmd *RedisListCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
 
-	if err := r.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if r.flagSet.NArg() > 0 {
-		return r.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", r.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return r.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	return r.runWithSpinner("list redis", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("list redis", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		var redisList []squarescale.RedisDbConfig
@@ -68,17 +68,17 @@ func (r *RedisListCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (r *RedisListCommand) Synopsis() string {
+func (cmd *RedisListCommand) Synopsis() string {
 	return "List Redis instances for a SquareScale projects"
 }
 
 // Help is part of cli.Command implementation.
-func (r *RedisListCommand) Help() string {
+func (cmd *RedisListCommand) Help() string {
 	helpText := `
 usage: sqsc redis list [options]
 
   List all Redis instances for a given SquareScale project.
 
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(r.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

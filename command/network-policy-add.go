@@ -15,45 +15,45 @@ type NetworkPolicyAddCommand struct {
 	flagSet *flag.FlagSet
 }
 
-func (b *NetworkPolicyAddCommand) Run(args []string) int {
-	b.flagSet = newFlagSet(b, b.Ui)
-	endpoint := endpointFlag(b.flagSet)
-	projectUUID := projectUUIDFlag(b.flagSet)
-	projectName := projectNameFlag(b.flagSet)
-	policyName := networkPolicyNameFlag(b.flagSet)
+func (cmd *NetworkPolicyAddCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
+	policyName := networkPolicyNameFlag(cmd.flagSet)
 
-	if err := b.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return b.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *policyName == "" {
-		return b.errorWithUsage(errors.New("Policy name is mandatory"))
+		return cmd.errorWithUsage(errors.New("Policy name is mandatory"))
 	}
 
-	if b.flagSet.NArg() > 2 {
-		return b.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", b.flagSet.Args()))
+	if cmd.flagSet.NArg() > 2 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	policy := squarescale.NetworkPolicy{}
 	policy.Name = *policyName
 
-	policyFile, err := networkPolicyFileArg(b.flagSet)
+	policyFile, err := networkPolicyFileArg(cmd.flagSet)
 	if err != nil {
-		return b.errorWithUsage(err)
+		return cmd.errorWithUsage(err)
 	}
 
 	if policyFile != "" {
 		err := policy.ImportPoliciesFromFile(policyFile)
 		if err != nil {
-			return b.error(err)
+			return cmd.error(err)
 		}
 	}
 
-	return b.runWithSpinner("add network policy", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("add network policy", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -75,16 +75,16 @@ func (b *NetworkPolicyAddCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (b *NetworkPolicyAddCommand) Synopsis() string {
+func (cmd *NetworkPolicyAddCommand) Synopsis() string {
 	return "Create a new network policy"
 }
 
 // Help is part of cli.Command implementation.
-func (b *NetworkPolicyAddCommand) Help() string {
+func (cmd *NetworkPolicyAddCommand) Help() string {
 	helpText := `
 usage: sqsc network-policy add -network-policy-name NAME FILE-PATH
 
   Add a new network policy to a project
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(b.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

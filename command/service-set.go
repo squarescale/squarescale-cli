@@ -16,62 +16,62 @@ type ServiceSetCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *ServiceSetCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
-	serviceName := serviceFlag(c.flagSet)
-	instances := containerInstancesFlag(c.flagSet)
-	runCommand := containerRunCmdFlag(c.flagSet)
-	noRunCommand := containerNoRunCmdFlag(c.flagSet)
-	entrypoint := entrypointFlag(c.flagSet)
-	autostart := autostartFlag(c.flagSet)
-	maxClientDisconnect := maxclientdisconnect(c.flagSet)
+func (cmd *ServiceSetCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
+	serviceName := serviceFlag(cmd.flagSet)
+	instances := containerInstancesFlag(cmd.flagSet)
+	runCommand := containerRunCmdFlag(cmd.flagSet)
+	noRunCommand := containerNoRunCmdFlag(cmd.flagSet)
+	entrypoint := entrypointFlag(cmd.flagSet)
+	autostart := autostartFlag(cmd.flagSet)
+	maxClientDisconnect := maxclientdisconnect(cmd.flagSet)
 
-	schedulingGroups := containerSchedulingGroupsFlag(c.flagSet)
-	limitMemory := containerLimitMemoryFlag(c.flagSet, 0)
-	limitCPU := containerLimitCPUFlag(c.flagSet, 0)
-	dockerCapabilities := dockerCapabilitiesFlag(c.flagSet)
-	noDockerCapabilities := noDockerCapabilitiesFlag(c.flagSet)
-	dockerDevices := dockerDevicesFlag(c.flagSet)
+	schedulingGroups := containerSchedulingGroupsFlag(cmd.flagSet)
+	limitMemory := containerLimitMemoryFlag(cmd.flagSet, 0)
+	limitCPU := containerLimitCPUFlag(cmd.flagSet, 0)
+	dockerCapabilities := dockerCapabilitiesFlag(cmd.flagSet)
+	noDockerCapabilities := noDockerCapabilitiesFlag(cmd.flagSet)
+	dockerDevices := dockerDevicesFlag(cmd.flagSet)
 
-	envVariables := envFileFlag(c.flagSet)
+	envVariables := envFileFlag(cmd.flagSet)
 	var envParams []string
-	envParameterFlag(c.flagSet, &envParams)
-	volumes := volumeFlag(c.flagSet)
+	envParameterFlag(cmd.flagSet, &envParams)
+	volumes := volumeFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *serviceName == "" {
-		return c.errorWithUsage(errors.New("Service name cannot be empty."))
+		return cmd.errorWithUsage(errors.New("Service name cannot be empty."))
 	}
 
 	if *noRunCommand && *runCommand != "" {
-		return c.errorWithUsage(errors.New("Cannot specify an override command and disable it at the same time"))
+		return cmd.errorWithUsage(errors.New("Cannot specify an override command and disable it at the same time"))
 	}
 
 	if *instances <= 0 {
 		if *instances != -1 {
-			c.Ui.Warn("Number of instances cannot be 0 or negative. This value won't be set and default 1 will be used.")
+			cmd.Ui.Warn("Number of instances cannot be 0 or negative. This value won't be set and default 1 will be used.")
 		}
 	}
 
 	if *limitCPU < 0 || *limitMemory < 0 {
-		return c.errorWithUsage(errors.New("Invalid values provided for limits."))
+		return cmd.errorWithUsage(errors.New("Invalid values provided for limits."))
 	}
 
-	return c.runWithSpinner("configure service", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("configure service", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		var projectToShow string
@@ -91,65 +91,65 @@ func (c *ServiceSetCommand) Run(args []string) int {
 			return "", err
 		}
 
-		c.Meta.spin.Stop()
-		c.Meta.info("")
+		cmd.Meta.spin.Stop()
+		cmd.Meta.info("")
 
 		if *instances > 0 && container.Size != *instances {
 			container.Size = *instances
-			c.info("Configure service with %d instances", *instances)
+			cmd.info("Configure service with %d instances", *instances)
 		}
 
 		if *runCommand != "" && container.RunCommand != *runCommand {
-			c.info("Configure service with run command: %s", *runCommand)
+			cmd.info("Configure service with run command: %s", *runCommand)
 			container.RunCommand = *runCommand
 			if len(container.RunCommand) == 0 {
 				container.RunCommand = ""
 			}
 		}
 		if *noRunCommand {
-			c.info("Configure service without run command")
+			cmd.info("Configure service without run command")
 			container.RunCommand = ""
 		}
 
 		if *entrypoint != "" && container.Entrypoint != *entrypoint {
-			c.info("Configure service with entrypoint: %s", *entrypoint)
+			cmd.info("Configure service with entrypoint: %s", *entrypoint)
 			container.Entrypoint = *entrypoint
 		}
 
 		if *limitMemory > 0 && container.Limits.Memory != *limitMemory {
-			c.info("Configure service with memory limit of %d MB", *limitMemory)
+			cmd.info("Configure service with memory limit of %d MB", *limitMemory)
 			container.Limits.Memory = *limitMemory
 		}
 		if *limitCPU > 0 && container.Limits.CPU != *limitCPU {
-			c.info("Configure service with CPU limit of %d Mhz", *limitCPU)
+			cmd.info("Configure service with CPU limit of %d Mhz", *limitCPU)
 			container.Limits.CPU = *limitCPU
 		}
 
 		if *envVariables != "" {
-			c.info("Configure service with some environment JSON file")
+			cmd.info("Configure service with some environment JSON file")
 			err := container.SetEnv(*envVariables)
 			if err != nil {
-				c.error(err)
+				cmd.error(err)
 			}
 		}
 		if len(envParams) > 0 {
-			c.info("Configure service with some environment parameters")
+			cmd.info("Configure service with some environment parameters")
 			err := container.SetEnvParams(envParams)
 			if err != nil {
-				c.error(err)
+				cmd.error(err)
 			}
 		}
 
-		if isFlagPassed("auto-start", c.flagSet) {
-			c.info("Configure service with CPU autostartFlag %v", *autostart)
+		if isFlagPassed("auto-start", cmd.flagSet) {
+			cmd.info("Configure service with CPU autostartFlag %v", *autostart)
 			container.AutoStart = *autostart
 		}
 
-		if isFlagPassed("docker-devices", c.flagSet) {
-			c.info("Configure service with custom Docker devices mapping")
+		if isFlagPassed("docker-devices", cmd.flagSet) {
+			cmd.info("Configure service with custom Docker devices mapping")
 			dockerDevicesArray, err := getDockerDevicesArray(*dockerDevices)
 			if err != nil {
-				c.error(err)
+				cmd.error(err)
 			} else {
 				container.DockerDevices = dockerDevicesArray
 			}
@@ -157,26 +157,26 @@ func (c *ServiceSetCommand) Run(args []string) int {
 
 		if *noDockerCapabilities {
 			container.DockerCapabilities = []string{"NONE"}
-			c.info("Configure service with all capabilities disabled")
+			cmd.info("Configure service with all capabilities disabled")
 		} else if *dockerCapabilities != "" {
 			container.DockerCapabilities = getDockerCapabilitiesArray(*dockerCapabilities)
-			c.info("Configure service with those capabilities : %v", strings.Join(container.DockerCapabilities, ","))
+			cmd.info("Configure service with those capabilities : %v", strings.Join(container.DockerCapabilities, ","))
 		}
 
 		schedulingGroupsToAdd := getSchedulingGroupsArray(UUID, client, *schedulingGroups)
 		if len(schedulingGroupsToAdd) != 0 {
-			c.info("Configure service with some scheduling groups")
+			cmd.info("Configure service with some scheduling groups")
 			container.SchedulingGroups = schedulingGroupsToAdd
 		}
 
-		if isFlagPassed("max-client-disconnect", c.flagSet) {
-			c.info("Configure max-client-disconnect")
+		if isFlagPassed("max-client-disconnect", cmd.flagSet) {
+			cmd.info("Configure max-client-disconnect")
 			container.MaxClientDisconnect = *maxClientDisconnect
 		}
 
 		volumesToBind := parseVolumesToBind(*volumes)
 		if len(volumesToBind) != 0 {
-			c.info("Configure service with some volumes")
+			cmd.info("Configure service with some volumes")
 			container.Volumes = volumesToBind
 		}
 
@@ -184,18 +184,18 @@ func (c *ServiceSetCommand) Run(args []string) int {
 			"Successfully configured service '%s' for project '%s'",
 			*serviceName, projectToShow)
 
-		c.Meta.spin.Start()
+		cmd.Meta.spin.Start()
 		return msg, client.ConfigService(container)
 	})
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ServiceSetCommand) Synopsis() string {
+func (cmd *ServiceSetCommand) Synopsis() string {
 	return "Set service aka Docker container runtime parameters for project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ServiceSetCommand) Help() string {
+func (cmd *ServiceSetCommand) Help() string {
 	helpText := `
 usage: sqsc service set [options]
 
@@ -209,5 +209,5 @@ Example:
       -instances=42         \
       -env=env.json
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

@@ -18,25 +18,25 @@ type LBSetCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *LBSetCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
-	disableArg := loadBalancerDisableFlag(c.flagSet)
-	certArg := certFlag(c.flagSet)
-	certChainArg := certChainFlag(c.flagSet)
-	secretKeyArg := secretKeyFlag(c.flagSet)
-	if err := c.flagSet.Parse(args); err != nil {
+func (cmd *LBSetCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
+	disableArg := loadBalancerDisableFlag(cmd.flagSet)
+	certArg := certFlag(cmd.flagSet)
+	certChainArg := certChainFlag(cmd.flagSet)
+	secretKeyArg := secretKeyFlag(cmd.flagSet)
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	var cert, secretKey string
@@ -47,7 +47,7 @@ func (c *LBSetCommand) Run(args []string) int {
 	if *certArg != "" {
 		data, err := ioutil.ReadFile(*certArg)
 		if err != nil {
-			return c.error(err)
+			return cmd.error(err)
 		}
 		cert = string(data)
 	}
@@ -55,7 +55,7 @@ func (c *LBSetCommand) Run(args []string) int {
 	if *certChainArg != "" {
 		data, err := ioutil.ReadFile(*certChainArg)
 		if err != nil {
-			return c.error(err)
+			return cmd.error(err)
 		}
 		certChain = string(data)
 	}
@@ -63,12 +63,12 @@ func (c *LBSetCommand) Run(args []string) int {
 	if *secretKeyArg != "" {
 		data, err := ioutil.ReadFile(*secretKeyArg)
 		if err != nil {
-			return c.error(err)
+			return cmd.error(err)
 		}
 		secretKey = string(data)
 	}
 
-	res := c.runWithSpinner("configure load balancer", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := cmd.runWithSpinner("configure load balancer", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		var projectToShow string
@@ -104,12 +104,12 @@ func (c *LBSetCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *LBSetCommand) Synopsis() string {
+func (cmd *LBSetCommand) Synopsis() string {
 	return "Configure load balancer associated to project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *LBSetCommand) Help() string {
+func (cmd *LBSetCommand) Help() string {
 	helpText := `
 usage: sqsc lb set [options]
 
@@ -117,5 +117,5 @@ usage: sqsc lb set [options]
 
 	Used to define a TLS certificate
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

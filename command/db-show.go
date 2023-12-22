@@ -16,24 +16,24 @@ type DBShowCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *DBShowCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
-	if err := c.flagSet.Parse(args); err != nil {
+func (cmd *DBShowCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	return c.runWithSpinner("fetch database configuration", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("fetch database configuration", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -50,7 +50,7 @@ func (c *DBShowCommand) Run(args []string) int {
 			return "", e
 		}
 
-		return c.FormatTable(
+		return cmd.FormatTable(
 			fmt.Sprintf(
 				"DB Enabled:\t%v\nDB Engine:\t%s\nDB Size:\t%s\nDB Version:\t%s\nDB Backup Enabled:\t%v\nDB Backup Retention:\t%v",
 				db.Enabled, db.Engine, db.Size, db.Version, db.BackupEnabled, db.BackupRetention,
@@ -60,16 +60,16 @@ func (c *DBShowCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *DBShowCommand) Synopsis() string {
+func (cmd *DBShowCommand) Synopsis() string {
 	return "Show database engine attached to project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *DBShowCommand) Help() string {
+func (cmd *DBShowCommand) Help() string {
 	helpText := `
 usage: sqsc db show [options]
 
   Show database engine attached to project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

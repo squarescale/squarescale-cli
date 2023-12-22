@@ -11,17 +11,17 @@ type DBCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *DBCommand) Run(args []string) int {
+func (cmd *DBCommand) Run(args []string) int {
 	return cli.RunResultHelp
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *DBCommand) Synopsis() string {
+func (cmd *DBCommand) Synopsis() string {
 	return "Commands to interact with databases in a project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *DBCommand) Help() string {
+func (cmd *DBCommand) Help() string {
 	helpText := `
 usage: sqsc db <subcommand>
 

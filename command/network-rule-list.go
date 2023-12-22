@@ -16,30 +16,30 @@ type NetworkRuleListCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *NetworkRuleListCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	endpoint := endpointFlag(c.flagSet)
-	projectUUID := projectUUIDFlag(c.flagSet)
-	projectName := projectNameFlag(c.flagSet)
-	serviceName := networkServiceNameFlag(c.flagSet)
+func (cmd *NetworkRuleListCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
+	serviceName := networkServiceNameFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return c.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
 	if *serviceName == "" {
-		return c.errorWithUsage(fmt.Errorf(("Service name is mandatory.")))
+		return cmd.errorWithUsage(fmt.Errorf(("Service name is mandatory.")))
 	}
 
-	return c.runWithSpinner("list service container network rules", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("list service container network rules", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -65,21 +65,21 @@ func (c *NetworkRuleListCommand) Run(args []string) int {
 			msg = "No network rules found"
 		}
 
-		return c.FormatTable(msg, true), nil
+		return cmd.FormatTable(msg, true), nil
 	})
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *NetworkRuleListCommand) Synopsis() string {
+func (cmd *NetworkRuleListCommand) Synopsis() string {
 	return "List service container network rules of project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *NetworkRuleListCommand) Help() string {
+func (cmd *NetworkRuleListCommand) Help() string {
 	helpText := `
 usage: sqsc network-rule list [options]
 
   List service container network rules of project.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

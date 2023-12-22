@@ -9,3 +9,4 @@ gh-actions/mapEnvVar.json
 coverage.out
 coverage.html
 dist/
+.DS_Store

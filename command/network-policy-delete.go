@@ -15,26 +15,26 @@ type NetworkPolicyDeleteCommand struct {
 	flagSet *flag.FlagSet
 }
 
-func (b *NetworkPolicyDeleteCommand) Run(args []string) int {
-	b.flagSet = newFlagSet(b, b.Ui)
-	endpoint := endpointFlag(b.flagSet)
-	projectUUID := projectUUIDFlag(b.flagSet)
-	projectName := projectNameFlag(b.flagSet)
+func (cmd *NetworkPolicyDeleteCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	endpoint := endpointFlag(cmd.flagSet)
+	projectUUID := projectUUIDFlag(cmd.flagSet)
+	projectName := projectNameFlag(cmd.flagSet)
 
-	if err := b.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
 	if *projectUUID == "" && *projectName == "" {
-		return b.errorWithUsage(errors.New("Project name or uuid is mandatory"))
+		return cmd.errorWithUsage(errors.New("Project name or uuid is mandatory"))
 	}
 
-	if b.flagSet.NArg() > 1 {
-		return b.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", b.flagSet.Args()))
+	if cmd.flagSet.NArg() > 1 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
-	version := networkPolicyVersionArg(b.flagSet)
+	version := networkPolicyVersionArg(cmd.flagSet)
 
-	return b.runWithSpinner("delete network policy version", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	return cmd.runWithSpinner("delete network policy version", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		var UUID string
 		var err error
 		if *projectUUID == "" {
@@ -56,16 +56,16 @@ func (b *NetworkPolicyDeleteCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (b *NetworkPolicyDeleteCommand) Synopsis() string {
+func (cmd *NetworkPolicyDeleteCommand) Synopsis() string {
 	return "Delete a network policy"
 }
 
 // Help is part of cli.Command implementation.
-func (b *NetworkPolicyDeleteCommand) Help() string {
+func (cmd *NetworkPolicyDeleteCommand) Help() string {
 	helpText := `
 usage: sqsc network-policy delete VERSION
 
   Delete network policy
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(b.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }

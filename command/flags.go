@@ -303,26 +303,6 @@ func batchNameFlag(f *flag.FlagSet) *string {
 	return f.String("batch-name", "", "Batch name")
 }
 
-func batchRunCmdFlag(f *flag.FlagSet) *string {
-	return f.String("command", "", "Command to run when starting batch (override)")
-}
-
-func batchLimitMemoryFlag(f *flag.FlagSet) *int {
-	return f.Int("memory", -1, "This is the maximum amount of memory your batch will be able to use until it is killed and restarted automatically.")
-}
-
-func batchLimitCPUFlag(f *flag.FlagSet) *int {
-	return f.Int("cpu", -1, "This is an indicative limit of how much CPU your batch requires.")
-}
-
-func batchLimitIOPSFlag(f *flag.FlagSet) *int {
-	return f.Int("iops", 0, "This is an indicative limit of how many I/O operation per second your service requires.")
-}
-
-func batchNoRunCmdFlag(f *flag.FlagSet) *bool {
-	return f.Bool("no-command", false, "Disable command override")
-}
-
 func dockerCapabilitiesFlag(f *flag.FlagSet) *string {
 	return f.String("docker-capabilities", "", "This is a list of enabled docker capabilities")
 }
@@ -358,10 +338,6 @@ func volumeFlag(f *flag.FlagSet) *string {
 
 func dockerImageNameFlag(f *flag.FlagSet) *string {
 	return f.String("docker-image", "", "Docker image name and potential repository and version (ex: [repoName[:repoPort]/]image[:version])")
-}
-
-func dockerImagePrivateFlag(f *flag.FlagSet) *bool {
-	return f.Bool("docker-image-private", false, "Docker image is private")
 }
 
 func dockerImageUsernameFlag(f *flag.FlagSet) *string {

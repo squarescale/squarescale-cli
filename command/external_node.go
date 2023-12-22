@@ -11,17 +11,17 @@ type ExternalNodeCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *ExternalNodeCommand) Run(args []string) int {
+func (cmd *ExternalNodeCommand) Run(args []string) int {
 	return cli.RunResultHelp
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *ExternalNodeCommand) Synopsis() string {
+func (cmd *ExternalNodeCommand) Synopsis() string {
 	return "Commands related to a external nodes"
 }
 
 // Help is part of cli.Command implementation.
-func (c *ExternalNodeCommand) Help() string {
+func (cmd *ExternalNodeCommand) Help() string {
 	helpText := `
 usage: sqsc external-node <subcommand>
 

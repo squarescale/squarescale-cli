@@ -11,17 +11,17 @@ type VolumeCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *VolumeCommand) Run(args []string) int {
+func (cmd *VolumeCommand) Run(args []string) int {
 	return cli.RunResultHelp
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *VolumeCommand) Synopsis() string {
+func (cmd *VolumeCommand) Synopsis() string {
 	return "Commands to interact with volumes in a project"
 }
 
 // Help is part of cli.Command implementation.
-func (c *VolumeCommand) Help() string {
+func (cmd *VolumeCommand) Help() string {
 	helpText := `
 usage: sqsc volume <subcommand>
 

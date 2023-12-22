@@ -11,17 +11,17 @@ type OrganizationCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *OrganizationCommand) Run(args []string) int {
+func (cmd *OrganizationCommand) Run(args []string) int {
 	return cli.RunResultHelp
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *OrganizationCommand) Synopsis() string {
+func (cmd *OrganizationCommand) Synopsis() string {
 	return "Commands to interact with organizations"
 }
 
 // Help is part of cli.Command implementation.
-func (c *OrganizationCommand) Help() string {
+func (cmd *OrganizationCommand) Help() string {
 	helpText := `
 usage: sqsc organization <subcommand>
 

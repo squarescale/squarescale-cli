@@ -15,38 +15,38 @@ type OrganizationDeleteCommand struct {
 }
 
 // Run is part of cli.Command implementation.
-func (c *OrganizationDeleteCommand) Run(args []string) int {
-	c.flagSet = newFlagSet(c, c.Ui)
-	alwaysYes := yesFlag(c.flagSet)
-	endpoint := endpointFlag(c.flagSet)
-	name := organizationNameFlag(c.flagSet)
+func (cmd *OrganizationDeleteCommand) Run(args []string) int {
+	cmd.flagSet = newFlagSet(cmd, cmd.Ui)
+	alwaysYes := yesFlag(cmd.flagSet)
+	endpoint := endpointFlag(cmd.flagSet)
+	name := organizationNameFlag(cmd.flagSet)
 
-	if err := c.flagSet.Parse(args); err != nil {
+	if err := cmd.flagSet.Parse(args); err != nil {
 		return 1
 	}
 
-	if c.flagSet.NArg() > 0 {
-		return c.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", c.flagSet.Args()))
+	if cmd.flagSet.NArg() > 0 {
+		return cmd.errorWithUsage(fmt.Errorf("Unparsed arguments on the command line: %v", cmd.flagSet.Args()))
 	}
 
 	if *name == "" {
-		return c.errorWithUsage(fmt.Errorf("Name must not be empty, use -name option"))
+		return cmd.errorWithUsage(fmt.Errorf("Name must not be empty, use -name option"))
 	}
 
-	c.Ui.Info("Are you sure you want to delete " + *name + "?")
+	cmd.Ui.Info("Are you sure you want to delete " + *name + "?")
 	if *alwaysYes {
-		c.Ui.Info("(approved from command line)")
+		cmd.Ui.Info("(approved from command line)")
 	} else {
-		res, err := c.Ui.Ask("y/N")
+		res, err := cmd.Ui.Ask("y/N")
 
 		if err != nil {
-			return c.error(err)
+			return cmd.error(err)
 		} else if res != "Y" && res != "y" {
-			return c.cancelled()
+			return cmd.cancelled()
 		}
 	}
 
-	res := c.runWithSpinner("deleting organization", endpoint.String(), func(client *squarescale.Client) (string, error) {
+	res := cmd.runWithSpinner("deleting organization", endpoint.String(), func(client *squarescale.Client) (string, error) {
 		err := client.DeleteOrganization(*name)
 		return "", err
 	})
@@ -59,16 +59,16 @@ func (c *OrganizationDeleteCommand) Run(args []string) int {
 }
 
 // Synopsis is part of cli.Command implementation.
-func (c *OrganizationDeleteCommand) Synopsis() string {
+func (cmd *OrganizationDeleteCommand) Synopsis() string {
 	return "Remove organization"
 }
 
 // Help is part of cli.Command implementation.
-func (c *OrganizationDeleteCommand) Help() string {
+func (cmd *OrganizationDeleteCommand) Help() string {
 	helpText := `
 usage: sqsc organization delete [options]
 
   Delete organization.
 `
-	return strings.TrimSpace(helpText + optionsFromFlags(c.flagSet))
+	return strings.TrimSpace(helpText + optionsFromFlags(cmd.flagSet))
 }
